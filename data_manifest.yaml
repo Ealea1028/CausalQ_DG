@@ -1,0 +1,39 @@
+schema_version: 1
+root_env: CAUSALQ_DATA_ROOT
+default_root: /root/autodl-tmp/datasets
+label_space:
+  name: cityscapes_train_ids
+  num_classes: 19
+  ignore_index: 255
+datasets:
+  gta5:
+    role: source
+    required_for: protocol_a
+    relative_root: gta5
+    images: images
+    labels_original: labels
+    labels_train_ids: labels_trainIds
+    status: required_on_autodl
+  cityscapes:
+    role: source_and_target
+    required_for: [protocol_a, protocol_b]
+    relative_root: cityscapes
+    images: leftImg8bit
+    labels_train_ids: gtFine
+    status: required_on_autodl
+  bdd100k:
+    role: target
+    required_for: protocol_a
+    relative_root: bdd100k
+    status: pending
+  mapillary:
+    role: target
+    required_for: protocol_a
+    relative_root: mapillary
+    status: pending
+  acdc:
+    role: target
+    required_for: protocol_b
+    relative_root: acdc
+    status: pending
+

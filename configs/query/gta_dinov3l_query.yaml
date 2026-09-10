@@ -1,0 +1,12 @@
+experiment:
+  id: A1_QUERY
+  phase: 6
+  status: not_implemented
+inherits: ../baseline/gta_dinov3l.yaml
+query:
+  queries_per_class: 3
+  alpha_init: 0.0
+  cross_attention_layers: 1
+  num_heads: 8
+  aggregation: logsumexp
+

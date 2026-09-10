@@ -1,0 +1,11 @@
+experiment:
+  id: A4_CQE
+  phase: 9
+  status: not_implemented
+inherits: ../style/gta_dinov3l_style.yaml
+causal_query_effect:
+  effect_space: logits
+  reference_stop_gradient: true
+  normalization: l2_per_class_map
+  present_classes_only: true
+

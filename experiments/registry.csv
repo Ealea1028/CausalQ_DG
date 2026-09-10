@@ -1,0 +1,2 @@
+experiment_id,date,git_sha,gpu,config,seed,status,cityscapes_miou,bdd_miou,mapillary_miou,average_miou,notes
+

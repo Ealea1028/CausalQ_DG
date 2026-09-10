@@ -1,0 +1,18 @@
+experiment:
+  id: A0_CITYS_DINOV3L_BASE
+  phase: 5
+  status: not_implemented
+data:
+  source: cityscapes
+  targets: [acdc]
+  num_classes: 19
+model:
+  backbone: dinov3_vitl16
+  freeze_backbone: true
+train:
+  crop_size: [512, 512]
+  amp: true
+  batch_size: 1
+  max_iterations: 40000
+  seed: 0
+

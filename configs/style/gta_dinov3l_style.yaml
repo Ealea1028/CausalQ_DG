@@ -1,0 +1,10 @@
+experiment:
+  id: A2_QUERY_STYLE
+  phase: 7
+  status: not_implemented
+inherits: ../query/gta_dinov3l_query.yaml
+style:
+  views: [original, photometric, fourier]
+  sequential_forward: true
+  preserve_geometry: true
+

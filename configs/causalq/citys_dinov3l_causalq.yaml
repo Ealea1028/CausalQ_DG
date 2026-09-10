@@ -1,0 +1,17 @@
+experiment:
+  id: A4_CITYS_CQE
+  phase: 9
+  status: not_implemented
+inherits: ../baseline/citys_dinov3l.yaml
+query:
+  queries_per_class: 3
+  alpha_init: 0.0
+  cross_attention_layers: 1
+style:
+  views: [original, photometric, fourier]
+  sequential_forward: true
+causal_query_effect:
+  effect_space: logits
+  normalization: l2_per_class_map
+  present_classes_only: true
+

@@ -1,0 +1,21 @@
+schema_version: 1
+root_env: CAUSALQ_PRETRAINED_ROOT
+default_root: /root/autodl-tmp/pretrained
+models:
+  dinov3_vitl16:
+    family: dinov3
+    architecture: vit_large_patch16
+    pretraining: LVD-1689M
+    status: required_on_autodl
+    source: to_be_confirmed_from_official_dinov3_or_eomt
+    filename: to_be_confirmed
+    sha256: to_be_recorded_after_download
+  dinov3_vitb16:
+    family: dinov3
+    architecture: vit_base_patch16
+    pretraining: LVD-1689M
+    status: optional_smoke_test
+    source: to_be_confirmed_from_official_dinov3_or_eomt
+    filename: to_be_confirmed
+    sha256: to_be_recorded_after_download
+
