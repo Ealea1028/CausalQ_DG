@@ -11,14 +11,14 @@ venv/
 .vscode/
 
 # Datasets, weights, runs, and generated artifacts
-data/
-datasets/
-pretrained/
-checkpoints/
-outputs/
-work_dirs/
-wandb/
-lightning_logs/
+/data/
+/datasets/
+/pretrained/
+/checkpoints/
+/outputs/
+/work_dirs/
+/wandb/
+/lightning_logs/
 analysis/style_examples/
 *.pth
 *.pt
