@@ -29,7 +29,7 @@ See `docs/DATASETS.md`. At minimum, Phase 3 needs:
 /root/autodl-tmp/datasets/cityscapes/gtFine
 ```
 
-Obtain GTA5 and Cityscapes through their official distribution channels, then upload/extract them into the paths above. Do not put archives or extracted datasets inside the Git repository.
+Obtain Cityscapes through its official distribution channel and upload/extract it into the paths above. GTA5 can be downloaded directly on AutoDL using the commands in `docs/DATASETS.md`; do not put archives or extracted datasets inside the Git repository.
 
 ## Commands
 

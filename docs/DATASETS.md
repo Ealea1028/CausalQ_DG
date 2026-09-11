@@ -36,3 +36,47 @@ Only Cityscapes `train` and `val` are required to have public semantic-label pai
 ## Validation artifacts
 
 `tools/check_datasets.py` emits a JSON report and saves paired image/colored-label previews under the configured output directory. The report distinguishes missing pairs, invalid train IDs, unreadable files, and image-mask size mismatches.
+
+## Direct GTA5 download on AutoDL
+
+The official Playing for Data page provides ten image archives (`01_images.zip` through `10_images.zip`) and ten matching label archives (`01_labels.zip` through `10_labels.zip`). Download them directly into `/root/autodl-tmp/uploads/gta5` with `wget -c`, then validate every archive before extraction. The data is for research and educational use only.
+
+```bash
+mkdir -p /root/autodl-tmp/uploads/gta5
+cd /root/autodl-tmp/uploads/gta5
+
+for kind in images labels; do
+  for part in $(seq -w 1 10); do
+    wget -c --tries=0 --timeout=60 --waitretry=10 \
+      "https://download.visinf.tu-darmstadt.de/data/from_games/data/${part}_${kind}.zip"
+  done
+done
+
+for archive in /root/autodl-tmp/uploads/gta5/*.zip; do
+  unzip -t "$archive" >/dev/null || {
+    echo "Corrupt archive: $archive" >&2
+    exit 1
+  }
+done
+```
+
+The official archives contain the PNG files directly. Extract image and label archives into separate directories:
+
+```bash
+mkdir -p /root/autodl-tmp/datasets/gta5/images
+mkdir -p /root/autodl-tmp/datasets/gta5/labels
+
+for part in $(seq -w 1 10); do
+  unzip -q "/root/autodl-tmp/uploads/gta5/${part}_images.zip" \
+    -d /root/autodl-tmp/datasets/gta5/images
+  unzip -q "/root/autodl-tmp/uploads/gta5/${part}_labels.zip" \
+    -d /root/autodl-tmp/datasets/gta5/labels
+done
+```
+
+Before running the project checker, confirm that the archive layout was not nested unexpectedly:
+
+```bash
+find /root/autodl-tmp/datasets/gta5/images -maxdepth 2 -type f | head
+find /root/autodl-tmp/datasets/gta5/labels -maxdepth 2 -type f | head
+```
