@@ -23,6 +23,8 @@ All datasets live below `/root/autodl-tmp/datasets`, configured by `CAUSALQ_DATA
 
 GTA5 images and labels must retain matching relative filenames. Cityscapes uses the official `*_leftImg8bit.png` and `*_gtFine_labelTrainIds.png` names.
 
+Only Cityscapes `train` and `val` are required to have public semantic-label pairs. Official `test` images may be present, but they are excluded from local GT validation because full test annotations are not public.
+
 ## Label contract
 
 - Common label space: Cityscapes 19 train IDs (`0..18`).
@@ -34,4 +36,3 @@ GTA5 images and labels must retain matching relative filenames. Cityscapes uses 
 ## Validation artifacts
 
 `tools/check_datasets.py` emits a JSON report and saves paired image/colored-label previews under the configured output directory. The report distinguishes missing pairs, invalid train IDs, unreadable files, and image-mask size mismatches.
-

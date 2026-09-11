@@ -207,16 +207,29 @@ def inspect_cityscapes(
 ) -> dict:
     image_root = dataset_root / config.get("images", "leftImg8bit")
     label_root = dataset_root / config.get("labels_train_ids", "gtFine")
-    image_paths = sorted(image_root.rglob("*_leftImg8bit.png")) if image_root.is_dir() else []
-    label_paths = (
+    all_image_paths = (
+        sorted(image_root.rglob("*_leftImg8bit.png")) if image_root.is_dir() else []
+    )
+    all_label_paths = (
         sorted(label_root.rglob("*_gtFine_labelTrainIds.png"))
         if label_root.is_dir()
         else []
     )
+    checked_splits = ("train", "val")
+    image_paths = [
+        path
+        for path in all_image_paths
+        if path.relative_to(image_root).parts[0] in checked_splits
+    ]
+    label_paths = [
+        path
+        for path in all_label_paths
+        if path.relative_to(label_root).parts[0] in checked_splits
+    ]
     image_split_counts = {
         split: sum(
             1
-            for path in image_paths
+            for path in all_image_paths
             if path.relative_to(image_root).parts
             and path.relative_to(image_root).parts[0] == split
         )
@@ -225,7 +238,7 @@ def inspect_cityscapes(
     label_split_counts = {
         split: sum(
             1
-            for path in label_paths
+            for path in all_label_paths
             if path.relative_to(label_root).parts
             and path.relative_to(label_root).parts[0] == split
         )
@@ -252,6 +265,7 @@ def inspect_cityscapes(
     return {
         "ok": ok,
         "root": str(dataset_root),
+        "checked_splits": list(checked_splits),
         "image_count": len(image_paths),
         "label_count": len(label_paths),
         "image_split_counts": image_split_counts,

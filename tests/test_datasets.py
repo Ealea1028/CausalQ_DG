@@ -84,6 +84,12 @@ def test_cityscapes_inspection_detects_valid_pair(tmp_path: Path) -> None:
     label = root / "gtFine/train/demo/demo_000001_000001_gtFine_labelTrainIds.png"
     save_rgb(image, (2, 2))
     save_label(label, np.asarray([[0, 1], [18, 255]]))
+    # Official test images do not have public semantic ground truth and must
+    # not be treated as missing-label failures.
+    save_rgb(
+        root / "leftImg8bit/test/demo/demo_000002_000002_leftImg8bit.png",
+        (2, 2),
+    )
 
     result = inspect_cityscapes(
         root,
@@ -95,7 +101,9 @@ def test_cityscapes_inspection_detects_valid_pair(tmp_path: Path) -> None:
     assert result["ok"] is True
     assert result["paired_count"] == 1
     assert result["invalid_train_ids"] == []
+    assert result["checked_splits"] == ["train", "val"]
     assert result["image_split_counts"]["train"] == 1
+    assert result["image_split_counts"]["test"] == 1
     assert result["label_split_counts"]["train"] == 1
 
 
