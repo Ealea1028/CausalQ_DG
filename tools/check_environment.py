@@ -18,6 +18,12 @@ PACKAGES = {
     "torchmetrics": "torchmetrics",
 }
 
+DEFAULT_PATHS = {
+    "data": "/root/autodl-tmp/datasets",
+    "pretrained": "/root/autodl-tmp/pretrained",
+    "outputs": "/root/autodl-tmp/outputs/CausalQ_DG",
+}
+
 
 def package_version(module_name: str) -> str:
     module = importlib.import_module(module_name)
@@ -40,9 +46,18 @@ def main() -> int:
         "cuda_available": torch.cuda.is_available(),
         "packages": {},
         "paths": {
-            "data": os.getenv("CAUSALQ_DATA_ROOT"),
-            "pretrained": os.getenv("CAUSALQ_PRETRAINED_ROOT"),
-            "outputs": os.getenv("CAUSALQ_OUTPUT_ROOT"),
+            "data": os.getenv("CAUSALQ_DATA_ROOT", DEFAULT_PATHS["data"]),
+            "pretrained": os.getenv(
+                "CAUSALQ_PRETRAINED_ROOT", DEFAULT_PATHS["pretrained"]
+            ),
+            "outputs": os.getenv("CAUSALQ_OUTPUT_ROOT", DEFAULT_PATHS["outputs"]),
+        },
+        "path_source": {
+            "data": "environment" if os.getenv("CAUSALQ_DATA_ROOT") else "default",
+            "pretrained": (
+                "environment" if os.getenv("CAUSALQ_PRETRAINED_ROOT") else "default"
+            ),
+            "outputs": "environment" if os.getenv("CAUSALQ_OUTPUT_ROOT") else "default",
         },
     }
 
@@ -83,4 +98,3 @@ def main() -> int:
 
 if __name__ == "__main__":
     raise SystemExit(main())
-

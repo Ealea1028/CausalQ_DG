@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 1 is complete: repository structure, environment definitions, manifests, tests, and the AutoDL hand-off checklist are present. Model training and dataset validation must run on the RTX 4090D AutoDL instance.
+Phases 1 and 2 are complete. The RTX 4090D environment has passed its CUDA and dependency checks. Phase 3 dataset inspection and non-destructive GTA5 label conversion are implemented locally and await validation against the real AutoDL datasets.
 
 ## Working directories
 

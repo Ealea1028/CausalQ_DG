@@ -23,18 +23,15 @@ fi
 
 "$ENV_ROOT/bin/python" -m pip install --upgrade pip setuptools wheel
 "$ENV_ROOT/bin/python" -m pip install -r "$PROJECT_ROOT/requirements.txt"
+"$ENV_ROOT/bin/python" -m pip install --no-deps -e "$PROJECT_ROOT"
 
 cat <<EOF
 
 CausalQ-DG environment is ready.
 Activate it with:
-  source "$ENV_ROOT/bin/activate"
+  source "$PROJECT_ROOT/scripts/activate_autodl.sh"
 
 Then run:
   cd "$PROJECT_ROOT"
-  export CAUSALQ_DATA_ROOT="$CAUSALQ_DATA_ROOT"
-  export CAUSALQ_PRETRAINED_ROOT="$CAUSALQ_PRETRAINED_ROOT"
-  export CAUSALQ_OUTPUT_ROOT="$CAUSALQ_OUTPUT_ROOT"
   python tools/check_environment.py
 EOF
-
