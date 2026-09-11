@@ -6,6 +6,7 @@ from PIL import Image
 
 from causalq.datasets.cityscapes import (
     IGNORE_INDEX,
+    convert_label_files,
     invalid_train_ids,
     label_ids_to_train_ids,
 )
@@ -26,6 +27,7 @@ def save_label(path: Path, values: np.ndarray) -> None:
 def arguments(**overrides) -> Namespace:
     values = {
         "convert_gta5": False,
+        "convert_cityscapes": False,
         "overwrite_converted": False,
         "conversion_limit": None,
         "label_scan_limit": 0,
@@ -105,6 +107,22 @@ def test_cityscapes_inspection_detects_valid_pair(tmp_path: Path) -> None:
     assert result["image_split_counts"]["train"] == 1
     assert result["image_split_counts"]["test"] == 1
     assert result["label_split_counts"]["train"] == 1
+
+
+def test_cityscapes_raw_label_conversion_is_non_destructive(tmp_path: Path) -> None:
+    root = tmp_path / "gtFine"
+    raw_path = root / "train/demo/demo_000001_000001_gtFine_labelIds.png"
+    raw = np.asarray([[7, 8], [33, 0]], dtype=np.uint8)
+    save_label(raw_path, raw)
+
+    result = convert_label_files(root)
+
+    assert result["converted_count"] == 1
+    assert np.array_equal(np.asarray(Image.open(raw_path)), raw)
+    converted = np.asarray(
+        Image.open(root / "train/demo/demo_000001_000001_gtFine_labelTrainIds.png")
+    )
+    assert converted.tolist() == [[0, 1], [18, IGNORE_INDEX]]
 
 
 def test_relative_pairing_reports_missing_files(tmp_path: Path) -> None:

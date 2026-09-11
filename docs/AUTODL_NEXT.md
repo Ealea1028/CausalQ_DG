@@ -77,6 +77,20 @@ python tools/check_datasets.py \
   | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_after_conversion.json
 ```
 
+If the Cityscapes section has zero `*_gtFine_labelTrainIds.png` files but does have `*_gtFine_labelIds.png` files (the normal official-archive layout), run:
+
+```bash
+python tools/check_datasets.py \
+  --datasets cityscapes \
+  --convert-cityscapes \
+  --samples 10 \
+  --label-scan-limit 200 \
+  --output-dir /root/autodl-tmp/outputs/CausalQ_DG/data_check \
+  | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/cityscapes_after_conversion.json
+```
+
+This creates train-ID masks beside the raw masks and never overwrites `*_gtFine_labelIds.png`.
+
 Then run the combined check once more:
 
 ```bash

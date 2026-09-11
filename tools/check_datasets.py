@@ -20,7 +20,11 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from causalq.datasets.cityscapes import colorize_train_ids, invalid_train_ids
+from causalq.datasets.cityscapes import (
+    colorize_train_ids,
+    convert_label_files,
+    invalid_train_ids,
+)
 from causalq.datasets.gta5 import convert_labels, discover_files, pair_by_relative_path
 
 
@@ -207,6 +211,13 @@ def inspect_cityscapes(
 ) -> dict:
     image_root = dataset_root / config.get("images", "leftImg8bit")
     label_root = dataset_root / config.get("labels_train_ids", "gtFine")
+    conversion = None
+    if args.convert_cityscapes:
+        conversion = convert_label_files(
+            label_root,
+            overwrite=args.overwrite_converted,
+            limit=args.conversion_limit,
+        )
     all_image_paths = (
         sorted(image_root.rglob("*_leftImg8bit.png")) if image_root.is_dir() else []
     )
@@ -272,6 +283,11 @@ def inspect_cityscapes(
         "label_split_counts": label_split_counts,
         "paired_count": len(pairs),
         "label_space": "cityscapes_train_ids",
+        "needs_conversion": not bool(label_paths)
+        and bool(list(label_root.rglob("*_gtFine_labelIds.png")))
+        if label_root.is_dir()
+        else False,
+        "conversion": conversion,
         "missing_label_count": len(missing_labels),
         "missing_image_count": len(missing_images),
         "missing_label_examples": missing_labels[:20],
@@ -297,6 +313,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=0)
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--convert-gta5", action="store_true")
+    parser.add_argument("--convert-cityscapes", action="store_true")
     parser.add_argument("--overwrite-converted", action="store_true")
     parser.add_argument("--conversion-limit", type=int)
     return parser.parse_args()

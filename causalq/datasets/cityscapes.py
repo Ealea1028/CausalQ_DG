@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import numpy as np
+from pathlib import Path
+from PIL import Image
 
 
 IGNORE_INDEX = 255
@@ -82,3 +84,29 @@ def colorize_train_ids(label: np.ndarray) -> np.ndarray:
         rgb[label == train_id] = color
     return rgb
 
+
+def convert_label_files(
+    root: Path, *, overwrite: bool = False, limit: int | None = None
+) -> dict[str, int]:
+    """Create train-ID masks beside official ``labelIds`` masks."""
+    raw_files = sorted(root.rglob("*_gtFine_labelIds.png")) if root.is_dir() else []
+    if limit is not None:
+        raw_files = raw_files[:limit]
+    converted_count = 0
+    skipped_count = 0
+    for source in raw_files:
+        destination = source.with_name(
+            source.name.replace("_gtFine_labelIds.png", "_gtFine_labelTrainIds.png")
+        )
+        if destination.exists() and not overwrite:
+            skipped_count += 1
+            continue
+        with Image.open(source) as image_file:
+            raw = np.asarray(image_file.convert("L"))
+        Image.fromarray(label_ids_to_train_ids(raw), mode="L").save(destination)
+        converted_count += 1
+    return {
+        "source_count": len(raw_files),
+        "converted_count": converted_count,
+        "skipped_existing_count": skipped_count,
+    }
