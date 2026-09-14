@@ -1,6 +1,6 @@
 # Next AutoDL action
 
-Status: Phase 2 accepted; waiting for Phase 3 dataset validation.
+Status: Phase 2 accepted; GTA5 pairing accepted provisionally; waiting for the Phase 3 full GTA5 scan and Cityscapes validation.
 
 ## Phase 2 conclusion
 
@@ -104,11 +104,23 @@ python tools/check_datasets.py \
 git status --short
 ```
 
+For GTA5, run one full scan before accepting the dataset. This checks all 24,966 masks and quantifies the resolution-only exceptions documented by the dataset authors:
+
+```bash
+python tools/check_datasets.py \
+  --datasets gta5 \
+  --samples 10 \
+  --label-scan-limit 0 \
+  --output-dir /root/autodl-tmp/outputs/CausalQ_DG/data_check \
+  | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_full_scan.json
+```
+
 ## Acceptance criteria
 
 - GTA5 and Cityscapes each report `ok: true`.
 - No images or labels are missing their pair.
-- No unreadable files or size mismatches are reported.
+- No unreadable files or `geometry_mismatch` cases are reported.
+- GTA5 resolution-only differences may appear as `scale_equivalent`; they remain visible in the report but do not fail the check. The official release documents 60 such label maps.
 - Converted/official masks contain only train IDs `0..18` and ignore index `255`.
 - Ten image-plus-colored-GT previews are generated for each dataset.
 - `git status --short` remains empty.

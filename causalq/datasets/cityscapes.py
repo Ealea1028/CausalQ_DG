@@ -103,7 +103,7 @@ def convert_label_files(
             continue
         with Image.open(source) as image_file:
             raw = np.asarray(image_file.convert("L"))
-        Image.fromarray(label_ids_to_train_ids(raw), mode="L").save(destination)
+        Image.fromarray(label_ids_to_train_ids(raw)).save(destination)
         converted_count += 1
     return {
         "source_count": len(raw_files),

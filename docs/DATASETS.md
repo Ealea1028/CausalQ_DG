@@ -37,6 +37,8 @@ Only Cityscapes `train` and `val` are required to have public semantic-label pai
 
 `tools/check_datasets.py` emits a JSON report and saves paired image/colored-label previews under the configured output directory. The report distinguishes missing pairs, invalid train IDs, unreadable files, and image-mask size mismatches.
 
+The official GTA5 release documents 60 label maps whose resolution differs from the corresponding image. The checker records these in `shape_mismatches` and classifies a pair as `scale_equivalent` when its aspect-ratio difference is at most 0.2%. Such a pair is valid because the training transform will resize the image and mask together, using nearest-neighbor interpolation for the mask. A `geometry_mismatch` changes the aspect ratio beyond that tolerance and still fails validation. Original images and labels are never rewritten merely to equalize their stored resolutions.
+
 ## Direct GTA5 download on AutoDL
 
 The official Playing for Data page provides ten image archives (`01_images.zip` through `10_images.zip`) and ten matching label archives (`01_labels.zip` through `10_labels.zip`). Download them directly into `/root/autodl-tmp/uploads/gta5` with `wget -c`, then validate every archive before extraction. The data is for research and educational use only.

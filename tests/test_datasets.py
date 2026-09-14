@@ -25,7 +25,7 @@ def save_rgb(path: Path, size: tuple[int, int] = (8, 6)) -> None:
 
 def save_label(path: Path, values: np.ndarray) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    Image.fromarray(values.astype(np.uint8), mode="L").save(path)
+    Image.fromarray(values.astype(np.uint8)).save(path)
 
 
 def arguments(**overrides) -> Namespace:
@@ -172,3 +172,48 @@ def test_gta5_inspection_pairs_redundant_archive_directories(tmp_path: Path) -> 
     assert result["paired_count"] == 1
     assert Path(result["resolved_image_root"]) == root / "images/images"
     assert Path(result["resolved_label_root"]) == root / "labels_trainIds/labels"
+
+
+def test_gta5_scale_equivalent_shape_mismatch_is_a_warning(tmp_path: Path) -> None:
+    root = tmp_path / "gta5"
+    save_rgb(root / "images/00001.png", (8, 6))
+    save_label(
+        root / "labels_trainIds/00001.png",
+        np.zeros((3, 4), dtype=np.uint8),
+    )
+    config = {
+        "images": "images",
+        "labels_original": "labels",
+        "labels_train_ids": "labels_trainIds",
+    }
+
+    result = inspect_gta5(root, config, arguments(), tmp_path / "visualizations")
+
+    assert result["ok"] is True
+    assert result["shape_mismatch_count"] == 1
+    assert result["scale_equivalent_mismatch_count"] == 1
+    assert result["geometry_mismatch_count"] == 0
+    assert result["shape_mismatches"][0]["classification"] == "scale_equivalent"
+    assert len(result["visualizations"]) == 1
+
+
+def test_gta5_geometry_mismatch_fails_validation(tmp_path: Path) -> None:
+    root = tmp_path / "gta5"
+    save_rgb(root / "images/00001.png", (8, 6))
+    save_label(
+        root / "labels_trainIds/00001.png",
+        np.zeros((4, 4), dtype=np.uint8),
+    )
+    config = {
+        "images": "images",
+        "labels_original": "labels",
+        "labels_train_ids": "labels_trainIds",
+    }
+
+    result = inspect_gta5(root, config, arguments(), tmp_path / "visualizations")
+
+    assert result["ok"] is False
+    assert result["shape_mismatch_count"] == 1
+    assert result["scale_equivalent_mismatch_count"] == 0
+    assert result["geometry_mismatch_count"] == 1
+    assert result["shape_mismatches"][0]["classification"] == "geometry_mismatch"

@@ -81,9 +81,9 @@ def save_visualizations(
             image = image_file.convert("RGB")
         with Image.open(label_path) as label_file:
             label = np.asarray(label_file.convert("L"))
-        colored = Image.fromarray(colorize_train_ids(label), mode="RGB")
+        colored = Image.fromarray(colorize_train_ids(label))
         if colored.size != image.size:
-            continue
+            colored = colored.resize(image.size, resample=Image.Resampling.NEAREST)
         canvas = Image.new("RGB", (image.width * 2, image.height))
         canvas.paste(image, (0, 0))
         canvas.paste(colored, (image.width, 0))
@@ -91,6 +91,26 @@ def save_visualizations(
         canvas.save(destination)
         outputs.append(str(destination))
     return outputs
+
+
+def classify_shape_mismatch(
+    image_size: tuple[int, int],
+    label_size: tuple[int, int],
+    *,
+    aspect_ratio_tolerance: float = 0.002,
+) -> tuple[str, float]:
+    """Separate resolution-only differences from changed image geometry."""
+    image_aspect = image_size[0] / image_size[1]
+    label_aspect = label_size[0] / label_size[1]
+    relative_error = abs(image_aspect - label_aspect) / max(
+        image_aspect, label_aspect
+    )
+    classification = (
+        "scale_equivalent"
+        if relative_error <= aspect_ratio_tolerance
+        else "geometry_mismatch"
+    )
+    return classification, relative_error
 
 
 def inspect_pairs(
@@ -111,6 +131,8 @@ def inspect_pairs(
     unique_ids: set[int] = set()
     invalid_ids: set[int] = set()
     shape_mismatches: list[dict[str, object]] = []
+    scale_equivalent_mismatch_count = 0
+    geometry_mismatch_count = 0
     unreadable: list[dict[str, str]] = []
     for image_path, label_path in scan_pairs:
         try:
@@ -123,12 +145,21 @@ def inspect_pairs(
             if train_ids:
                 invalid_ids.update(invalid_train_ids(label))
             if image_size != label_size:
+                classification, aspect_ratio_relative_error = classify_shape_mismatch(
+                    image_size, label_size
+                )
+                if classification == "scale_equivalent":
+                    scale_equivalent_mismatch_count += 1
+                else:
+                    geometry_mismatch_count += 1
                 shape_mismatches.append(
                     {
                         "image": str(image_path),
                         "label": str(label_path),
                         "image_size": image_size,
                         "label_size": label_size,
+                        "classification": classification,
+                        "aspect_ratio_relative_error": aspect_ratio_relative_error,
                     }
                 )
         except Exception as exc:
@@ -146,6 +177,8 @@ def inspect_pairs(
         "invalid_train_ids": sorted(invalid_ids),
         "shape_mismatches": shape_mismatches[:20],
         "shape_mismatch_count": len(shape_mismatches),
+        "scale_equivalent_mismatch_count": scale_equivalent_mismatch_count,
+        "geometry_mismatch_count": geometry_mismatch_count,
         "unreadable": unreadable[:20],
         "unreadable_count": len(unreadable),
         "visualizations": visualizations,
@@ -194,7 +227,7 @@ def inspect_gta5(
         seed=args.seed,
     )
     ok = bool(pairs) and not missing_labels and not missing_images
-    ok = ok and inspection["shape_mismatch_count"] == 0
+    ok = ok and inspection["geometry_mismatch_count"] == 0
     ok = ok and inspection["unreadable_count"] == 0
     ok = ok and using_train_ids and not inspection["invalid_train_ids"]
     return {
@@ -283,7 +316,7 @@ def inspect_cityscapes(
         seed=args.seed,
     )
     ok = bool(pairs) and not missing_labels and not missing_images
-    ok = ok and inspection["shape_mismatch_count"] == 0
+    ok = ok and inspection["geometry_mismatch_count"] == 0
     ok = ok and inspection["unreadable_count"] == 0
     ok = ok and not inspection["invalid_train_ids"]
     return {

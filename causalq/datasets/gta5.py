@@ -78,7 +78,7 @@ def convert_labels(
         with Image.open(source) as image:
             raw = np.asarray(image.convert("L"))
         converted = label_ids_to_train_ids(raw)
-        Image.fromarray(converted, mode="L").save(destination)
+        Image.fromarray(converted).save(destination)
         converted_count += 1
     return {
         "source_count": len(raw_labels),
