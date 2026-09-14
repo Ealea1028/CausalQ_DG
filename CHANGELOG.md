@@ -16,3 +16,5 @@
 
 - Removed any dependency on historical DAFormer/MRM and QK Adapter projects.
 - Environment checks now use documented AutoDL path defaults when variables have not been exported.
+- GTA5 validation now unwraps one redundant archive directory such as `images/images` or `labels_trainIds/labels`.
+- Editable-install `*.egg-info` metadata is ignored by Git.

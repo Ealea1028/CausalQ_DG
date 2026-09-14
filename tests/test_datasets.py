@@ -10,7 +10,11 @@ from causalq.datasets.cityscapes import (
     invalid_train_ids,
     label_ids_to_train_ids,
 )
-from causalq.datasets.gta5 import convert_labels, pair_by_relative_path
+from causalq.datasets.gta5 import (
+    convert_labels,
+    pair_by_relative_path,
+    resolve_flat_payload_root,
+)
 from tools.check_datasets import inspect_cityscapes, inspect_gta5
 
 
@@ -139,3 +143,32 @@ def test_relative_pairing_reports_missing_files(tmp_path: Path) -> None:
     assert len(pairs) == 1
     assert missing_labels == ["b"]
     assert missing_images == []
+
+
+def test_redundant_gta5_archive_directory_is_unwrapped(tmp_path: Path) -> None:
+    configured_root = tmp_path / "images"
+    nested_root = configured_root / "images"
+    save_rgb(nested_root / "00001.png")
+
+    assert resolve_flat_payload_root(configured_root) == nested_root
+
+
+def test_gta5_inspection_pairs_redundant_archive_directories(tmp_path: Path) -> None:
+    root = tmp_path / "gta5"
+    save_rgb(root / "images/images/00001.png", (2, 2))
+    save_label(
+        root / "labels_trainIds/labels/00001.png",
+        np.asarray([[0, 1], [13, 255]]),
+    )
+    config = {
+        "images": "images",
+        "labels_original": "labels",
+        "labels_train_ids": "labels_trainIds",
+    }
+
+    result = inspect_gta5(root, config, arguments(), tmp_path / "visualizations")
+
+    assert result["ok"] is True
+    assert result["paired_count"] == 1
+    assert Path(result["resolved_image_root"]) == root / "images/images"
+    assert Path(result["resolved_label_root"]) == root / "labels_trainIds/labels"

@@ -21,6 +21,25 @@ def discover_files(root: Path, suffixes: set[str] = IMAGE_SUFFIXES) -> list[Path
     )
 
 
+def resolve_flat_payload_root(root: Path) -> Path:
+    """Unwrap one redundant archive directory when GTA5 PNGs are nested."""
+    if not root.is_dir():
+        return root
+    direct_files = [
+        path
+        for path in root.iterdir()
+        if path.is_file() and path.suffix.lower() in IMAGE_SUFFIXES
+    ]
+    if direct_files:
+        return root
+    populated_children = [
+        child
+        for child in root.iterdir()
+        if child.is_dir() and discover_files(child)
+    ]
+    return populated_children[0] if len(populated_children) == 1 else root
+
+
 def pair_by_relative_path(image_root: Path, label_root: Path) -> tuple[list[tuple[Path, Path]], list[str], list[str]]:
     """Pair images and labels while preserving nested relative paths."""
     images = discover_files(image_root)
@@ -66,4 +85,3 @@ def convert_labels(
         "converted_count": converted_count,
         "skipped_existing_count": skipped_count,
     }
-

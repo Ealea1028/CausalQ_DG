@@ -25,7 +25,12 @@ from causalq.datasets.cityscapes import (
     convert_label_files,
     invalid_train_ids,
 )
-from causalq.datasets.gta5 import convert_labels, discover_files, pair_by_relative_path
+from causalq.datasets.gta5 import (
+    convert_labels,
+    discover_files,
+    pair_by_relative_path,
+    resolve_flat_payload_root,
+)
 
 
 def read_manifest(path: Path) -> dict:
@@ -153,9 +158,14 @@ def inspect_gta5(
     args: argparse.Namespace,
     output_root: Path,
 ) -> dict:
-    image_root = dataset_root / config.get("images", "images")
-    raw_label_root = dataset_root / config.get("labels_original", "labels")
-    train_label_root = dataset_root / config.get("labels_train_ids", "labels_trainIds")
+    configured_image_root = dataset_root / config.get("images", "images")
+    configured_raw_label_root = dataset_root / config.get("labels_original", "labels")
+    configured_train_label_root = dataset_root / config.get(
+        "labels_train_ids", "labels_trainIds"
+    )
+    image_root = resolve_flat_payload_root(configured_image_root)
+    raw_label_root = resolve_flat_payload_root(configured_raw_label_root)
+    train_label_root = resolve_flat_payload_root(configured_train_label_root)
 
     conversion = None
     if args.convert_gta5:
@@ -163,10 +173,11 @@ def inspect_gta5(
             raise FileNotFoundError(f"GTA5 raw label directory not found: {raw_label_root}")
         conversion = convert_labels(
             raw_label_root,
-            train_label_root,
+            configured_train_label_root,
             overwrite=args.overwrite_converted,
             limit=args.conversion_limit,
         )
+        train_label_root = resolve_flat_payload_root(configured_train_label_root)
 
     train_label_files = discover_files(train_label_root, {".png"})
     using_train_ids = bool(train_label_files)
@@ -189,6 +200,8 @@ def inspect_gta5(
     return {
         "ok": ok,
         "root": str(dataset_root),
+        "resolved_image_root": str(image_root),
+        "resolved_label_root": str(selected_label_root),
         "image_count": len(discover_files(image_root)),
         "label_count": len(discover_files(selected_label_root, {".png"})),
         "paired_count": len(pairs),

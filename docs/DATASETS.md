@@ -74,6 +74,8 @@ for part in $(seq -w 1 10); do
 done
 ```
 
+Some archive versions already contain top-level `images/` and `labels/` folders. If this creates `images/images`, `labels/labels`, or `labels_trainIds/labels`, the checker automatically unwraps that single redundant level; moving tens of thousands of files is unnecessary.
+
 Before running the project checker, confirm that the archive layout was not nested unexpectedly:
 
 ```bash
