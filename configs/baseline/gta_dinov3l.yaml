@@ -1,7 +1,7 @@
 experiment:
   id: A0_DINOV3L_BASE
   phase: 5
-  status: ready_for_autodl_smoke
+  status: blocked_pending_corrected_gta5_train_ids
 data:
   source: gta5
   targets: [cityscapes, bdd100k, mapillary]

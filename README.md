@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phases 1 through 4 are complete. GTA5 and Cityscapes passed data validation, and the frozen DINOv3 ViT-B/L backbones passed real-weight dense-feature checks on the RTX 4090D. Phase 5 implements the source-only DINOv3-L segmentation baseline and awaits its 500-iteration AutoDL smoke run.
+The DINOv3 ViT-B/L backbones passed real-weight checks on the RTX 4090D. Phase 5 exposed a palette-index conversion bug in the derived GTA5 train-ID masks, so baseline training is paused while Phase 3 GTA5 labels are rebuilt and revalidated from the untouched raw labels.
 
 ## Working directories
 

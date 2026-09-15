@@ -1,23 +1,14 @@
 # Next AutoDL action
 
-Status: Phases 1 through 4 are accepted. The first Phase 5 smoke attempt on commit `e9df3918f6c569550a8013578f5f220fe10cc7c6` stopped at iteration 4 because mean cross-entropy became NaN. The retry implementation samples crops toward valid semantic pixels, rejects all-ignore batches explicitly, checks logits separately, and records the valid-pixel count. It awaits a fresh 500-iteration GPU smoke run.
+Status: DINOv3 Phase 4 is accepted. Phase 5 is paused because its first batches exposed an invalid GTA5 raw-label conversion. Phase 3 GTA5 train-ID masks must be rebuilt and fully revalidated before baseline training resumes.
 
-## Phase 4 conclusion
+## Root cause
 
-- Verified commit: `881a5cd2539a132669616975ef51cbd013a44981`.
-- RTX 4090D, PyTorch `2.7.0+cu126`, CUDA runtime `12.6`, BF16.
-- ViT-B/16: `[1, 1024, 768]` patch tokens, `[1, 768, 32, 32]` map, four valid intermediate maps, 0.209 GiB peak allocated.
-- ViT-L/16: `[1, 1024, 1024]` patch tokens, `[1, 1024, 32, 32]` map, four valid intermediate maps, 0.642 GiB peak allocated.
-- Both models exposed five prefix tokens, had zero trainable backbone parameters, and contained no NaN or Inf values.
-- ViT-B SHA-256: `9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`.
-- ViT-L SHA-256: `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
-- The files came from the corresponding `facebook` namespace on ModelScope, recorded as a secondary distribution source subject to the DINOv3 License.
+Official GTA5 PNG labels are palette-mode (`P`) indexed masks. The previous converter called `convert("L")`, which converted the palette colors to grayscale luminance instead of preserving class indices. Sample `22706` consequently retained only 1,142 valid pixels out of 2,002,044, and 20 of 200 sampled derived masks were entirely ignore-index 255. The raw labels remain untouched and can be used to rebuild the derived masks.
 
-## Phase 5 smoke goal
+## Repair behavior
 
-Train only the segmentation decoder for 500 optimizer iterations on GTA5, with the DINOv3-L backbone frozen. Use standard shared geometric augmentation only: no causal queries, style intervention, prediction consistency, or CQE. Validate on 50 Cityscapes validation images to verify the complete inference and mIoU path. Do not start the 40k schedule yet.
-
-The training log must contain a positive `valid_pixel_count` for every reported iteration. If the retry fails, preserve the complete traceback and the last training records; do not lower the learning rate or edit the source directly on AutoDL.
+The corrected reader accepts indexed/integer mask modes and obtains their stored indices directly. Converted files are written through a temporary PNG and atomically replaced. The validator now reports and rejects all-ignore labels as well as valid-pixel coverage. Keep the broken derived directory as a temporary backup until the rebuilt dataset passes full validation.
 
 ## Commands
 
@@ -33,58 +24,121 @@ git status --short
 
 source scripts/activate_autodl.sh
 python tools/check_environment.py
-nvidia-smi
 ```
 
-Confirm persistent inputs:
+Confirm the corrected reader on sample `22706` before rebuilding anything:
 
 ```bash
-test -f /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
-test -d /root/autodl-tmp/datasets/gta5/images
-test -d /root/autodl-tmp/datasets/gta5/labels_trainIds
-test -d /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val
-test -d /root/autodl-tmp/datasets/cityscapes/gtFine/val
+python - <<'PY'
+from pathlib import Path
+import numpy as np
+from PIL import Image
 
-sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
+from causalq.datasets.cityscapes import label_ids_to_train_ids, read_index_mask
+
+paths = sorted(Path("/root/autodl-tmp/datasets/gta5/labels").rglob("22706.png"))
+if len(paths) != 1:
+    raise RuntimeError(f"Expected one raw label, got {paths}")
+
+with Image.open(paths[0]) as image:
+    print("raw_mode:", image.mode)
+    raw = read_index_mask(image)
+
+converted = label_ids_to_train_ids(raw)
+print("raw_unique_ids:", np.unique(raw).tolist())
+print("converted_unique_ids:", np.unique(converted).tolist())
+print("converted_valid_pixels:", int(np.count_nonzero(converted != 255)))
+print("converted_valid_fraction:", float(np.mean(converted != 255)))
+PY
 ```
 
-Run the smoke test with a unique output name:
+The raw mode should be `P`; the raw indices should resemble Cityscapes label IDs rather than palette luminance values, and the converted mask should contain substantially more than 1,142 valid pixels. Stop if this preflight is not satisfied.
+
+Verify the exact directories and available space before moving anything:
 
 ```bash
-cd /root/autodl-tmp/CausalQ_DG
-export MAX_ITERATIONS=500
-export VALIDATION_MAX_SAMPLES=50
-export RUN_ID="A0_DINOV3L_BASE_SMOKE_500_$(git rev-parse --short HEAD)"
+realpath /root/autodl-tmp/datasets/gta5/labels
+realpath /root/autodl-tmp/datasets/gta5/labels_trainIds
+du -sh /root/autodl-tmp/datasets/gta5/labels_trainIds
+df -h /root/autodl-tmp
 
+test ! -e /root/autodl-tmp/datasets/gta5/labels_trainIds_palette_luminance_bug
+echo "backup_target_available=$?"
+```
+
+The two `realpath` results must remain inside `/root/autodl-tmp/datasets/gta5`. The backup check must print zero. Then preserve the incorrect derived masks and create a fresh destination:
+
+```bash
+mv -- \
+  /root/autodl-tmp/datasets/gta5/labels_trainIds \
+  /root/autodl-tmp/datasets/gta5/labels_trainIds_palette_luminance_bug
+
+mkdir -p /root/autodl-tmp/datasets/gta5/labels_trainIds
+```
+
+Rebuild all 24,966 derived labels and perform a full scan:
+
+```bash
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/data_check
 set -o pipefail
-bash scripts/train_baseline.sh \
-  | tee "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
-echo "train_exit_code=${PIPESTATUS[0]}"
+
+python tools/check_datasets.py \
+  --datasets gta5 \
+  --convert-gta5 \
+  --label-scan-limit 0 \
+  --samples 10 \
+  --output-dir /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_palette_fix \
+  | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_palette_fix.json
+
+echo "gta5_rebuild_exit_code=${PIPESTATUS[0]}"
 ```
 
-Inspect the artifacts:
+If conversion is interrupted, rerun the same command. Completed files will be skipped and each new file is atomically installed.
+
+Inspect the corrected sample and final state:
 
 ```bash
-cat "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/metadata.json"
-cat "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/summary.json"
-tail -n 30 "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/train.jsonl"
-find "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/checkpoints" \
-  -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
+python - <<'PY'
+from pathlib import Path
+import numpy as np
+from PIL import Image
+
+root = Path("/root/autodl-tmp/datasets/gta5/labels_trainIds")
+paths = sorted(root.rglob("22706.png"))
+if len(paths) != 1:
+    raise RuntimeError(f"Expected one rebuilt label, got {paths}")
+
+with Image.open(paths[0]) as image:
+    label = np.asarray(image)
+    mode = image.mode
+
+unique, counts = np.unique(label, return_counts=True)
+print("path:", paths[0])
+print("mode:", mode)
+print("unique_ids:", unique.tolist())
+print("value_counts:", {int(v): int(c) for v, c in zip(unique, counts)})
+print("valid_pixels:", int(np.count_nonzero(label != 255)))
+print("valid_fraction:", float(np.mean(label != 255)))
+PY
+
+find /root/autodl-tmp/datasets/gta5/labels_trainIds \
+  -type f -name '*.png' | wc -l
+
 git status --short
 ```
 
 ## Acceptance criteria
 
-- `train_exit_code=0` and `summary.json` contains `"ok": true`.
-- Git SHA and ViT-L SHA-256 exactly match the hand-off and manifest.
-- `max_iterations=500`, source is GTA5, and validation is Cityscapes val with 50 samples.
-- Total loss and gradient norm remain finite; gradient norm is nonzero for ordinary iterations.
-- Every training record has a positive `valid_pixel_count`; an all-ignore crop is an error rather than a trainable sample.
-- The last-20 loss mean is lower than the first-20 mean. Small short-term fluctuations are acceptable.
-- Validation returns a finite mIoU and non-empty per-class IoUs. This smoke run is not a reportable benchmark.
-- Backbone remains frozen; trainable parameters belong only to the decoder.
-- At least one compact `.pth` checkpoint exists and does not contain a duplicate DINOv3 backbone.
-- Peak allocated/reserved VRAM is recorded without out-of-memory errors.
+- `gta5_rebuild_exit_code=0` and top-level report has `"ok": true`.
+- Conversion reports 24,966 source files and a total of 24,966 converted plus safely skipped existing outputs.
+- `paired_count=24966`, with zero missing images or labels.
+- Full scan covers all 24,966 derived labels.
+- `unique_label_ids` is exactly `0..18` plus `255`.
+- `invalid_train_ids`, geometry mismatches, unreadable files, and all-ignore labels are all zero.
+- `valid_fraction_min` is greater than zero and mean coverage is plausible for dense semantic masks.
+- Sample `22706` has substantially more than the incorrect 1,142 valid pixels.
+- The corrected directory contains 24,966 PNG files.
+- The old derived directory remains at `labels_trainIds_palette_luminance_bug`; do not delete it yet.
 - `git status --short` is empty.
 
-Return the complete `metadata.json`, `summary.json`, the last 30 training records, checkpoint sizes, training exit code, and final Git status. Stop after the smoke run; review the evidence locally before authorizing the full 40k baseline.
+Return the complete JSON report, rebuild exit code, sample `22706` statistics, corrected file count, disk usage, and final Git status. Stop after data repair; Phase 5 training resumes only after this evidence is reviewed locally.

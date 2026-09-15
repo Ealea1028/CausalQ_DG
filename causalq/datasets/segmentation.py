@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from .cityscapes import IGNORE_INDEX
+from .cityscapes import IGNORE_INDEX, read_index_mask
 from .gta5 import pair_by_relative_path, resolve_flat_payload_root
 
 
@@ -148,7 +148,7 @@ class PairedSegmentationDataset(Dataset[dict[str, Tensor | str]]):
         with Image.open(pair.image) as image_file:
             image = image_file.convert("RGB")
         with Image.open(pair.label) as label_file:
-            label = label_file.convert("L")
+            label = Image.fromarray(read_index_mask(label_file))
         label = align_scale_equivalent_label(image, label)
         if self.transform is None:
             image_tensor, label_tensor = _tensorize(image, label)

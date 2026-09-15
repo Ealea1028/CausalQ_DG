@@ -33,3 +33,6 @@
 - ModelScope secondary-distribution provenance and verified checkpoint SHA-256 values are recorded.
 - Phase 5 crops now retry toward valid semantic pixels and reject all-ignore batches explicitly instead of allowing a NaN mean cross-entropy.
 - Training records now distinguish non-finite logits from invalid labels and include the valid-pixel count.
+- GTA5 palette-mode labels now preserve their class indices instead of converting palette colors to grayscale luminance.
+- Dataset validation now rejects all-ignore train-ID masks and reports valid-pixel coverage.
+- Derived-label writes are atomic so an interrupted full conversion can be resumed safely.

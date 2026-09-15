@@ -9,6 +9,7 @@ from causalq.datasets.cityscapes import (
     convert_label_files,
     invalid_train_ids,
     label_ids_to_train_ids,
+    read_index_mask,
 )
 from causalq.datasets.gta5 import (
     convert_labels,
@@ -62,6 +63,51 @@ def test_gta5_conversion_preserves_raw_labels(tmp_path: Path) -> None:
     assert np.array_equal(np.asarray(Image.open(source)), raw)
     converted = np.asarray(Image.open(output_root / "00001.png"))
     assert converted.tolist() == [[0, 1], [13, IGNORE_INDEX]]
+
+
+def test_gta5_palette_indices_are_not_converted_to_luminance(tmp_path: Path) -> None:
+    raw_root = tmp_path / "labels"
+    output_root = tmp_path / "labels_trainIds"
+    source = raw_root / "00001.png"
+    source.parent.mkdir(parents=True)
+    indexed = Image.fromarray(
+        np.asarray([[7, 8], [26, 0]], dtype=np.uint8)
+    ).convert("P")
+    palette = [0] * 768
+    palette[7 * 3 : 7 * 3 + 3] = [255, 255, 255]
+    palette[8 * 3 : 8 * 3 + 3] = [10, 20, 30]
+    palette[26 * 3 : 26 * 3 + 3] = [200, 100, 50]
+    indexed.putpalette(palette)
+    indexed.save(source)
+
+    with Image.open(source) as image:
+        assert read_index_mask(image).tolist() == [[7, 8], [26, 0]]
+        assert np.asarray(image.convert("L")).tolist() != [[7, 8], [26, 0]]
+
+    convert_labels(raw_root, output_root)
+
+    converted = np.asarray(Image.open(output_root / "00001.png"))
+    assert converted.tolist() == [[0, 1], [13, IGNORE_INDEX]]
+
+
+def test_gta5_inspection_rejects_all_ignore_train_label(tmp_path: Path) -> None:
+    root = tmp_path / "gta5"
+    save_rgb(root / "images/00001.png", (2, 2))
+    save_label(
+        root / "labels_trainIds/00001.png",
+        np.full((2, 2), IGNORE_INDEX, dtype=np.uint8),
+    )
+    config = {
+        "images": "images",
+        "labels_original": "labels",
+        "labels_train_ids": "labels_trainIds",
+    }
+
+    result = inspect_gta5(root, config, arguments(), tmp_path / "visualizations")
+
+    assert result["ok"] is False
+    assert result["all_ignore_label_count"] == 1
+    assert result["valid_fraction_min"] == 0.0
 
 
 def test_gta5_inspection_pairs_and_visualizes(tmp_path: Path) -> None:

@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from .cityscapes import label_ids_to_train_ids
+from .cityscapes import label_ids_to_train_ids, read_index_mask
 
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}
@@ -76,9 +76,11 @@ def convert_labels(
             continue
         destination.parent.mkdir(parents=True, exist_ok=True)
         with Image.open(source) as image:
-            raw = np.asarray(image.convert("L"))
+            raw = read_index_mask(image)
         converted = label_ids_to_train_ids(raw)
-        Image.fromarray(converted).save(destination)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        Image.fromarray(converted).save(temporary, format="PNG")
+        temporary.replace(destination)
         converted_count += 1
     return {
         "source_count": len(raw_labels),

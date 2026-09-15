@@ -24,6 +24,7 @@ from causalq.datasets.cityscapes import (
     colorize_train_ids,
     convert_label_files,
     invalid_train_ids,
+    read_index_mask,
 )
 from causalq.datasets.gta5 import (
     convert_labels,
@@ -80,7 +81,7 @@ def save_visualizations(
         with Image.open(image_path) as image_file:
             image = image_file.convert("RGB")
         with Image.open(label_path) as label_file:
-            label = np.asarray(label_file.convert("L"))
+            label = read_index_mask(label_file)
         colored = Image.fromarray(colorize_train_ids(label))
         if colored.size != image.size:
             colored = colored.resize(image.size, resample=Image.Resampling.NEAREST)
@@ -134,16 +135,22 @@ def inspect_pairs(
     scale_equivalent_mismatch_count = 0
     geometry_mismatch_count = 0
     unreadable: list[dict[str, str]] = []
+    all_ignore_labels: list[str] = []
+    valid_fractions: list[float] = []
     for image_path, label_path in scan_pairs:
         try:
             with Image.open(image_path) as image_file:
                 image_size = image_file.size
             with Image.open(label_path) as label_file:
-                label = np.asarray(label_file.convert("L"))
+                label = read_index_mask(label_file)
                 label_size = label_file.size
             unique_ids.update(int(value) for value in np.unique(label))
             if train_ids:
                 invalid_ids.update(invalid_train_ids(label))
+                valid_fraction = float(np.mean(label != 255))
+                valid_fractions.append(valid_fraction)
+                if valid_fraction == 0.0:
+                    all_ignore_labels.append(str(label_path))
             if image_size != label_size:
                 classification, aspect_ratio_relative_error = classify_shape_mismatch(
                     image_size, label_size
@@ -181,6 +188,12 @@ def inspect_pairs(
         "geometry_mismatch_count": geometry_mismatch_count,
         "unreadable": unreadable[:20],
         "unreadable_count": len(unreadable),
+        "all_ignore_label_count": len(all_ignore_labels),
+        "all_ignore_label_examples": all_ignore_labels[:20],
+        "valid_fraction_min": min(valid_fractions) if valid_fractions else None,
+        "valid_fraction_mean": (
+            sum(valid_fractions) / len(valid_fractions) if valid_fractions else None
+        ),
         "visualizations": visualizations,
     }
 
@@ -204,9 +217,14 @@ def inspect_gta5(
     if args.convert_gta5:
         if not raw_label_root.is_dir():
             raise FileNotFoundError(f"GTA5 raw label directory not found: {raw_label_root}")
+        conversion_output_root = (
+            train_label_root
+            if train_label_root.is_dir() and train_label_root != configured_train_label_root
+            else configured_train_label_root
+        )
         conversion = convert_labels(
             raw_label_root,
-            configured_train_label_root,
+            conversion_output_root,
             overwrite=args.overwrite_converted,
             limit=args.conversion_limit,
         )
@@ -229,6 +247,7 @@ def inspect_gta5(
     ok = bool(pairs) and not missing_labels and not missing_images
     ok = ok and inspection["geometry_mismatch_count"] == 0
     ok = ok and inspection["unreadable_count"] == 0
+    ok = ok and inspection["all_ignore_label_count"] == 0
     ok = ok and using_train_ids and not inspection["invalid_train_ids"]
     return {
         "ok": ok,
@@ -318,6 +337,7 @@ def inspect_cityscapes(
     ok = bool(pairs) and not missing_labels and not missing_images
     ok = ok and inspection["geometry_mismatch_count"] == 0
     ok = ok and inspection["unreadable_count"] == 0
+    ok = ok and inspection["all_ignore_label_count"] == 0
     ok = ok and not inspection["invalid_train_ids"]
     return {
         "ok": ok,

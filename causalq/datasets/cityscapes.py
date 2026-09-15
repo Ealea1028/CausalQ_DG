@@ -58,6 +58,26 @@ TRAIN_ID_PALETTE = np.asarray(
 )
 
 
+def read_index_mask(image_or_path: Image.Image | Path) -> np.ndarray:
+    """Read class indices without converting palette colors to luminance."""
+    owns_image = not isinstance(image_or_path, Image.Image)
+    image = Image.open(image_or_path) if owns_image else image_or_path
+    try:
+        if image.mode not in {"P", "L", "I", "I;16"}:
+            raise ValueError(
+                f"Expected an indexed or integer label mask, got mode {image.mode!r}"
+            )
+        label = np.asarray(image).copy()
+    finally:
+        if owns_image:
+            image.close()
+    if label.ndim != 2:
+        raise ValueError(f"Expected a 2-D label mask, got shape {label.shape}")
+    if label.size and (label.min() < 0 or label.max() > 255):
+        raise ValueError("Label mask contains values outside uint8 range")
+    return label.astype(np.uint8, copy=False)
+
+
 def label_ids_to_train_ids(label: np.ndarray) -> np.ndarray:
     """Map raw Cityscapes label IDs to train IDs without mutating the input."""
     if label.ndim != 2:
@@ -102,8 +122,10 @@ def convert_label_files(
             skipped_count += 1
             continue
         with Image.open(source) as image_file:
-            raw = np.asarray(image_file.convert("L"))
-        Image.fromarray(label_ids_to_train_ids(raw)).save(destination)
+            raw = read_index_mask(image_file)
+        temporary = destination.with_suffix(destination.suffix + ".tmp")
+        Image.fromarray(label_ids_to_train_ids(raw)).save(temporary, format="PNG")
+        temporary.replace(destination)
         converted_count += 1
     return {
         "source_count": len(raw_files),
