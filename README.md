@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phases 1 through 3 are complete. GTA5 and Cityscapes passed pairing, train-ID, shape, and readability validation on AutoDL. Phase 4 provides a frozen DINOv3 ViT-B/L dense-feature wrapper and awaits real-weight GPU validation on the RTX 4090D.
+Phases 1 through 3 are complete. GTA5 and Cityscapes passed pairing, train-ID, shape, and readability validation on AutoDL. Phase 4 provides a frozen DINOv3 ViT-B/L dense-feature wrapper. A direct ViT-B diagnostic passed with the ModelScope-distributed weights; the formal B/L checker still awaits rerun on the RTX 4090D.
 
 ## Working directories
 

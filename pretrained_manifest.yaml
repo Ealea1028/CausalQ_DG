@@ -8,6 +8,8 @@ models:
     pretraining: LVD-1689M
     status: required_on_autodl
     source: facebook/dinov3-vitl16-pretrain-lvd1689m
+    acquisition_source: https://modelscope.cn/models/facebook/dinov3-vitl16-pretrain-lvd1689m
+    acquisition_note: secondary_distribution_after_official_huggingface_request_rejected
     local_dir: dinov3_vitl16
     format: huggingface_safetensors
     patch_size: 16
@@ -20,6 +22,8 @@ models:
     pretraining: LVD-1689M
     status: optional_smoke_test
     source: facebook/dinov3-vitb16-pretrain-lvd1689m
+    acquisition_source: https://modelscope.cn/models/facebook/dinov3-vitb16-pretrain-lvd1689m
+    acquisition_note: secondary_distribution_after_official_huggingface_request_rejected
     local_dir: dinov3_vitb16
     format: huggingface_safetensors
     patch_size: 16

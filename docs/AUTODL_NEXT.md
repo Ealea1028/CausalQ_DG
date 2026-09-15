@@ -1,6 +1,6 @@
 # Next AutoDL action
 
-Status: Phases 1 through 3 are accepted. Phase 4 is implemented locally and awaits official DINOv3 ViT-B/L weight loading and GPU smoke tests.
+Status: Phases 1 through 3 are accepted. In Phase 4, a direct ViT-B diagnostic loaded the ModelScope-distributed checkpoint and produced the expected dense features on the RTX 4090D. The formal checker failed before loading because PyTorch 2.7.0 rejected a `torch.device` argument in its CUDA memory-statistics API; the local fix now uses an integer CUDA index. The formal B/L checker awaits rerun.
 
 ## Phase 3 conclusion
 
@@ -12,16 +12,21 @@ Status: Phases 1 through 3 are accepted. Phase 4 is implemented locally and awai
 
 ## Goal
 
-Download the gated official LVD-1689M DINOv3 ViT-B/16 and ViT-L/16 checkpoints into persistent storage, record their hashes, and verify frozen dense features for a 512×512 input on the RTX 4090D. Do not implement or train the segmentation baseline yet.
+Record the hashes of the already-downloaded LVD-1689M DINOv3 ViT-B/16 and ViT-L/16 checkpoints and verify frozen dense features for a 512×512 input on the RTX 4090D. The files were acquired from the corresponding `facebook` namespace on ModelScope after the official Hugging Face gating request was rejected. Treat ModelScope as a secondary distribution source and preserve that provenance in every report. Do not implement or train the segmentation baseline yet.
 
-## One-time model access
+## Weight provenance
 
-Accept the DINOv3 license on both official Hugging Face model pages before running the commands:
+The local snapshots correspond to these upstream model identities:
 
 - `https://huggingface.co/facebook/dinov3-vitb16-pretrain-lvd1689m`
 - `https://huggingface.co/facebook/dinov3-vitl16-pretrain-lvd1689m`
 
-Create a Hugging Face read token. Enter it only into the interactive `hf auth login` prompt; never paste a token into Git, a shell script, the experiment report, or this repository.
+They were downloaded from:
+
+- `https://modelscope.cn/models/facebook/dinov3-vitb16-pretrain-lvd1689m`
+- `https://modelscope.cn/models/facebook/dinov3-vitl16-pretrain-lvd1689m`
+
+Use is subject to the DINOv3 License. Do not describe the secondary distribution as proof of official Meta or Hugging Face access. Record the exact checkpoint SHA-256 values returned by the checker.
 
 ## Commands
 
@@ -39,20 +44,9 @@ python tools/check_environment.py
 nvidia-smi
 ```
 
-Authenticate and download both official model snapshots into persistent storage:
+Confirm both existing snapshots and record their hashes:
 
 ```bash
-hf auth whoami || hf auth login
-
-mkdir -p /root/autodl-tmp/pretrained/dinov3_vitb16
-mkdir -p /root/autodl-tmp/pretrained/dinov3_vitl16
-
-hf download facebook/dinov3-vitb16-pretrain-lvd1689m \
-  --local-dir /root/autodl-tmp/pretrained/dinov3_vitb16
-
-hf download facebook/dinov3-vitl16-pretrain-lvd1689m \
-  --local-dir /root/autodl-tmp/pretrained/dinov3_vitl16
-
 find /root/autodl-tmp/pretrained/dinov3_vitb16 \
   -maxdepth 1 -type f -name '*.safetensors' -exec sha256sum {} \;
 find /root/autodl-tmp/pretrained/dinov3_vitl16 \

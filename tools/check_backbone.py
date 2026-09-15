@@ -52,6 +52,16 @@ def checkpoint_hashes(weights: Path) -> dict[str, str]:
     return hashes
 
 
+def prepare_cuda_device() -> tuple[int, torch.device]:
+    """Prepare the active CUDA device using integer indices for metric APIs."""
+    device_index = torch.cuda.current_device()
+    torch.cuda.empty_cache()
+    # Some PyTorch CUDA builds reject torch.device here even though tensor
+    # placement accepts it. The integer index is portable across those builds.
+    torch.cuda.reset_peak_memory_stats(device_index)
+    return device_index, torch.device("cuda", device_index)
+
+
 def main() -> int:
     args = parse_args()
     report: dict[str, object] = {
@@ -70,10 +80,8 @@ def main() -> int:
         os.getenv("CAUSALQ_PRETRAINED_ROOT", "/root/autodl-tmp/pretrained")
     )
     weights = args.weights or pretrained_root / args.model
-    device = torch.device("cuda:0")
     try:
-        torch.cuda.empty_cache()
-        torch.cuda.reset_peak_memory_stats(device)
+        device_index, device = prepare_cuda_device()
         backbone = DINOv3Backbone.from_pretrained(
             args.model,
             weights=weights,
@@ -106,7 +114,7 @@ def main() -> int:
                 "weights": str(weights),
                 "weights_loaded": True,
                 "checkpoint_sha256": hashes,
-                "device": torch.cuda.get_device_name(device),
+                "device": torch.cuda.get_device_name(device_index),
                 "dtype": str(features.patch_map.dtype),
                 "input_shape": list(images.shape),
                 "patch_size": list(backbone.patch_size),
@@ -122,10 +130,10 @@ def main() -> int:
                 "total_parameters": total_parameters,
                 "trainable_parameters": trainable_parameters,
                 "peak_allocated_gib": round(
-                    torch.cuda.max_memory_allocated(device) / 1024**3, 3
+                    torch.cuda.max_memory_allocated(device_index) / 1024**3, 3
                 ),
                 "peak_reserved_gib": round(
-                    torch.cuda.max_memory_reserved(device) / 1024**3, 3
+                    torch.cuda.max_memory_reserved(device_index) / 1024**3, 3
                 ),
             }
         )

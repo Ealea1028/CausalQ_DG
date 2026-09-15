@@ -14,8 +14,14 @@ export CAUSALQ_DATA_ROOT="${CAUSALQ_DATA_ROOT:-/root/autodl-tmp/datasets}"
 export CAUSALQ_PRETRAINED_ROOT="${CAUSALQ_PRETRAINED_ROOT:-/root/autodl-tmp/pretrained}"
 export CAUSALQ_OUTPUT_ROOT="${CAUSALQ_OUTPUT_ROOT:-/root/autodl-tmp/outputs/CausalQ_DG}"
 
+# libgomp requires a positive integer. AutoDL images can inherit an empty or
+# otherwise invalid value from the parent shell.
+if [[ ! "${OMP_NUM_THREADS:-}" =~ ^[1-9][0-9]*$ ]]; then
+  export OMP_NUM_THREADS=1
+fi
+
 echo "Activated causalq-dg"
 echo "  data:       $CAUSALQ_DATA_ROOT"
 echo "  pretrained: $CAUSALQ_PRETRAINED_ROOT"
 echo "  outputs:    $CAUSALQ_OUTPUT_ROOT"
-
+echo "  omp threads: $OMP_NUM_THREADS"

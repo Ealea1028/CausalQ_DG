@@ -5,7 +5,7 @@ import torch
 from torch import nn
 
 from causalq.models.dinov3_wrapper import DINOv3Backbone
-from tools.check_backbone import checkpoint_hashes
+from tools.check_backbone import checkpoint_hashes, prepare_cuda_device
 
 
 class FakeDINOv3(nn.Module):
@@ -98,3 +98,25 @@ def test_checkpoint_hashes_safetensors_only(tmp_path) -> None:
             "b00361a396177a9cb410ff61f20015ad"
         )
     }
+
+
+def test_prepare_cuda_device_uses_integer_for_memory_metrics(monkeypatch) -> None:
+    calls: list[tuple[str, object]] = []
+
+    monkeypatch.setattr(torch.cuda, "current_device", lambda: 2)
+    monkeypatch.setattr(
+        torch.cuda,
+        "empty_cache",
+        lambda: calls.append(("empty_cache", None)),
+    )
+    monkeypatch.setattr(
+        torch.cuda,
+        "reset_peak_memory_stats",
+        lambda device: calls.append(("reset", device)),
+    )
+
+    device_index, device = prepare_cuda_device()
+
+    assert device_index == 2
+    assert device == torch.device("cuda:2")
+    assert calls == [("empty_cache", None), ("reset", 2)]
