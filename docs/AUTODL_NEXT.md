@@ -1,36 +1,25 @@
 # Next AutoDL action
 
-Status: Phases 1 through 3 are accepted. In Phase 4, a direct ViT-B diagnostic loaded the ModelScope-distributed checkpoint and produced the expected dense features on the RTX 4090D. The formal checker failed before loading because PyTorch 2.7.0 rejected a `torch.device` argument in its CUDA memory-statistics API; the local fix now uses an integer CUDA index. The formal B/L checker awaits rerun.
+Status: Phases 1 through 4 are accepted. Phase 5 source-only baseline implementation is complete locally and awaits a 500-iteration GPU smoke run.
 
-## Phase 3 conclusion
+## Phase 4 conclusion
 
-- GTA5 full validation is accepted under the user's stated completion assumption.
-- Cityscapes train/val: 3,475 image-mask pairs checked.
-- Cityscapes train IDs: all `0..18` plus ignore index `255` observed.
-- Missing pairs, invalid IDs, unreadable files, and geometry mismatches: zero.
-- All 5,000 Cityscapes train-ID masks already existed, so the repeat conversion safely skipped them.
+- Verified commit: `881a5cd2539a132669616975ef51cbd013a44981`.
+- RTX 4090D, PyTorch `2.7.0+cu126`, CUDA runtime `12.6`, BF16.
+- ViT-B/16: `[1, 1024, 768]` patch tokens, `[1, 768, 32, 32]` map, four valid intermediate maps, 0.209 GiB peak allocated.
+- ViT-L/16: `[1, 1024, 1024]` patch tokens, `[1, 1024, 32, 32]` map, four valid intermediate maps, 0.642 GiB peak allocated.
+- Both models exposed five prefix tokens, had zero trainable backbone parameters, and contained no NaN or Inf values.
+- ViT-B SHA-256: `9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`.
+- ViT-L SHA-256: `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
+- The files came from the corresponding `facebook` namespace on ModelScope, recorded as a secondary distribution source subject to the DINOv3 License.
 
-## Goal
+## Phase 5 smoke goal
 
-Record the hashes of the already-downloaded LVD-1689M DINOv3 ViT-B/16 and ViT-L/16 checkpoints and verify frozen dense features for a 512×512 input on the RTX 4090D. The files were acquired from the corresponding `facebook` namespace on ModelScope after the official Hugging Face gating request was rejected. Treat ModelScope as a secondary distribution source and preserve that provenance in every report. Do not implement or train the segmentation baseline yet.
-
-## Weight provenance
-
-The local snapshots correspond to these upstream model identities:
-
-- `https://huggingface.co/facebook/dinov3-vitb16-pretrain-lvd1689m`
-- `https://huggingface.co/facebook/dinov3-vitl16-pretrain-lvd1689m`
-
-They were downloaded from:
-
-- `https://modelscope.cn/models/facebook/dinov3-vitb16-pretrain-lvd1689m`
-- `https://modelscope.cn/models/facebook/dinov3-vitl16-pretrain-lvd1689m`
-
-Use is subject to the DINOv3 License. Do not describe the secondary distribution as proof of official Meta or Hugging Face access. Record the exact checkpoint SHA-256 values returned by the checker.
+Train only the segmentation decoder for 500 optimizer iterations on GTA5, with the DINOv3-L backbone frozen. Use standard shared geometric augmentation only: no causal queries, style intervention, prediction consistency, or CQE. Validate on 50 Cityscapes validation images to verify the complete inference and mIoU path. Do not start the 40k schedule yet.
 
 ## Commands
 
-Run the exact Git commit from the hand-off:
+Run the exact Git commit supplied in the hand-off:
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -38,61 +27,61 @@ git status --short
 git fetch origin
 git checkout --detach <EXACT_SHA_FROM_HANDOFF>
 git rev-parse HEAD
+git status --short
 
 source scripts/activate_autodl.sh
 python tools/check_environment.py
 nvidia-smi
 ```
 
-Confirm both existing snapshots and record their hashes:
+Confirm persistent inputs:
 
 ```bash
-find /root/autodl-tmp/pretrained/dinov3_vitb16 \
-  -maxdepth 1 -type f -name '*.safetensors' -exec sha256sum {} \;
-find /root/autodl-tmp/pretrained/dinov3_vitl16 \
-  -maxdepth 1 -type f -name '*.safetensors' -exec sha256sum {} \;
+test -f /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
+test -d /root/autodl-tmp/datasets/gta5/images
+test -d /root/autodl-tmp/datasets/gta5/labels_trainIds
+test -d /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val
+test -d /root/autodl-tmp/datasets/cityscapes/gtFine/val
+
+sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
 ```
 
-Run the B/16 smoke test first, followed by the primary L/16 test:
+Run the smoke test with a unique output name:
 
 ```bash
-mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/backbone_check
+cd /root/autodl-tmp/CausalQ_DG
+export MAX_ITERATIONS=500
+export VALIDATION_MAX_SAMPLES=50
+export RUN_ID="A0_DINOV3L_BASE_SMOKE_500_$(git rev-parse --short HEAD)"
+
 set -o pipefail
+bash scripts/train_baseline.sh \
+  | tee "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
+echo "train_exit_code=${PIPESTATUS[0]}"
+```
 
-python tools/check_backbone.py \
-  --model dinov3_vitb16 \
-  --weights /root/autodl-tmp/pretrained/dinov3_vitb16 \
-  --image-size 512 512 \
-  --batch-size 1 \
-  --dtype bfloat16 \
-  --intermediate-indices 3 6 9 12 \
-  | tee /root/autodl-tmp/outputs/CausalQ_DG/backbone_check/vitb16.json
-echo "vitb_exit_code=${PIPESTATUS[0]}"
+Inspect the artifacts:
 
-python tools/check_backbone.py \
-  --model dinov3_vitl16 \
-  --weights /root/autodl-tmp/pretrained/dinov3_vitl16 \
-  --image-size 512 512 \
-  --batch-size 1 \
-  --dtype bfloat16 \
-  --intermediate-indices 6 12 18 24 \
-  | tee /root/autodl-tmp/outputs/CausalQ_DG/backbone_check/vitl16.json
-echo "vitl_exit_code=${PIPESTATUS[0]}"
-
+```bash
+cat "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/metadata.json"
+cat "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/summary.json"
+tail -n 30 "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/train.jsonl"
+find "/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}/checkpoints" \
+  -maxdepth 1 -type f -printf '%f %s bytes\n' | sort
 git status --short
 ```
 
 ## Acceptance criteria
 
-Both reports must show:
+- `train_exit_code=0` and `summary.json` contains `"ok": true`.
+- Git SHA and ViT-L SHA-256 exactly match the hand-off and manifest.
+- `max_iterations=500`, source is GTA5, and validation is Cityscapes val with 50 samples.
+- Total loss and gradient norm remain finite; gradient norm is nonzero for ordinary iterations.
+- The last-20 loss mean is lower than the first-20 mean. Small short-term fluctuations are acceptable.
+- Validation returns a finite mIoU and non-empty per-class IoUs. This smoke run is not a reportable benchmark.
+- Backbone remains frozen; trainable parameters belong only to the decoder.
+- At least one compact `.pth` checkpoint exists and does not contain a duplicate DINOv3 backbone.
+- Peak allocated/reserved VRAM is recorded without out-of-memory errors.
+- `git status --short` is empty.
 
-- `ok: true`, `weights_loaded: true`, and the exact hand-off Git SHA.
-- Input shape `[1, 3, 512, 512]`, patch size `[16, 16]`, and five model-derived prefix tokens.
-- ViT-B patch tokens `[1, 1024, 768]` and patch map `[1, 768, 32, 32]`.
-- ViT-L patch tokens `[1, 1024, 1024]` and patch map `[1, 1024, 32, 32]`.
-- Four intermediate maps with the same spatial grid and model hidden size.
-- `nan_count: 0`, `inf_count: 0`, and `trainable_parameters: 0`.
-- Non-empty checkpoint SHA-256 mappings and recorded peak allocated/reserved VRAM.
-- Empty `git status --short`.
-
-Return both complete JSON reports, the two shell exit codes, the `sha256sum` output, and the final Git status. Stop after this check; Phase 5 baseline implementation begins only after the real ViT-L result is reviewed locally.
+Return the complete `metadata.json`, `summary.json`, the last 30 training records, checkpoint sizes, training exit code, and final Git status. Stop after the smoke run; review the evidence locally before authorizing the full 40k baseline.

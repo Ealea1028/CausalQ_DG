@@ -11,6 +11,9 @@
 - Phase 3 GTA5/Cityscapes discovery, pairing, label-ID, shape, and visualization checks.
 - Non-destructive GTA5 raw-label conversion into `labels_trainIds`.
 - AutoDL activation helper that exports all project storage paths.
+- Phase 5 GTA5-to-Cityscapes source-only training and validation pipeline.
+- Frozen DINOv3 multi-layer fusion decoder, segmentation cross-entropy, streaming mIoU, and compact head-only checkpoints.
+- Geometry-only paired augmentation with scale-equivalent GTA5 label alignment.
 
 ### Changed
 
@@ -24,3 +27,7 @@
 - Phase 4 frozen DINOv3 ViT-B/L wrapper with dynamic prefix-token removal and dense patch maps.
 - GPU backbone checker for feature shapes, finite values, parameter freezing, checkpoint hashes, and peak CUDA memory.
 - Official Hugging Face DINOv3 model IDs and architecture metadata in the pretrained manifest.
+- Phase 4 real-weight ViT-B/L checks passed on RTX 4090D with finite frozen features.
+- CUDA memory-statistics calls now use integer device indices for PyTorch 2.7 compatibility.
+- Invalid inherited `OMP_NUM_THREADS` values are normalized during AutoDL activation.
+- ModelScope secondary-distribution provenance and verified checkpoint SHA-256 values are recorded.

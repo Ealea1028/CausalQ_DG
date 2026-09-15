@@ -1,18 +1,38 @@
 experiment:
   id: A0_DINOV3L_BASE
   phase: 5
-  status: not_implemented
+  status: ready_for_autodl_smoke
 data:
   source: gta5
   targets: [cityscapes, bdd100k, mapillary]
+  validation: cityscapes_val
   num_classes: 19
+  num_workers: 4
+  random_scale: [0.5, 2.0]
+  horizontal_flip_probability: 0.5
 model:
   backbone: dinov3_vitl16
+  weights_dir: dinov3_vitl16
+  weights_sha256: dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179
   freeze_backbone: true
+  intermediate_indices: [6, 12, 18, 24]
+  decoder_channels: 256
+  dropout: 0.1
+  query: false
 train:
   crop_size: [512, 512]
   amp: true
   batch_size: 1
+  gradient_accumulation: 1
   max_iterations: 40000
   seed: 0
-
+  style: false
+  log_interval: 10
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.01
+  scheduler: poly
+  poly_power: 0.9
+validation:
+  interval: 500

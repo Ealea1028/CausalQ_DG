@@ -15,7 +15,7 @@ models:
     patch_size: 16
     hidden_size: 1024
     num_register_tokens: 4
-    sha256: to_be_recorded_after_download
+    sha256: dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179
   dinov3_vitb16:
     family: dinov3
     architecture: vit_base_patch16
@@ -29,4 +29,4 @@ models:
     patch_size: 16
     hidden_size: 768
     num_register_tokens: 4
-    sha256: to_be_recorded_after_download
+    sha256: 9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b
