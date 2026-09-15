@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The DINOv3 ViT-B/L backbones passed real-weight checks on the RTX 4090D. Phase 5 exposed a palette-index conversion bug in the derived GTA5 train-ID masks, so baseline training is paused while Phase 3 GTA5 labels are rebuilt and revalidated from the untouched raw labels.
+The DINOv3 ViT-B/L backbones passed real-weight checks on the RTX 4090D. The corrected GTA5 palette-index conversion passed a full 24,966-label scan, so Phase 3 is accepted again and Phase 5 resumes with a 500-iteration source-only baseline smoke test.
 
 ## Working directories
 
