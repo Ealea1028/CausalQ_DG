@@ -11,3 +11,4 @@ No upstream source is vendored or copied into this repository during Phase 1.
 
 The EoMT dependency baseline inspected for Phase 1 pins Torch 2.7.0, Torchvision 0.22.0, Transformers 4.56.1, timm 1.0.15, Lightning 2.5.1.post0, and TorchMetrics 1.7.1. The exact repository SHA must be captured when the upstream repository is cloned successfully; a moving branch name is not sufficient for experiments.
 
+Phase 4 uses the official Hugging Face Transformers DINOv3 interface rather than vendoring upstream source. Official model IDs are `facebook/dinov3-vitb16-pretrain-lvd1689m` and `facebook/dinov3-vitl16-pretrain-lvd1689m`. Their model-owned configuration supplies patch size, hidden size, and register-token count. The wrapper removes the CLS and configured register tokens before reshaping patch tokens for dense prediction.

@@ -21,3 +21,6 @@
 - GTA5 validation now reports official resolution-only image/label differences as scale-equivalent warnings while still rejecting geometry mismatches.
 - Pillow image creation no longer uses the deprecated explicit `mode` argument.
 - Phase 3 hand-off now records the assumed GTA5 acceptance and isolates the remaining Cityscapes full-validation step.
+- Phase 4 frozen DINOv3 ViT-B/L wrapper with dynamic prefix-token removal and dense patch maps.
+- GPU backbone checker for feature shapes, finite values, parameter freezing, checkpoint hashes, and peak CUDA memory.
+- Official Hugging Face DINOv3 model IDs and architecture metadata in the pretrained manifest.

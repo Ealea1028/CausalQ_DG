@@ -7,15 +7,22 @@ models:
     architecture: vit_large_patch16
     pretraining: LVD-1689M
     status: required_on_autodl
-    source: to_be_confirmed_from_official_dinov3_or_eomt
-    filename: to_be_confirmed
+    source: facebook/dinov3-vitl16-pretrain-lvd1689m
+    local_dir: dinov3_vitl16
+    format: huggingface_safetensors
+    patch_size: 16
+    hidden_size: 1024
+    num_register_tokens: 4
     sha256: to_be_recorded_after_download
   dinov3_vitb16:
     family: dinov3
     architecture: vit_base_patch16
     pretraining: LVD-1689M
     status: optional_smoke_test
-    source: to_be_confirmed_from_official_dinov3_or_eomt
-    filename: to_be_confirmed
+    source: facebook/dinov3-vitb16-pretrain-lvd1689m
+    local_dir: dinov3_vitb16
+    format: huggingface_safetensors
+    patch_size: 16
+    hidden_size: 768
+    num_register_tokens: 4
     sha256: to_be_recorded_after_download
-
