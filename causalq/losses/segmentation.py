@@ -11,4 +11,6 @@ def segmentation_cross_entropy(
         raise ValueError("Expected BCHW logits and BHW labels")
     if logits.shape[0] != labels.shape[0] or logits.shape[-2:] != labels.shape[-2:]:
         raise ValueError("Logits and labels must have matching batch/spatial dimensions")
+    if not (labels != ignore_index).any():
+        raise ValueError("Segmentation batch contains no valid pixels")
     return F.cross_entropy(logits.float(), labels, ignore_index=ignore_index)

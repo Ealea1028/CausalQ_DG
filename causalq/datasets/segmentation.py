@@ -62,12 +62,39 @@ class TrainTransform:
         *,
         scale_range: Sequence[float] = (0.5, 2.0),
         horizontal_flip_probability: float = 0.5,
+        min_valid_fraction: float = 0.01,
+        crop_attempts: int = 10,
     ) -> None:
         if len(crop_size) != 2 or len(scale_range) != 2:
             raise ValueError("crop_size and scale_range must each contain two values")
         self.crop_size = int(crop_size[0]), int(crop_size[1])
         self.scale_range = float(scale_range[0]), float(scale_range[1])
         self.horizontal_flip_probability = float(horizontal_flip_probability)
+        self.min_valid_fraction = float(min_valid_fraction)
+        self.crop_attempts = int(crop_attempts)
+        if not 0.0 <= self.min_valid_fraction <= 1.0:
+            raise ValueError("min_valid_fraction must be between zero and one")
+        if self.crop_attempts < 1:
+            raise ValueError("crop_attempts must be positive")
+
+    def _sample_crop_box(self, label: Image.Image) -> tuple[int, int, int, int]:
+        crop_height, crop_width = self.crop_size
+        max_left = label.width - crop_width
+        max_top = label.height - crop_height
+        best_box = (0, 0, crop_width, crop_height)
+        best_valid_fraction = -1.0
+        for _ in range(self.crop_attempts):
+            left = int(torch.randint(max_left + 1, ()).item()) if max_left else 0
+            top = int(torch.randint(max_top + 1, ()).item()) if max_top else 0
+            box = (left, top, left + crop_width, top + crop_height)
+            crop = np.asarray(label.crop(box), dtype=np.uint8)
+            valid_fraction = float(np.count_nonzero(crop != IGNORE_INDEX) / crop.size)
+            if valid_fraction > best_valid_fraction:
+                best_valid_fraction = valid_fraction
+                best_box = box
+            if valid_fraction >= self.min_valid_fraction:
+                break
+        return best_box
 
     def __call__(self, image: Image.Image, label: Image.Image) -> tuple[Tensor, Tensor]:
         scale = torch.empty(()).uniform_(*self.scale_range).item()
@@ -91,11 +118,7 @@ class TrainTransform:
                 fill=IGNORE_INDEX,
             )
 
-        max_left = image.width - crop_width
-        max_top = image.height - crop_height
-        left = int(torch.randint(max_left + 1, ()).item()) if max_left else 0
-        top = int(torch.randint(max_top + 1, ()).item()) if max_top else 0
-        box = (left, top, left + crop_width, top + crop_height)
+        box = self._sample_crop_box(label)
         image = image.crop(box)
         label = label.crop(box)
 
@@ -131,6 +154,8 @@ class PairedSegmentationDataset(Dataset[dict[str, Tensor | str]]):
             image_tensor, label_tensor = _tensorize(image, label)
         else:
             image_tensor, label_tensor = self.transform(image, label)
+        if not torch.any(label_tensor != IGNORE_INDEX):
+            raise ValueError(f"Sample {pair.sample_id} contains no valid training pixels")
         return {"image": image_tensor, "label": label_tensor, "id": pair.sample_id}
 
 

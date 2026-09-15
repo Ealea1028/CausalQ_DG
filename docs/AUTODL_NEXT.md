@@ -1,6 +1,6 @@
 # Next AutoDL action
 
-Status: Phases 1 through 4 are accepted. Phase 5 source-only baseline implementation is complete locally and awaits a 500-iteration GPU smoke run.
+Status: Phases 1 through 4 are accepted. The first Phase 5 smoke attempt on commit `e9df3918f6c569550a8013578f5f220fe10cc7c6` stopped at iteration 4 because mean cross-entropy became NaN. The retry implementation samples crops toward valid semantic pixels, rejects all-ignore batches explicitly, checks logits separately, and records the valid-pixel count. It awaits a fresh 500-iteration GPU smoke run.
 
 ## Phase 4 conclusion
 
@@ -16,6 +16,8 @@ Status: Phases 1 through 4 are accepted. Phase 5 source-only baseline implementa
 ## Phase 5 smoke goal
 
 Train only the segmentation decoder for 500 optimizer iterations on GTA5, with the DINOv3-L backbone frozen. Use standard shared geometric augmentation only: no causal queries, style intervention, prediction consistency, or CQE. Validate on 50 Cityscapes validation images to verify the complete inference and mIoU path. Do not start the 40k schedule yet.
+
+The training log must contain a positive `valid_pixel_count` for every reported iteration. If the retry fails, preserve the complete traceback and the last training records; do not lower the learning rate or edit the source directly on AutoDL.
 
 ## Commands
 
@@ -77,6 +79,7 @@ git status --short
 - Git SHA and ViT-L SHA-256 exactly match the hand-off and manifest.
 - `max_iterations=500`, source is GTA5, and validation is Cityscapes val with 50 samples.
 - Total loss and gradient norm remain finite; gradient norm is nonzero for ordinary iterations.
+- Every training record has a positive `valid_pixel_count`; an all-ignore crop is an error rather than a trainable sample.
 - The last-20 loss mean is lower than the first-20 mean. Small short-term fluctuations are acceptable.
 - Validation returns a finite mIoU and non-empty per-class IoUs. This smoke run is not a reportable benchmark.
 - Backbone remains frozen; trainable parameters belong only to the decoder.

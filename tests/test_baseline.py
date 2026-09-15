@@ -74,6 +74,25 @@ def test_training_dataset_returns_shared_fixed_geometry(tmp_path: Path) -> None:
     assert sample["label"].dtype == torch.int64
 
 
+def test_training_crop_prefers_valid_pixels() -> None:
+    torch.manual_seed(0)
+    image = Image.new("RGB", (8, 8), color=(124, 116, 104))
+    values = np.full((8, 8), 255, dtype=np.uint8)
+    values[:, :4] = 0
+    label = Image.fromarray(values)
+    transform = TrainTransform(
+        (4, 4),
+        scale_range=(1.0, 1.0),
+        horizontal_flip_probability=0.0,
+        min_valid_fraction=0.5,
+        crop_attempts=20,
+    )
+
+    _, cropped_label = transform(image, label)
+
+    assert (cropped_label != 255).float().mean() >= 0.5
+
+
 def test_baseline_outputs_full_resolution_and_only_decoder_trains() -> None:
     backbone = DINOv3Backbone(
         FakeBackbone(), freeze=True, intermediate_indices=(0, 1)
@@ -127,6 +146,14 @@ def test_mean_iou_ignores_255_and_averages_present_classes() -> None:
 
     assert result["class_iou"] == pytest.approx([0.5, 0.5])
     assert result["miou"] == pytest.approx(0.5)
+
+
+def test_segmentation_loss_rejects_all_ignore_batch() -> None:
+    with pytest.raises(ValueError, match="no valid pixels"):
+        segmentation_cross_entropy(
+            torch.randn(1, 19, 2, 2),
+            torch.full((1, 2, 2), 255, dtype=torch.long),
+        )
 
 
 def test_phase5_config_disables_future_mechanisms() -> None:

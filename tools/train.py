@@ -127,6 +127,8 @@ def main() -> int:
         config["train"]["crop_size"],
         scale_range=config["data"]["random_scale"],
         horizontal_flip_probability=config["data"]["horizontal_flip_probability"],
+        min_valid_fraction=config["data"]["min_valid_fraction"],
+        crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
         raise NotImplementedError("The first Phase 5 run supports GTA5 source only")
@@ -218,8 +220,13 @@ def main() -> int:
                 batch = next(train_iterator)
             images = batch["image"].to("cuda:0", non_blocking=True)
             labels = batch["label"].to("cuda:0", non_blocking=True)
+            valid_pixel_count = int((labels != 255).sum().item())
             with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
                 logits = model(images)
+                if not torch.isfinite(logits).all():
+                    raise FloatingPointError(
+                        f"Non-finite model logits at iteration {iteration}"
+                    )
                 loss = segmentation_cross_entropy(logits, labels)
             if not torch.isfinite(loss):
                 raise FloatingPointError(
@@ -246,6 +253,7 @@ def main() -> int:
             "iteration": iteration,
             "loss": micro_loss,
             "gradient_norm": gradient_norm,
+            "valid_pixel_count": valid_pixel_count,
             "lr": optimizer.param_groups[0]["lr"],
         }
         with (run_dir / "train.jsonl").open("a", encoding="utf-8") as stream:
