@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phases 1 and 2 are complete. The RTX 4090D environment has passed its CUDA and dependency checks. Phase 3 dataset inspection and non-destructive GTA5 label conversion are implemented locally and await validation against the real AutoDL datasets.
+Phases 1 and 2 are complete. The RTX 4090D environment has passed its CUDA and dependency checks. In Phase 3, GTA5 pairing, train-ID conversion, and the full scan are accepted under the user's stated assumption; Cityscapes train-ID conversion and full validation remain pending on AutoDL.
 
 ## Working directories
 

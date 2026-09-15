@@ -20,3 +20,4 @@
 - Editable-install `*.egg-info` metadata is ignored by Git.
 - GTA5 validation now reports official resolution-only image/label differences as scale-equivalent warnings while still rejecting geometry mismatches.
 - Pillow image creation no longer uses the deprecated explicit `mode` argument.
+- Phase 3 hand-off now records the assumed GTA5 acceptance and isolates the remaining Cityscapes full-validation step.
