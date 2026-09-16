@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The DINOv3 ViT-B/L backbones passed real-weight checks on the RTX 4090D. The corrected GTA5 palette-index conversion passed a full 24,966-label scan, so Phase 3 is accepted again and Phase 5 resumes with a 500-iteration source-only baseline smoke test.
+The DINOv3 ViT-B/L backbones and corrected GTA5 labels are accepted. The Phase 5 source-only baseline passed its 500-iteration RTX 4090D smoke test and is ready for the full 40k schedule.
 
 ## Working directories
 

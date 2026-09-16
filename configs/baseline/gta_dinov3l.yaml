@@ -1,7 +1,7 @@
 experiment:
   id: A0_DINOV3L_BASE
   phase: 5
-  status: ready_for_smoke_test
+  status: smoke_test_passed_ready_for_full_training
 data:
   source: gta5
   targets: [cityscapes, bdd100k, mapillary]
