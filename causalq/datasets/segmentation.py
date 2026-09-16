@@ -145,10 +145,20 @@ class PairedSegmentationDataset(Dataset[dict[str, Tensor | str]]):
 
     def __getitem__(self, index: int) -> dict[str, Tensor | str]:
         pair = self.pairs[index]
-        with Image.open(pair.image) as image_file:
-            image = image_file.convert("RGB")
-        with Image.open(pair.label) as label_file:
-            label = Image.fromarray(read_index_mask(label_file))
+        try:
+            with Image.open(pair.image) as image_file:
+                image = image_file.convert("RGB")
+        except Exception as exc:
+            raise OSError(
+                f"Failed to decode image for sample {pair.sample_id}: {pair.image}"
+            ) from exc
+        try:
+            with Image.open(pair.label) as label_file:
+                label = Image.fromarray(read_index_mask(label_file))
+        except Exception as exc:
+            raise OSError(
+                f"Failed to decode label for sample {pair.sample_id}: {pair.label}"
+            ) from exc
         label = align_scale_equivalent_label(image, label)
         if self.transform is None:
             image_tensor, label_tensor = _tensorize(image, label)

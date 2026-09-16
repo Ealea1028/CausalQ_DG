@@ -74,6 +74,18 @@ def test_training_dataset_returns_shared_fixed_geometry(tmp_path: Path) -> None:
     assert sample["label"].dtype == torch.int64
 
 
+def test_training_dataset_reports_corrupt_image_path(tmp_path: Path) -> None:
+    pair = save_pair(tmp_path)
+    payload = pair.image.read_bytes()
+    pair.image.write_bytes(payload[:16])
+    dataset = PairedSegmentationDataset([pair])
+
+    with pytest.raises(OSError, match=r"Failed to decode image for sample sample") as error:
+        dataset[0]
+
+    assert str(pair.image) in str(error.value)
+
+
 def test_training_crop_prefers_valid_pixels() -> None:
     torch.manual_seed(0)
     image = Image.new("RGB", (8, 8), color=(124, 116, 104))

@@ -140,7 +140,14 @@ def inspect_pairs(
     for image_path, label_path in scan_pairs:
         try:
             with Image.open(image_path) as image_file:
+                image_file.load()
                 image_size = image_file.size
+        except Exception as exc:
+            unreadable.append(
+                {"path": str(image_path), "kind": "image", "error": str(exc)}
+            )
+            continue
+        try:
             with Image.open(label_path) as label_file:
                 label = read_index_mask(label_file)
                 label_size = label_file.size
@@ -170,7 +177,9 @@ def inspect_pairs(
                     }
                 )
         except Exception as exc:
-            unreadable.append({"path": str(label_path), "error": str(exc)})
+            unreadable.append(
+                {"path": str(label_path), "kind": "label", "error": str(exc)}
+            )
 
     visualizations: list[str] = []
     if train_ids and not invalid_ids:

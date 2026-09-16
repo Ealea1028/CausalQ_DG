@@ -130,6 +130,39 @@ def test_gta5_inspection_pairs_and_visualizes(tmp_path: Path) -> None:
     assert len(result["visualizations"]) == 1
 
 
+def test_gta5_inspection_fully_decodes_images(tmp_path: Path) -> None:
+    root = tmp_path / "gta5"
+    image_path = root / "images/00001.png"
+    image_path.parent.mkdir(parents=True)
+    pixels = np.random.default_rng(0).integers(
+        0, 256, size=(32, 32, 3), dtype=np.uint8
+    )
+    Image.fromarray(pixels).save(image_path)
+    payload = image_path.read_bytes()
+    image_path.write_bytes(payload[: len(payload) // 2])
+    save_label(
+        root / "labels_trainIds/00001.png",
+        np.zeros((32, 32), dtype=np.uint8),
+    )
+    config = {
+        "images": "images",
+        "labels_original": "labels",
+        "labels_train_ids": "labels_trainIds",
+    }
+
+    result = inspect_gta5(
+        root,
+        config,
+        arguments(samples=0),
+        tmp_path / "visualizations",
+    )
+
+    assert result["ok"] is False
+    assert result["unreadable_count"] == 1
+    assert result["unreadable"][0]["path"] == str(image_path)
+    assert result["unreadable"][0]["kind"] == "image"
+
+
 def test_cityscapes_inspection_detects_valid_pair(tmp_path: Path) -> None:
     root = tmp_path / "cityscapes"
     image = root / "leftImg8bit/train/demo/demo_000001_000001_leftImg8bit.png"

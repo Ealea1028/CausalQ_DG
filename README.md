@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The DINOv3 ViT-B/L backbones and corrected GTA5 labels are accepted. The Phase 5 source-only baseline passed its 500-iteration RTX 4090D smoke test and is ready for the full 40k schedule.
+The DINOv3 ViT-B/L backbones and corrected GTA5 labels passed their semantic checks. The Phase 5 source-only baseline passed its 500-iteration RTX 4090D smoke test, but the full run exposed at least one truncated GTA5 image; full pixel-decoding validation is required before restarting the 40k schedule.
 
 ## Working directories
 

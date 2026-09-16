@@ -1,32 +1,16 @@
 # Next AutoDL action
 
-Status: the Phase 5 source-only baseline passed its 500-iteration RTX 4090D smoke test. Run the full 40,000-iteration seed-0 schedule next; do not begin Phase 6 until the complete baseline is accepted.
+Status: the Phase 5 500-iteration smoke run remains accepted, but the first full 40k attempt stopped when Pillow fully decoded a truncated GTA5 PNG. Pause training and perform a full pixel-decoding scan of all GTA5 image/label pairs before deciding how to repair the remote data.
 
-## Accepted smoke evidence
+## Diagnosis
 
-- Run: `A0_DINOV3L_BASE_SMOKE_500_0a758f8`.
-- Exact Git SHA: `0a758f86b55398711033707093a5b45fe35d2c19`.
-- All 500 losses were finite.
-- First/last 20-loss means: `1.640873` / `0.687394`.
-- Cityscapes mIoU on the bounded 50-image smoke validation: `0.322154`.
-- Peak allocated/reserved VRAM: `1.349` / `1.795 GiB`.
-- The iteration-500 checkpoint is 19,742,619 bytes and does not duplicate the frozen backbone.
-- Corrected GTA5 and Cityscapes data, DINOv3-L weights, and Git provenance passed their prerequisites.
+The previous dataset validator read each image's dimensions but did not force Pillow to decode its pixel stream. A PNG can therefore have a valid header and file count while ending prematurely in its compressed image data. The updated validator calls `load()` on every image and records the exact failing path and whether it is an image or label. The dataset loader now also includes the sample ID and path in decode errors.
 
-## Full-run scope
-
-- Experiment: `A0_DINOV3L_BASE`.
-- Seed: 0.
-- Source: GTA5.
-- Validation: all 500 Cityscapes val images.
-- Frozen DINOv3-L/16 plus the baseline segmentation decoder.
-- 40,000 iterations, 512x512 crops, batch size 1, bfloat16 autocast, AdamW, and polynomial learning-rate decay.
-- Validation and compact checkpoint every 500 iterations.
-- No query branch, style intervention, prediction consistency, or CQE.
+Do not enable Pillow's `LOAD_TRUNCATED_IMAGES`: it would silently train on incomplete pixels and would make the experiment irreproducible. Do not restart the 40k run until every pair passes full decoding.
 
 ## Commands
 
-Use the exact Git commit supplied in the hand-off:
+Run the exact Git commit supplied in the hand-off:
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -38,90 +22,75 @@ git status --short
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
-python tools/check_environment.py
 ```
 
-Both `git status --short` checks must be empty. Confirm the fixed data, weight identity, and available space:
+Both Git status checks must be empty. Record where the failed full run stopped without modifying it:
 
 ```bash
-GTA_IMAGE_COUNT="$(find /root/autodl-tmp/datasets/gta5/images/images -type f -name '*.png' | wc -l)"
-GTA_LABEL_COUNT="$(find /root/autodl-tmp/datasets/gta5/labels_trainIds -type f -name '*.png' | wc -l)"
-CITY_VAL_COUNT="$(find /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val -type f -name '*_leftImg8bit.png' | wc -l)"
+FAILED_RUN_ID="A0_DINOV3L_BASE_SEED0_40000_c085de9"
+FAILED_RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${FAILED_RUN_ID}"
 
-echo "gta_image_count=${GTA_IMAGE_COUNT}"
-echo "gta_label_count=${GTA_LABEL_COUNT}"
-echo "cityscapes_val_count=${CITY_VAL_COUNT}"
+if test -f "$FAILED_RUN_DIR/train.jsonl"; then
+  echo "failed_run_records=$(wc -l < "$FAILED_RUN_DIR/train.jsonl")"
+  tail -n 5 "$FAILED_RUN_DIR/train.jsonl"
+fi
 
-test "$GTA_IMAGE_COUNT" -eq 24966
-test "$GTA_LABEL_COUNT" -eq 24966
-test "$CITY_VAL_COUNT" -eq 500
-
-sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
-df -h /root/autodl-tmp
+find "$FAILED_RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' 2>/dev/null | sort -k2 | tail -n 5
 ```
 
-The checkpoint SHA-256 must be `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`. The run creates 80 compact checkpoints and requires roughly 2 GiB beyond transient overhead; the currently reported 41 GiB free is sufficient.
-
-Start the full run:
+Run a full, zero-sample visualization scan. A nonzero scan exit code is expected while corrupt files exist, so capture it without terminating the shell:
 
 ```bash
-cd /root/autodl-tmp/CausalQ_DG
-source scripts/activate_autodl.sh
-
-export OMP_NUM_THREADS=1
-export RUN_SHA="$(git rev-parse --short HEAD)"
-export RUN_ID="A0_DINOV3L_BASE_SEED0_40000_${RUN_SHA}"
-export MAX_ITERATIONS=40000
-export VALIDATION_MAX_SAMPLES=500
-
-LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
-
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_full_decode
 set -o pipefail
-bash scripts/train_baseline.sh 2>&1 | tee "$LOG_FILE"
-TRAIN_EXIT=${PIPESTATUS[0]}
 
-echo "run_id=${RUN_ID}"
-echo "train_exit_code=${TRAIN_EXIT}"
-echo "log_file=${LOG_FILE}"
+python tools/check_datasets.py \
+  --datasets gta5 \
+  --label-scan-limit 0 \
+  --samples 0 \
+  --output-dir /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_full_decode \
+  | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_full_decode.json
+
+SCAN_EXIT=${PIPESTATUS[0]}
+echo "gta5_full_decode_exit_code=${SCAN_EXIT}"
 ```
 
-Do not reuse an existing run ID. The current trainer intentionally does not claim interruption-resume support; run it in a stable terminal session. If desired, create a `tmux` session before starting with `tmux new -s causalq_a0_full`, and detach with `Ctrl-b` then `d`.
-
-After completion, collect the evidence:
+Extract a compact list of every reported unreadable path:
 
 ```bash
-RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
+python - <<'PY'
+import json
+from pathlib import Path
 
-echo "===== metadata ====="
-cat "$RUN_DIR/metadata.json"
+report_path = Path(
+    "/root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_full_decode.json"
+)
+report = json.loads(report_path.read_text(encoding="utf-8"))
+gta5 = report["datasets"]["gta5"]
+print("ok:", gta5["ok"])
+print("scan_scope:", gta5["scan_scope"])
+print("scanned_label_count:", gta5["scanned_label_count"])
+print("unreadable_count:", gta5["unreadable_count"])
+for item in gta5["unreadable"]:
+    print(item)
+PY
+```
 
-echo "===== summary ====="
-cat "$RUN_DIR/summary.json"
+The JSON keeps the first 20 unreadable examples. If `unreadable_count` exceeds 20, do not attempt repair yet; return the report so the checker can be extended to publish a complete machine-readable path manifest without truncation.
 
-echo "===== checkpoint count and size ====="
-find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name '*.pth' | wc -l
-du -sh "$RUN_DIR/checkpoints"
-find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' | sort -k2 | tail -n 5
+Finally record provenance and space:
 
-echo "===== first and last training records ====="
-head -n 5 "$RUN_DIR/train.jsonl"
-tail -n 30 "$RUN_DIR/train.jsonl"
-
-echo "===== provenance and disk ====="
+```bash
 git rev-parse HEAD
 git status --short
 df -h /root/autodl-tmp
 ```
 
-## Acceptance criteria
+## Expected outcome
 
-- `train_exit_code=0` and `summary.json` has `"ok": true`.
-- Exact hand-off Git SHA and accepted DINOv3-L checkpoint SHA-256 are recorded.
-- All 40,000 iterations complete with finite loss and gradient checks.
-- The training trace remains stable and shows a credible lower late-stage loss distribution than its beginning.
-- Validation covers all 500 Cityscapes val images and returns finite class IoUs and mIoU.
-- There are 80 compact checkpoints from iteration 500 through 40,000; the final `iter_040000.pth` exists.
-- Peak memory remains below the RTX 4090D capacity.
-- Final `git status --short` is empty.
+- The scan covers all 24,966 paired GTA5 samples.
+- Each corrupt file appears with `kind: image` or `kind: label` and its exact path.
+- No source files are changed by the scan.
+- The failed run directory is retained for evidence but is never reused.
 
-Return the training exit code, complete `metadata.json` and `summary.json`, checkpoint count/size, first and last training records, exact Git SHA/status, and disk usage. Stop after the full Phase 5 run so its final baseline result can be reviewed and published before Phase 6 begins.
+Return the failed-run record count and tail, full JSON report, scan exit code, compact unreadable list, exact Git SHA/status, and disk usage. Stop after the scan. The next hand-off will target only the affected source archive segment or files, then repeat the full decoder scan before creating a new 40k run ID.
