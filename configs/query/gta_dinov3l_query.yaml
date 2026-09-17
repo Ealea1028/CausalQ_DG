@@ -1,7 +1,7 @@
 experiment:
   id: A1_QUERY
   phase: 6
-  status: ready_for_gpu_smoke_test
+  status: smoke_test_passed_ready_for_full_training
 data:
   source: gta5
   targets: [cityscapes, bdd100k, mapillary]

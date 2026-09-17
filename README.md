@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 5 is accepted: the repaired 40k DINOv3-L source-only baseline reached 60.17% Cityscapes mIoU with finite training and complete provenance. Phase 6 now adds only the grouped one-way query residual branch and is ready for real-weight GPU checks and a 500-iteration AutoDL smoke run.
+Phase 5 is accepted: the repaired 40k DINOv3-L source-only baseline reached 60.17% Cityscapes mIoU with finite training and complete provenance. The Phase 6 grouped one-way query branch passed its real-weight contract check and 500-iteration smoke run, and is ready for the full 40k Query-only comparison.
 
 ## Working directories
 
