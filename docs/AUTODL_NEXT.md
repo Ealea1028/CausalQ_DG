@@ -1,26 +1,17 @@
 # Next AutoDL action
 
-Status: the Phase 5 500-iteration smoke run is accepted. GTA5 image `20217.png` was restored from the official part-9 archive, and the operator-confirmed full decoding recheck passed. Start a fresh 40,000-iteration seed-0 baseline run; never reuse the earlier interrupted run directory.
+Status: Phase 5 is accepted at 60.17% Cityscapes mIoU. Phase 6 Query-only is implemented locally and must now pass a real DINOv3-L GPU contract check followed by a 500-iteration smoke run. Do not start the full Phase 6 schedule yet.
 
-## Accepted prerequisites
+## Phase 6 scope
 
-- Corrected GTA5 palette labels passed semantic validation.
-- Full GTA5 scan covers 24,966 paired samples.
-- The only truncated image, `20217.png`, was replaced from the integrity-checked official archive.
-- The post-repair scan reports no unreadable images or labels, missing pairs, invalid train IDs, all-ignore labels, or geometry mismatches.
-- The 62 scale-equivalent size mismatches remain accepted warnings.
-- The DINOv3-L/16 checkpoint SHA-256 is `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
-- The 500-iteration smoke run completed with finite loss, decreasing loss means, 50-image Cityscapes mIoU `0.322154`, and 1.349 GiB peak allocated VRAM.
-
-## Full-run scope
-
-- Experiment: `A0_DINOV3L_BASE`.
-- Seed: 0.
-- GTA5 source training; all 500 Cityscapes val images for validation.
-- Frozen DINOv3-L/16 and the baseline segmentation decoder only.
-- 40,000 iterations, 512x512 crops, batch size 1, bfloat16 autocast, AdamW, and polynomial learning-rate decay.
-- Validation and compact checkpoint every 500 iterations.
-- No query branch, style intervention, prediction consistency, or CQE.
+- Experiment: `A1_QUERY`.
+- Frozen DINOv3-L/16 backbone and the same baseline decoder.
+- Nineteen class anchors with three residual queries per class: 57 queries total.
+- One one-way, eight-head query-to-image cross-attention layer.
+- Normalized feature/query similarity with temperature `0.07` and within-class `logsumexp` aggregation.
+- Additive query residual controlled by a learnable scalar `alpha`, initialized to exactly zero.
+- GTA5 source training and Cityscapes validation.
+- No style intervention, prediction consistency, CQE, or diversity loss.
 
 ## Commands
 
@@ -39,7 +30,7 @@ export OMP_NUM_THREADS=1
 python tools/check_environment.py
 ```
 
-Both Git status checks must be empty. Enforce the saved post-repair report as a training gate:
+Both Git status checks must be empty. Reuse the accepted data and weight gates:
 
 ```bash
 python - <<'PY'
@@ -52,46 +43,39 @@ path = Path(
 )
 report = json.loads(path.read_text(encoding="utf-8"))
 gta5 = report["datasets"]["gta5"]
-
-assert report["ok"] is True, report
-assert gta5["ok"] is True, gta5
-assert gta5["paired_count"] == 24966, gta5["paired_count"]
-assert gta5["scanned_label_count"] == 24966, gta5["scanned_label_count"]
-assert gta5["scan_scope"] == "all", gta5["scan_scope"]
-assert gta5["unreadable_count"] == 0, gta5["unreadable"]
-assert gta5["missing_label_count"] == 0
-assert gta5["missing_image_count"] == 0
-assert gta5["invalid_train_ids"] == []
-assert gta5["all_ignore_label_count"] == 0
-assert gta5["geometry_mismatch_count"] == 0
+assert report["ok"] is True
+assert gta5["ok"] is True
+assert gta5["paired_count"] == 24966
+assert gta5["scanned_label_count"] == 24966
+assert gta5["unreadable_count"] == 0
 print("GTA5_POST_REPAIR_GATE_OK")
 PY
-```
-
-Fully decode the installed repaired image once more and verify the remaining prerequisites:
-
-```bash
-python - <<'PY'
-from pathlib import Path
-from PIL import Image
-
-path = Path("/root/autodl-tmp/datasets/gta5/images/images/20217.png")
-with Image.open(path) as image:
-    image.load()
-    print("repaired_image_ok:", path, image.mode, image.size, path.stat().st_size)
-PY
-
-test "$(find /root/autodl-tmp/datasets/gta5/images/images -type f -name '*.png' | wc -l)" -eq 24966
-test "$(find /root/autodl-tmp/datasets/gta5/labels_trainIds -type f -name '*.png' | wc -l)" -eq 24966
-test "$(find /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val -type f -name '*_leftImg8bit.png' | wc -l)" -eq 500
 
 sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
 df -h /root/autodl-tmp
 ```
 
-The weight hash must match the accepted value above. Keep the repair archive, staging directory, quarantine file, and failed run until the new full run is accepted.
+The weight hash must be `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
 
-For a stable terminal, optionally start `tmux new -s causalq_a0_full_r2` before running the following block. Start a uniquely named run from iteration zero:
+Run the real-weight query contract check:
+
+```bash
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/query_check
+set -o pipefail
+
+python tools/check_query.py \
+  --config configs/query/gta_dinov3l_query.yaml \
+  --image-size 512 512 \
+  --batch-size 1 \
+  | tee /root/autodl-tmp/outputs/CausalQ_DG/query_check/phase6_query.json
+
+QUERY_CHECK_EXIT=${PIPESTATUS[0]}
+echo "query_check_exit_code=${QUERY_CHECK_EXIT}"
+```
+
+The report must have `ok=true`, logits and delta logits shaped `[1,19,512,512]`, query states shaped `[1,19,3,1024]`, `alpha=0`, finite outputs, and `max_abs_full_vs_baseline < 1e-6`.
+
+Only after that check passes, start a unique 500-iteration smoke run with 50-image validation:
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -99,9 +83,9 @@ source scripts/activate_autodl.sh
 
 export OMP_NUM_THREADS=1
 export RUN_SHA="$(git rev-parse --short HEAD)"
-export RUN_ID="A0_DINOV3L_BASE_SEED0_40000_REPAIRED_${RUN_SHA}"
-export MAX_ITERATIONS=40000
-export VALIDATION_MAX_SAMPLES=500
+export RUN_ID="A1_QUERY_SMOKE_500_${RUN_SHA}"
+export MAX_ITERATIONS=500
+export VALIDATION_MAX_SAMPLES=50
 
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
@@ -110,7 +94,7 @@ test ! -e "$RUN_DIR"
 test ! -e "$LOG_FILE"
 
 set -o pipefail
-bash scripts/train_baseline.sh 2>&1 | tee "$LOG_FILE"
+bash scripts/train_query.sh 2>&1 | tee "$LOG_FILE"
 TRAIN_EXIT=${PIPESTATUS[0]}
 
 echo "run_id=${RUN_ID}"
@@ -118,32 +102,51 @@ echo "train_exit_code=${TRAIN_EXIT}"
 echo "log_file=${LOG_FILE}"
 ```
 
-Do not resume or overwrite `A0_DINOV3L_BASE_SEED0_40000_c085de9`; it remains a failed pre-repair run.
-
-After completion, collect compact evidence:
+Collect compact evidence after successful completion:
 
 ```bash
 RUN_SHA="$(git rev-parse --short HEAD)"
-RUN_ID="A0_DINOV3L_BASE_SEED0_40000_REPAIRED_${RUN_SHA}"
+RUN_ID="A1_QUERY_SMOKE_500_${RUN_SHA}"
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 
-echo "===== metadata ====="
-cat "$RUN_DIR/metadata.json"
+python - "$RUN_DIR" <<'PY'
+import json
+import math
+from pathlib import Path
+import sys
 
-echo "===== summary ====="
-cat "$RUN_DIR/summary.json"
+run_dir = Path(sys.argv[1])
+metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+records = [
+    json.loads(line)
+    for line in (run_dir / "train.jsonl").read_text(encoding="utf-8").splitlines()
+    if line.strip()
+]
+validation = summary["validation_results"][-1]
 
-echo "===== checkpoint evidence ====="
-find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name '*.pth' | wc -l
-du -sh "$RUN_DIR/checkpoints"
-find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' | sort -k2 | tail -n 5
-test -f "$RUN_DIR/checkpoints/iter_040000.pth"
+print("metadata:", metadata)
+for key in (
+    "ok",
+    "elapsed_seconds",
+    "first_20_loss_mean",
+    "last_20_loss_mean",
+    "finite_losses",
+    "last_gradient_norm",
+    "final_alpha",
+    "peak_allocated_gib",
+    "peak_reserved_gib",
+):
+    print(f"{key}: {summary[key]}")
+print("record_count:", len(records))
+print("iterations_contiguous:", [r["iteration"] for r in records] == list(range(1, 501)))
+print("all_gradients_finite:", all(math.isfinite(r["gradient_norm"]) for r in records))
+print("first_alpha:", records[0]["alpha"])
+print("last_alpha:", records[-1]["alpha"])
+print("validation:", validation)
+PY
 
-echo "===== first and last training records ====="
-head -n 5 "$RUN_DIR/train.jsonl"
-tail -n 30 "$RUN_DIR/train.jsonl"
-
-echo "===== provenance and disk ====="
+find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' | sort
 git rev-parse HEAD
 git status --short
 df -h /root/autodl-tmp
@@ -151,14 +154,14 @@ df -h /root/autodl-tmp
 
 ## Acceptance criteria
 
-- The post-repair JSON gate and direct `20217.png` decode both pass before training.
-- `train_exit_code=0` and `summary.json` has `"ok": true`.
-- Exact hand-off Git SHA and accepted DINOv3-L checkpoint SHA-256 are recorded.
-- All 40,000 iterations complete with finite loss and gradient checks.
-- The late-stage loss distribution remains credibly below its beginning without persistent instability.
-- Validation covers all 500 Cityscapes val images and returns finite class IoUs and mIoU.
-- Exactly 80 compact checkpoints exist from iteration 500 through 40,000, including `iter_040000.pth`.
+- Query checker exits zero with the specified shapes, finite values, zero alpha, and baseline equivalence below `1e-6`.
+- Smoke training exits zero and records `summary.ok=true`.
+- Exactly 500 contiguous iterations complete with finite losses and gradients.
+- `alpha` starts from zero and becomes finite; query training does not produce persistent instability.
+- The late loss distribution is credibly below the early distribution.
+- Validation completes on 50 Cityscapes images with finite class IoUs and mIoU.
+- The iteration-500 compact checkpoint exists.
 - Peak memory remains below the RTX 4090D capacity.
-- Final `git status --short` is empty.
+- Exact Git SHA and accepted DINOv3 checkpoint hash are recorded; final Git status is empty.
 
-Return the preflight gate output, training exit code, complete `metadata.json` and `summary.json`, checkpoint evidence, first and last training records, exact Git SHA/status, and disk usage. Stop after the full run so the baseline can be published before Phase 6 begins.
+Return the complete query-check JSON and exit code, smoke training exit code, compact evidence output, checkpoint listing, exact Git SHA/status, and disk usage. Stop after the Phase 6 smoke run; the full query-only schedule begins only after local review.

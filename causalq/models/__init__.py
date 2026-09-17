@@ -7,6 +7,13 @@ from .dinov3_wrapper import (
     DINOv3Backbone,
     DINOv3Features,
 )
+from .query_segmentor import (
+    GroupedCausalQueryBank,
+    QueryCrossAttention,
+    QueryResidualHead,
+    QuerySegmentor,
+    QuerySegmentorOutput,
+)
 
 __all__ = [
     "BaselineDecoder",
@@ -15,4 +22,9 @@ __all__ = [
     "DINOV3_MODEL_SPECS",
     "DINOv3Backbone",
     "DINOv3Features",
+    "GroupedCausalQueryBank",
+    "QueryCrossAttention",
+    "QueryResidualHead",
+    "QuerySegmentor",
+    "QuerySegmentorOutput",
 ]

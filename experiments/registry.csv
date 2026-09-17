@@ -1,2 +1,3 @@
 experiment_id,date,git_sha,gpu,config,seed,status,cityscapes_miou,bdd_miou,mapillary_miou,average_miou,notes
 A0_DINOV3L_BASE_SMOKE_500_0a758f8,2026-09-16,0a758f86b55398711033707093a5b45fe35d2c19,NVIDIA GeForce RTX 4090 D,configs/baseline/gta_dinov3l.yaml,0,smoke_passed,0.3221537975,,,,50-image Cityscapes validation smoke test
+A0_DINOV3L_BASE_SEED0_40000_REPAIRED_7eee12b,2026-09-17,7eee12b3ad8c923de0e8557d3126f41c7b6cc617,NVIDIA GeForce RTX 4090 D,configs/baseline/gta_dinov3l.yaml,0,complete,0.6017277359,,,,Full 500-image Cityscapes validation after GTA5 image repair

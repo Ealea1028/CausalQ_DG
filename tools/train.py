@@ -1,4 +1,4 @@
-"""Train the Phase-5 frozen-DINOv3 source-only baseline."""
+"""Train the Phase-5/6 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -26,7 +26,7 @@ if str(PROJECT_ROOT) not in sys.path:
 from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
 from causalq.losses import segmentation_cross_entropy
 from causalq.metrics import MeanIoU
-from causalq.models import BaselineSegmentor, DINOv3Backbone
+from causalq.models import BaselineSegmentor, DINOv3Backbone, QuerySegmentor
 from causalq.utils.checkpoint import save_training_checkpoint
 from causalq.utils.seed import seed_everything
 
@@ -57,10 +57,20 @@ def sha256(path: Path) -> str:
 def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
-    if config["experiment"]["phase"] != 5:
-        raise ValueError("tools/train.py currently accepts only Phase 5 configs")
-    if config["model"].get("query", False) or config["train"].get("style", False):
-        raise ValueError("Phase 5 baseline cannot enable query or style mechanisms")
+    phase = int(config["experiment"]["phase"])
+    if phase not in (5, 6):
+        raise ValueError("tools/train.py accepts only Phase 5 or Phase 6 configs")
+    if config["train"].get("style", False):
+        raise ValueError("Phase 5/6 cannot enable style mechanisms")
+    query_enabled = bool(config["model"].get("query", False))
+    if phase == 5 and query_enabled:
+        raise ValueError("Phase 5 baseline cannot enable queries")
+    if phase == 6 and not query_enabled:
+        raise ValueError("Phase 6 requires the query branch")
+    if phase == 6 and "query" not in config:
+        raise ValueError("Phase 6 requires query configuration")
+    if phase == 6 and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6 currently requires logsumexp query aggregation")
     return config
 
 
@@ -78,7 +88,7 @@ def make_loader(dataset, config: dict[str, Any], *, training: bool) -> DataLoade
 
 
 def validate(
-    model: BaselineSegmentor,
+    model: torch.nn.Module,
     loader: DataLoader,
     *,
     amp: bool,
@@ -107,7 +117,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5 training requires CUDA")
+        raise RuntimeError("Phase 5/6 training requires CUDA")
 
     seed = int(config["train"]["seed"])
     seed_everything(seed)
@@ -131,10 +141,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The first Phase 5 run supports GTA5 source only")
+        raise NotImplementedError("The Phase 5/6 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("The first Phase 5 run validates on Cityscapes val")
+        raise NotImplementedError("Phase 5/6 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -157,12 +167,25 @@ def main() -> int:
         dtype=torch.bfloat16,
         local_files_only=True,
     )
-    model = BaselineSegmentor(
-        backbone,
-        decoder_channels=int(config["model"]["decoder_channels"]),
-        num_classes=int(config["data"]["num_classes"]),
-        dropout=float(config["model"]["dropout"]),
-    ).to("cuda:0")
+    common_model_options = {
+        "decoder_channels": int(config["model"]["decoder_channels"]),
+        "num_classes": int(config["data"]["num_classes"]),
+        "dropout": float(config["model"]["dropout"]),
+    }
+    if int(config["experiment"]["phase"]) == 5:
+        model = BaselineSegmentor(backbone, **common_model_options)
+    else:
+        query_config = config["query"]
+        model = QuerySegmentor(
+            backbone,
+            **common_model_options,
+            queries_per_class=int(query_config["queries_per_class"]),
+            num_heads=int(query_config["num_heads"]),
+            cross_attention_layers=int(query_config["cross_attention_layers"]),
+            temperature=float(query_config["temperature"]),
+            alpha_init=float(query_config["alpha_init"]),
+        )
+    model = model.to("cuda:0")
     model.train()
 
     run_dir.mkdir(parents=True, exist_ok=False)
@@ -185,6 +208,7 @@ def main() -> int:
 
     metadata = {
         "experiment_id": run_id,
+        "phase": int(config["experiment"]["phase"]),
         "git_sha": git_sha(),
         "hostname": socket.gethostname(),
         "gpu": torch.cuda.get_device_name(torch.cuda.current_device()),
@@ -199,6 +223,15 @@ def main() -> int:
         "trainable_parameters": sum(p.numel() for p in trainable),
         "max_iterations": max_iterations,
     }
+    if isinstance(model, QuerySegmentor):
+        metadata["query"] = {
+            "queries_per_class": model.queries_per_class,
+            "cross_attention_layers": len(model.query_attention.layers),
+            "num_heads": int(config["query"]["num_heads"]),
+            "temperature": model.query_head.temperature,
+            "aggregation": config["query"]["aggregation"],
+            "alpha_init": float(model.query_head.alpha.detach().cpu()),
+        }
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -256,6 +289,8 @@ def main() -> int:
             "valid_pixel_count": valid_pixel_count,
             "lr": optimizer.param_groups[0]["lr"],
         }
+        if isinstance(model, QuerySegmentor):
+            record["alpha"] = float(model.query_head.alpha.detach().cpu())
         with (run_dir / "train.jsonl").open("a", encoding="utf-8") as stream:
             stream.write(json.dumps(record) + "\n")
         if iteration == 1 or iteration % int(config["train"]["log_interval"]) == 0:
@@ -291,6 +326,8 @@ def main() -> int:
         "peak_reserved_gib": round(torch.cuda.max_memory_reserved() / 1024**3, 3),
         "validation_results": validation_results,
     }
+    if isinstance(model, QuerySegmentor):
+        summary["final_alpha"] = float(model.query_head.alpha.detach().cpu())
     (run_dir / "summary.json").write_text(
         json.dumps(summary, indent=2), encoding="utf-8"
     )

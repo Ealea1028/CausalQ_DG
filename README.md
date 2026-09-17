@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The DINOv3 ViT-B/L backbones and corrected GTA5 labels passed their semantic checks. The Phase 5 source-only baseline passed its 500-iteration RTX 4090D smoke test, and the only truncated GTA5 image (`20217.png`) was restored from the official part-9 archive and passed a full 24,966-pair decoding recheck. A fresh 40k baseline run is ready.
+Phase 5 is accepted: the repaired 40k DINOv3-L source-only baseline reached 60.17% Cityscapes mIoU with finite training and complete provenance. Phase 6 now adds only the grouped one-way query residual branch and is ready for real-weight GPU checks and a 500-iteration AutoDL smoke run.
 
 ## Working directories
 
