@@ -1,20 +1,30 @@
 # Next AutoDL action
 
-Status: the full GTA5 pixel-decoding scan covered all 24,966 pairs and isolated exactly one unreadable file: `/root/autodl-tmp/datasets/gta5/images/images/20217.png`. Restore only this image from the official part-9 image archive, then repeat the full scan. Do not restart the 40k run yet.
+Status: the Phase 5 500-iteration smoke run is accepted. GTA5 image `20217.png` was restored from the official part-9 archive, and the operator-confirmed full decoding recheck passed. Start a fresh 40,000-iteration seed-0 baseline run; never reuse the earlier interrupted run directory.
 
-## Accepted scan evidence
+## Accepted prerequisites
 
-- `paired_count=24966` and `scanned_label_count=24966` with `scan_scope=all`.
-- `unreadable_count=1`; the only unreadable item is image `20217.png`, reported as `image file is truncated`.
-- All labels remain readable with exactly train IDs `0..18` plus `255`.
-- Zero missing pairs, invalid train IDs, all-ignore labels, or geometry mismatches.
-- All 62 size mismatches are scale-equivalent and remain accepted.
+- Corrected GTA5 palette labels passed semantic validation.
+- Full GTA5 scan covers 24,966 paired samples.
+- The only truncated image, `20217.png`, was replaced from the integrity-checked official archive.
+- The post-repair scan reports no unreadable images or labels, missing pairs, invalid train IDs, all-ignore labels, or geometry mismatches.
+- The 62 scale-equivalent size mismatches remain accepted warnings.
+- The DINOv3-L/16 checkpoint SHA-256 is `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
+- The 500-iteration smoke run completed with finite loss, decreasing loss means, 50-image Cityscapes mIoU `0.322154`, and 1.349 GiB peak allocated VRAM.
 
-The official Playing for Data release contains 24,966 frames split across ten archives. Image `20217.png` belongs to part 9. Use the official TU Darmstadt archive URL already documented in `docs/DATASETS.md`.
+## Full-run scope
+
+- Experiment: `A0_DINOV3L_BASE`.
+- Seed: 0.
+- GTA5 source training; all 500 Cityscapes val images for validation.
+- Frozen DINOv3-L/16 and the baseline segmentation decoder only.
+- 40,000 iterations, 512x512 crops, batch size 1, bfloat16 autocast, AdamW, and polynomial learning-rate decay.
+- Validation and compact checkpoint every 500 iterations.
+- No query branch, style intervention, prediction consistency, or CQE.
 
 ## Commands
 
-Use the exact Git commit supplied in the hand-off:
+Run the exact Git commit supplied in the hand-off:
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -26,118 +36,10 @@ git status --short
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
+python tools/check_environment.py
 ```
 
-Both Git status checks must be empty. Define and validate all repair paths:
-
-```bash
-ARCHIVE_DIR="/root/autodl-tmp/uploads/gta5_repair"
-ARCHIVE="${ARCHIVE_DIR}/09_images.zip"
-STAGE_DIR="/root/autodl-tmp/datasets/gta5/repair_stage_09"
-CORRUPT="/root/autodl-tmp/datasets/gta5/images/images/20217.png"
-QUARANTINE_DIR="/root/autodl-tmp/datasets/gta5/quarantine"
-QUARANTINE="${QUARANTINE_DIR}/20217.truncated.png"
-
-realpath "$CORRUPT"
-test -f "$CORRUPT"
-test ! -e "$QUARANTINE"
-df -h /root/autodl-tmp
-```
-
-The resolved corrupt path must remain under `/root/autodl-tmp/datasets/gta5/images/images`. Download only official image part 9 and test the entire ZIP before extraction:
-
-```bash
-mkdir -p "$ARCHIVE_DIR"
-
-wget -c --tries=0 --timeout=60 --waitretry=10 \
-  -O "$ARCHIVE" \
-  "https://download.visinf.tu-darmstadt.de/data/from_games/data/09_images.zip"
-
-unzip -t "$ARCHIVE"
-```
-
-Stop if `unzip -t` does not end with `No errors detected`. Locate the exact archive entry and require exactly one match:
-
-```bash
-ENTRY_LIST="$(unzip -Z1 "$ARCHIVE" | grep -E '(^|/)20217\.png$')"
-ENTRY_COUNT="$(printf '%s\n' "$ENTRY_LIST" | sed '/^$/d' | wc -l)"
-
-echo "entry_count=${ENTRY_COUNT}"
-printf '%s\n' "$ENTRY_LIST"
-test "$ENTRY_COUNT" -eq 1
-
-ENTRY="$ENTRY_LIST"
-```
-
-Extract only that image into an isolated staging directory and fully decode it:
-
-```bash
-test ! -e "$STAGE_DIR"
-mkdir -p "$STAGE_DIR"
-unzip -q "$ARCHIVE" "$ENTRY" -d "$STAGE_DIR"
-
-STAGED="${STAGE_DIR}/${ENTRY}"
-test -f "$STAGED"
-
-python - "$CORRUPT" "$STAGED" <<'PY'
-import hashlib
-from pathlib import Path
-import sys
-from PIL import Image
-
-for value in sys.argv[1:]:
-    path = Path(value)
-    digest = hashlib.sha256(path.read_bytes()).hexdigest()
-    try:
-        with Image.open(path) as image:
-            image.load()
-            print(path, "OK", image.mode, image.size, path.stat().st_size, digest)
-    except Exception as exc:
-        print(path, "FAILED", type(exc).__name__, str(exc), path.stat().st_size, digest)
-PY
-```
-
-The current file must report `FAILED` and the staged official image must report `OK`. Preserve the corrupt file, install the staged file through a temporary path, and validate it again:
-
-```bash
-mkdir -p "$QUARANTINE_DIR"
-mv -- "$CORRUPT" "$QUARANTINE"
-
-cp -- "$STAGED" "${CORRUPT}.replacement.tmp"
-
-python - "${CORRUPT}.replacement.tmp" <<'PY'
-from pathlib import Path
-import sys
-from PIL import Image
-
-path = Path(sys.argv[1])
-with Image.open(path) as image:
-    image.load()
-    print("replacement_ok:", path, image.mode, image.size, path.stat().st_size)
-PY
-
-mv -- "${CORRUPT}.replacement.tmp" "$CORRUPT"
-sha256sum "$QUARANTINE" "$CORRUPT" "$STAGED"
-```
-
-Repeat the full validation. This time the checker must exit zero:
-
-```bash
-mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_after_20217_repair
-set -o pipefail
-
-python tools/check_datasets.py \
-  --datasets gta5 \
-  --label-scan-limit 0 \
-  --samples 0 \
-  --output-dir /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_after_20217_repair \
-  | tee /root/autodl-tmp/outputs/CausalQ_DG/data_check/gta5_after_20217_repair.json
-
-RECHECK_EXIT=${PIPESTATUS[0]}
-echo "gta5_recheck_exit_code=${RECHECK_EXIT}"
-```
-
-Record final state without deleting the archive, staged image, quarantine copy, or failed run yet:
+Both Git status checks must be empty. Enforce the saved post-repair report as a training gate:
 
 ```bash
 python - <<'PY'
@@ -148,21 +50,100 @@ path = Path(
     "/root/autodl-tmp/outputs/CausalQ_DG/"
     "data_check/gta5_after_20217_repair.json"
 )
-gta5 = json.loads(path.read_text(encoding="utf-8"))["datasets"]["gta5"]
-for key in (
-    "ok",
-    "paired_count",
-    "scanned_label_count",
-    "scan_scope",
-    "unreadable_count",
-    "invalid_train_ids",
-    "all_ignore_label_count",
-    "geometry_mismatch_count",
-    "scale_equivalent_mismatch_count",
-):
-    print(f"{key}: {gta5[key]}")
+report = json.loads(path.read_text(encoding="utf-8"))
+gta5 = report["datasets"]["gta5"]
+
+assert report["ok"] is True, report
+assert gta5["ok"] is True, gta5
+assert gta5["paired_count"] == 24966, gta5["paired_count"]
+assert gta5["scanned_label_count"] == 24966, gta5["scanned_label_count"]
+assert gta5["scan_scope"] == "all", gta5["scan_scope"]
+assert gta5["unreadable_count"] == 0, gta5["unreadable"]
+assert gta5["missing_label_count"] == 0
+assert gta5["missing_image_count"] == 0
+assert gta5["invalid_train_ids"] == []
+assert gta5["all_ignore_label_count"] == 0
+assert gta5["geometry_mismatch_count"] == 0
+print("GTA5_POST_REPAIR_GATE_OK")
+PY
+```
+
+Fully decode the installed repaired image once more and verify the remaining prerequisites:
+
+```bash
+python - <<'PY'
+from pathlib import Path
+from PIL import Image
+
+path = Path("/root/autodl-tmp/datasets/gta5/images/images/20217.png")
+with Image.open(path) as image:
+    image.load()
+    print("repaired_image_ok:", path, image.mode, image.size, path.stat().st_size)
 PY
 
+test "$(find /root/autodl-tmp/datasets/gta5/images/images -type f -name '*.png' | wc -l)" -eq 24966
+test "$(find /root/autodl-tmp/datasets/gta5/labels_trainIds -type f -name '*.png' | wc -l)" -eq 24966
+test "$(find /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val -type f -name '*_leftImg8bit.png' | wc -l)" -eq 500
+
+sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
+df -h /root/autodl-tmp
+```
+
+The weight hash must match the accepted value above. Keep the repair archive, staging directory, quarantine file, and failed run until the new full run is accepted.
+
+For a stable terminal, optionally start `tmux new -s causalq_a0_full_r2` before running the following block. Start a uniquely named run from iteration zero:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+source scripts/activate_autodl.sh
+
+export OMP_NUM_THREADS=1
+export RUN_SHA="$(git rev-parse --short HEAD)"
+export RUN_ID="A0_DINOV3L_BASE_SEED0_40000_REPAIRED_${RUN_SHA}"
+export MAX_ITERATIONS=40000
+export VALIDATION_MAX_SAMPLES=500
+
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
+LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
+
+test ! -e "$RUN_DIR"
+test ! -e "$LOG_FILE"
+
+set -o pipefail
+bash scripts/train_baseline.sh 2>&1 | tee "$LOG_FILE"
+TRAIN_EXIT=${PIPESTATUS[0]}
+
+echo "run_id=${RUN_ID}"
+echo "train_exit_code=${TRAIN_EXIT}"
+echo "log_file=${LOG_FILE}"
+```
+
+Do not resume or overwrite `A0_DINOV3L_BASE_SEED0_40000_c085de9`; it remains a failed pre-repair run.
+
+After completion, collect compact evidence:
+
+```bash
+RUN_SHA="$(git rev-parse --short HEAD)"
+RUN_ID="A0_DINOV3L_BASE_SEED0_40000_REPAIRED_${RUN_SHA}"
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
+
+echo "===== metadata ====="
+cat "$RUN_DIR/metadata.json"
+
+echo "===== summary ====="
+cat "$RUN_DIR/summary.json"
+
+echo "===== checkpoint evidence ====="
+find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name '*.pth' | wc -l
+du -sh "$RUN_DIR/checkpoints"
+find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' | sort -k2 | tail -n 5
+test -f "$RUN_DIR/checkpoints/iter_040000.pth"
+
+echo "===== first and last training records ====="
+head -n 5 "$RUN_DIR/train.jsonl"
+tail -n 30 "$RUN_DIR/train.jsonl"
+
+echo "===== provenance and disk ====="
 git rev-parse HEAD
 git status --short
 df -h /root/autodl-tmp
@@ -170,13 +151,14 @@ df -h /root/autodl-tmp
 
 ## Acceptance criteria
 
-- Official part-9 archive passes `unzip -t`.
-- It contains exactly one entry ending in `/20217.png` or equal to `20217.png`.
-- The old image fails full decoding; the staged and installed images pass it.
-- Installed and staged SHA-256 values match; the quarantined file has a different hash.
-- Full scan covers 24,966 pairs and exits zero with top-level and GTA5 `ok=true`.
-- `unreadable_count=0`, with no missing pairs, invalid IDs, all-ignore labels, or geometry mismatches.
-- The 62 scale-equivalent mismatches remain warnings only.
-- Final Git SHA matches the hand-off and `git status --short` is empty.
+- The post-repair JSON gate and direct `20217.png` decode both pass before training.
+- `train_exit_code=0` and `summary.json` has `"ok": true`.
+- Exact hand-off Git SHA and accepted DINOv3-L checkpoint SHA-256 are recorded.
+- All 40,000 iterations complete with finite loss and gradient checks.
+- The late-stage loss distribution remains credibly below its beginning without persistent instability.
+- Validation covers all 500 Cityscapes val images and returns finite class IoUs and mIoU.
+- Exactly 80 compact checkpoints exist from iteration 500 through 40,000, including `iter_040000.pth`.
+- Peak memory remains below the RTX 4090D capacity.
+- Final `git status --short` is empty.
 
-Return the ZIP integrity result, archive entry name, before/after decode output and hashes, complete recheck JSON, recheck exit code, final Git SHA/status, and disk usage. Stop after repair verification. A new 40k run ID will be issued only after this evidence is accepted.
+Return the preflight gate output, training exit code, complete `metadata.json` and `summary.json`, checkpoint evidence, first and last training records, exact Git SHA/status, and disk usage. Stop after the full run so the baseline can be published before Phase 6 begins.

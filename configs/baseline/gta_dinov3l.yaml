@@ -1,7 +1,7 @@
 experiment:
   id: A0_DINOV3L_BASE
   phase: 5
-  status: blocked_pending_full_image_decode_scan
+  status: ready_for_full_training_after_data_repair
 data:
   source: gta5
   targets: [cityscapes, bdd100k, mapillary]
