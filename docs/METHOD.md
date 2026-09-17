@@ -24,7 +24,13 @@ For class `c`, intervening with `do(Q_c = 0)` removes only the class-query resid
 
 Establish a credible source-only baseline before adding queries. Then add style augmentation, prediction consistency, and CQE in separate phases so every contribution has a controlled comparison.
 
+## Prediction-consistency control
+
+Phase 8 keeps the accepted Query + Style setup fixed. For each photometric or
+Fourier view, it minimizes `KL(P_original || P_style)` on valid label pixels.
+The original-view probabilities are detached, the two style losses are averaged,
+and no causal-query-effect or diversity term is enabled.
+
 ## Success criterion
 
 The decisive comparison is CQE against prediction consistency under the same query and style setup, accompanied by reduced cross-style query-effect variance.
-

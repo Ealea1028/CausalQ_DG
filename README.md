@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 6 is accepted: the 40k DINOv3-L Query-only run reached 61.95% Cityscapes mIoU, improving by 1.78 percentage points over the accepted 60.17% source-only baseline. Phase 7 aligned original/photometric/Fourier views passed five-sample visual review and a stable 500-iteration RTX 4090D smoke test, and is ready for its controlled 40k Query + Style run.
+Phase 7 is accepted: the 40k DINOv3-L Query + Style run reached 63.96% Cityscapes mIoU, improving by 2.01 percentage points over Query-only and 3.79 points over the source-only baseline. Phase 8 adds only a stop-gradient original-to-style prediction KL control and is ready for remote smoke verification.
 
 ## Working directories
 

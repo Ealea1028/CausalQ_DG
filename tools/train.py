@@ -1,4 +1,4 @@
-"""Train the Phase-5--7 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--8 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -25,7 +25,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
 from causalq.interventions import StyleInterventionBank
-from causalq.losses import segmentation_cross_entropy
+from causalq.losses import prediction_consistency_kl, segmentation_cross_entropy
 from causalq.metrics import MeanIoU
 from causalq.models import BaselineSegmentor, DINOv3Backbone, QuerySegmentor
 from causalq.utils.checkpoint import save_training_checkpoint
@@ -59,32 +59,51 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6, 7):
-        raise ValueError("tools/train.py accepts only Phase 5, 6, or 7 configs")
+    if phase not in (5, 6, 7, 8):
+        raise ValueError("tools/train.py accepts only Phase 5--8 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase in (6, 7) and not query_enabled:
-        raise ValueError("Phase 6/7 requires the query branch")
-    if phase in (6, 7) and "query" not in config:
-        raise ValueError("Phase 6/7 requires query configuration")
-    if phase in (6, 7) and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6/7 currently requires logsumexp query aggregation")
-    if phase == 7:
+    if phase in (6, 7, 8) and not query_enabled:
+        raise ValueError("Phase 6--8 requires the query branch")
+    if phase in (6, 7, 8) and "query" not in config:
+        raise ValueError("Phase 6--8 requires query configuration")
+    if phase in (6, 7, 8) and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6--8 currently requires logsumexp query aggregation")
+    if phase in (7, 8):
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7 requires style training")
+            raise ValueError("Phase 7/8 requires style training")
         if style.get("views") != ["original", "photometric", "fourier"]:
-            raise ValueError("Phase 7 requires original, photometric, and fourier views")
+            raise ValueError("Phase 7/8 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
-            raise ValueError("Phase 7 requires geometry-preserving style views")
+            raise ValueError("Phase 7/8 requires geometry-preserving style views")
         if not style.get("sequential_forward", False):
-            raise ValueError("Phase 7 requires sequential style forwards")
+            raise ValueError("Phase 7/8 requires sequential style forwards")
         if float(style.get("lambda_cf", 0.0)) < 0:
             raise ValueError("style.lambda_cf must be non-negative")
+    prediction = config.get("prediction_consistency", {})
+    prediction_enabled = bool(prediction.get("enabled", False))
+    if phase < 8 and prediction_enabled:
+        raise ValueError("Prediction consistency is disabled before Phase 8")
+    if phase == 8:
+        if not prediction_enabled:
+            raise ValueError("Phase 8 requires prediction consistency")
+        if float(prediction.get("lambda_pred", -1.0)) < 0:
+            raise ValueError("prediction_consistency.lambda_pred must be non-negative")
+        if float(prediction.get("temperature", 0.0)) <= 0:
+            raise ValueError("prediction_consistency.temperature must be positive")
+        if prediction.get("divergence") != "kl_reference_to_view":
+            raise ValueError("Phase 8 requires KL(reference || view)")
+        if not prediction.get("reference_stop_gradient", False):
+            raise ValueError("Phase 8 requires a stop-gradient reference")
+        if not prediction.get("valid_pixels_only", False):
+            raise ValueError("Phase 8 requires valid-pixel masking")
+        if "causal_query_effect" in config:
+            raise ValueError("Phase 8 cannot enable causal-query-effect losses")
     return config
 
 
@@ -131,7 +150,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5/6/7 training requires CUDA")
+        raise RuntimeError("Phase 5--8 training requires CUDA")
 
     seed = int(config["train"]["seed"])
     seed_everything(seed)
@@ -155,10 +174,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5/6/7 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5--8 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5/6/7 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5--8 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -203,7 +222,8 @@ def main() -> int:
     model.train()
 
     style_bank = None
-    if int(config["experiment"]["phase"]) == 7:
+    phase = int(config["experiment"]["phase"])
+    if phase in (7, 8):
         style_config = config["style"]
         photo_config = style_config["photometric"]
         fourier_config = style_config["fourier"]
@@ -270,6 +290,9 @@ def main() -> int:
             "photometric": config["style"]["photometric"],
             "fourier": config["style"]["fourier"],
         }
+    prediction_enabled = phase == 8
+    if prediction_enabled:
+        metadata["prediction_consistency"] = config["prediction_consistency"]
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -305,6 +328,7 @@ def main() -> int:
                     "fourier": counterfactual_weight,
                 }
 
+            reference_logits = None
             for view_name, view_images in named_views:
                 with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
                     logits = model(view_images)
@@ -318,9 +342,37 @@ def main() -> int:
                         f"Non-finite {view_name} segmentation loss at iteration "
                         f"{iteration}: {view_loss.item()}"
                     )
-                weighted_loss = view_loss * view_weights[view_name]
-                (weighted_loss / accumulation).backward()
-                micro_loss += weighted_loss.detach().item() / accumulation
+                objective = view_loss * view_weights[view_name]
+                if prediction_enabled:
+                    if view_name == "original":
+                        reference_logits = logits.detach()
+                    else:
+                        if reference_logits is None:
+                            raise RuntimeError("Original view must precede style views")
+                        prediction_loss = prediction_consistency_kl(
+                            logits,
+                            reference_logits,
+                            labels=labels,
+                            temperature=float(
+                                config["prediction_consistency"]["temperature"]
+                            ),
+                        )
+                        if not torch.isfinite(prediction_loss):
+                            raise FloatingPointError(
+                                f"Non-finite {view_name} prediction consistency "
+                                f"at iteration {iteration}: {prediction_loss.item()}"
+                            )
+                        prediction_weight = (
+                            float(config["prediction_consistency"]["lambda_pred"])
+                            / 2.0
+                        )
+                        objective = objective + prediction_weight * prediction_loss
+                        key = f"prediction_{view_name}"
+                        component_losses[key] = component_losses.get(key, 0.0) + (
+                            prediction_loss.detach().item() / accumulation
+                        )
+                (objective / accumulation).backward()
+                micro_loss += objective.detach().item() / accumulation
                 component_losses[view_name] = component_losses.get(view_name, 0.0) + (
                     view_loss.detach().item() / accumulation
                 )
@@ -352,6 +404,22 @@ def main() -> int:
                     "loss_original": component_losses["original"],
                     "loss_photometric": component_losses["photometric"],
                     "loss_fourier": component_losses["fourier"],
+                }
+            )
+        if prediction_enabled:
+            prediction_mean = 0.5 * (
+                component_losses["prediction_photometric"]
+                + component_losses["prediction_fourier"]
+            )
+            record.update(
+                {
+                    "loss_prediction": prediction_mean,
+                    "loss_prediction_photometric": component_losses[
+                        "prediction_photometric"
+                    ],
+                    "loss_prediction_fourier": component_losses[
+                        "prediction_fourier"
+                    ],
                 }
             )
         if isinstance(model, QuerySegmentor):
