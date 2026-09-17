@@ -16,6 +16,8 @@
 - Geometry-only paired augmentation with scale-equivalent GTA5 label alignment.
 - Phase 6 grouped class-anchor/residual queries, one-way query-to-image cross-attention, normalized logsumexp residual logits, and an explicit class intervention output.
 - Real-weight CUDA query checker and a query-only training launcher.
+- Phase 7 geometry-preserving photometric/Fourier style bank, aligned-view checker,
+  sequential three-view training objective, and style-only launcher.
 
 ### Changed
 
@@ -39,4 +41,6 @@
 - Dataset validation now rejects all-ignore train-ID masks and reports valid-pixel coverage.
 - Derived-label writes are atomic so an interrupted full conversion can be resumed safely.
 - Dataset validation now fully decodes image pixels and reports whether an unreadable path is an image or label; training decode failures include the sample ID and exact path.
-- The shared source-only trainer now accepts the controlled Phase 6 query configuration while continuing to reject style mechanisms.
+- The shared source-only trainer now accepts controlled Phase 5--7 configurations;
+  Phase 7 adds only style counterfactual segmentation and keeps later consistency
+  objectives disabled.

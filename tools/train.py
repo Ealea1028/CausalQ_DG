@@ -1,4 +1,4 @@
-"""Train the Phase-5/6 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--7 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
+from causalq.interventions import StyleInterventionBank
 from causalq.losses import segmentation_cross_entropy
 from causalq.metrics import MeanIoU
 from causalq.models import BaselineSegmentor, DINOv3Backbone, QuerySegmentor
@@ -58,19 +59,32 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6):
-        raise ValueError("tools/train.py accepts only Phase 5 or Phase 6 configs")
-    if config["train"].get("style", False):
+    if phase not in (5, 6, 7):
+        raise ValueError("tools/train.py accepts only Phase 5, 6, or 7 configs")
+    style_enabled = bool(config["train"].get("style", False))
+    if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase == 6 and not query_enabled:
-        raise ValueError("Phase 6 requires the query branch")
-    if phase == 6 and "query" not in config:
-        raise ValueError("Phase 6 requires query configuration")
-    if phase == 6 and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6 currently requires logsumexp query aggregation")
+    if phase in (6, 7) and not query_enabled:
+        raise ValueError("Phase 6/7 requires the query branch")
+    if phase in (6, 7) and "query" not in config:
+        raise ValueError("Phase 6/7 requires query configuration")
+    if phase in (6, 7) and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6/7 currently requires logsumexp query aggregation")
+    if phase == 7:
+        style = config.get("style", {})
+        if not style_enabled:
+            raise ValueError("Phase 7 requires style training")
+        if style.get("views") != ["original", "photometric", "fourier"]:
+            raise ValueError("Phase 7 requires original, photometric, and fourier views")
+        if not style.get("preserve_geometry", False):
+            raise ValueError("Phase 7 requires geometry-preserving style views")
+        if not style.get("sequential_forward", False):
+            raise ValueError("Phase 7 requires sequential style forwards")
+        if float(style.get("lambda_cf", 0.0)) < 0:
+            raise ValueError("style.lambda_cf must be non-negative")
     return config
 
 
@@ -117,7 +131,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5/6 training requires CUDA")
+        raise RuntimeError("Phase 5/6/7 training requires CUDA")
 
     seed = int(config["train"]["seed"])
     seed_everything(seed)
@@ -141,10 +155,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5/6 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5/6/7 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5/6 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5/6/7 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -187,6 +201,21 @@ def main() -> int:
         )
     model = model.to("cuda:0")
     model.train()
+
+    style_bank = None
+    if int(config["experiment"]["phase"]) == 7:
+        style_config = config["style"]
+        photo_config = style_config["photometric"]
+        fourier_config = style_config["fourier"]
+        style_bank = StyleInterventionBank(
+            brightness=tuple(photo_config["brightness"]),
+            contrast=tuple(photo_config["contrast"]),
+            saturation=tuple(photo_config["saturation"]),
+            gamma=tuple(photo_config["gamma"]),
+            temperature=tuple(photo_config["temperature"]),
+            grayscale_probability=float(photo_config["grayscale_probability"]),
+            fourier_mix_strength=tuple(fourier_config["mix_strength"]),
+        ).to("cuda:0")
 
     run_dir.mkdir(parents=True, exist_ok=False)
     shutil.copy2(args.config, run_dir / "config.yaml")
@@ -232,6 +261,15 @@ def main() -> int:
             "aggregation": config["query"]["aggregation"],
             "alpha_init": float(model.query_head.alpha.detach().cpu()),
         }
+    if style_bank is not None:
+        metadata["style"] = {
+            "views": config["style"]["views"],
+            "preserve_geometry": True,
+            "sequential_forward": True,
+            "lambda_cf": float(config["style"]["lambda_cf"]),
+            "photometric": config["style"]["photometric"],
+            "fourier": config["style"]["fourier"],
+        }
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -245,6 +283,7 @@ def main() -> int:
 
     for iteration in range(1, max_iterations + 1):
         micro_loss = 0.0
+        component_losses: dict[str, float] = {}
         for _ in range(accumulation):
             try:
                 batch = next(train_iterator)
@@ -254,19 +293,37 @@ def main() -> int:
             images = batch["image"].to("cuda:0", non_blocking=True)
             labels = batch["label"].to("cuda:0", non_blocking=True)
             valid_pixel_count = int((labels != 255).sum().item())
-            with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
-                logits = model(images)
-                if not torch.isfinite(logits).all():
+            if style_bank is None:
+                named_views = (("original", images),)
+                view_weights = {"original": 1.0}
+            else:
+                named_views = style_bank(images).items()
+                counterfactual_weight = float(config["style"]["lambda_cf"]) / 2.0
+                view_weights = {
+                    "original": 1.0,
+                    "photometric": counterfactual_weight,
+                    "fourier": counterfactual_weight,
+                }
+
+            for view_name, view_images in named_views:
+                with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
+                    logits = model(view_images)
+                    if not torch.isfinite(logits).all():
+                        raise FloatingPointError(
+                            f"Non-finite {view_name} logits at iteration {iteration}"
+                        )
+                    view_loss = segmentation_cross_entropy(logits, labels)
+                if not torch.isfinite(view_loss):
                     raise FloatingPointError(
-                        f"Non-finite model logits at iteration {iteration}"
+                        f"Non-finite {view_name} segmentation loss at iteration "
+                        f"{iteration}: {view_loss.item()}"
                     )
-                loss = segmentation_cross_entropy(logits, labels)
-            if not torch.isfinite(loss):
-                raise FloatingPointError(
-                    f"Non-finite segmentation loss at iteration {iteration}: {loss.item()}"
+                weighted_loss = view_loss * view_weights[view_name]
+                (weighted_loss / accumulation).backward()
+                micro_loss += weighted_loss.detach().item() / accumulation
+                component_losses[view_name] = component_losses.get(view_name, 0.0) + (
+                    view_loss.detach().item() / accumulation
                 )
-            (loss / accumulation).backward()
-            micro_loss += loss.detach().item() / accumulation
 
         gradient_norm = float(clip_grad_norm_(trainable, max_norm=1.0))
         if not torch.isfinite(torch.tensor(gradient_norm)):
@@ -289,6 +346,14 @@ def main() -> int:
             "valid_pixel_count": valid_pixel_count,
             "lr": optimizer.param_groups[0]["lr"],
         }
+        if style_bank is not None:
+            record.update(
+                {
+                    "loss_original": component_losses["original"],
+                    "loss_photometric": component_losses["photometric"],
+                    "loss_fourier": component_losses["fourier"],
+                }
+            )
         if isinstance(model, QuerySegmentor):
             record["alpha"] = float(model.query_head.alpha.detach().cpu())
         with (run_dir / "train.jsonl").open("a", encoding="utf-8") as stream:
