@@ -42,3 +42,10 @@ consistency and diversity remain disabled in this phase.
 ## Success criterion
 
 The decisive comparison is CQE against prediction consistency under the same query and style setup, accompanied by reduced cross-style query-effect variance.
+
+Cross-style query-effect variance is measured on the same original,
+photometric, and Fourier views for both checkpoints. Each valid-pixel class
+effect map is L2-normalized over space, population variance is computed across
+the three views and summed spatially, and results are averaged only over
+ground-truth-present class maps. The evaluation uses a fixed per-sample seed so
+the compared checkpoints receive identical interventions.
