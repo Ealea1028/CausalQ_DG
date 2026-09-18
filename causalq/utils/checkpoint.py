@@ -7,6 +7,7 @@ from typing import Any
 
 import torch
 from torch import nn
+from torch.torch_version import TorchVersion
 
 
 def trainable_state_dict(model: nn.Module) -> dict[str, torch.Tensor]:
@@ -36,3 +37,19 @@ def save_training_checkpoint(
         },
         path,
     )
+
+
+def load_training_checkpoint(path: Path) -> dict[str, Any]:
+    """Safely load a project checkpoint without enabling arbitrary pickle code."""
+    # PyTorch exposes ``torch.__version__`` as a ``TorchVersion`` string
+    # subclass. Training metadata stores that value, so PyTorch 2.6+ needs the
+    # exact class in its weights-only allowlist.
+    with torch.serialization.safe_globals([TorchVersion]):
+        payload = torch.load(path, map_location="cpu", weights_only=True)
+    if not isinstance(payload, dict):
+        raise TypeError("Training checkpoint payload must be a dictionary")
+    required = {"iteration", "trainable_model", "optimizer", "metadata"}
+    missing = required - payload.keys()
+    if missing:
+        raise KeyError(f"Training checkpoint is missing keys: {sorted(missing)}")
+    return payload

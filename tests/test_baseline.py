@@ -16,7 +16,11 @@ from causalq.datasets.segmentation import (
 from causalq.losses import segmentation_cross_entropy
 from causalq.metrics import MeanIoU
 from causalq.models import BaselineSegmentor, DINOv3Backbone
-from causalq.utils.checkpoint import save_training_checkpoint, trainable_state_dict
+from causalq.utils.checkpoint import (
+    load_training_checkpoint,
+    save_training_checkpoint,
+    trainable_state_dict,
+)
 from tools.train import load_config
 
 
@@ -138,12 +142,13 @@ def test_checkpoint_excludes_frozen_backbone(tmp_path: Path) -> None:
         model=model,
         optimizer=optimizer,
         iteration=3,
-        metadata={"git_sha": "example"},
+        metadata={"git_sha": "example", "pytorch": torch.__version__},
     )
-    payload = torch.load(path, weights_only=True)
+    payload = load_training_checkpoint(path)
 
     assert payload["iteration"] == 3
     assert payload["metadata"]["git_sha"] == "example"
+    assert str(payload["metadata"]["pytorch"]) == str(torch.__version__)
     assert payload["trainable_model"]
     assert all(name.startswith("decoder.") for name in payload["trainable_model"])
 

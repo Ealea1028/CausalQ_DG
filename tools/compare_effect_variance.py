@@ -20,6 +20,7 @@ from causalq.analysis import cross_style_effect_variance_values
 from causalq.datasets import cityscapes_dataset
 from causalq.interventions import StyleInterventionBank
 from causalq.models import DINOv3Backbone, QuerySegmentor
+from causalq.utils.checkpoint import load_training_checkpoint
 from tools.train import git_sha, load_config, sha256
 
 
@@ -77,7 +78,7 @@ def load_model(
         alpha_init=float(query["alpha_init"]),
     ).to("cuda:0")
 
-    payload = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
+    payload = load_training_checkpoint(checkpoint_path)
     missing, unexpected = model.load_state_dict(payload["trainable_model"], strict=False)
     trainable_names = {
         name for name, parameter in model.named_parameters() if parameter.requires_grad

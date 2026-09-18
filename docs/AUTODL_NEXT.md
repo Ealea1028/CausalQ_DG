@@ -72,14 +72,14 @@ test -f "$A4_CKPT"
 
 python - "$A3_CKPT" "$A4_CKPT" <<'PY'
 import sys
-import torch
+from causalq.utils.checkpoint import load_training_checkpoint
 
 expected = {
     sys.argv[1]: "4a95ebd7dd627bd4695f201553a5e84aa709db09",
     sys.argv[2]: "f05cdc37fc1a95bc83d1b4a90441250c657e8c51",
 }
 for path, git_sha in expected.items():
-    payload = torch.load(path, map_location="cpu", weights_only=True)
+    payload = load_training_checkpoint(path)
     assert payload["iteration"] == 40000
     assert payload["metadata"]["git_sha"] == git_sha
     assert payload["trainable_model"]
