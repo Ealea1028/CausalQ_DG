@@ -1,6 +1,6 @@
 # Next AutoDL action
 
-Status: the Phase 9 CQE smoke test passed at exact implementation SHA `fc063040ed9d0df19cae3cd059f68a6903be3c2c`. Run the fresh 40,000-iteration seed-0 CQE experiment next. Do not resume the smoke checkpoint and do not add prediction consistency or diversity.
+Status: the Phase 9 CQE smoke test passed at exact implementation SHA `fc063040ed9d0df19cae3cd059f68a6903be3c2c`. A follow-up test fix makes the query counterfactual exact; use the final commit supplied in the handoff for the fresh 40,000-iteration seed-0 CQE experiment. Do not resume the smoke checkpoint and do not add prediction consistency or diversity.
 
 ## Controlled comparison
 
