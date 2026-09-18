@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 7 is accepted: the 40k DINOv3-L Query + Style run reached 63.96% Cityscapes mIoU, improving by 2.01 percentage points over Query-only and 3.79 points over the source-only baseline. Phase 8 adds only a stop-gradient original-to-style prediction KL control and is ready for remote smoke verification.
+Phase 7 is accepted: the 40k DINOv3-L Query + Style run reached 63.96% Cityscapes mIoU, improving by 2.01 percentage points over Query-only and 3.79 points over the source-only baseline. The Phase 8 stop-gradient prediction-KL control is operator-confirmed through its remote smoke gate and is ready for the controlled 40k run.
 
 ## Working directories
 
