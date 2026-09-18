@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 8 is complete: the stable 40k prediction-consistency control reached 62.12% Cityscapes mIoU, 1.84 percentage points below Query + Style but 0.17 points above Query-only. It is retained without post-hoc tuning as the fixed control. Phase 9 implements logit-level causal-query-effect distillation and is ready for remote smoke verification.
+Phase 8 is complete: the stable 40k prediction-consistency control reached 62.12% Cityscapes mIoU, 1.84 percentage points below Query + Style but 0.17 points above Query-only. It is retained without post-hoc tuning as the fixed control. The Phase 9 logit-level causal-query-effect implementation passed its 500-iteration GPU smoke test and is ready for the controlled 40k run.
 
 ## Working directories
 
