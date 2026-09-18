@@ -288,3 +288,16 @@ class QuerySegmentor(nn.Module):
 
     def forward(self, images: Tensor) -> Tensor:
         return self.forward_components(images).logits
+
+    def get_query_effect(
+        self,
+        images: Tensor | None = None,
+        *,
+        output: QuerySegmentorOutput | None = None,
+    ) -> Tensor:
+        """Return the public logit-level effect ``alpha * delta_logits``."""
+        if (images is None) == (output is None):
+            raise ValueError("Provide exactly one of images or output")
+        if output is None:
+            output = self.forward_components(images)
+        return output.scaled_delta_logits

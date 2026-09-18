@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 7 is accepted: the 40k DINOv3-L Query + Style run reached 63.96% Cityscapes mIoU, improving by 2.01 percentage points over Query-only and 3.79 points over the source-only baseline. The Phase 8 stop-gradient prediction-KL control is operator-confirmed through its remote smoke gate and is ready for the controlled 40k run.
+Phase 8 is complete: the stable 40k prediction-consistency control reached 62.12% Cityscapes mIoU, 1.84 percentage points below Query + Style but 0.17 points above Query-only. It is retained without post-hoc tuning as the fixed control. Phase 9 implements logit-level causal-query-effect distillation and is ready for remote smoke verification.
 
 ## Working directories
 

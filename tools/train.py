@@ -1,4 +1,4 @@
-"""Train the Phase-5--8 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--9 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -25,7 +25,11 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
 from causalq.interventions import StyleInterventionBank
-from causalq.losses import prediction_consistency_kl, segmentation_cross_entropy
+from causalq.losses import (
+    causal_query_effect_loss,
+    prediction_consistency_kl,
+    segmentation_cross_entropy,
+)
 from causalq.metrics import MeanIoU
 from causalq.models import BaselineSegmentor, DINOv3Backbone, QuerySegmentor
 from causalq.utils.checkpoint import save_training_checkpoint
@@ -59,21 +63,21 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6, 7, 8):
-        raise ValueError("tools/train.py accepts only Phase 5--8 configs")
+    if phase not in (5, 6, 7, 8, 9):
+        raise ValueError("tools/train.py accepts only Phase 5--9 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase in (6, 7, 8) and not query_enabled:
-        raise ValueError("Phase 6--8 requires the query branch")
-    if phase in (6, 7, 8) and "query" not in config:
-        raise ValueError("Phase 6--8 requires query configuration")
-    if phase in (6, 7, 8) and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--8 currently requires logsumexp query aggregation")
-    if phase in (7, 8):
+    if phase in (6, 7, 8, 9) and not query_enabled:
+        raise ValueError("Phase 6--9 requires the query branch")
+    if phase in (6, 7, 8, 9) and "query" not in config:
+        raise ValueError("Phase 6--9 requires query configuration")
+    if phase in (6, 7, 8, 9) and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6--9 currently requires logsumexp query aggregation")
+    if phase in (7, 8, 9):
         style = config.get("style", {})
         if not style_enabled:
             raise ValueError("Phase 7/8 requires style training")
@@ -104,6 +108,30 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError("Phase 8 requires valid-pixel masking")
         if "causal_query_effect" in config:
             raise ValueError("Phase 8 cannot enable causal-query-effect losses")
+    if phase == 9 and prediction_enabled:
+        raise ValueError("Phase 9 CQE control cannot enable prediction consistency")
+    cqe = config.get("causal_query_effect", {})
+    cqe_enabled = bool(cqe.get("enabled", False))
+    if phase < 9 and cqe_enabled:
+        raise ValueError("CQE is disabled before Phase 9")
+    if phase == 9:
+        if not cqe_enabled:
+            raise ValueError("Phase 9 requires causal-query-effect distillation")
+        required = {
+            "effect_space": "logits",
+            "reference_stop_gradient": True,
+            "normalization": "l2_per_class_map",
+            "present_classes_only": True,
+            "valid_pixels_only": True,
+            "loss": "smooth_l1",
+        }
+        for key, expected in required.items():
+            if cqe.get(key) != expected:
+                raise ValueError(f"Phase 9 requires causal_query_effect.{key}={expected}")
+        if float(cqe.get("lambda_cqe", -1.0)) < 0:
+            raise ValueError("causal_query_effect.lambda_cqe must be non-negative")
+        if float(cqe.get("smooth_l1_beta", 0.0)) <= 0:
+            raise ValueError("causal_query_effect.smooth_l1_beta must be positive")
     return config
 
 
@@ -150,7 +178,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5--8 training requires CUDA")
+        raise RuntimeError("Phase 5--9 training requires CUDA")
 
     seed = int(config["train"]["seed"])
     seed_everything(seed)
@@ -174,10 +202,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5--8 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5--9 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5--8 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5--9 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -223,7 +251,7 @@ def main() -> int:
 
     style_bank = None
     phase = int(config["experiment"]["phase"])
-    if phase in (7, 8):
+    if phase in (7, 8, 9):
         style_config = config["style"]
         photo_config = style_config["photometric"]
         fourier_config = style_config["fourier"]
@@ -293,6 +321,9 @@ def main() -> int:
     prediction_enabled = phase == 8
     if prediction_enabled:
         metadata["prediction_consistency"] = config["prediction_consistency"]
+    cqe_enabled = phase == 9
+    if cqe_enabled:
+        metadata["causal_query_effect"] = config["causal_query_effect"]
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -329,9 +360,15 @@ def main() -> int:
                 }
 
             reference_logits = None
+            reference_effect = None
             for view_name, view_images in named_views:
                 with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
-                    logits = model(view_images)
+                    if cqe_enabled:
+                        model_output = model.forward_components(view_images)
+                        logits = model_output.logits
+                        query_effect = model.get_query_effect(output=model_output)
+                    else:
+                        logits = model(view_images)
                     if not torch.isfinite(logits).all():
                         raise FloatingPointError(
                             f"Non-finite {view_name} logits at iteration {iteration}"
@@ -370,6 +407,34 @@ def main() -> int:
                         key = f"prediction_{view_name}"
                         component_losses[key] = component_losses.get(key, 0.0) + (
                             prediction_loss.detach().item() / accumulation
+                        )
+                if cqe_enabled:
+                    if view_name == "original":
+                        reference_effect = query_effect.detach()
+                    else:
+                        if reference_effect is None:
+                            raise RuntimeError("Original effect must precede style effects")
+                        cqe_loss = causal_query_effect_loss(
+                            query_effect,
+                            reference_effect,
+                            labels,
+                            beta=float(
+                                config["causal_query_effect"]["smooth_l1_beta"]
+                            ),
+                        )
+                        if not torch.isfinite(cqe_loss):
+                            raise FloatingPointError(
+                                f"Non-finite {view_name} CQE loss at iteration "
+                                f"{iteration}: {cqe_loss.item()}"
+                            )
+                        cqe_weight = (
+                            float(config["causal_query_effect"]["lambda_cqe"])
+                            / 2.0
+                        )
+                        objective = objective + cqe_weight * cqe_loss
+                        key = f"cqe_{view_name}"
+                        component_losses[key] = component_losses.get(key, 0.0) + (
+                            cqe_loss.detach().item() / accumulation
                         )
                 (objective / accumulation).backward()
                 micro_loss += objective.detach().item() / accumulation
@@ -420,6 +485,20 @@ def main() -> int:
                     "loss_prediction_fourier": component_losses[
                         "prediction_fourier"
                     ],
+                }
+            )
+        if cqe_enabled:
+            cqe_mean = 0.5 * (
+                component_losses["cqe_photometric"]
+                + component_losses["cqe_fourier"]
+            )
+            record.update(
+                {
+                    "loss_cqe": cqe_mean,
+                    "loss_cqe_photometric": component_losses[
+                        "cqe_photometric"
+                    ],
+                    "loss_cqe_fourier": component_losses["cqe_fourier"],
                 }
             )
         if isinstance(model, QuerySegmentor):

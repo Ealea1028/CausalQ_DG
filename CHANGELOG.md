@@ -20,6 +20,8 @@
   sequential three-view training objective, and style-only launcher.
 - Phase 8 valid-pixel prediction KL with a stop-gradient original-view reference,
   fixed control configuration, component logging, and a dedicated launcher.
+- Phase 9 public query-effect API and GT-present-class, valid-pixel,
+  L2-normalized cross-style SmoothL1 effect distillation.
 
 ### Changed
 

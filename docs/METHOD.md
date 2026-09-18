@@ -31,6 +31,14 @@ Fourier view, it minimizes `KL(P_original || P_style)` on valid label pixels.
 The original-view probabilities are detached, the two style losses are averaged,
 and no causal-query-effect or diversity term is enabled.
 
+## Causal-query-effect distillation
+
+Phase 9 defines the public logit effect as `alpha * delta_logits`. The original
+view is a stop-gradient reference. Each effect map is L2-normalized over valid
+pixels, and SmoothL1 distances are averaged across counterfactual views and only
+the semantic classes present in the current ground-truth mask. Prediction
+consistency and diversity remain disabled in this phase.
+
 ## Success criterion
 
 The decisive comparison is CQE against prediction consistency under the same query and style setup, accompanied by reduced cross-style query-effect variance.
