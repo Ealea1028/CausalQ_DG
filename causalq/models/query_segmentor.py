@@ -184,7 +184,11 @@ class QuerySegmentorOutput:
         if not 0 <= class_index < self.logits.shape[1]:
             raise IndexError(f"class_index out of range: {class_index}")
         result = self.logits.clone()
-        result[:, class_index] -= self.scaled_delta_logits[:, class_index]
+        # Assign the base map directly.  Subtracting the residual from
+        # ``base + residual`` can leave a small floating-point cancellation
+        # error, even though the counterfactual is defined to equal the base
+        # path exactly for the intervened class.
+        result[:, class_index] = self.base_logits[:, class_index]
         return result
 
 
