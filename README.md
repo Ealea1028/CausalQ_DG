@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 9 is complete. The stable 40k CQE run reached 59.18% Cityscapes mIoU, 2.95 percentage points below the Phase 8 prediction-consistency control, while reducing normalized cross-style query-effect variance by 99.47%. The fixed result is retained without post-hoc tuning. Phase 10 adds only the planned lightweight within-class query-residual diversity penalty to the composed full objective and is ready for GPU smoke verification.
+Phase 9 is complete. The stable 40k CQE run reached 59.18% Cityscapes mIoU, 2.95 percentage points below the Phase 8 prediction-consistency control, while reducing normalized cross-style query-effect variance by 99.47%. The fixed result is retained without post-hoc tuning. The Phase 10 composed full objective and lightweight within-class query-residual diversity penalty passed a 500-iteration GPU smoke test and are ready for the controlled 40k run.
 
 ## Working directories
 
