@@ -43,6 +43,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--run-id")
     parser.add_argument("--max-iterations", type=int)
     parser.add_argument("--validation-max-samples", type=int)
+    parser.add_argument("--seed", type=int)
     return parser.parse_args()
 
 
@@ -58,6 +59,13 @@ def sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def resolve_seed(config: dict[str, Any], override: int | None) -> int:
+    seed = int(config["train"]["seed"] if override is None else override)
+    if seed < 0:
+        raise ValueError("seed must be non-negative")
+    return seed
 
 
 def load_config(path: Path) -> dict[str, Any]:
@@ -220,7 +228,7 @@ def main() -> int:
     if not torch.cuda.is_available():
         raise RuntimeError("Phase 5--9 training requires CUDA")
 
-    seed = int(config["train"]["seed"])
+    seed = resolve_seed(config, args.seed)
     seed_everything(seed)
     torch.backends.cuda.matmul.allow_tf32 = True
 

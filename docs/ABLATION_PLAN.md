@@ -27,6 +27,8 @@ Both isolated 500-iteration smoke tests passed. Run the 40k photometric-only
 experiment first, retain its final checkpoint and compact evidence, reclaim its
 intermediate-checkpoint space, and only then run the Fourier-only experiment.
 
-The photometric-only 40k run is complete at `0.638287` final Cityscapes mIoU,
-0.1324 percentage points below combined-view A2. Reclaim its 79 intermediate
-checkpoints before starting the Fourier-only 40k run.
+Photometric-only completes at `0.638287` final Cityscapes mIoU and Fourier-only
+at `0.627076`, versus `0.639610` for combined-view A2. Fourier-only is clearly
+inferior at seed 0. The combined-versus-photometric gap is only 0.1324 points,
+so repeat those two variants at seeds 1 and 2 and report paired mean and standard
+deviation before closing Phase 11.

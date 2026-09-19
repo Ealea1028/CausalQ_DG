@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.train import load_config, style_view_weights
+from tools.train import load_config, resolve_seed, style_view_weights
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -49,3 +49,13 @@ def test_style_weights_reject_duplicate_or_missing_original_views() -> None:
         style_view_weights(
             {"views": ["original", "photometric", "photometric"], "lambda_cf": 1.0}
         )
+
+
+def test_training_seed_can_be_overridden_for_close_ablation_repeats() -> None:
+    config = load_config(ROOT / "configs/style/gta_dinov3l_style.yaml")
+
+    assert resolve_seed(config, None) == 0
+    assert resolve_seed(config, 1) == 1
+    assert resolve_seed(config, 2) == 2
+    with pytest.raises(ValueError, match="non-negative"):
+        resolve_seed(config, -1)

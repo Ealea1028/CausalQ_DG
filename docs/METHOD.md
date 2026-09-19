@@ -87,5 +87,8 @@ images.
 The fixed photometric-only run reaches `0.638287` final Cityscapes mIoU,
 0.1324 percentage points below the combined-view A2 reference. Its best
 intermediate validation is `0.641253` at iteration 30,000, but the prespecified
-final-iteration result remains the primary comparison. The Fourier-only full
-run is still required before drawing the style-ablation conclusion.
+final-iteration result remains the primary comparison. Fourier-only reaches
+`0.627076`, 1.2534 points below combined and 1.1211 below photometric-only.
+The Fourier result is decisive at seed 0. The combined-versus-photometric gap
+is below the project's 0.5-point repeat threshold, so those two variants must
+be repeated with seeds 1 and 2 before drawing the final style conclusion.

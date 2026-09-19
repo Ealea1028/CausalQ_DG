@@ -9,10 +9,12 @@ source scripts/activate_autodl.sh
 
 MAX_ITERATIONS="${MAX_ITERATIONS:-500}"
 VALIDATION_MAX_SAMPLES="${VALIDATION_MAX_SAMPLES:-50}"
+SEED="${SEED:-0}"
 RUN_ID="${RUN_ID:-S1_STYLE_PHOTO_SMOKE_${MAX_ITERATIONS}_$(git rev-parse --short HEAD)}"
 
 python tools/train.py \
   --config configs/style_ablation/gta_dinov3l_photo.yaml \
   --run-id "$RUN_ID" \
   --max-iterations "$MAX_ITERATIONS" \
-  --validation-max-samples "$VALIDATION_MAX_SAMPLES"
+  --validation-max-samples "$VALIDATION_MAX_SAMPLES" \
+  --seed "$SEED"
