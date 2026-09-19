@@ -22,3 +22,7 @@ a negative ablation result, and diversity is removed from the final method.
 The style ablation holds Query, optimizer, seed, geometry, and total
 counterfactual supervision weight fixed. It compares photometric-only,
 Fourier-only, and the accepted combined A2 run.
+
+Both isolated 500-iteration smoke tests passed. Run the 40k photometric-only
+experiment first, retain its final checkpoint and compact evidence, reclaim its
+intermediate-checkpoint space, and only then run the Fourier-only experiment.

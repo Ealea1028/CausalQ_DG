@@ -76,3 +76,10 @@ consistency loss. Photometric-only and Fourier-only variants are compared with
 the existing combined-view A2 result. The total counterfactual supervision
 weight remains `lambda_cf=1`: a single intervention receives weight 1, while
 the combined run assigns weight 0.5 to each of its two interventions.
+
+Both isolated 500-iteration smoke tests passed at commit `b0d6e14`: their
+records were contiguous and finite, their objectives reconstructed exactly,
+and their metadata contained no prediction-consistency, CQE, or diversity
+configuration. Full-run conclusions are intentionally deferred until both
+40,000-iteration variants have been evaluated on all 500 Cityscapes validation
+images.
