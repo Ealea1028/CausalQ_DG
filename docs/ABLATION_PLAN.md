@@ -18,3 +18,7 @@ at least 0.2 percentage points under the project protocol.
 
 The fixed A5 run improved A4 by only 0.037 percentage points. It is retained as
 a negative ablation result, and diversity is removed from the final method.
+
+The style ablation holds Query, optimizer, seed, geometry, and total
+counterfactual supervision weight fixed. It compares photometric-only,
+Fourier-only, and the accepted combined A2 run.

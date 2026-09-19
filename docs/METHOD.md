@@ -68,3 +68,11 @@ The fixed Phase 10 run is numerically stable and drives the diversity loss from
 `1.11e-3` to `1.07e-7`, but reaches only `0.592124` Cityscapes mIoU. Its gain
 over A4 is 0.037 percentage points, below the predefined 0.2-point retention
 threshold. Query diversity is therefore excluded from the final method.
+
+## Style ablation
+
+Phase 11 returns to the accepted A2 Query + Style objective and disables every
+consistency loss. Photometric-only and Fourier-only variants are compared with
+the existing combined-view A2 result. The total counterfactual supervision
+weight remains `lambda_cf=1`: a single intervention receives weight 1, while
+the combined run assigns weight 0.5 to each of its two interventions.

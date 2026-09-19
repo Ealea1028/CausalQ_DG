@@ -1,4 +1,4 @@
-"""Train the Phase-5--10 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--11 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -64,25 +64,33 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6, 7, 8, 9, 10):
-        raise ValueError("tools/train.py accepts only Phase 5--10 configs")
+    if phase not in (5, 6, 7, 8, 9, 10, 11):
+        raise ValueError("tools/train.py accepts only Phase 5--11 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase in (6, 7, 8, 9, 10) and not query_enabled:
-        raise ValueError("Phase 6--10 requires the query branch")
-    if phase in (6, 7, 8, 9, 10) and "query" not in config:
-        raise ValueError("Phase 6--10 requires query configuration")
-    if phase in (6, 7, 8, 9, 10) and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--10 currently requires logsumexp query aggregation")
-    if phase in (7, 8, 9, 10):
+    if phase in (6, 7, 8, 9, 10, 11) and not query_enabled:
+        raise ValueError("Phase 6--11 requires the query branch")
+    if phase in (6, 7, 8, 9, 10, 11) and "query" not in config:
+        raise ValueError("Phase 6--11 requires query configuration")
+    if phase in (6, 7, 8, 9, 10, 11) and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6--11 currently requires logsumexp query aggregation")
+    if phase in (7, 8, 9, 10, 11):
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7--10 requires style training")
-        if style.get("views") != ["original", "photometric", "fourier"]:
+            raise ValueError("Phase 7--11 requires style training")
+        views = style.get("views")
+        if phase == 11:
+            allowed = (
+                ["original", "photometric"],
+                ["original", "fourier"],
+            )
+            if views not in allowed:
+                raise ValueError("Phase 11 requires exactly one counterfactual view")
+        elif views != ["original", "photometric", "fourier"]:
             raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
             raise ValueError("Phase 7--10 requires geometry-preserving style views")
@@ -153,7 +161,18 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
         if float(diversity.get("lambda_div", -1.0)) != 0.01:
             raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
+    if phase == 11 and (prediction_enabled or cqe_enabled or diversity_enabled):
+        raise ValueError("Phase 11 style ablations disable all consistency losses")
     return config
+
+
+def style_view_weights(style: dict[str, Any]) -> dict[str, float]:
+    """Keep total counterfactual supervision weight fixed across view ablations."""
+    views = list(style["views"])
+    if len(views) < 2 or views[0] != "original" or len(set(views)) != len(views):
+        raise ValueError("Style views require original followed by unique interventions")
+    counterfactual_weight = float(style["lambda_cf"]) / (len(views) - 1)
+    return {"original": 1.0, **{name: counterfactual_weight for name in views[1:]}}
 
 
 def make_loader(dataset, config: dict[str, Any], *, training: bool) -> DataLoader:
@@ -272,7 +291,7 @@ def main() -> int:
 
     style_bank = None
     phase = int(config["experiment"]["phase"])
-    if phase in (7, 8, 9, 10):
+    if phase in (7, 8, 9, 10, 11):
         style_config = config["style"]
         photo_config = style_config["photometric"]
         fourier_config = style_config["fourier"]
@@ -377,13 +396,16 @@ def main() -> int:
                 named_views = (("original", images),)
                 view_weights = {"original": 1.0}
             else:
-                named_views = style_bank(images).items()
-                counterfactual_weight = float(config["style"]["lambda_cf"]) / 2.0
-                view_weights = {
-                    "original": 1.0,
-                    "photometric": counterfactual_weight,
-                    "fourier": counterfactual_weight,
-                }
+                configured_views = config["style"]["views"]
+                generated_views = {"original": images}
+                if "photometric" in configured_views:
+                    generated_views["photometric"] = style_bank.photometric_view(images)
+                if "fourier" in configured_views:
+                    generated_views["fourier"] = style_bank.fourier_view(images)
+                named_views = tuple(
+                    (name, generated_views[name]) for name in configured_views
+                )
+                view_weights = style_view_weights(config["style"])
 
             reference_logits = None
             reference_effect = None
@@ -509,9 +531,8 @@ def main() -> int:
         if style_bank is not None:
             record.update(
                 {
-                    "loss_original": component_losses["original"],
-                    "loss_photometric": component_losses["photometric"],
-                    "loss_fourier": component_losses["fourier"],
+                    f"loss_{name}": component_losses[name]
+                    for name in config["style"]["views"]
                 }
             )
         if prediction_enabled:
