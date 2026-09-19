@@ -49,3 +49,8 @@ effect map is L2-normalized over space, population variance is computed across
 the three views and summed spatially, and results are averaged only over
 ground-truth-present class maps. The evaluation uses a fixed per-sample seed so
 the compared checkpoints receive identical interventions.
+
+The fixed Phase 9 result passes the variance target but fails the segmentation
+target: A4 reduces normalized effect variance by 99.47% relative to A3 while
+losing 2.95 Cityscapes mIoU percentage points. Both outcomes are retained; the
+variance result does not override the failed accuracy criterion.

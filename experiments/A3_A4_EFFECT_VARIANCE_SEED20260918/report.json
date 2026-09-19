@@ -1,0 +1,43 @@
+{
+  "ok": true,
+  "evaluation_git_sha": "38c2df3470322dacd937aed17518d67dc9c5e3a1",
+  "pytorch": "2.7.0+cu126",
+  "cuda": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4090 D",
+  "metric": {
+    "name": "cross_style_normalized_query_effect_variance",
+    "views": ["original", "photometric", "fourier"],
+    "normalization": "l2_per_class_map_over_valid_pixels",
+    "variance": "population_across_views_then_spatial_sum",
+    "aggregation": "mean_over_gt_present_class_maps"
+  },
+  "dataset": "cityscapes_val",
+  "seed": 20260918,
+  "sample_count": 500,
+  "present_class_map_count": 6005,
+  "pretrained_checkpoint_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+  "reference": {
+    "name": "A3_PRED_CONS",
+    "effect_variance": 0.0019905460056527783,
+    "alpha": 0.2734627425670624,
+    "checkpoint_sha256": "eccaf42db82df4f95db8eb378e9449ed8c7aadfe1f6a928e528a23e14ea3be87",
+    "training_git_sha": "4a95ebd7dd627bd4695f201553a5e84aa709db09",
+    "iteration": 40000,
+    "peak_allocated_gib": 4.004,
+    "peak_reserved_gib": 5.416
+  },
+  "candidate": {
+    "name": "A4_CQE",
+    "effect_variance": 0.000010522321916976188,
+    "alpha": 0.044347554445266724,
+    "checkpoint_sha256": "c04bac1358157292ef5b176f5d14fa5c3a441ac7da5c9a6c141a57b4f5beb0b0",
+    "training_git_sha": "f05cdc37fc1a95bc83d1b4a90441250c657e8c51",
+    "iteration": 40000,
+    "peak_allocated_gib": 4.567,
+    "peak_reserved_gib": 5.998
+  },
+  "candidate_minus_reference": -0.001980023683735802,
+  "candidate_to_reference_ratio": 0.005286148567827501,
+  "relative_reduction": 0.9947138514321725,
+  "passes_lower_variance_target": true
+}

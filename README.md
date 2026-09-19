@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 9 training is complete. The stable 40k CQE run reached 59.18% Cityscapes mIoU, 2.95 percentage points below the Phase 8 prediction-consistency control and below the predefined safety floor. The fixed result is retained without post-hoc tuning; the remaining Phase 9 task is the planned A3/A4 cross-style query-effect-variance comparison.
+Phase 9 is complete. The stable 40k CQE run reached 59.18% Cityscapes mIoU, 2.95 percentage points below the Phase 8 prediction-consistency control and below the predefined safety floor. However, its normalized cross-style query-effect variance was only 0.53% of the control value, a 99.47% reduction. The fixed result is retained without post-hoc tuning: CQE strongly stabilizes effects but costs too much segmentation accuracy in this configuration.
 
 ## Working directories
 
@@ -35,5 +35,6 @@ Local verification is CPU-only. Do not use a local GPU for formal DINOv3-L train
 7. Style intervention
 8. Prediction-consistency control
 9. CQE training
+10. Query diversity
 
 See `CausalQ_DG_Project_Plan.md` for the complete specification and `docs/AUTODL_NEXT.md` for the next remote action.
