@@ -1,4 +1,4 @@
-"""Train the Phase-5--9 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--10 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -28,6 +28,7 @@ from causalq.interventions import StyleInterventionBank
 from causalq.losses import (
     causal_query_effect_loss,
     prediction_consistency_kl,
+    query_diversity_loss,
     segmentation_cross_entropy,
 )
 from causalq.metrics import MeanIoU
@@ -63,39 +64,37 @@ def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6, 7, 8, 9):
-        raise ValueError("tools/train.py accepts only Phase 5--9 configs")
+    if phase not in (5, 6, 7, 8, 9, 10):
+        raise ValueError("tools/train.py accepts only Phase 5--10 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase in (6, 7, 8, 9) and not query_enabled:
-        raise ValueError("Phase 6--9 requires the query branch")
-    if phase in (6, 7, 8, 9) and "query" not in config:
-        raise ValueError("Phase 6--9 requires query configuration")
-    if phase in (6, 7, 8, 9) and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--9 currently requires logsumexp query aggregation")
-    if phase in (7, 8, 9):
+    if phase in (6, 7, 8, 9, 10) and not query_enabled:
+        raise ValueError("Phase 6--10 requires the query branch")
+    if phase in (6, 7, 8, 9, 10) and "query" not in config:
+        raise ValueError("Phase 6--10 requires query configuration")
+    if phase in (6, 7, 8, 9, 10) and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6--10 currently requires logsumexp query aggregation")
+    if phase in (7, 8, 9, 10):
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7/8 requires style training")
+            raise ValueError("Phase 7--10 requires style training")
         if style.get("views") != ["original", "photometric", "fourier"]:
-            raise ValueError("Phase 7/8 requires original, photometric, and fourier views")
+            raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
-            raise ValueError("Phase 7/8 requires geometry-preserving style views")
+            raise ValueError("Phase 7--10 requires geometry-preserving style views")
         if not style.get("sequential_forward", False):
-            raise ValueError("Phase 7/8 requires sequential style forwards")
+            raise ValueError("Phase 7--10 requires sequential style forwards")
         if float(style.get("lambda_cf", 0.0)) < 0:
             raise ValueError("style.lambda_cf must be non-negative")
     prediction = config.get("prediction_consistency", {})
     prediction_enabled = bool(prediction.get("enabled", False))
     if phase < 8 and prediction_enabled:
         raise ValueError("Prediction consistency is disabled before Phase 8")
-    if phase == 8:
-        if not prediction_enabled:
-            raise ValueError("Phase 8 requires prediction consistency")
+    if prediction_enabled:
         if float(prediction.get("lambda_pred", -1.0)) < 0:
             raise ValueError("prediction_consistency.lambda_pred must be non-negative")
         if float(prediction.get("temperature", 0.0)) <= 0:
@@ -106,6 +105,9 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError("Phase 8 requires a stop-gradient reference")
         if not prediction.get("valid_pixels_only", False):
             raise ValueError("Phase 8 requires valid-pixel masking")
+    if phase == 8:
+        if not prediction_enabled:
+            raise ValueError("Phase 8 requires prediction consistency")
         if "causal_query_effect" in config:
             raise ValueError("Phase 8 cannot enable causal-query-effect losses")
     if phase == 9 and prediction_enabled:
@@ -114,9 +116,7 @@ def load_config(path: Path) -> dict[str, Any]:
     cqe_enabled = bool(cqe.get("enabled", False))
     if phase < 9 and cqe_enabled:
         raise ValueError("CQE is disabled before Phase 9")
-    if phase == 9:
-        if not cqe_enabled:
-            raise ValueError("Phase 9 requires causal-query-effect distillation")
+    if cqe_enabled:
         required = {
             "effect_space": "logits",
             "reference_stop_gradient": True,
@@ -132,6 +132,27 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError("causal_query_effect.lambda_cqe must be non-negative")
         if float(cqe.get("smooth_l1_beta", 0.0)) <= 0:
             raise ValueError("causal_query_effect.smooth_l1_beta must be positive")
+    if phase == 9 and not cqe_enabled:
+        raise ValueError("Phase 9 requires causal-query-effect distillation")
+
+    diversity = config.get("query_diversity", {})
+    diversity_enabled = bool(diversity.get("enabled", False))
+    if phase < 10 and diversity_enabled:
+        raise ValueError("Query diversity is disabled before Phase 10")
+    if phase == 10:
+        if not prediction_enabled or not cqe_enabled or not diversity_enabled:
+            raise ValueError(
+                "Phase 10 requires prediction consistency, CQE, and query diversity"
+            )
+        required_diversity = {
+            "target": "query_residuals",
+            "loss": "off_diagonal_cosine_squared",
+        }
+        for key, expected in required_diversity.items():
+            if diversity.get(key) != expected:
+                raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
+        if float(diversity.get("lambda_div", -1.0)) != 0.01:
+            raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
     return config
 
 
@@ -251,7 +272,7 @@ def main() -> int:
 
     style_bank = None
     phase = int(config["experiment"]["phase"])
-    if phase in (7, 8, 9):
+    if phase in (7, 8, 9, 10):
         style_config = config["style"]
         photo_config = style_config["photometric"]
         fourier_config = style_config["fourier"]
@@ -318,12 +339,17 @@ def main() -> int:
             "photometric": config["style"]["photometric"],
             "fourier": config["style"]["fourier"],
         }
-    prediction_enabled = phase == 8
+    prediction_enabled = bool(
+        config.get("prediction_consistency", {}).get("enabled", False)
+    )
     if prediction_enabled:
         metadata["prediction_consistency"] = config["prediction_consistency"]
-    cqe_enabled = phase == 9
+    cqe_enabled = bool(config.get("causal_query_effect", {}).get("enabled", False))
     if cqe_enabled:
         metadata["causal_query_effect"] = config["causal_query_effect"]
+    diversity_enabled = bool(config.get("query_diversity", {}).get("enabled", False))
+    if diversity_enabled:
+        metadata["query_diversity"] = config["query_diversity"]
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -442,6 +468,23 @@ def main() -> int:
                     view_loss.detach().item() / accumulation
                 )
 
+            if diversity_enabled:
+                if not isinstance(model, QuerySegmentor):
+                    raise TypeError("Query diversity requires QuerySegmentor")
+                diversity_loss = query_diversity_loss(model.get_query_residuals())
+                if not torch.isfinite(diversity_loss):
+                    raise FloatingPointError(
+                        f"Non-finite query diversity loss at iteration {iteration}: "
+                        f"{diversity_loss.item()}"
+                    )
+                diversity_weight = float(config["query_diversity"]["lambda_div"])
+                weighted_diversity = diversity_weight * diversity_loss
+                (weighted_diversity / accumulation).backward()
+                micro_loss += weighted_diversity.detach().item() / accumulation
+                component_losses["diversity"] = component_losses.get(
+                    "diversity", 0.0
+                ) + diversity_loss.detach().item() / accumulation
+
         gradient_norm = float(clip_grad_norm_(trainable, max_norm=1.0))
         if not torch.isfinite(torch.tensor(gradient_norm)):
             raise FloatingPointError(
@@ -499,6 +542,15 @@ def main() -> int:
                         "cqe_photometric"
                     ],
                     "loss_cqe_fourier": component_losses["cqe_fourier"],
+                }
+            )
+        if diversity_enabled:
+            diversity_raw = component_losses["diversity"]
+            diversity_weight = float(config["query_diversity"]["lambda_div"])
+            record.update(
+                {
+                    "loss_diversity": diversity_raw,
+                    "loss_diversity_weighted": diversity_weight * diversity_raw,
                 }
             )
         if isinstance(model, QuerySegmentor):

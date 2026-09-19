@@ -1,50 +1,14 @@
 # Next AutoDL action
 
-Status: the Phase 9 A4 run is complete and stable at `0.5917505963` Cityscapes mIoU. It missed both `A4 > A3` and the predefined one-point safety floor. Retain the fixed result without tuning. Evaluate the remaining Phase 9 target, cross-style normalized query-effect variance, on the A3 and A4 final checkpoints. Do not begin Phase 10.
+Status: Phase 9 is complete with a failed accuracy target and a passed effect-variance target. Phase 10 composes Query + Style + prediction consistency + CQE and adds only the planned query-residual diversity loss. Run the 500-iteration A5 smoke test next; do not begin the 40k run.
 
-## Fixed evaluation protocol
+## Fixed Phase 10 mechanism
 
-- Dataset: all 500 Cityscapes validation images in sorted order.
-- Views: original, photometric, and Fourier, with identical per-sample random seeds for A3 and A4.
-- Effect API: `model.get_query_effect(...)`; analysis does not access private tensors.
-- Masking: valid pixels only and ground-truth-present classes only.
-- Normalization: L2 per class map over valid spatial positions, matching Phase 9 training.
-- Metric: population variance across the three normalized view maps, summed spatially, then averaged over all present class maps.
-- Seed: `20260918`.
-- Target: `variance(A4) < variance(A3)`.
-
-## Reclaim A4 intermediate-checkpoint space
-
-Verify the completed run before deleting only its 79 intermediate checkpoints:
-
-```bash
-A4_RUN=/root/autodl-tmp/outputs/CausalQ_DG/A4_CQE_SEED0_40000_f05cdc3
-A4_RESOLVED="$(realpath "$A4_RUN")"
-
-case "$A4_RESOLVED" in
-  /root/autodl-tmp/outputs/CausalQ_DG/A4_CQE_SEED0_40000_f05cdc3) ;;
-  *) echo "unsafe path: $A4_RESOLVED"; exit 1 ;;
-esac
-
-test -f "$A4_RUN/summary.json"
-test -f "$A4_RUN/checkpoints/iter_040000.pth"
-test "$(find "$A4_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
-test "$(find "$A4_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
-
-du -sh "$A4_RUN/checkpoints"
-```
-
-After all checks succeed:
-
-```bash
-find "$A4_RUN/checkpoints" -maxdepth 1 -type f \
-  -name 'iter_*.pth' ! -name 'iter_040000.pth' -delete
-
-test -f "$A4_RUN/checkpoints/iter_040000.pth"
-test "$(find "$A4_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
-du -sh "$A4_RUN/checkpoints"
-df -h /root/autodl-tmp
-```
+- Diversity target: the learned `query_residuals`, not class anchors or contextual query states.
+- Loss: mean squared off-diagonal cosine similarity within each class.
+- Fixed weight: `lambda_div=0.01`.
+- Prediction consistency and CQE retain their accepted Phase 8/9 definitions and weights.
+- The diversity loss is added once per training batch, not once per style view.
 
 ## Checkout and preflight
 
@@ -58,32 +22,53 @@ git status --short
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
+python tools/check_environment.py
 python -m pytest
 ```
 
-Both Git status checks must be empty and the full test suite must pass. Verify inputs:
+Both Git status checks must be empty and all 59 tests must pass. Verify the fixed full objective and Phase 9 evidence:
 
 ```bash
-A3_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/A3_PRED_CONS_SEED0_40000_4a95ebd/checkpoints/iter_040000.pth
-A4_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/A4_CQE_SEED0_40000_f05cdc3/checkpoints/iter_040000.pth
+python - <<'PY'
+import json
+from pathlib import Path
+import yaml
 
-test -f "$A3_CKPT"
-test -f "$A4_CKPT"
+config = yaml.safe_load(Path(
+    "configs/full/gta_dinov3l_full.yaml"
+).read_text(encoding="utf-8"))
 
-python - "$A3_CKPT" "$A4_CKPT" <<'PY'
-import sys
-from causalq.utils.checkpoint import load_training_checkpoint
-
-expected = {
-    sys.argv[1]: "4a95ebd7dd627bd4695f201553a5e84aa709db09",
-    sys.argv[2]: "f05cdc37fc1a95bc83d1b4a90441250c657e8c51",
+assert config["experiment"]["phase"] == 10
+assert config["train"]["max_iterations"] == 40000
+assert config["train"]["seed"] == 0
+assert config["style"]["lambda_cf"] == 1.0
+assert config["prediction_consistency"]["enabled"] is True
+assert config["prediction_consistency"]["lambda_pred"] == 1.0
+assert config["causal_query_effect"]["enabled"] is True
+assert config["causal_query_effect"]["lambda_cqe"] == 1.0
+assert config["query_diversity"] == {
+    "enabled": True,
+    "lambda_div": 0.01,
+    "target": "query_residuals",
+    "loss": "off_diagonal_cosine_squared",
 }
-for path, git_sha in expected.items():
-    payload = load_training_checkpoint(path)
-    assert payload["iteration"] == 40000
-    assert payload["metadata"]["git_sha"] == git_sha
-    assert payload["trainable_model"]
-    print(path, git_sha, "OK")
+
+output = Path("/root/autodl-tmp/outputs/CausalQ_DG")
+a4 = output / "A4_CQE_SEED0_40000_f05cdc3"
+a4_summary = json.loads((a4 / "summary.json").read_text(encoding="utf-8"))
+assert a4_summary["ok"] is True
+assert a4_summary["validation_results"][-1]["miou"] == 0.5917505963345144
+assert (a4 / "checkpoints/iter_040000.pth").is_file()
+
+variance = json.loads((
+    output / "analysis/A3_A4_effect_variance_seed20260918.json"
+).read_text(encoding="utf-8"))
+assert variance["ok"] is True
+assert variance["passes_lower_variance_target"] is True
+assert variance["models"]["A3_PRED_CONS"]["sample_count"] == 500
+assert variance["models"]["A4_CQE"]["sample_count"] == 500
+
+print("PHASE10_SMOKE_GATES_OK")
 PY
 
 sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
@@ -92,80 +77,120 @@ df -h /root/autodl-tmp
 
 The DINOv3 hash must be `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
 
-## Run the variance comparison
+## Run the 500-iteration A5 smoke test
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
+
 export OMP_NUM_THREADS=1
+export RUN_SHA="$(git rev-parse --short HEAD)"
+export RUN_ID="A5_FULL_SMOKE_500_${RUN_SHA}"
+export MAX_ITERATIONS=500
+export VALIDATION_MAX_SAMPLES=50
 
-A3_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/A3_PRED_CONS_SEED0_40000_4a95ebd/checkpoints/iter_040000.pth
-A4_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/A4_CQE_SEED0_40000_f05cdc3/checkpoints/iter_040000.pth
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/A3_A4_effect_variance_seed20260918.json
-LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/A3_A4_effect_variance_seed20260918.log
-
-mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
-test ! -e "$REPORT"
-test ! -e "$LOG"
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
+LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
+test ! -e "$RUN_DIR"
+test ! -e "$LOG_FILE"
 
 set -o pipefail
-python tools/compare_effect_variance.py \
-  --config configs/causalq/gta_dinov3l_causalq.yaml \
-  --reference-name A3_PRED_CONS \
-  --reference-checkpoint "$A3_CKPT" \
-  --candidate-name A4_CQE \
-  --candidate-checkpoint "$A4_CKPT" \
-  --max-samples 500 \
-  --seed 20260918 \
-  --output "$REPORT" \
-  2>&1 | tee "$LOG"
+bash scripts/train_full.sh 2>&1 | tee "$LOG_FILE"
+TRAIN_EXIT=${PIPESTATUS[0]}
 
-EVAL_EXIT=${PIPESTATUS[0]}
-echo "eval_exit_code=$EVAL_EXIT"
+echo "run_id=$RUN_ID"
+echo "train_exit_code=$TRAIN_EXIT"
+echo "log_file=$LOG_FILE"
 ```
 
-## Evidence
+## Smoke evidence
 
 ```bash
-cat "$REPORT"
+RUN_SHA="$(git rev-parse --short HEAD)"
+RUN_ID="A5_FULL_SMOKE_500_${RUN_SHA}"
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 
-python - "$REPORT" <<'PY'
+python - "$RUN_DIR" <<'PY'
 import json
+import math
 from pathlib import Path
 import sys
 
-report = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
-a3 = report["models"]["A3_PRED_CONS"]
-a4 = report["models"]["A4_CQE"]
+run_dir = Path(sys.argv[1])
+metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+records = [json.loads(line) for line in (run_dir / "train.jsonl").read_text(
+    encoding="utf-8"
+).splitlines() if line.strip()]
 
-assert report["ok"] is True
-assert a3["sample_count"] == 500
-assert a4["sample_count"] == 500
-assert a3["present_class_map_count"] == a4["present_class_map_count"]
-assert a3["iteration"] == a4["iteration"] == 40000
+keys = (
+    "loss", "loss_original", "loss_photometric", "loss_fourier",
+    "loss_prediction", "loss_prediction_photometric",
+    "loss_prediction_fourier", "loss_cqe", "loss_cqe_photometric",
+    "loss_cqe_fourier", "loss_diversity", "loss_diversity_weighted",
+    "gradient_norm", "alpha",
+)
+iterations = [row["iteration"] for row in records]
+errors = [abs(row["loss"] - (
+    row["loss_original"]
+    + 0.5 * row["loss_photometric"]
+    + 0.5 * row["loss_fourier"]
+    + row["loss_prediction"]
+    + row["loss_cqe"]
+    + row["loss_diversity_weighted"]
+)) for row in records]
 
-print("a3_effect_variance:", a3["effect_variance"])
-print("a4_effect_variance:", a4["effect_variance"])
-print("candidate_minus_reference:", report["candidate_minus_reference"])
-print("candidate_to_reference_ratio:", report["candidate_to_reference_ratio"])
-print("passes_lower_variance_target:", report["passes_lower_variance_target"])
-print("a3_peak_allocated_gib:", a3["peak_allocated_gib"])
-print("a4_peak_allocated_gib:", a4["peak_allocated_gib"])
+print("===== metadata =====")
+print(metadata)
+print("===== summary =====")
+for key in ("ok", "elapsed_seconds", "first_20_loss_mean", "last_20_loss_mean",
+            "finite_losses", "last_gradient_norm", "final_alpha",
+            "peak_allocated_gib", "peak_reserved_gib"):
+    print(f"{key}: {summary[key]}")
+print("===== trace =====")
+print("record_count:", len(records))
+print("iterations_contiguous:", iterations == list(range(1, 501)))
+for key in keys:
+    print(f"all_{key}_finite:", all(math.isfinite(row[key]) for row in records))
+print("first_diversity_loss:", records[0]["loss_diversity"])
+print("last_diversity_loss:", records[-1]["loss_diversity"])
+print("minimum_diversity_loss:", min(row["loss_diversity"] for row in records))
+print("maximum_diversity_loss:", max(row["loss_diversity"] for row in records))
+print("nonzero_diversity_count:", sum(row["loss_diversity"] > 0 for row in records))
+print("maximum_objective_reconstruction_error:", max(errors))
+print("first_record:", records[0])
+print("last_record:", records[-1])
+print("===== validation =====")
+print("validation_count:", len(summary["validation_results"]))
+print("final_validation:", summary["validation_results"][-1])
+print("===== isolation =====")
+print("prediction_consistency:", metadata.get("prediction_consistency"))
+print("causal_query_effect:", metadata.get("causal_query_effect"))
+print("query_diversity:", metadata.get("query_diversity"))
 PY
 
+echo "===== checkpoint ====="
+find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -printf '%s %f\n' | sort -k2
+test -f "$RUN_DIR/checkpoints/iter_000500.pth" && echo "final_checkpoint_ok=true"
+
+echo "===== provenance ====="
 git rev-parse HEAD
 git status --short
+
+echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
 ## Acceptance criteria
 
-- Intermediate cleanup retains only A4 `iter_040000.pth` and recovers roughly 15 GiB.
-- Full tests pass; A3/A4 checkpoints have the expected training SHAs and iteration 40,000.
-- `eval_exit_code=0`, report `ok=true`, and each model evaluates all 500 images.
-- Both models use the same number of present class maps and the fixed seed/protocol.
-- Both variances are finite and non-negative.
-- Phase 9 second target passes only if `A4_CQE.effect_variance < A3_PRED_CONS.effect_variance`.
-- Exact evaluation Git SHA, clean Git status, and remaining disk are reported.
+- Preflight prints `PHASE10_SMOKE_GATES_OK`, all 59 tests pass, and the backbone hash matches.
+- `train_exit_code=0`, `summary.ok=true`, and all 500 iterations are contiguous.
+- Supervised, prediction, CQE, diversity, gradient, and alpha values are finite.
+- Diversity loss is non-negative, nonzero, and does not explode.
+- Total loss reconstructs from the logged supervised, prediction, CQE, and weighted-diversity components with negligible error.
+- Metadata contains all three auxiliary mechanisms with `lambda_div=0.01`.
+- One 50-image validation and `iter_000500.pth` exist.
+- Peak memory remains within RTX 4090D capacity.
+- Exact Git SHA, clean status, and disk space are reported.
 
-Return cleanup, tests/preflight, complete report, provenance, and disk output. Stop after this comparison; do not begin Phase 10.
+Return gates/tests, training exit code, compact evidence, checkpoint, provenance, and disk output. Stop after the smoke test; do not begin the 40k Phase 10 run.

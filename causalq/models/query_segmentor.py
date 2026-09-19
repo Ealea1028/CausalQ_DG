@@ -305,3 +305,7 @@ class QuerySegmentor(nn.Module):
         if output is None:
             output = self.forward_components(images)
         return output.scaled_delta_logits
+
+    def get_query_residuals(self) -> Tensor:
+        """Return the learnable within-class residual queries for regularization."""
+        return self.query_bank.query_residuals

@@ -54,3 +54,12 @@ The fixed Phase 9 result passes the variance target but fails the segmentation
 target: A4 reduces normalized effect variance by 99.47% relative to A3 while
 losing 2.95 Cityscapes mIoU percentage points. Both outcomes are retained; the
 variance result does not override the failed accuracy criterion.
+
+## Query diversity
+
+Phase 10 composes the already implemented prediction-consistency and CQE
+objectives, then adds one new mechanism: a lightweight diversity penalty on the
+learned residual queries. Within each semantic class, residual queries are
+L2-normalized and the squared off-diagonal cosine similarities are averaged.
+The fixed weight is `lambda_div=0.01`. The class anchors and contextualized
+image-conditioned query states are not regularized by this term.
