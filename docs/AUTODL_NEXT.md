@@ -61,8 +61,13 @@ The DINOv3 hash must be `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
-unset MAX_ITERATIONS
-unset VALIDATION_MAX_SAMPLES
+export MAX_ITERATIONS=40000
+export VALIDATION_MAX_SAMPLES=500
+
+test "$MAX_ITERATIONS" -eq 40000
+test "$VALIDATION_MAX_SAMPLES" -eq 500
+echo "max_iterations=$MAX_ITERATIONS"
+echo "validation_max_samples=$VALIDATION_MAX_SAMPLES"
 
 RUN_SHA="$(git rev-parse --short HEAD)"
 RUN_ID="S1_STYLE_PHOTO_SEED0_40000_${RUN_SHA}"
