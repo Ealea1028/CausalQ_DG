@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. Both Phase 11 photometric-only and Fourier-only smoke tests passed; the next controlled action is the photometric-only 40k run.
+The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. Phase 11 photometric-only training reached 63.83% Cityscapes mIoU, 0.13 percentage points below combined-view A2. The next controlled action is the Fourier-only 40k run.
 
 ## Working directories
 

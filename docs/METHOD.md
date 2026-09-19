@@ -83,3 +83,9 @@ and their metadata contained no prediction-consistency, CQE, or diversity
 configuration. Full-run conclusions are intentionally deferred until both
 40,000-iteration variants have been evaluated on all 500 Cityscapes validation
 images.
+
+The fixed photometric-only run reaches `0.638287` final Cityscapes mIoU,
+0.1324 percentage points below the combined-view A2 reference. Its best
+intermediate validation is `0.641253` at iteration 30,000, but the prespecified
+final-iteration result remains the primary comparison. The Fourier-only full
+run is still required before drawing the style-ablation conclusion.

@@ -26,3 +26,7 @@ Fourier-only, and the accepted combined A2 run.
 Both isolated 500-iteration smoke tests passed. Run the 40k photometric-only
 experiment first, retain its final checkpoint and compact evidence, reclaim its
 intermediate-checkpoint space, and only then run the Fourier-only experiment.
+
+The photometric-only 40k run is complete at `0.638287` final Cityscapes mIoU,
+0.1324 percentage points below combined-view A2. Reclaim its 79 intermediate
+checkpoints before starting the Fourier-only 40k run.
