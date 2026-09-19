@@ -63,3 +63,8 @@ learned residual queries. Within each semantic class, residual queries are
 L2-normalized and the squared off-diagonal cosine similarities are averaged.
 The fixed weight is `lambda_div=0.01`. The class anchors and contextualized
 image-conditioned query states are not regularized by this term.
+
+The fixed Phase 10 run is numerically stable and drives the diversity loss from
+`1.11e-3` to `1.07e-7`, but reaches only `0.592124` Cityscapes mIoU. Its gain
+over A4 is 0.037 percentage points, below the predefined 0.2-point retention
+threshold. Query diversity is therefore excluded from the final method.

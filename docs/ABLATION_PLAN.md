@@ -15,3 +15,6 @@ Phase 10 uses `lambda_div=0.01` and applies squared off-diagonal cosine
 decorrelation only to within-class query residuals. Retain the diversity term in
 the final method only if the controlled full run is stable and improves mIoU by
 at least 0.2 percentage points under the project protocol.
+
+The fixed A5 run improved A4 by only 0.037 percentage points. It is retained as
+a negative ablation result, and diversity is removed from the final method.

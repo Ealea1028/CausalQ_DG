@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-Phase 9 is complete. The stable 40k CQE run reached 59.18% Cityscapes mIoU, 2.95 percentage points below the Phase 8 prediction-consistency control, while reducing normalized cross-style query-effect variance by 99.47%. The fixed result is retained without post-hoc tuning. The Phase 10 composed full objective and lightweight within-class query-residual diversity penalty passed a 500-iteration GPU smoke test and are ready for the controlled 40k run.
+The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. The next controlled study is the Phase 11 photometric-versus-Fourier style ablation.
 
 ## Working directories
 
