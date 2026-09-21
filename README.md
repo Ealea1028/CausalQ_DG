@@ -1,5 +1,9 @@
 # CausalQ-DG
 
+New contributors should begin with the standalone Chinese project guide:
+[`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md). It separates the implemented
+method and verified results from the proposed next-generation theory roadmap.
+
 Counterfactual Query Effect Distillation for domain-generalized semantic segmentation.
 
 The project studies whether the prediction effect of class-specific semantic queries can remain stable under appearance-only interventions. The first implementation target is a frozen DINOv3 ViT-L/16 backbone with a lightweight segmentation head and a grouped causal-query residual branch.
