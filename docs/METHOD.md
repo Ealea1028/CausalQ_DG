@@ -92,3 +92,9 @@ final-iteration result remains the primary comparison. Fourier-only reaches
 The Fourier result is decisive at seed 0. The combined-versus-photometric gap
 is below the project's 0.5-point repeat threshold, so those two variants must
 be repeated with seeds 1 and 2 before drawing the final style conclusion.
+
+The combined-view seed-1 repeat is numerically stable and reaches `0.651021`
+final Cityscapes mIoU. Its learned residual scale is negative, which is valid
+for the unconstrained alpha parameter and does not indicate instability. The
+paired photometric-only seed-1 result is required before any cross-seed style
+comparison is made.

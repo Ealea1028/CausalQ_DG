@@ -32,3 +32,6 @@ at `0.627076`, versus `0.639610` for combined-view A2. Fourier-only is clearly
 inferior at seed 0. The combined-versus-photometric gap is only 0.1324 points,
 so repeat those two variants at seeds 1 and 2 and report paired mean and standard
 deviation before closing Phase 11.
+
+Combined-view seed 1 is complete at `0.651021` final Cityscapes mIoU. Run the
+paired photometric-only seed 1 next, then repeat the same pair at seed 2.
