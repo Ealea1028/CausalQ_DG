@@ -1,42 +1,42 @@
 # Next AutoDL action
 
-Status: the Phase 12 `R=1,2,4` query-count smoke tests passed at `be450a1`.
-Run only the seed-0 `R=1` 40k experiment next. The selected photometric-only
-style protocol remains fixed, and the existing seed-0 `R=3` result
-(`0.6382865707103561` final Cityscapes mIoU) is the reference. Do not launch
-`R=2` or `R=4` full training in this step.
+Status: the Phase 12 seed-0 R=1 full run completed stably at `0.603711`
+Cityscapes mIoU, 3.4576 percentage points below the fixed photometric-only R=3
+reference. Retain R=1 as a negative capacity ablation. Run only the seed-0 R=2
+40k experiment next; do not launch R=4 in this step.
 
-## Reclaim the three smoke checkpoints
+## Reclaim R=1 intermediate-checkpoint space
 
-Each smoke is already recorded in Git. Validate the exact paths and artifacts,
-then remove only the three `iter_000500.pth` files.
+Retain the final R=1 checkpoint and delete only its 79 intermediates.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 
-for QUERY_COUNT in 1 2 4; do
-  RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/Q${QUERY_COUNT}_QUERY_COUNT_SMOKE_500_be450a1"
-  RESOLVED="$(realpath "$RUN_DIR")"
-  EXPECTED="/root/autodl-tmp/outputs/CausalQ_DG/Q${QUERY_COUNT}_QUERY_COUNT_SMOKE_500_be450a1"
+R1_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q1_QUERY_COUNT_SEED0_40000_9f47726
+R1_RESOLVED="$(realpath "$R1_RUN")"
 
-  test "$RESOLVED" = "$EXPECTED"
-  test -f "$RUN_DIR/metadata.json"
-  test -f "$RUN_DIR/summary.json"
-  test -f "$RUN_DIR/checkpoints/iter_000500.pth"
-  test "$(find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
-  du -sh "$RUN_DIR/checkpoints"
-done
+case "$R1_RESOLVED" in
+  /root/autodl-tmp/outputs/CausalQ_DG/Q1_QUERY_COUNT_SEED0_40000_9f47726) ;;
+  *) echo "unsafe path: $R1_RESOLVED"; exit 1 ;;
+esac
+
+test -f "$R1_RUN/metadata.json"
+test -f "$R1_RUN/summary.json"
+test -f "$R1_RUN/checkpoints/iter_040000.pth"
+test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
+test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
+du -sh "$R1_RUN/checkpoints"
 ```
 
-Only after all checks above succeed:
+Only after every check succeeds:
 
 ```bash
-for QUERY_COUNT in 1 2 4; do
-  RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/Q${QUERY_COUNT}_QUERY_COUNT_SMOKE_500_be450a1"
-  rm -- "$RUN_DIR/checkpoints/iter_000500.pth"
-  test "$(find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 0
-done
+find "$R1_RUN/checkpoints" -maxdepth 1 -type f \
+  -name 'iter_*.pth' ! -name 'iter_040000.pth' -delete
 
+test -f "$R1_RUN/checkpoints/iter_040000.pth"
+test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
+du -sh "$R1_RUN/checkpoints"
 df -h /root/autodl-tmp
 ```
 
@@ -59,7 +59,7 @@ python tools/check_environment.py
 python -m pytest
 ```
 
-Verify the single-variable protocol and pretrained checkpoint:
+Verify that only query count changes from the accepted control:
 
 ```bash
 python - <<'PY'
@@ -69,7 +69,7 @@ from tools.train import load_config, resolve_query_count, resolve_seed, style_vi
 config = load_config(Path("configs/query_count/gta_dinov3l.yaml"))
 assert config["experiment"]["phase"] == 12
 assert resolve_seed(config, None) == 0
-assert resolve_query_count(config, 1) == 1
+assert resolve_query_count(config, 2) == 2
 assert style_view_weights(config["style"]) == {
     "original": 1.0,
     "photometric": 1.0,
@@ -77,7 +77,7 @@ assert style_view_weights(config["style"]) == {
 assert "prediction_consistency" not in config
 assert "causal_query_effect" not in config
 assert "query_diversity" not in config
-print("PHASE12_R1_FULL_GATES_OK")
+print("PHASE12_R2_FULL_GATES_OK")
 PY
 
 sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
@@ -87,25 +87,25 @@ df -h /root/autodl-tmp
 The DINOv3 hash must be
 `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
 
-## Run the R=1 full experiment
+## Run the R=2 full experiment
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
 
 export OMP_NUM_THREADS=1
-export QUERY_COUNT=1
+export QUERY_COUNT=2
 export MAX_ITERATIONS=40000
 export VALIDATION_MAX_SAMPLES=500
 export SEED=0
 
-test "$QUERY_COUNT" -eq 1
+test "$QUERY_COUNT" -eq 2
 test "$MAX_ITERATIONS" -eq 40000
 test "$VALIDATION_MAX_SAMPLES" -eq 500
 test "$SEED" -eq 0
 
 RUN_SHA="$(git rev-parse --short HEAD)"
-RUN_ID="Q1_QUERY_COUNT_SEED0_40000_${RUN_SHA}"
+RUN_ID="Q2_QUERY_COUNT_SEED0_40000_${RUN_SHA}"
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
 
@@ -124,7 +124,7 @@ test -f "$RUN_DIR/summary.json"
 
 Do not interrupt training. Continue only after `train_exit_code=0`.
 
-## Extract R=1 evidence
+## Extract R=2 evidence
 
 ```bash
 python - "$RUN_DIR" <<'PY'
@@ -150,7 +150,7 @@ errors = [
 assert metadata["phase"] == 12
 assert metadata["seed"] == 0
 assert metadata["max_iterations"] == 40000
-assert metadata["query"]["queries_per_class"] == 1
+assert metadata["query"]["queries_per_class"] == 2
 assert metadata["style"]["views"] == ["original", "photometric"]
 assert "prediction_consistency" not in metadata
 assert "causal_query_effect" not in metadata
@@ -182,12 +182,15 @@ print("===== validation =====")
 print("validation_count:", len(validations))
 print("final_validation:", validations[-1])
 print("best_validation:", max(validations, key=lambda row: row["miou"]))
-print("===== R=3 reference comparison =====")
-reference = 0.6382865707103561
-candidate = validations[-1]["miou"]
-print("r1_miou:", candidate)
-print("r3_photometric_miou:", reference)
-print("r1_minus_r3:", candidate - reference)
+print("===== current query-count comparison =====")
+r1 = 0.6037110117161197
+r2 = validations[-1]["miou"]
+r3 = 0.6382865707103561
+print("r1_miou:", r1)
+print("r2_miou:", r2)
+print("r3_photometric_miou:", r3)
+print("r2_minus_r1:", r2 - r1)
+print("r2_minus_r3:", r2 - r3)
 PY
 
 CHECKPOINT_COUNT="$(
@@ -223,19 +226,18 @@ df -h /root/autodl-tmp
 
 ## Acceptance criteria
 
-- The three smoke checkpoint files are removed only after their summaries and
-  exact paths are validated.
-- The exact handoff SHA is checked out with clean Git status, all tests pass,
-  and the DINOv3 hash matches.
-- R=1 metadata records Phase 12, seed 0, 40,000 iterations, query count 1, and
+- R=1 cleanup retains only `iter_040000.pth` and recovers roughly 15 GiB.
+- Exact handoff SHA, clean Git status, passing tests, and the expected DINOv3
+  hash are recorded.
+- R=2 metadata records Phase 12, seed 0, 40,000 iterations, query count 2, and
   only original/photometric views.
 - No prediction consistency, CQE, or query-diversity configuration is present.
-- Exit code is zero; all 40,000 records and component values are finite and
+- Exit code is zero; all 40,000 records and tracked values are finite and
   contiguous; objective reconstruction error is below `1e-5`.
 - There are 80 complete 500-image validations and 80 checkpoints, including
   `iter_040000.pth`.
-- Final and best Cityscapes mIoU, the fixed R=3 comparison, exact Git SHA, and
-  disk status are printed.
+- Final/best mIoU and comparisons against R=1 and R=3 are printed with exact
+  Git SHA and disk status.
 
-Return all R=1 evidence. Stop after this experiment: do not delete its
-checkpoints and do not start R=2 or R=4 until R=1 has been recorded in Git.
+Return all R=2 evidence. Stop afterward: do not delete its checkpoints and do
+not launch R=4 until R=2 is recorded in Git.

@@ -129,3 +129,9 @@ excluding every auxiliary consistency loss. Peak reserved memory remained
 between `2.434` and `2.438 GiB`. Their short-run mIoU values are diagnostic only
 and are not used for model selection. Full runs proceed one query count at a
 time, beginning with `R=1`.
+
+The R=1 full run is stable but reaches only `0.603711` final Cityscapes mIoU,
+compared with `0.638287` for the fixed photometric-only R=3 reference. The
+3.4576-point deficit occurs despite 40,000 finite contiguous records, exact
+objective reconstruction, and the intended isolated protocol, so R=1 is
+retained as a negative capacity ablation. Phase 12 continues with R=2.

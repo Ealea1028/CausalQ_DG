@@ -326,7 +326,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 9 | A4 CQE 与效应方差分析 | 完成，结果为负 |
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
-| Phase 12 | Query 数量消融（R=1/2/3/4） | R=1/2/4 GPU smoke 通过，等待 R=1 full run |
+| Phase 12 | Query 数量消融（R=1/2/3/4） | R=1 full 为 60.37%，等待 R=2 full run |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -553,7 +553,7 @@ python -m pytest
 3. 现有 photometric-only `R=3` 作为参考；
 4. `R=4`。
 
-`R=1/2/4` 的 500-iteration GPU smoke 已全部通过：三个运行均有连续有限轨迹、精确的目标函数重构、正确的机制隔离，峰值 reserved 显存不超过 `2.438 GiB`。短 smoke 的 50 图 mIoU 不用于 Query 数量排序。接下来逐个执行 40k full run，先运行 `R=1`，完成并归档后再放行 `R=2`。
+`R=1/2/4` 的 500-iteration GPU smoke 已全部通过。R=1 full run 也完成且数值稳定，最终 Cityscapes mIoU 为 `0.603711`，比固定的 R=3 photometric-only 参考低 3.4576 pp。这是有效的负容量消融，不是运行失败。下一步清理 R=1 的 79 个中间 checkpoint、保留最终 checkpoint，然后运行 R=2 full run；R=4 仍未放行。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 

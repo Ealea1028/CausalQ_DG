@@ -57,3 +57,8 @@ The `R=1,2,4` GPU smokes passed at `be450a1` with finite contiguous traces,
 exact objective reconstruction, correct mechanism isolation, and less than
 `2.44 GiB` peak reserved memory. Proceed to 40k runs sequentially, beginning
 with `R=1`; do not interpret the 50-image smoke mIoU as an ablation result.
+
+R=1 completes stably at `0.603711` final Cityscapes mIoU, 3.4576 percentage
+points below the fixed R=3 photometric-only reference. Retain this as a negative
+capacity result, reclaim its intermediate checkpoints after recording, and run
+R=2 next under the identical seed-0 protocol.
