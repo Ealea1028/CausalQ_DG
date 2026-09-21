@@ -6,7 +6,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. In Phase 11, seed-0 photometric-only reached 63.83% and Fourier-only 62.71% Cityscapes mIoU, versus 63.96% for combined-view A2. Because the combined-versus-photometric gap is below 0.5 points, paired seeds 1 and 2 are required; combined seed 1 is complete at 65.10%, and photometric-only seed 1 is next.
+The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. In Phase 11, seed-0 photometric-only reached 63.83% and Fourier-only 62.71% Cityscapes mIoU, versus 63.96% for combined-view A2. At seed 1, combined reaches 65.10% and photometric-only 65.15%, reversing their seed-0 ordering. The seed-2 pair is therefore required before closing the style ablation.
 
 ## Working directories
 

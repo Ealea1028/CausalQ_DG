@@ -35,3 +35,7 @@ deviation before closing Phase 11.
 
 Combined-view seed 1 is complete at `0.651021` final Cityscapes mIoU. Run the
 paired photometric-only seed 1 next, then repeat the same pair at seed 2.
+
+Photometric-only seed 1 completes at `0.651486`, 0.0465 percentage points above
+its paired combined-view run. Proceed with combined seed 2 followed by
+photometric-only seed 2.

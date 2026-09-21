@@ -98,3 +98,8 @@ final Cityscapes mIoU. Its learned residual scale is negative, which is valid
 for the unconstrained alpha parameter and does not indicate instability. The
 paired photometric-only seed-1 result is required before any cross-seed style
 comparison is made.
+
+Photometric-only seed 1 reaches `0.651486`, exceeding the paired combined-view
+result by 0.0465 percentage points. This reverses the seed-0 ordering, where
+combined led by 0.1324 points. The seed-2 pair is therefore necessary for the
+prespecified three-seed mean and standard deviation.
