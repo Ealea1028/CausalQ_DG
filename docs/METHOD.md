@@ -121,3 +121,11 @@ Phase 12 fixes the selected photometric-only style protocol and seed 0 while
 varying only the number of residual queries per class: `R=1,2,4`. The existing
 photometric-only `R=3` seed-0 run is the reference. Initial GPU work is limited
 to 500-iteration smoke tests before any 40k run.
+
+All three isolated smoke tests passed at commit `be450a1`. Each produced 500
+contiguous finite records, exact objective reconstruction, one 50-image
+validation, and one checkpoint, while preserving the intended query count and
+excluding every auxiliary consistency loss. Peak reserved memory remained
+between `2.434` and `2.438 GiB`. Their short-run mIoU values are diagnostic only
+and are not used for model selection. Full runs proceed one query count at a
+time, beginning with `R=1`.

@@ -52,3 +52,8 @@ at seed 1, use photometric-only as the parsimonious default.
 Phase 12 varies residual queries per class at `R=1,2,4`, holding the selected
 photometric-only protocol fixed. The existing seed-0 `R=3` result is the
 reference. Run isolated 500-iteration smokes before full training.
+
+The `R=1,2,4` GPU smokes passed at `be450a1` with finite contiguous traces,
+exact objective reconstruction, correct mechanism isolation, and less than
+`2.44 GiB` peak reserved memory. Proceed to 40k runs sequentially, beginning
+with `R=1`; do not interpret the 50-image smoke mIoU as an ablation result.

@@ -1,0 +1,73 @@
+{
+  "status": "smoke_passed",
+  "git_sha": "be450a19eb457bac91b9f61a8f56d52bb3f689dd",
+  "gpu": "NVIDIA GeForce RTX 4090 D",
+  "pytorch": "2.7.0+cu126",
+  "cuda": "12.6",
+  "pretrained_checkpoint_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+  "protocol": {
+    "phase": 12,
+    "seed": 0,
+    "max_iterations": 500,
+    "validation_samples": 50,
+    "views": [
+      "original",
+      "photometric"
+    ],
+    "query_counts": [
+      1,
+      2,
+      4
+    ]
+  },
+  "runs": {
+    "R1": {
+      "experiment_id": "Q1_QUERY_COUNT_SMOKE_500_be450a1",
+      "total_parameters": 319506196,
+      "trainable_parameters": 16376596,
+      "elapsed_seconds": 48.29,
+      "first_20_loss_mean": 3.6638104990124702,
+      "last_20_loss_mean": 0.824628428556025,
+      "last_gradient_norm_pre_clip": 66.73026275634766,
+      "final_alpha": 0.024316607043147087,
+      "peak_allocated_gib": 1.725,
+      "peak_reserved_gib": 2.434,
+      "cityscapes_50_image_miou": 0.3498688722286492
+    },
+    "R2": {
+      "experiment_id": "Q2_QUERY_COUNT_SMOKE_500_be450a1",
+      "total_parameters": 319525652,
+      "trainable_parameters": 16396052,
+      "elapsed_seconds": 44.76,
+      "first_20_loss_mean": 4.077460178732872,
+      "last_20_loss_mean": 1.0306823225691915,
+      "last_gradient_norm_pre_clip": 2.068988561630249,
+      "final_alpha": -0.024132991209626198,
+      "peak_allocated_gib": 1.725,
+      "peak_reserved_gib": 2.436,
+      "cityscapes_50_image_miou": 0.3246594454683276
+    },
+    "R4": {
+      "experiment_id": "Q4_QUERY_COUNT_SMOKE_500_be450a1",
+      "total_parameters": 319564564,
+      "trainable_parameters": 16434964,
+      "elapsed_seconds": 41.54,
+      "first_20_loss_mean": 4.225029091536999,
+      "last_20_loss_mean": 0.7911541238892823,
+      "last_gradient_norm_pre_clip": 2.374575614929199,
+      "final_alpha": 0.02374717779457569,
+      "peak_allocated_gib": 1.726,
+      "peak_reserved_gib": 2.438,
+      "cityscapes_50_image_miou": 0.3330642489945168
+    }
+  },
+  "checks": {
+    "all_ok": true,
+    "records_per_run": 500,
+    "iterations_contiguous": true,
+    "all_tracked_values_finite": true,
+    "maximum_objective_reconstruction_error": 0.0,
+    "checkpoints_per_run": 1,
+    "auxiliary_losses_absent": true
+  }
+}
