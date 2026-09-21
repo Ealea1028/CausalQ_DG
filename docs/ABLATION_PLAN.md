@@ -39,3 +39,7 @@ paired photometric-only seed 1 next, then repeat the same pair at seed 2.
 Photometric-only seed 1 completes at `0.651486`, 0.0465 percentage points above
 its paired combined-view run. Proceed with combined seed 2 followed by
 photometric-only seed 2.
+
+Combined-view seed 2 completes at `0.629514`. Run photometric-only seed 2 next;
+then compute paired three-seed mean, sample standard deviation, and per-seed
+differences to close Phase 11.

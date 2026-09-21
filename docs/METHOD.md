@@ -103,3 +103,8 @@ Photometric-only seed 1 reaches `0.651486`, exceeding the paired combined-view
 result by 0.0465 percentage points. This reverses the seed-0 ordering, where
 combined led by 0.1324 points. The seed-2 pair is therefore necessary for the
 prespecified three-seed mean and standard deviation.
+
+Combined-view seed 2 reaches `0.629514` final Cityscapes mIoU. Its last logged
+gradient norm is a finite pre-clipping value; the fixed max-norm `1.0` clip is
+applied before the optimizer step. The run otherwise satisfies every stability
+and provenance gate. Photometric-only seed 2 is the remaining paired run.
