@@ -108,3 +108,16 @@ Combined-view seed 2 reaches `0.629514` final Cityscapes mIoU. Its last logged
 gradient norm is a finite pre-clipping value; the fixed max-norm `1.0` clip is
 applied before the optimizer step. The run otherwise satisfies every stability
 and provenance gate. Photometric-only seed 2 is the remaining paired run.
+
+The completed paired comparison gives combined `0.640048 ± 0.010760` and
+photometric-only `0.636201 ± 0.016427` final Cityscapes mIoU. The paired
+combined-minus-photometric difference is `0.003847 ± 0.005987`, changes sign at
+seed 1, and is too unstable to support a superiority claim. Photometric-only is
+selected as the lower-cost default; combined and Fourier remain ablations.
+
+## Query-count ablation
+
+Phase 12 fixes the selected photometric-only style protocol and seed 0 while
+varying only the number of residual queries per class: `R=1,2,4`. The existing
+photometric-only `R=3` seed-0 run is the reference. Initial GPU work is limited
+to 500-iteration smoke tests before any 40k run.

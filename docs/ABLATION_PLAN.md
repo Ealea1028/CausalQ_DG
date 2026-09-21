@@ -43,3 +43,12 @@ photometric-only seed 2.
 Combined-view seed 2 completes at `0.629514`. Run photometric-only seed 2 next;
 then compute paired three-seed mean, sample standard deviation, and per-seed
 differences to close Phase 11.
+
+Phase 11 is complete. Combined obtains `0.640048 ± 0.010760`, photometric-only
+`0.636201 ± 0.016427`, and their paired difference is
+`0.003847 ± 0.005987`. Because the difference is small, variable, and reverses
+at seed 1, use photometric-only as the parsimonious default.
+
+Phase 12 varies residual queries per class at `R=1,2,4`, holding the selected
+photometric-only protocol fixed. The existing seed-0 `R=3` result is the
+reference. Run isolated 500-iteration smokes before full training.

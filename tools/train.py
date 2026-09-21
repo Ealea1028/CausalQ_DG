@@ -1,4 +1,4 @@
-"""Train the Phase-5--11 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--12 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -37,6 +37,11 @@ from causalq.utils.checkpoint import save_training_checkpoint
 from causalq.utils.seed import seed_everything
 
 
+SUPPORTED_PHASES = frozenset(range(5, 13))
+QUERY_PHASES = frozenset(range(6, 13))
+STYLE_PHASES = frozenset(range(7, 13))
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--config", type=Path, required=True)
@@ -44,6 +49,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-iterations", type=int)
     parser.add_argument("--validation-max-samples", type=int)
     parser.add_argument("--seed", type=int)
+    parser.add_argument("--queries-per-class", type=int)
     return parser.parse_args()
 
 
@@ -68,44 +74,58 @@ def resolve_seed(config: dict[str, Any], override: int | None) -> int:
     return seed
 
 
+def resolve_query_count(config: dict[str, Any], override: int | None) -> int:
+    configured = int(config["query"]["queries_per_class"])
+    query_count = configured if override is None else int(override)
+    phase = int(config["experiment"]["phase"])
+    if phase == 12:
+        if query_count not in (1, 2, 4):
+            raise ValueError("Phase 12 query-count runs require R in {1, 2, 4}")
+    elif override is not None and query_count != configured:
+        raise ValueError("Query-count overrides are reserved for Phase 12")
+    return query_count
+
+
 def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
-    if phase not in (5, 6, 7, 8, 9, 10, 11):
-        raise ValueError("tools/train.py accepts only Phase 5--11 configs")
+    if phase not in SUPPORTED_PHASES:
+        raise ValueError("tools/train.py accepts only Phase 5--12 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
     query_enabled = bool(config["model"].get("query", False))
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
-    if phase in (6, 7, 8, 9, 10, 11) and not query_enabled:
-        raise ValueError("Phase 6--11 requires the query branch")
-    if phase in (6, 7, 8, 9, 10, 11) and "query" not in config:
-        raise ValueError("Phase 6--11 requires query configuration")
-    if phase in (6, 7, 8, 9, 10, 11) and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--11 currently requires logsumexp query aggregation")
-    if phase in (7, 8, 9, 10, 11):
+    if phase in QUERY_PHASES and not query_enabled:
+        raise ValueError("Phase 6--12 requires the query branch")
+    if phase in QUERY_PHASES and "query" not in config:
+        raise ValueError("Phase 6--12 requires query configuration")
+    if phase in QUERY_PHASES and config["query"].get("aggregation") != "logsumexp":
+        raise ValueError("Phase 6--12 currently requires logsumexp query aggregation")
+    if phase in STYLE_PHASES:
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7--11 requires style training")
+            raise ValueError("Phase 7--12 requires style training")
         views = style.get("views")
-        if phase == 11:
+        if phase in (11, 12):
             allowed = (
                 ["original", "photometric"],
                 ["original", "fourier"],
             )
             if views not in allowed:
-                raise ValueError("Phase 11 requires exactly one counterfactual view")
+                raise ValueError("Phase 11/12 requires exactly one counterfactual view")
         elif views != ["original", "photometric", "fourier"]:
             raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
-            raise ValueError("Phase 7--10 requires geometry-preserving style views")
+            raise ValueError("Style phases require geometry-preserving style views")
         if not style.get("sequential_forward", False):
-            raise ValueError("Phase 7--10 requires sequential style forwards")
+            raise ValueError("Style phases require sequential style forwards")
         if float(style.get("lambda_cf", 0.0)) < 0:
             raise ValueError("style.lambda_cf must be non-negative")
+    if phase == 12 and int(config["query"]["queries_per_class"]) not in (1, 2, 4):
+        raise ValueError("Phase 12 query-count configs require R in {1, 2, 4}")
     prediction = config.get("prediction_consistency", {})
     prediction_enabled = bool(prediction.get("enabled", False))
     if phase < 8 and prediction_enabled:
@@ -169,8 +189,10 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
         if float(diversity.get("lambda_div", -1.0)) != 0.01:
             raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
-    if phase == 11 and (prediction_enabled or cqe_enabled or diversity_enabled):
-        raise ValueError("Phase 11 style ablations disable all consistency losses")
+    if phase in (11, 12) and (
+        prediction_enabled or cqe_enabled or diversity_enabled
+    ):
+        raise ValueError("Phase 11/12 ablations disable all consistency losses")
     return config
 
 
@@ -226,9 +248,14 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5--9 training requires CUDA")
+        raise RuntimeError("Phase 5--12 training requires CUDA")
 
     seed = resolve_seed(config, args.seed)
+    query_count = (
+        resolve_query_count(config, args.queries_per_class)
+        if int(config["experiment"]["phase"]) != 5
+        else None
+    )
     seed_everything(seed)
     torch.backends.cuda.matmul.allow_tf32 = True
 
@@ -250,10 +277,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5--9 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5--12 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5--9 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5--12 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -288,7 +315,7 @@ def main() -> int:
         model = QuerySegmentor(
             backbone,
             **common_model_options,
-            queries_per_class=int(query_config["queries_per_class"]),
+            queries_per_class=int(query_count),
             num_heads=int(query_config["num_heads"]),
             cross_attention_layers=int(query_config["cross_attention_layers"]),
             temperature=float(query_config["temperature"]),
@@ -299,7 +326,7 @@ def main() -> int:
 
     style_bank = None
     phase = int(config["experiment"]["phase"])
-    if phase in (7, 8, 9, 10, 11):
+    if phase in STYLE_PHASES:
         style_config = config["style"]
         photo_config = style_config["photometric"]
         fourier_config = style_config["fourier"]

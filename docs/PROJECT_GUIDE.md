@@ -5,9 +5,9 @@
 ## 1. 文档状态与阅读约定
 
 - 当前基准日期：2026-09-21。
-- 当前代码基线：`main` 分支，提交 `fe41a138d1a56ce0b0a41641ca79eaf6ca5d5b8f`。
+- 当前 Phase 11 最终实验证据提交：`4662cbadd4553728e521c351682da53545996a03`。
 - 当前已完成主实验：A0–A5。
-- 当前进行中：Phase 11 风格消融，尚缺 seed 2 的 combined 与 photometric 配对实验。
+- Phase 11 风格消融已完成；当前进行中为 Phase 12 Query 数量消融。
 - 本文中的“已实现”“已验证”只指已进入 Git 并有实验证据的内容。
 - 本文中的“建议”“下一版”“拟议”均不是当前实现或现有实验结论。
 
@@ -308,7 +308,7 @@ seed 1：
 | Combined | 65.10% |
 | Photometric only | 65.15% |
 
-seed 0 中 combined 比 photometric 高 0.1324 pp，但 seed 1 中 photometric 反而高 0.0465 pp。两者差距很小且排序翻转，因此必须完成 seed 2 配对实验，再报告配对均值与标准差。Fourier-only 在 seed 0 明显较弱，但不能据此断言 Fourier 在联合训练中没有互补价值。
+seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总后，combined 为 `64.00 ± 1.08%`，photometric-only 为 `63.62 ± 1.64%`；配对差为 `+0.38 ± 0.60 pp`，且 seed 1 排序翻转。该证据不支持 combined 稳定优于 photometric-only。按预设决策树，后续优先采用计算更低的 photometric-only，combined 与 Fourier 保留为消融证据。
 
 ## 11. 项目进度总览
 
@@ -325,7 +325,8 @@ seed 0 中 combined 比 photometric 高 0.1324 pp，但 seed 1 中 photometric �
 | Phase 8 | A3 Prediction Consistency | 完成 |
 | Phase 9 | A4 CQE 与效应方差分析 | 完成，结果为负 |
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
-| Phase 11 | 风格消融与多种子复验 | 进行中，缺 seed 2 配对 |
+| Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
+| Phase 12 | Query 数量消融（R=1/2/3/4） | 本地实现完成，等待 GPU smoke |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -543,18 +544,20 @@ python -m pytest
 
 原始数据、权重、完整 checkpoints 和完整运行目录不进入 Git。Git 只保存精简后的 `summary.json`、必要日志摘录、运行清单和 `experiments/registry.csv`。
 
-## 18. 当前下一步：完成 Phase 11
+## 18. 当前下一步：Phase 12 Query 数量消融
 
-当前唯一应继续的 GPU 工作是 seed 2 配对：
+固定已选择的 photometric-only 风格协议与 seed 0，仅改变每类 residual Query 数量：
 
-1. combined A2 seed 2；
-2. photometric-only seed 2；
-3. 汇总 seeds 0/1/2 的 paired mean、standard deviation 和差值；
-4. 决定 combined 是否真的优于 photometric-only。
+1. `R=1`；
+2. `R=2`；
+3. 现有 photometric-only `R=3` 作为参考；
+4. `R=4`。
+
+先运行 `R=1/2/4` 的 500-iteration GPU smoke，验证配置隔离、张量形状、数值稳定性和显存；smoke 全部通过后才允许逐个执行 40k full run。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
-Phase 11 的结束判据不是“seed 2 跑完”本身，而是得到三组配对结果并形成可复核的统计结论。
+Query 数量实验除 mIoU 外，还应在 full run 后比较 query similarity、active-query 行为和 query-effect variance，避免仅凭容量变化解释结果。
 
 ## 19. 创新点：已经成立与仍待验证
 
@@ -564,7 +567,7 @@ Phase 11 的结束判据不是“seed 2 跑完”本身，而是得到三组配�
 
 **显式可分离的 Query logit 残差。** 基础预测与 Query 贡献在结构上分开，`alpha=0` 的初始化保证安全接入，也使类级零消融无需重跑主干。这是后续机制分析的工程基础。
 
-**保持几何的双路径风格干预。** Photometric 处理颜色与成像变化，Fourier 处理频谱幅度变化；A2 比 A1 提高 2.01 pp。虽然 combined 相对 photo-only 的优势尚未通过三种子确认，但“加入风格监督整体有效”已经由 A2 对 A1 支持。
+**保持几何的风格干预。** Photometric 处理颜色与成像变化，Fourier 处理频谱幅度变化；A2 比 A1 提高 2.01 pp。三 seed 消融未证明 combined 稳定优于 photo-only，因此后续默认使用更简洁的 photometric-only，双风格结果保留为受控消融。
 
 **将机制稳定性与任务性能分开测量。** A4 展示了 99.47% 方差降低却伴随显著精度下降。这一结果否定了“稳定性指标降低即可证明机制更好”的简单叙事，是有价值的机制诊断。
 
@@ -600,11 +603,13 @@ Specificity：移除/替换该机制是否真的破坏对应语义证据？
 ## 20. 后续研究决策树
 
 ```text
-完成 Phase 11 三种子配对
+Phase 11：差异不稳定/极小
   |
-  +-- combined 稳定优于 photo --> 保留双风格方案
+  v
+优先 photo，combined/Fourier 作为消融
   |
-  +-- 差异不稳定/极小 --------> 优先 photo，Fourier 作为消融
+  v
+完成 Query 数量 R=1/2/3/4 消融
   |
   v
 冻结可复现的 A2 强基线
@@ -682,7 +687,7 @@ python -m pytest
 
 **误区 6：单个 seed 的微小差异足以决定风格方案。**
 
-错误。seed 0/1 已出现排序翻转，必须完成 seed 2 配对。
+错误。seed 0/1 排序翻转，三 seed 配对后仍未得到稳定优势，因此项目选择更简洁的 photometric-only，而不是放大微小均值差。
 
 ## 23. 完成标准
 

@@ -1,44 +1,53 @@
 # Next AutoDL action
 
-Status: combined-view A2 seed 2 completed at `0.629514` Cityscapes mIoU. Run the paired photometric-only S1 seed 2 next. This is the final GPU run needed to close Phase 11. First retain the A2 seed-2 final checkpoint and reclaim its 79 intermediates.
+Status: Phase 11 is complete. Across paired seeds 0/1/2, combined style reaches
+`0.640048 +/- 0.010760` Cityscapes mIoU and photometric-only reaches
+`0.636201 +/- 0.016427`. The paired advantage of combined style is small,
+variable, and reverses at seed 1, so Phase 12 uses photometric-only as the
+parsimonious control. Run only the three 500-iteration query-count smoke tests
+below. Do not start a 40k query-count run yet.
 
-## Reclaim A2 seed-2 intermediate-checkpoint space
+## Reclaim the completed Phase-11 intermediates
+
+Keep the final checkpoint and delete only the 79 intermediate checkpoints from
+the completed photometric-only seed-2 run.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 git rev-parse HEAD
 git status --short
 
-A2S2_RUN=/root/autodl-tmp/outputs/CausalQ_DG/A2_QUERY_STYLE_SEED2_40000_fe41a13
-A2S2_RESOLVED="$(realpath "$A2S2_RUN")"
+S1S2_RUN=/root/autodl-tmp/outputs/CausalQ_DG/S1_STYLE_PHOTO_SEED2_40000_4662cba
+S1S2_RESOLVED="$(realpath "$S1S2_RUN")"
 
-case "$A2S2_RESOLVED" in
-  /root/autodl-tmp/outputs/CausalQ_DG/A2_QUERY_STYLE_SEED2_40000_fe41a13) ;;
-  *) echo "unsafe path: $A2S2_RESOLVED"; exit 1 ;;
+case "$S1S2_RESOLVED" in
+  /root/autodl-tmp/outputs/CausalQ_DG/S1_STYLE_PHOTO_SEED2_40000_4662cba) ;;
+  *) echo "unsafe path: $S1S2_RESOLVED"; exit 1 ;;
 esac
 
-test -f "$A2S2_RUN/summary.json"
-test -f "$A2S2_RUN/checkpoints/iter_040000.pth"
-test "$(find "$A2S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
-test "$(find "$A2S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
-du -sh "$A2S2_RUN/checkpoints"
+test -f "$S1S2_RUN/summary.json"
+test -f "$S1S2_RUN/checkpoints/iter_040000.pth"
+test "$(find "$S1S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
+test "$(find "$S1S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
+du -sh "$S1S2_RUN/checkpoints"
 ```
 
-The Git SHA must be `fe41a138d1a56ce0b0a41641ca79eaf6ca5d5b8f` and status must be empty. Only after all checks succeed:
+The Git SHA must be `4662cbadd4553728e521c351682da53545996a03` and status
+must be empty. Only after every check above succeeds:
 
 ```bash
-find "$A2S2_RUN/checkpoints" -maxdepth 1 -type f \
+find "$S1S2_RUN/checkpoints" -maxdepth 1 -type f \
   -name 'iter_*.pth' ! -name 'iter_040000.pth' -delete
 
-test -f "$A2S2_RUN/checkpoints/iter_040000.pth"
-test "$(find "$A2S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
-du -sh "$A2S2_RUN/checkpoints"
+test -f "$S1S2_RUN/checkpoints/iter_040000.pth"
+test "$(find "$S1S2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
+du -sh "$S1S2_RUN/checkpoints"
 df -h /root/autodl-tmp
 ```
 
 ## Checkout and preflight
 
-Replace `<EXACT_SHA_FROM_HANDOFF>` with the exact handoff SHA.
+Replace `<EXACT_SHA_FROM_HANDOFF>` with the exact SHA in the local handoff.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -53,144 +62,163 @@ python tools/check_environment.py
 python -m pytest
 ```
 
-Git status must be empty and all 64 tests must pass. Verify seed 2 and photometric-only weights:
+Git status must be empty and all tests must pass. Verify that Phase 12 changes
+only query count and retains the selected photometric-only control:
 
 ```bash
 python - <<'PY'
 from pathlib import Path
-from tools.train import load_config, resolve_seed, style_view_weights
+from tools.train import load_config, resolve_query_count, resolve_seed, style_view_weights
 
-config = load_config(Path("configs/style_ablation/gta_dinov3l_photo.yaml"))
-assert resolve_seed(config, 2) == 2
+config = load_config(Path("configs/query_count/gta_dinov3l.yaml"))
+assert config["experiment"]["phase"] == 12
+assert resolve_seed(config, None) == 0
 assert style_view_weights(config["style"]) == {
     "original": 1.0,
     "photometric": 1.0,
 }
+for query_count in (1, 2, 4):
+    assert resolve_query_count(config, query_count) == query_count
 assert "prediction_consistency" not in config
 assert "causal_query_effect" not in config
 assert "query_diversity" not in config
-print("S1_SEED2_GATES_OK")
+print("PHASE12_SMOKE_GATES_OK")
 PY
 
 sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
 df -h /root/autodl-tmp
 ```
 
-The DINOv3 hash must be `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
+The DINOv3 hash must be
+`dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
 
-## Run photometric-only S1 seed 2
+## Run the three query-count smoke tests
+
+Run the following block once. It stops on the first failed training process and
+does not overwrite an existing run or log.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
-export MAX_ITERATIONS=40000
-export VALIDATION_MAX_SAMPLES=500
-export SEED=2
+export MAX_ITERATIONS=500
+export VALIDATION_MAX_SAMPLES=50
+export SEED=0
 
-test "$MAX_ITERATIONS" -eq 40000
-test "$VALIDATION_MAX_SAMPLES" -eq 500
-test "$SEED" -eq 2
-echo "max_iterations=$MAX_ITERATIONS"
-echo "validation_max_samples=$VALIDATION_MAX_SAMPLES"
-echo "seed=$SEED"
+test "$MAX_ITERATIONS" -eq 500
+test "$VALIDATION_MAX_SAMPLES" -eq 50
+test "$SEED" -eq 0
 
 RUN_SHA="$(git rev-parse --short HEAD)"
-RUN_ID="S1_STYLE_PHOTO_SEED2_40000_${RUN_SHA}"
-RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
-LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
-
-test ! -e "$RUN_DIR"
-test ! -e "$LOG_FILE"
-
 set -o pipefail
-RUN_ID="$RUN_ID" bash scripts/train_style_photo.sh 2>&1 | tee "$LOG_FILE"
-TRAIN_EXIT=${PIPESTATUS[0]}
-echo "train_exit_code=$TRAIN_EXIT"
+
+for QUERY_COUNT in 1 2 4; do
+  RUN_ID="Q${QUERY_COUNT}_QUERY_COUNT_SMOKE_500_${RUN_SHA}"
+  RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
+  LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
+
+  test ! -e "$RUN_DIR"
+  test ! -e "$LOG_FILE"
+
+  QUERY_COUNT="$QUERY_COUNT" RUN_ID="$RUN_ID" \
+    bash scripts/train_query_count.sh 2>&1 | tee "$LOG_FILE"
+  TRAIN_EXIT=${PIPESTATUS[0]}
+  echo "query_count=$QUERY_COUNT train_exit_code=$TRAIN_EXIT"
+  if [ "$TRAIN_EXIT" -ne 0 ]; then
+    exit "$TRAIN_EXIT"
+  fi
+  test -f "$RUN_DIR/summary.json"
+done
 ```
 
-Do not interrupt the process. Continue only when `train_exit_code=0` and `summary.json` exists.
-
-## Evidence extraction and final paired statistics
+## Extract smoke evidence
 
 ```bash
-python - "$RUN_DIR" <<'PY'
+cd /root/autodl-tmp/CausalQ_DG
+RUN_SHA="$(git rev-parse --short HEAD)"
+
+python - "$RUN_SHA" <<'PY'
 import json
 import math
 from pathlib import Path
-from statistics import mean, stdev
 import sys
 
-run_dir = Path(sys.argv[1])
-metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
-summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
-records = [json.loads(line) for line in (run_dir / "train.jsonl").read_text(
-    encoding="utf-8"
-).splitlines() if line.strip()]
-validations = summary["validation_results"]
-errors = [abs(row["loss"] - (
-    row["loss_original"] + row["loss_photometric"]
-)) for row in records]
+run_sha = sys.argv[1]
+output_root = Path("/root/autodl-tmp/outputs/CausalQ_DG")
 
-print("===== metadata =====")
-print(metadata)
-print("===== summary =====")
-for key in ("ok", "elapsed_seconds", "first_20_loss_mean", "last_20_loss_mean",
-            "finite_losses", "last_gradient_norm", "final_alpha",
-            "peak_allocated_gib", "peak_reserved_gib"):
-    print(f"{key}:", summary[key])
-print("===== trace =====")
-print("record_count:", len(records))
-print("iterations_contiguous:", [row["iteration"] for row in records] == list(range(1, 40001)))
-for key in ("loss", "loss_original", "loss_photometric", "gradient_norm", "alpha"):
-    print(f"all_{key}_finite:", all(math.isfinite(row[key]) for row in records))
-print("maximum_objective_reconstruction_error:", max(errors))
-print("===== validation =====")
-print("validation_count:", len(validations))
-print("final_validation:", validations[-1])
-print("best_validation:", max(validations, key=lambda row: row["miou"]))
+for query_count in (1, 2, 4):
+    run_id = f"Q{query_count}_QUERY_COUNT_SMOKE_500_{run_sha}"
+    run_dir = output_root / run_id
+    metadata = json.loads((run_dir / "metadata.json").read_text(encoding="utf-8"))
+    summary = json.loads((run_dir / "summary.json").read_text(encoding="utf-8"))
+    records = [
+        json.loads(line)
+        for line in (run_dir / "train.jsonl").read_text(encoding="utf-8").splitlines()
+        if line.strip()
+    ]
+    validations = summary["validation_results"]
+    errors = [
+        abs(row["loss"] - (row["loss_original"] + row["loss_photometric"]))
+        for row in records
+    ]
+    checkpoints = list((run_dir / "checkpoints").glob("iter_*.pth"))
 
-combined = [0.639610125136919, 0.6510211122004892, 0.629513840900438]
-photo = [0.6382865707103561, 0.6514857398288119, validations[-1]["miou"]]
-paired = [c - p for c, p in zip(combined, photo)]
-print("===== final three-seed comparison =====")
-print("combined_values:", combined)
-print("photometric_values:", photo)
-print("paired_combined_minus_photo:", paired)
-print("combined_mean:", mean(combined))
-print("combined_sample_std:", stdev(combined))
-print("photometric_mean:", mean(photo))
-print("photometric_sample_std:", stdev(photo))
-print("paired_difference_mean:", mean(paired))
-print("paired_difference_sample_std:", stdev(paired))
+    assert metadata["phase"] == 12
+    assert metadata["seed"] == 0
+    assert metadata["max_iterations"] == 500
+    assert metadata["query"]["queries_per_class"] == query_count
+    assert metadata["style"]["views"] == ["original", "photometric"]
+    assert "prediction_consistency" not in metadata
+    assert "causal_query_effect" not in metadata
+    assert "query_diversity" not in metadata
+    assert summary["ok"] is True
+    assert len(records) == 500
+    assert [row["iteration"] for row in records] == list(range(1, 501))
+    for key in ("loss", "loss_original", "loss_photometric", "gradient_norm", "alpha"):
+        assert all(math.isfinite(row[key]) for row in records), key
+    assert max(errors) < 1e-5
+    assert len(validations) == 1
+    assert validations[0]["sample_count"] == 50
+    assert len(checkpoints) == 1
+    assert (run_dir / "checkpoints" / "iter_000500.pth").is_file()
+
+    print(f"===== R={query_count} metadata =====")
+    print(metadata)
+    print(f"===== R={query_count} summary =====")
+    for key in (
+        "ok", "elapsed_seconds", "first_20_loss_mean", "last_20_loss_mean",
+        "finite_losses", "last_gradient_norm", "final_alpha",
+        "peak_allocated_gib", "peak_reserved_gib",
+    ):
+        print(f"{key}:", summary[key])
+    print("record_count:", len(records))
+    print("maximum_objective_reconstruction_error:", max(errors))
+    print("final_validation:", validations[-1])
+    print("checkpoint_count:", len(checkpoints))
+
+print("PHASE12_ALL_SMOKES_OK")
 PY
 
-CHECKPOINT_COUNT="$(
-  find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l
-)"
-INTERMEDIATE_COUNT="$(
-  find "$RUN_DIR/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l
-)"
-echo "checkpoint_count=$CHECKPOINT_COUNT"
-echo "intermediate_checkpoint_count=$INTERMEDIATE_COUNT"
-du -sh "$RUN_DIR/checkpoints"
-test "$CHECKPOINT_COUNT" -eq 80 && echo "checkpoint_count_ok=true"
-test "$INTERMEDIATE_COUNT" -eq 79 && echo "intermediate_count_ok=true"
-test -f "$RUN_DIR/checkpoints/iter_040000.pth" && echo "final_checkpoint_ok=true"
-
-cd /root/autodl-tmp/CausalQ_DG
+echo "===== provenance ====="
 git rev-parse HEAD
 git status --short
+
+echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
 ## Acceptance criteria
 
-- A2 seed-2 cleanup retains only `iter_040000.pth` and recovers roughly 15 GiB.
-- S1 metadata records seed 2, 40,000 iterations, and original/photometric views with weights `1/1`.
-- Exit code zero, `ok=true`, 40,000 contiguous finite records, reconstruction error `0`, and 80 full validations/checkpoints.
-- No prediction consistency, CQE, or diversity is present.
-- Three-seed paired mean and sample standard deviation are printed.
-- Exact Git SHA, clean status, and disk report are present.
+- The Phase-11 cleanup retains only `iter_040000.pth` and recovers roughly
+  15 GiB.
+- Exact handoff SHA, clean Git status, environment report, test pass, and the
+  expected DINOv3 checksum are recorded.
+- R=1, R=2, and R=4 each finish with exit code zero and `ok=true`.
+- Each run records Phase 12, seed 0, 500 contiguous finite records, its intended
+  query count, and only original/photometric style views.
+- Each objective reconstructs as `loss_original + loss_photometric` within
+  `1e-5`, has one 50-image validation, and produces only `iter_000500.pth`.
+- No prediction consistency, CQE, or query-diversity metadata is present.
 
-Return cleanup output and complete S1 seed-2 evidence. Stop after this run; do not delete its checkpoints until Phase 11 is recorded.
+Return the cleanup output, preflight output, and complete evidence for all three
+smokes. Stop after these smoke tests; do not launch any 40k query-count run.

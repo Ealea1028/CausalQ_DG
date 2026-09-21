@@ -1,0 +1,33 @@
+{
+  "status": "complete",
+  "protocol": "paired_seeds_0_1_2_final_iteration_cityscapes_miou",
+  "combined": {
+    "values": [
+      0.639610125136919,
+      0.6510211122004892,
+      0.629513840900438
+    ],
+    "mean": 0.6400483594126154,
+    "sample_std": 0.010760330694444167
+  },
+  "photometric_only": {
+    "values": [
+      0.6382865707103561,
+      0.6514857398288119,
+      0.6188310685789284
+    ],
+    "mean": 0.6362011263726988,
+    "sample_std": 0.01642691989307767
+  },
+  "paired_combined_minus_photometric": {
+    "values": [
+      0.0013235544265628452,
+      -0.0004646276283226669,
+      0.010682772321509604
+    ],
+    "mean": 0.003847233039916594,
+    "sample_std": 0.005986889569551492
+  },
+  "fourier_only_seed0": 0.6270758293743043,
+  "decision": "prefer_photometric_for_parsimony; retain_combined_and_fourier_as_ablations"
+}

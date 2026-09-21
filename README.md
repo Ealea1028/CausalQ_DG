@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence is complete. Phase 10 A5 was stable at 59.21% Cityscapes mIoU, only 0.037 percentage points above A4 and therefore below the predefined 0.2-point diversity-retention threshold. Query diversity is removed from the final method, while the fixed A5 result is retained. In Phase 11, seed-0 photometric-only reached 63.83% and Fourier-only 62.71% Cityscapes mIoU, versus 63.96% for combined-view A2. At seed 1, combined reaches 65.10% and photometric-only 65.15%, reversing their seed-0 ordering. Combined seed 2 is complete at 62.95%; photometric-only seed 2 is the final run needed to close the style ablation.
+The A0--A5 core sequence and Phase 11 style ablation are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the paired combined advantage is only `0.003847 ± 0.005987` and reverses sign at seed 1. Photometric-only is therefore preferred as the simpler default, with combined and Fourier retained as ablations. Phase 12 query-count ablation is next.
 
 ## Working directories
 
@@ -41,5 +41,6 @@ Local verification is CPU-only. Do not use a local GPU for formal DINOv3-L train
 9. CQE training
 10. Query diversity
 11. Style ablation
+12. Query-count ablation
 
 See `CausalQ_DG_Project_Plan.md` for the complete specification and `docs/AUTODL_NEXT.md` for the next remote action.
