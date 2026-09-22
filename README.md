@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11 style ablation are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the paired combined advantage is only `0.003847 ± 0.005987` and reverses sign at seed 1. Photometric-only is therefore preferred as the simpler default, with combined and Fourier retained as ablations. Phase 12 query-count smokes for `R=1,2,4` passed. The stable R=1 full run reaches `0.603711`, 3.4576 percentage points below the existing photometric-only R=3 reference; R=2 is next.
+The A0--A5 core sequence and Phase 11 style ablation are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the paired combined advantage is only `0.003847 ± 0.005987` and reverses sign at seed 1. Photometric-only is therefore preferred as the simpler default, with combined and Fourier retained as ablations. In Phase 12, R=1 reaches `0.603711` and R=2 reaches `0.643725`, versus `0.638287` for the fixed photometric-only R=3 reference. R=4 is next before query-behavior diagnostics and final selection.
 
 ## Working directories
 

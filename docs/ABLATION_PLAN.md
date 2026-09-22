@@ -62,3 +62,9 @@ R=1 completes stably at `0.603711` final Cityscapes mIoU, 3.4576 percentage
 points below the fixed R=3 photometric-only reference. Retain this as a negative
 capacity result, reclaim its intermediate checkpoints after recording, and run
 R=2 next under the identical seed-0 protocol.
+
+R=2 completes stably at `0.643725`, improving R=1 by 4.0014 percentage points
+and R=3 by 0.5439 points. This is just above the project's `<0.5 mIoU`
+multi-seed repeat trigger. Keep R=2 as the current candidate, run R=4 next,
+then compare the planned query similarity, active-query behavior, and effect
+variance before closing Phase 12.

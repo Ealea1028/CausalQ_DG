@@ -135,3 +135,9 @@ compared with `0.638287` for the fixed photometric-only R=3 reference. The
 3.4576-point deficit occurs despite 40,000 finite contiguous records, exact
 objective reconstruction, and the intended isolated protocol, so R=1 is
 retained as a negative capacity ablation. Phase 12 continues with R=2.
+
+The R=2 full run reaches `0.643725` final Cityscapes mIoU, improving R=1 by
+4.0014 percentage points and the fixed R=3 reference by 0.5439 points. Its
+40,000-record trace, objective reconstruction, isolation, and 80 full
+validations all pass. R=2 is the current best candidate, but selection remains
+open until the R=4 result and query-behavior diagnostics are available.

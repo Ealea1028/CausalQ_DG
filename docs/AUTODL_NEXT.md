@@ -1,42 +1,43 @@
 # Next AutoDL action
 
-Status: the Phase 12 seed-0 R=1 full run completed stably at `0.603711`
-Cityscapes mIoU, 3.4576 percentage points below the fixed photometric-only R=3
-reference. Retain R=1 as a negative capacity ablation. Run only the seed-0 R=2
-40k experiment next; do not launch R=4 in this step.
+Status: the Phase 12 seed-0 R=2 full run completed stably at `0.643725`
+Cityscapes mIoU. It exceeds R=1 by 4.0014 percentage points and the fixed
+photometric-only R=3 reference by 0.5439 points. R=2 is the current best
+candidate, but Phase 12 is not complete. Run only the seed-0 R=4 40k experiment
+next; query-behavior analysis follows after all four final checkpoints exist.
 
-## Reclaim R=1 intermediate-checkpoint space
+## Reclaim R=2 intermediate-checkpoint space
 
-Retain the final R=1 checkpoint and delete only its 79 intermediates.
+Retain the final R=2 checkpoint and delete only its 79 intermediates.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 
-R1_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q1_QUERY_COUNT_SEED0_40000_9f47726
-R1_RESOLVED="$(realpath "$R1_RUN")"
+R2_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q2_QUERY_COUNT_SEED0_40000_198898f
+R2_RESOLVED="$(realpath "$R2_RUN")"
 
-case "$R1_RESOLVED" in
-  /root/autodl-tmp/outputs/CausalQ_DG/Q1_QUERY_COUNT_SEED0_40000_9f47726) ;;
-  *) echo "unsafe path: $R1_RESOLVED"; exit 1 ;;
+case "$R2_RESOLVED" in
+  /root/autodl-tmp/outputs/CausalQ_DG/Q2_QUERY_COUNT_SEED0_40000_198898f) ;;
+  *) echo "unsafe path: $R2_RESOLVED"; exit 1 ;;
 esac
 
-test -f "$R1_RUN/metadata.json"
-test -f "$R1_RUN/summary.json"
-test -f "$R1_RUN/checkpoints/iter_040000.pth"
-test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
-test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
-du -sh "$R1_RUN/checkpoints"
+test -f "$R2_RUN/metadata.json"
+test -f "$R2_RUN/summary.json"
+test -f "$R2_RUN/checkpoints/iter_040000.pth"
+test "$(find "$R2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 80
+test "$(find "$R2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' ! -name 'iter_040000.pth' | wc -l)" -eq 79
+du -sh "$R2_RUN/checkpoints"
 ```
 
 Only after every check succeeds:
 
 ```bash
-find "$R1_RUN/checkpoints" -maxdepth 1 -type f \
+find "$R2_RUN/checkpoints" -maxdepth 1 -type f \
   -name 'iter_*.pth' ! -name 'iter_040000.pth' -delete
 
-test -f "$R1_RUN/checkpoints/iter_040000.pth"
-test "$(find "$R1_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
-du -sh "$R1_RUN/checkpoints"
+test -f "$R2_RUN/checkpoints/iter_040000.pth"
+test "$(find "$R2_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 1
+du -sh "$R2_RUN/checkpoints"
 df -h /root/autodl-tmp
 ```
 
@@ -69,7 +70,7 @@ from tools.train import load_config, resolve_query_count, resolve_seed, style_vi
 config = load_config(Path("configs/query_count/gta_dinov3l.yaml"))
 assert config["experiment"]["phase"] == 12
 assert resolve_seed(config, None) == 0
-assert resolve_query_count(config, 2) == 2
+assert resolve_query_count(config, 4) == 4
 assert style_view_weights(config["style"]) == {
     "original": 1.0,
     "photometric": 1.0,
@@ -77,7 +78,7 @@ assert style_view_weights(config["style"]) == {
 assert "prediction_consistency" not in config
 assert "causal_query_effect" not in config
 assert "query_diversity" not in config
-print("PHASE12_R2_FULL_GATES_OK")
+print("PHASE12_R4_FULL_GATES_OK")
 PY
 
 sha256sum /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
@@ -87,25 +88,25 @@ df -h /root/autodl-tmp
 The DINOv3 hash must be
 `dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179`.
 
-## Run the R=2 full experiment
+## Run the R=4 full experiment
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
 
 export OMP_NUM_THREADS=1
-export QUERY_COUNT=2
+export QUERY_COUNT=4
 export MAX_ITERATIONS=40000
 export VALIDATION_MAX_SAMPLES=500
 export SEED=0
 
-test "$QUERY_COUNT" -eq 2
+test "$QUERY_COUNT" -eq 4
 test "$MAX_ITERATIONS" -eq 40000
 test "$VALIDATION_MAX_SAMPLES" -eq 500
 test "$SEED" -eq 0
 
 RUN_SHA="$(git rev-parse --short HEAD)"
-RUN_ID="Q2_QUERY_COUNT_SEED0_40000_${RUN_SHA}"
+RUN_ID="Q4_QUERY_COUNT_SEED0_40000_${RUN_SHA}"
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
 
@@ -124,7 +125,7 @@ test -f "$RUN_DIR/summary.json"
 
 Do not interrupt training. Continue only after `train_exit_code=0`.
 
-## Extract R=2 evidence
+## Extract R=4 evidence
 
 ```bash
 python - "$RUN_DIR" <<'PY'
@@ -150,7 +151,7 @@ errors = [
 assert metadata["phase"] == 12
 assert metadata["seed"] == 0
 assert metadata["max_iterations"] == 40000
-assert metadata["query"]["queries_per_class"] == 2
+assert metadata["query"]["queries_per_class"] == 4
 assert metadata["style"]["views"] == ["original", "photometric"]
 assert "prediction_consistency" not in metadata
 assert "causal_query_effect" not in metadata
@@ -182,15 +183,19 @@ print("===== validation =====")
 print("validation_count:", len(validations))
 print("final_validation:", validations[-1])
 print("best_validation:", max(validations, key=lambda row: row["miou"]))
-print("===== current query-count comparison =====")
-r1 = 0.6037110117161197
-r2 = validations[-1]["miou"]
-r3 = 0.6382865707103561
-print("r1_miou:", r1)
-print("r2_miou:", r2)
-print("r3_photometric_miou:", r3)
-print("r2_minus_r1:", r2 - r1)
-print("r2_minus_r3:", r2 - r3)
+print("===== complete query-count mIoU table =====")
+values = {
+    1: 0.6037110117161197,
+    2: 0.6437254689928078,
+    3: 0.6382865707103561,
+    4: validations[-1]["miou"],
+}
+for count, value in values.items():
+    print(f"R={count}:", value)
+best_count = max(values, key=values.get)
+print("best_query_count_by_final_miou:", best_count)
+print("r4_minus_r2:", values[4] - values[2])
+print("r4_minus_r3:", values[4] - values[3])
 PY
 
 CHECKPOINT_COUNT="$(
@@ -226,18 +231,19 @@ df -h /root/autodl-tmp
 
 ## Acceptance criteria
 
-- R=1 cleanup retains only `iter_040000.pth` and recovers roughly 15 GiB.
+- R=2 cleanup retains only `iter_040000.pth` and recovers roughly 15 GiB.
 - Exact handoff SHA, clean Git status, passing tests, and the expected DINOv3
   hash are recorded.
-- R=2 metadata records Phase 12, seed 0, 40,000 iterations, query count 2, and
+- R=4 metadata records Phase 12, seed 0, 40,000 iterations, query count 4, and
   only original/photometric views.
 - No prediction consistency, CQE, or query-diversity configuration is present.
 - Exit code is zero; all 40,000 records and tracked values are finite and
   contiguous; objective reconstruction error is below `1e-5`.
 - There are 80 complete 500-image validations and 80 checkpoints, including
   `iter_040000.pth`.
-- Final/best mIoU and comparisons against R=1 and R=3 are printed with exact
-  Git SHA and disk status.
+- The complete R=1/2/3/4 final-mIoU table, best query count, exact Git SHA, and
+  disk status are printed.
 
-Return all R=2 evidence. Stop afterward: do not delete its checkpoints and do
-not launch R=4 until R=2 is recorded in Git.
+Return all R=4 evidence. Stop afterward: do not delete its checkpoints. The
+next local step will implement and verify the planned cross-count query
+similarity, active-query, and effect-variance analysis before Phase 12 closes.
