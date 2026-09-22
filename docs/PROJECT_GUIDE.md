@@ -126,6 +126,56 @@ D -> S -> X <- C -> Y
 - 再使用 `3×3 Conv + GroupNorm + GELU + Dropout`；
 - 输出 19 类低分辨率 logits，再上采样至标签大小。
 
+关键实现（[`causalq/models/dinov3_wrapper.py`](../causalq/models/dinov3_wrapper.py)）如下。这里最重要的不是 Hugging Face 的调用本身，而是冻结时使用 `no_grad`、动态去除 prefix tokens，并把 patch token 恢复成二维特征图：
+
+```python
+def forward(self, images: Tensor) -> DINOv3Features:
+    if images.ndim != 4 or images.shape[1] != 3:
+        raise ValueError(f"Expected BCHW RGB images, got {tuple(images.shape)}")
+
+    grid_size = (
+        images.shape[-2] // self.patch_size[0],
+        images.shape[-1] // self.patch_size[1],
+    )
+    context = torch.no_grad() if self.freeze else nullcontext()
+    with context:
+        outputs = self.model(
+            pixel_values=images,
+            output_hidden_states=bool(self.intermediate_indices),
+            return_dict=True,
+        )
+
+    patch_map, patch_tokens = self._to_patch_map(
+        outputs.last_hidden_state, grid_size
+    )
+    return DINOv3Features(
+        patch_map=patch_map,
+        patch_tokens=patch_tokens,
+        intermediate_maps=tuple(
+            self._to_patch_map(outputs.hidden_states[i], grid_size)[0]
+            for i in self.intermediate_indices
+        ),
+    )
+```
+
+基础解码器的实际融合入口（[`causalq/models/baseline_segmentor.py`](../causalq/models/baseline_segmentor.py)）很小，这保证 A0 的可解释性：
+
+```python
+class BaselineDecoder(nn.Module):
+    def forward(self, feature_maps: Sequence[Tensor]) -> Tensor:
+        fused = torch.cat(tuple(feature_maps), dim=1)
+        return self.classifier(self.fuse(fused))
+
+
+def forward(self, images: Tensor) -> Tensor:
+    features = self.backbone(images)
+    maps = features.intermediate_maps or (features.patch_map,)
+    logits = self.decoder(maps)
+    return F.interpolate(
+        logits, size=images.shape[-2:], mode="bilinear", align_corners=False
+    )
+```
+
 ### 5.3 Grouped Causal Query Bank
 
 每个类别维护一个共享锚点和多个可学习残差：
@@ -142,6 +192,29 @@ q[c, r] = anchor[c] + residual[c, r]
 
 这种组织方式让 Query 具有明确的类别归属，同时允许同一类别表示多个上下文或外观模式。
 
+对应源码（[`causalq/models/query_segmentor.py`](../causalq/models/query_segmentor.py)）：
+
+```python
+class GroupedCausalQueryBank(nn.Module):
+    def __init__(self, hidden_size: int, *, num_classes=19,
+                 queries_per_class=3):
+        super().__init__()
+        self.class_anchors = nn.Parameter(
+            torch.empty(num_classes, hidden_size)
+        )
+        self.query_residuals = nn.Parameter(
+            torch.empty(num_classes, queries_per_class, hidden_size)
+        )
+        nn.init.normal_(self.class_anchors, std=0.02)
+        nn.init.normal_(self.query_residuals, std=0.02)
+
+    def forward(self, batch_size: int) -> Tensor:
+        queries = self.class_anchors[:, None, :] + self.query_residuals
+        return queries.unsqueeze(0).expand(batch_size, -1, -1, -1)
+```
+
+返回张量形状是 `B × C × R × D`。`C=19`、`R=3` 时，一张样本有 57 个 Query；Phase 12 只改变 `R`，其余协议保持不变。
+
 ### 5.4 单向 Query-to-Image Cross-Attention
 
 Query 作为查询，图像 token 作为 key/value：
@@ -151,6 +224,33 @@ Q_ctx = CrossAttention(Q, F_img, F_img)
 ```
 
 当前采用 1 层、8 个注意力头，并接残差、归一化与前馈网络。关键结构约束是单向读取：图像特征不会被 Query 写回修改。这既控制实现复杂度，也保留基础分支与 Query 分支的可分离性。
+
+核心层的真实调用明确展示了方向（`queries` 是 query，`image_tokens` 同时是 key/value）：
+
+```python
+def forward(self, queries: Tensor, image_tokens: Tensor) -> Tensor:
+    attended, _ = self.attention(
+        queries,
+        image_tokens,
+        image_tokens,
+        need_weights=False,
+    )
+    queries = self.attention_norm(queries + attended)
+    return self.ffn_norm(queries + self.ffn(queries))
+```
+
+模型中先把 `B×C×R×D` 展平为 `B×(C·R)×D`，注意力完成后再恢复类别和组维度：
+
+```python
+grouped_queries = self.query_bank(images.shape[0])
+flat_queries = grouped_queries.flatten(1, 2)
+contextual_queries = self.query_attention(
+    flat_queries, features.patch_tokens
+).reshape(
+    images.shape[0], self.num_classes, self.queries_per_class,
+    self.backbone.hidden_size,
+)
+```
 
 ### 5.5 Query Residual Head
 
@@ -163,6 +263,24 @@ L = L_base + alpha * Delta L_query
 ```
 
 其中 `alpha` 是可学习标量，初始化为 0。这样 A1 在初始化时与 A0 完全一致，Query 分支只在训练中逐步获得影响力。
+
+残差头的关键计算（同一源文件）为：
+
+```python
+pixel_features = F.normalize(
+    self.feature_projection(image_tokens), dim=-1
+)
+query_features = F.normalize(
+    self.query_projection(grouped_queries), dim=-1
+)
+scores = torch.einsum(
+    "bnd,bcrd->bcrn", pixel_features, query_features
+) / self.temperature
+delta = torch.logsumexp(scores, dim=2)
+return delta.reshape(batch_size, self.num_classes, *grid_size)
+```
+
+这段代码说明三个设计点：像素与 Query 先做 L2 归一化；温度 `0.07` 控制相似度尖锐程度；`logsumexp` 在同一类别的 `R` 个 Query 上聚合，而不是把不同类别混在一起。
 
 ## 6. 当前零消融与效应定义
 
@@ -179,6 +297,30 @@ E_zero[c]    = L_factual[c] - L_zero[c]
 
 - 不需要重新运行 DINOv3；
 - 消融量与 Query 分支在结构上完全对应。
+
+对应的公共 API 是：
+
+```python
+def counterfactual_logits(self, class_index: int) -> Tensor:
+    if not 0 <= class_index < self.logits.shape[1]:
+        raise IndexError(f"class_index out of range: {class_index}")
+    result = self.logits.clone()
+    result[:, class_index] = self.base_logits[:, class_index]
+    return result
+
+
+def get_query_effect(
+    self, images: Tensor | None = None, *,
+    output: QuerySegmentorOutput | None = None,
+) -> Tensor:
+    if (images is None) == (output is None):
+        raise ValueError("Provide exactly one of images or output")
+    if output is None:
+        output = self.forward_components(images)
+    return output.scaled_delta_logits
+```
+
+`counterfactual_logits` 直接赋值为 `base_logits`，而不是用减法近似，避免浮点抵消误差。训练和分析代码通常直接读取 `scaled_delta_logits`，因此效应定义不会因为重复前向而改变。
 
 但它也有一个已经被实验暴露出的缺点：让 `alpha * Delta L_query` 变小，同样可以让跨风格效应更“稳定”。因此，单独约束零消融效应一致性存在退化解，不能保证 Query 对正确预测具有充分贡献。
 
@@ -199,6 +341,38 @@ E_zero[c]    = L_factual[c] - L_zero[c]
 - Fourier mix strength：`[0.1, 0.35]`。
 
 训练时三个视图顺序前向以节省显存。几何增强先统一完成，风格变换不改变标签坐标。
+
+`StyleInterventionBank.forward` 只负责组织对齐视图；视图内部的 photometric 与 Fourier 变换均在原图的归一化/反归一化空间中完成：
+
+```python
+def forward(self, images: Tensor) -> StyleViews:
+    if images.ndim != 4 or images.shape[1] != 3:
+        raise ValueError("images must have shape Bx3xHxW")
+    return StyleViews(
+        original=images,
+        photometric=self.photometric_view(images),
+        fourier=self.fourier_view(images),
+    )
+```
+
+Fourier 分支保留相位、只混合幅度：
+
+```python
+spectrum = torch.fft.fft2(unit, dim=(-2, -1))
+amplitude = spectrum.abs()
+phase = spectrum / amplitude.clamp_min(1e-8)
+if unit.shape[0] > 1:
+    donor = amplitude.roll(shifts=1, dims=0)
+else:
+    donor = amplitude.roll(shifts=1, dims=1)
+strength = self._sample(self.fourier_mix_strength, unit)
+mixed_amplitude = amplitude.lerp(donor, strength)
+mixed = torch.fft.ifft2(
+    mixed_amplitude * phase, dim=(-2, -1)
+).real
+```
+
+当 batch size 为 1 时，源码沿空间维滚动幅度作为 donor；当 batch size 大于 1 时，使用相邻样本的幅度。该实现不做几何 warp，因此标签仍可直接复用。
 
 ## 8. 损失函数与实验变体
 
@@ -228,6 +402,21 @@ L_pred = KL(stopgrad(P_original) || P_style)
 
 权重 `lambda_pred = 1.0`。它是 CQE 的必要控制组，用来回答“约束 Query 效应是否比直接约束预测更有价值”。
 
+源码实现（[`causalq/losses/prediction_consistency.py`](../causalq/losses/prediction_consistency.py)）先 detach 原图 teacher，再只在有效像素上求 KL：
+
+```python
+scaled_view = view_logits.float() / temperature
+scaled_reference = reference_logits.detach().float() / temperature
+reference_probabilities = F.softmax(scaled_reference, dim=1)
+per_class = F.kl_div(
+    F.log_softmax(scaled_view, dim=1),
+    reference_probabilities,
+    reduction="none",
+)
+per_pixel = per_class.sum(dim=1) * temperature**2
+return per_pixel[labels != ignore_index].mean()
+```
+
 ### 8.3 Causal Query Effect Distillation
 
 A4 对原图与风格图的零消融效应图进行逐类 L2 归一化，仅在有效像素和当前样本真实出现的类别上计算 Smooth L1：
@@ -237,6 +426,33 @@ L_CQE = SmoothL1(norm(stopgrad(E_original)), norm(E_style))
 ```
 
 权重 `lambda_cqe = 1.0`。停止梯度只作用于原图参考分支。
+
+CQE 的关键掩码和归一化逻辑（[`causalq/losses/causal_query_effect.py`](../causalq/losses/causal_query_effect.py)）如下：
+
+```python
+valid = labels != ignore_index
+safe_labels = labels.masked_fill(~valid, 0)
+present = F.one_hot(safe_labels, num_classes=num_classes).bool()
+present = (present & valid.unsqueeze(-1)).any(dim=(1, 2))
+
+view_flat = view_effect.float().reshape(batch_size, num_classes, -1)
+reference_flat = reference_effect.detach().float().reshape(
+    batch_size, num_classes, -1
+)
+view_flat = view_flat.masked_fill(~valid.reshape(batch_size, 1, -1), 0.0)
+reference_flat = reference_flat.masked_fill(
+    ~valid.reshape(batch_size, 1, -1), 0.0
+)
+view_normalized = F.normalize(view_flat, p=2, dim=-1, eps=eps)
+reference_normalized = F.normalize(reference_flat, p=2, dim=-1, eps=eps)
+per_element = F.smooth_l1_loss(
+    view_normalized, reference_normalized,
+    reduction="none", beta=beta,
+)
+return per_element.sum(dim=-1)[present].mean()
+```
+
+读者应注意 `present` 是“每个样本中出现过的类别”掩码，不是把 19 类全部强行平均；这正是当前实现处理类别稀疏标签的地方。
 
 ### 8.4 Query Diversity
 
@@ -525,6 +741,32 @@ python -m pytest
 ```
 
 还应执行对应阶段的数据检查、权重检查和 GPU smoke test。任何门禁失败都不得直接启动 40k full run。
+
+训练器会把配置约束落实为运行时检查。例如 Phase 11/12 禁止混入 CQE、预测一致性或 diversity：
+
+```python
+if phase in (11, 12) and (
+    prediction_enabled or cqe_enabled or diversity_enabled
+):
+    raise ValueError("Phase 11/12 ablations disable all consistency losses")
+```
+
+正式训练的视图循环也体现了“原图先行、风格视图复用同一标签”的协议：
+
+```python
+for view_name, view_images in named_views:
+    logits = model(view_images)
+    view_loss = segmentation_cross_entropy(logits, labels)
+    objective = view_loss * view_weights[view_name]
+
+    if prediction_enabled and view_name != "original":
+        objective += (lambda_pred / 2.0) * prediction_consistency_kl(
+            logits, reference_logits, labels=labels
+        )
+    (objective / accumulation).backward()
+```
+
+完整训练循环还包含 finite 检查、梯度累积、梯度裁剪、验证与 JSONL 证据记录；上面只保留解释协议所需的核心路径。
 
 ### 17.4 正式训练与证据保存
 
