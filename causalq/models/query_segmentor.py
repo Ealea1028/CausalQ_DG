@@ -127,13 +127,14 @@ class QueryResidualHead(nn.Module):
         self.query_projection = nn.Linear(hidden_size, hidden_size, bias=False)
         self.alpha = nn.Parameter(torch.tensor(float(alpha_init)))
 
-    def delta_logits(
+    def query_scores(
         self,
         image_tokens: Tensor,
         grouped_queries: Tensor,
         *,
         grid_size: tuple[int, int],
     ) -> Tensor:
+        """Return per-query similarity maps before class-wise aggregation."""
         batch_size, patch_count, _ = image_tokens.shape
         expected_queries = (self.num_classes, self.queries_per_class)
         if grouped_queries.shape[1:3] != expected_queries:
@@ -154,8 +155,26 @@ class QueryResidualHead(nn.Module):
         scores = torch.einsum(
             "bnd,bcrd->bcrn", pixel_features, query_features
         ) / self.temperature
-        delta = torch.logsumexp(scores, dim=2)
-        return delta.reshape(batch_size, self.num_classes, *grid_size)
+        return scores.reshape(
+            batch_size,
+            self.num_classes,
+            self.queries_per_class,
+            *grid_size,
+        )
+
+    def delta_logits(
+        self,
+        image_tokens: Tensor,
+        grouped_queries: Tensor,
+        *,
+        grid_size: tuple[int, int],
+    ) -> Tensor:
+        scores = self.query_scores(
+            image_tokens,
+            grouped_queries,
+            grid_size=grid_size,
+        )
+        return torch.logsumexp(scores, dim=2)
 
     def forward(
         self,
@@ -178,6 +197,7 @@ class QuerySegmentorOutput:
     delta_logits: Tensor
     scaled_delta_logits: Tensor
     query_states: Tensor
+    query_score_maps: Tensor
 
     def counterfactual_logits(self, class_index: int) -> Tensor:
         """Apply do(Q_c=0) by removing only class c's scaled residual."""
@@ -262,11 +282,12 @@ class QuerySegmentor(nn.Module):
             self.backbone.hidden_size,
         )
         grid_size = features.patch_map.shape[-2:]
-        delta_patch_logits = self.query_head.delta_logits(
+        query_score_maps = self.query_head.query_scores(
             features.patch_tokens,
             contextual_queries,
             grid_size=grid_size,
         )
+        delta_patch_logits = torch.logsumexp(query_score_maps, dim=2)
 
         output_size = images.shape[-2:]
         base_logits = F.interpolate(
@@ -288,6 +309,7 @@ class QuerySegmentor(nn.Module):
             delta_logits=delta_logits,
             scaled_delta_logits=scaled_delta_logits,
             query_states=contextual_queries,
+            query_score_maps=query_score_maps,
         )
 
     def forward(self, images: Tensor) -> Tensor:
@@ -309,3 +331,16 @@ class QuerySegmentor(nn.Module):
     def get_query_residuals(self) -> Tensor:
         """Return the learnable within-class residual queries for regularization."""
         return self.query_bank.query_residuals
+
+    def get_query_score_maps(
+        self,
+        images: Tensor | None = None,
+        *,
+        output: QuerySegmentorOutput | None = None,
+    ) -> Tensor:
+        """Return pre-aggregation per-query score maps at patch resolution."""
+        if (images is None) == (output is None):
+            raise ValueError("Provide exactly one of images or output")
+        if output is None:
+            output = self.forward_components(images)
+        return output.query_score_maps

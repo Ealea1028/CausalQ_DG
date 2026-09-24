@@ -141,3 +141,23 @@ The R=2 full run reaches `0.643725` final Cityscapes mIoU, improving R=1 by
 40,000-record trace, objective reconstruction, isolation, and 80 full
 validations all pass. R=2 is the current best candidate, but selection remains
 open until the R=4 result and query-behavior diagnostics are available.
+
+The R=4 full run is also stable and reaches `0.624083`, 1.9642 percentage
+points below R=2 and 1.4203 points below R=3. Final mIoU across `R=1/2/3/4`
+is `0.603711/0.643725/0.638287/0.624083`; R=2 is the current leader.
+
+The closing diagnostic uses the same 500 Cityscapes validation images and the
+deterministic original/photometric view pair for every checkpoint. It reports:
+
+- unordered within-class cosine similarity for both learned residual queries
+  and contextualized queries (the latter only for ground-truth-present
+  classes);
+- per-query logsumexp responsibility on downsampled ground-truth-class pixels,
+  summarized by entropy-based effective query count and fraction, dominant
+  mean share, and mean per-pixel top-1 responsibility;
+- population variance across the two views after valid-pixel L2 normalization
+  of each ground-truth-present class effect map.
+
+These metrics distinguish redundant capacity from genuinely active and
+style-stable queries. Phase 12 remains open until this common analysis is
+complete.

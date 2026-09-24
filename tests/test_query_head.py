@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 from pathlib import Path
 
+import pytest
 import torch
 from torch import nn
 
@@ -42,10 +43,13 @@ def test_query_residual_head_shape_and_scale() -> None:
     image_tokens = torch.randn(2, 20, 16)
     queries = torch.randn(2, 4, 3, 16)
 
+    scores = head.query_scores(image_tokens, queries, grid_size=(4, 5))
     delta = head.delta_logits(image_tokens, queries, grid_size=(4, 5))
     scaled = head(image_tokens, queries, grid_size=(4, 5))
 
+    assert scores.shape == (2, 4, 3, 4, 5)
     assert delta.shape == (2, 4, 4, 5)
+    assert torch.allclose(delta, torch.logsumexp(scores, dim=2))
     assert torch.count_nonzero(delta) > 0
     assert torch.count_nonzero(scaled) == 0
 
@@ -72,7 +76,31 @@ def test_alpha_zero_preserves_baseline_output() -> None:
     assert output.logits.shape == (2, 4, 8, 8)
     assert output.delta_logits.shape == (2, 4, 8, 8)
     assert output.query_states.shape == (2, 4, 3, 16)
+    assert output.query_score_maps.shape == (2, 4, 3, 4, 4)
+    assert torch.equal(
+        model.get_query_score_maps(output=output),
+        output.query_score_maps,
+    )
     assert torch.max(torch.abs(output.logits - output.base_logits)).item() < 1e-6
+
+
+def test_query_score_map_accessor_requires_one_source() -> None:
+    backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
+    model = QuerySegmentor(
+        backbone,
+        decoder_channels=32,
+        num_classes=4,
+        dropout=0.0,
+        queries_per_class=2,
+        num_heads=4,
+    ).eval()
+    images = torch.randn(1, 3, 8, 8)
+
+    from_images = model.get_query_score_maps(images)
+
+    assert from_images.shape == (1, 4, 2, 4, 4)
+    with pytest.raises(ValueError, match="exactly one"):
+        model.get_query_score_maps()
 
 
 def test_counterfactual_removes_only_selected_class_residual() -> None:

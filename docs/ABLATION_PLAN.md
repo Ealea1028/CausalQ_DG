@@ -68,3 +68,8 @@ and R=3 by 0.5439 points. This is just above the project's `<0.5 mIoU`
 multi-seed repeat trigger. Keep R=2 as the current candidate, run R=4 next,
 then compare the planned query similarity, active-query behavior, and effect
 variance before closing Phase 12.
+
+R=4 completes stably at `0.624083`, trailing R=2 by 1.9642 percentage points
+and R=3 by 1.4203 points. The complete final-mIoU ranking is therefore
+`R=2 > R=3 > R=4 > R=1`. Run the shared 500-image mechanism analysis on all
+four final checkpoints before selecting the Phase 12 default.

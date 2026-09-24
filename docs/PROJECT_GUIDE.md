@@ -542,7 +542,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 9 | A4 CQE 与效应方差分析 | 完成，结果为负 |
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
-| Phase 12 | Query 数量消融（R=1/2/3/4） | R=2 当前最佳为 64.37%，等待 R=4 full run |
+| Phase 12 | Query 数量消融（R=1/2/3/4） | 四个 full run 已完成，R=2 当前最佳，等待机制诊断 |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -795,7 +795,7 @@ for view_name, view_images in named_views:
 3. 现有 photometric-only `R=3` 作为参考；
 4. `R=4`。
 
-`R=1/2/4` 的 500-iteration GPU smoke 已全部通过。R=1 full 为 `0.603711`，是比 R=3 低 3.4576 pp 的负容量消融；R=2 full 为 `0.643725`，比 R=1 高 4.0014 pp、比 R=3 高 0.5439 pp，暂为最佳候选。下一步清理 R=2 的中间 checkpoint 并运行 R=4 full；随后统一比较 mIoU、query similarity、active-query 行为和 query-effect variance，再关闭 Phase 12。
+`R=1/2/4` 的 500-iteration GPU smoke 和 40k full run 已全部完成。最终 mIoU 依次为 `R=1: 0.603711`、`R=2: 0.643725`、`R=3: 0.638287`、`R=4: 0.624083`，当前排序为 `R=2 > R=3 > R=4 > R=1`。下一步在四个最终 checkpoint 上统一比较 query similarity、active-query 行为和 query-effect variance，再关闭 Phase 12。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
