@@ -190,3 +190,13 @@ objective reconstruction, and `2.258 GiB` peak reserved memory. Because the
 gap is below the plan's 0.5-point repeat threshold, no interaction winner is
 declared. One-way and static must be repeated as paired seeds 1 and 2 before
 introducing the bidirectional control.
+
+The first one-way seed-1 attempt at commit `367694e` stopped after 3,316
+iterations because all ten random crop candidates for sample `13286` contained
+only ignore pixels. A subsequent audit of all 24,966 GTA5 labels found no
+all-ignore or unreadable label and a minimum full-image valid fraction of
+`0.134332`, confirming a crop-sampling edge case rather than corrupt data.
+Training preprocessing therefore keeps the existing random attempts but, only
+when all attempts are empty, samples a real valid label pixel and constructs a
+crop guaranteed to contain it. The failed run is excluded and must restart
+from random initialization after GPU verification of the fix.

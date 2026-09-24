@@ -94,7 +94,33 @@ class TrainTransform:
                 best_box = box
             if valid_fraction >= self.min_valid_fraction:
                 break
-        return best_box
+        if best_valid_fraction > 0.0:
+            return best_box
+
+        label_array = np.asarray(label, dtype=np.uint8)
+        valid_indices = np.flatnonzero(label_array != IGNORE_INDEX)
+        if valid_indices.size == 0:
+            return best_box
+
+        valid_offset = (
+            int(torch.randint(int(valid_indices.size), ()).item())
+            if valid_indices.size > 1
+            else 0
+        )
+        valid_y, valid_x = divmod(int(valid_indices[valid_offset]), label.width)
+        minimum_left = max(0, valid_x - crop_width + 1)
+        maximum_left = min(valid_x, max_left)
+        minimum_top = max(0, valid_y - crop_height + 1)
+        maximum_top = min(valid_y, max_top)
+        left = minimum_left
+        top = minimum_top
+        if maximum_left > minimum_left:
+            left += int(
+                torch.randint(maximum_left - minimum_left + 1, ()).item()
+            )
+        if maximum_top > minimum_top:
+            top += int(torch.randint(maximum_top - minimum_top + 1, ()).item())
+        return left, top, left + crop_width, top + crop_height
 
     def __call__(self, image: Image.Image, label: Image.Image) -> tuple[Tensor, Tensor]:
         scale = torch.empty(()).uniform_(*self.scale_range).item()

@@ -109,6 +109,31 @@ def test_training_crop_prefers_valid_pixels() -> None:
     assert (cropped_label != 255).float().mean() >= 0.5
 
 
+def test_training_crop_falls_back_to_a_real_valid_pixel(monkeypatch) -> None:
+    image = Image.new("RGB", (8, 8), color=(124, 116, 104))
+    values = np.full((8, 8), 255, dtype=np.uint8)
+    values[7, 7] = 0
+    label = Image.fromarray(values)
+    transform = TrainTransform(
+        (4, 4),
+        scale_range=(1.0, 1.0),
+        horizontal_flip_probability=0.0,
+        min_valid_fraction=0.5,
+        crop_attempts=1,
+    )
+
+    monkeypatch.setattr(
+        torch,
+        "randint",
+        lambda high, size: torch.zeros(size, dtype=torch.int64),
+    )
+
+    _, cropped_label = transform(image, label)
+
+    assert torch.any(cropped_label != 255)
+    assert cropped_label[-1, -1] == 0
+
+
 def test_baseline_outputs_full_resolution_and_only_decoder_trains() -> None:
     backbone = DINOv3Backbone(
         FakeBackbone(), freeze=True, intermediate_indices=(0, 1)
