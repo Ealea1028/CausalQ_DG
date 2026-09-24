@@ -200,3 +200,10 @@ Training preprocessing therefore keeps the existing random attempts but, only
 when all attempts are empty, samples a real valid label pixel and constructs a
 crop guaranteed to contain it. The failed run is excluded and must restart
 from random initialization after GPU verification of the fix.
+
+The repaired one-way seed-1 path passes a fresh 500-iteration GPU smoke at
+commit `3860e69`: it reaches the final iteration, writes one checkpoint, and
+completes a finite 50-image validation at `0.341777` mIoU. This short-run score
+is diagnostic only. The original 3,316-iteration attempt remains excluded;
+the formal seed-1 repeat restarts from random initialization at the repaired
+commit.

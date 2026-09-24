@@ -103,3 +103,8 @@ pixels for sample `13286`. A full 24,966-label audit found no all-ignore or
 unreadable source label, identifying a crop-sampling edge case. Commit
 `3860e69` adds a valid-pixel fallback and must pass a fresh 500-iteration GPU
 smoke before the one-way seed-1 40k repeat restarts from initialization.
+
+The repaired path passes its 500-iteration GPU smoke at `3860e69`, producing
+one checkpoint and a finite 50-image diagnostic validation. Restart the
+one-way R=2 seed-1 40k run from random initialization under this exact commit;
+do not resume or compare the excluded 3,316-iteration attempt.

@@ -1,0 +1,28 @@
+{
+  "ok": true,
+  "experiment_id": "Q2_ONE_WAY_SEED1_CROP_FALLBACK_SMOKE_500_3860e69",
+  "phase": 12,
+  "git_sha": "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497",
+  "gpu": "NVIDIA GeForce RTX 4090 D",
+  "pytorch": "2.7.0+cu126",
+  "cuda": "12.6",
+  "seed": 1,
+  "max_iterations": 500,
+  "queries_per_class": 2,
+  "interaction": "one_way",
+  "cross_attention_layers": 1,
+  "views": [
+    "original",
+    "photometric"
+  ],
+  "record_count": 500,
+  "validation_count": 1,
+  "validation_samples": 50,
+  "cityscapes_miou": 0.34177680936070914,
+  "final_alpha": -0.025014610961079597,
+  "checkpoint_count": 1,
+  "checkpoint": "iter_000500.pth",
+  "checkpoint_bytes": 196783903,
+  "failed_attempt_record_count_preserved": 3316,
+  "failed_attempt_checkpoint_count_preserved": 6
+}
