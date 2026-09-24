@@ -110,7 +110,7 @@ for row in records:
     expected = float(row["loss_original"]) + float(row["loss_photometric"])
     assert abs(float(row["loss"]) - expected) <= 1e-5
 
-validations = summary["validation"]
+validations = summary["validation_results"]
 assert len(validations) == 1
 assert validations[0]["iteration"] == 500
 assert validations[0]["sample_count"] == 50
