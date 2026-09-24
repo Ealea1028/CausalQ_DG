@@ -96,3 +96,10 @@ mIoU, 0.3671 percentage points above the one-way R=2 reference (`0.643725`).
 This gap is below the prespecified `<0.5 mIoU` repeat trigger. Repeat the
 one-way and static variants as paired seeds 1 and 2, beginning with one-way
 seed 1; defer bidirectional interaction until the paired result is resolved.
+
+The first one-way seed-1 attempt at `367694e` is invalid and excluded: it
+stopped after 3,316 iterations when all random crop attempts missed valid
+pixels for sample `13286`. A full 24,966-label audit found no all-ignore or
+unreadable source label, identifying a crop-sampling edge case. Commit
+`3860e69` adds a valid-pixel fallback and must pass a fresh 500-iteration GPU
+smoke before the one-way seed-1 40k repeat restarts from initialization.
