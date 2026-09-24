@@ -176,3 +176,9 @@ still form dense logits through the same normalized pixel/query similarity
 head; only the image-conditioned query update is absent. No prediction
 consistency, CQE, diversity, learned-null, or bidirectional interaction is
 enabled. The existing Phase 12 R=2 result is the one-way reference.
+
+The isolated 500-iteration Static Query smoke passes at commit `367694e`:
+500 contiguous finite records, exact objective reconstruction, the intended
+zero-layer interaction metadata, one 50-image validation, and one checkpoint.
+Peak reserved memory is `2.258 GiB`. Its short-run mIoU is diagnostic only;
+the seed-0 40k run is required for the interaction comparison.

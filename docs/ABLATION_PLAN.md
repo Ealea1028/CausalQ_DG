@@ -85,3 +85,8 @@ static R=2 queries under the selected photometric-only protocol, compared with
 the existing one-way R=2 result. Run a 500-iteration GPU smoke before any full
 training. Bidirectional interaction is deferred until the static control is
 complete.
+
+The Static Query smoke passes at `367694e` with finite contiguous records,
+exact objective reconstruction, correct mechanism isolation, and `2.258 GiB`
+peak reserved memory. Proceed to its seed-0 40k run; do not interpret the
+50-image smoke mIoU or add bidirectional interaction yet.
