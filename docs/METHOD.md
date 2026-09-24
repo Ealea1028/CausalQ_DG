@@ -182,3 +182,11 @@ The isolated 500-iteration Static Query smoke passes at commit `367694e`:
 zero-layer interaction metadata, one 50-image validation, and one checkpoint.
 Peak reserved memory is `2.258 GiB`. Its short-run mIoU is diagnostic only;
 the seed-0 40k run is required for the interaction comparison.
+
+The seed-0 Static Query full run reaches `0.647396` final Cityscapes mIoU,
+0.3671 percentage points above the existing one-way R=2 reference. It has
+40,000 contiguous finite records, 80 full 500-image validations, exact
+objective reconstruction, and `2.258 GiB` peak reserved memory. Because the
+gap is below the plan's 0.5-point repeat threshold, no interaction winner is
+declared. One-way and static must be repeated as paired seeds 1 and 2 before
+introducing the bidirectional control.

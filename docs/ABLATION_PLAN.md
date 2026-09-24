@@ -90,3 +90,9 @@ The Static Query smoke passes at `367694e` with finite contiguous records,
 exact objective reconstruction, correct mechanism isolation, and `2.258 GiB`
 peak reserved memory. Proceed to its seed-0 40k run; do not interpret the
 50-image smoke mIoU or add bidirectional interaction yet.
+
+The Static Query seed-0 full run completes at `0.647396` final Cityscapes
+mIoU, 0.3671 percentage points above the one-way R=2 reference (`0.643725`).
+This gap is below the prespecified `<0.5 mIoU` repeat trigger. Repeat the
+one-way and static variants as paired seeds 1 and 2, beginning with one-way
+seed 1; defer bidirectional interaction until the paired result is resolved.
