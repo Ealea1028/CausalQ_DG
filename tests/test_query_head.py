@@ -123,6 +123,36 @@ def test_counterfactual_removes_only_selected_class_residual() -> None:
     assert torch.equal(counterfactual[:, 3:], output.logits[:, 3:])
 
 
+def test_static_queries_skip_image_cross_attention() -> None:
+    backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
+    model = QuerySegmentor(
+        backbone,
+        decoder_channels=32,
+        num_classes=4,
+        dropout=0.0,
+        queries_per_class=2,
+        num_heads=4,
+        interaction="static",
+    ).eval()
+    images = torch.randn(2, 3, 8, 8)
+
+    output = model.forward_components(images)
+    expected = model.query_bank(2)
+
+    assert model.query_attention is None
+    assert model.interaction == "static"
+    assert torch.equal(output.query_states, expected)
+    assert output.logits.shape == (2, 4, 8, 8)
+    assert not any("query_attention" in name for name, _ in model.named_parameters())
+
+
+def test_query_interaction_rejects_unknown_mode() -> None:
+    backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
+
+    with pytest.raises(ValueError, match="one_way.*static"):
+        QuerySegmentor(backbone, interaction="bidirectional")
+
+
 def test_phase6_config_enables_only_query_mechanism() -> None:
     root = Path(__file__).resolve().parents[1]
     config = load_config(root / "configs/query/gta_dinov3l_query.yaml")
@@ -134,3 +164,19 @@ def test_phase6_config_enables_only_query_mechanism() -> None:
     assert config["query"]["cross_attention_layers"] == 1
     assert config["query"]["aggregation"] == "logsumexp"
     assert config["train"]["style"] is False
+
+
+def test_phase13_static_query_config_is_isolated() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = load_config(
+        root / "configs/query_interaction/gta_dinov3l_static.yaml"
+    )
+
+    assert config["experiment"]["phase"] == 13
+    assert config["query"]["queries_per_class"] == 2
+    assert config["query"]["interaction"] == "static"
+    assert config["query"]["cross_attention_layers"] == 0
+    assert config["style"]["views"] == ["original", "photometric"]
+    assert "prediction_consistency" not in config
+    assert "causal_query_effect" not in config
+    assert "query_diversity" not in config

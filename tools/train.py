@@ -1,4 +1,4 @@
-"""Train the Phase-5--12 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--13 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -37,9 +37,9 @@ from causalq.utils.checkpoint import save_training_checkpoint
 from causalq.utils.seed import seed_everything
 
 
-SUPPORTED_PHASES = frozenset(range(5, 13))
-QUERY_PHASES = frozenset(range(6, 13))
-STYLE_PHASES = frozenset(range(7, 13))
+SUPPORTED_PHASES = frozenset(range(5, 14))
+QUERY_PHASES = frozenset(range(6, 14))
+STYLE_PHASES = frozenset(range(7, 14))
 
 
 def parse_args() -> argparse.Namespace:
@@ -91,7 +91,7 @@ def load_config(path: Path) -> dict[str, Any]:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
     if phase not in SUPPORTED_PHASES:
-        raise ValueError("tools/train.py accepts only Phase 5--12 configs")
+        raise ValueError("tools/train.py accepts only Phase 5--13 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
@@ -99,23 +99,23 @@ def load_config(path: Path) -> dict[str, Any]:
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
     if phase in QUERY_PHASES and not query_enabled:
-        raise ValueError("Phase 6--12 requires the query branch")
+        raise ValueError("Phase 6--13 requires the query branch")
     if phase in QUERY_PHASES and "query" not in config:
-        raise ValueError("Phase 6--12 requires query configuration")
+        raise ValueError("Phase 6--13 requires query configuration")
     if phase in QUERY_PHASES and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--12 currently requires logsumexp query aggregation")
+        raise ValueError("Phase 6--13 currently requires logsumexp query aggregation")
     if phase in STYLE_PHASES:
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7--12 requires style training")
+            raise ValueError("Phase 7--13 requires style training")
         views = style.get("views")
-        if phase in (11, 12):
+        if phase in (11, 12, 13):
             allowed = (
                 ["original", "photometric"],
                 ["original", "fourier"],
             )
             if views not in allowed:
-                raise ValueError("Phase 11/12 requires exactly one counterfactual view")
+                raise ValueError("Phase 11--13 requires exactly one counterfactual view")
         elif views != ["original", "photometric", "fourier"]:
             raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
@@ -126,6 +126,16 @@ def load_config(path: Path) -> dict[str, Any]:
             raise ValueError("style.lambda_cf must be non-negative")
     if phase == 12 and int(config["query"]["queries_per_class"]) not in (1, 2, 4):
         raise ValueError("Phase 12 query-count configs require R in {1, 2, 4}")
+    interaction = config.get("query", {}).get("interaction", "one_way")
+    if interaction not in {"one_way", "static"}:
+        raise ValueError("query.interaction must be one_way or static")
+    if phase < 13 and interaction != "one_way":
+        raise ValueError("Static query interaction is reserved for Phase 13")
+    if phase == 13:
+        if interaction != "static":
+            raise ValueError("Phase 13 static-query control requires static interaction")
+        if int(config["query"]["queries_per_class"]) != 2:
+            raise ValueError("Phase 13 fixes queries_per_class=2")
     prediction = config.get("prediction_consistency", {})
     prediction_enabled = bool(prediction.get("enabled", False))
     if phase < 8 and prediction_enabled:
@@ -189,10 +199,10 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
         if float(diversity.get("lambda_div", -1.0)) != 0.01:
             raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
-    if phase in (11, 12) and (
+    if phase in (11, 12, 13) and (
         prediction_enabled or cqe_enabled or diversity_enabled
     ):
-        raise ValueError("Phase 11/12 ablations disable all consistency losses")
+        raise ValueError("Phase 11--13 ablations disable all consistency losses")
     return config
 
 
@@ -248,7 +258,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5--12 training requires CUDA")
+        raise RuntimeError("Phase 5--13 training requires CUDA")
 
     seed = resolve_seed(config, args.seed)
     query_count = (
@@ -277,10 +287,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5--12 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5--13 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5--12 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5--13 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
@@ -320,6 +330,7 @@ def main() -> int:
             cross_attention_layers=int(query_config["cross_attention_layers"]),
             temperature=float(query_config["temperature"]),
             alpha_init=float(query_config["alpha_init"]),
+            interaction=query_config.get("interaction", "one_way"),
         )
     model = model.to("cuda:0")
     model.train()
@@ -378,7 +389,12 @@ def main() -> int:
     if isinstance(model, QuerySegmentor):
         metadata["query"] = {
             "queries_per_class": model.queries_per_class,
-            "cross_attention_layers": len(model.query_attention.layers),
+            "interaction": model.interaction,
+            "cross_attention_layers": (
+                len(model.query_attention.layers)
+                if model.query_attention is not None
+                else 0
+            ),
             "num_heads": int(config["query"]["num_heads"]),
             "temperature": model.query_head.temperature,
             "aggregation": config["query"]["aggregation"],

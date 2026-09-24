@@ -158,6 +158,21 @@ deterministic original/photometric view pair for every checkpoint. It reports:
 - population variance across the two views after valid-pixel L2 normalization
   of each ground-truth-present class effect map.
 
-These metrics distinguish redundant capacity from genuinely active and
-style-stable queries. Phase 12 remains open until this common analysis is
-complete.
+The common 500-image analysis selects R=2. It reaches the highest final mIoU
+(`0.643725`), uses `1.91/2` effective queries, and has residual/contextual mean
+cosine `0.320/0.931`. R=3 and R=4 have contextual cosine near `0.999`; their
+near-uniform responsibilities therefore describe duplicated states rather than
+clear specialization. R=3 has 14.5% lower cross-style effect variance than
+R=2 (`7.88e-4` versus `9.03e-4`) but lower accuracy and higher query cost.
+R=1 and R=4 are worse in both accuracy and effect variance than R=2. Phase 12
+is complete and fixes `queries_per_class=2` for subsequent experiments.
+
+## Query-interaction ablation
+
+Phase 13 starts the interaction comparison from one isolated control: static
+queries. It keeps the selected R=2 photometric-only protocol fixed but removes
+Query-to-Image cross-attention. The grouped class anchors and residual queries
+still form dense logits through the same normalized pixel/query similarity
+head; only the image-conditioned query update is absent. No prediction
+consistency, CQE, diversity, learned-null, or bidirectional interaction is
+enabled. The existing Phase 12 R=2 result is the one-way reference.

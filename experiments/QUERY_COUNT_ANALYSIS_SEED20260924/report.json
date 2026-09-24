@@ -1,0 +1,69 @@
+{
+  "ok": true,
+  "evaluation_git_sha": "07ef4ce71d04cac432259f10d05693cdcecfdca8",
+  "pytorch": "2.7.0+cu126",
+  "cuda": "12.6",
+  "gpu": "NVIDIA GeForce RTX 4090 D",
+  "dataset": "cityscapes_val",
+  "seed": 20260924,
+  "sample_count_per_model": 500,
+  "views": ["original", "photometric"],
+  "ranking_by_final_cityscapes_miou": ["R2", "R3", "R4", "R1"],
+  "selected_query_count": 2,
+  "models": {
+    "R1": {
+      "queries_per_class": 1,
+      "final_cityscapes_miou": 0.6037110117161197,
+      "alpha": 0.2728145122528076,
+      "residual_mean_cosine": null,
+      "contextual_mean_cosine": {"original": null, "photometric": null},
+      "effective_query_count": {"original": 1.0, "photometric": 1.0},
+      "dominant_query_share": {"original": 1.0, "photometric": 1.0},
+      "cross_style_effect_variance": 0.0012099210871383548,
+      "training_git_sha": "9f477261d4cf1bb7e9618b0d9d4fb2c1f6227d3c",
+      "checkpoint_sha256": "2d7799c33f5b4b0ab5a8bcb451873b312925f6fc7277e80b79307cc1210a778a"
+    },
+    "R2": {
+      "queries_per_class": 2,
+      "final_cityscapes_miou": 0.6437254689928078,
+      "alpha": -0.26361969113349915,
+      "residual_mean_cosine": 0.31987616419792175,
+      "contextual_mean_cosine": {"original": 0.9311797618865967, "photometric": 0.9310472011566162},
+      "effective_query_count": {"original": 1.9109830856323242, "photometric": 1.9110743999481201},
+      "effective_query_fraction": {"original": 0.9554915428161621, "photometric": 0.9555371999740601},
+      "dominant_query_share": {"original": 0.5900768637657166, "photometric": 0.5900178551673889},
+      "pixel_top1_responsibility": {"original": 0.6136628985404968, "photometric": 0.6135875582695007},
+      "cross_style_effect_variance": 0.0009029699140228331,
+      "training_git_sha": "198898f580516e3cf508b588d299b0bd3a95c55f",
+      "checkpoint_sha256": "2b8848cfbd5d874dbe95409550d97aee10f35a2a1758f47501d3657ef4147f83"
+    },
+    "R3": {
+      "queries_per_class": 3,
+      "final_cityscapes_miou": 0.6382865707103561,
+      "alpha": 0.27017688751220703,
+      "residual_mean_cosine": 0.7312442660331726,
+      "contextual_mean_cosine": {"original": 0.9990626573562622, "photometric": 0.9990536570549011},
+      "effective_query_count": {"original": 2.999242067337036, "photometric": 2.9991886615753174},
+      "effective_query_fraction": {"original": 0.9997473955154419, "photometric": 0.9997295141220093},
+      "dominant_query_share": {"original": 0.3378702402114868, "photometric": 0.3379288613796234},
+      "pixel_top1_responsibility": {"original": 0.33938685059547424, "photometric": 0.33945125341415405},
+      "cross_style_effect_variance": 0.000788394536357373,
+      "training_git_sha": "d335694f33b0266a338c91fe9bfe6885fb48467c",
+      "checkpoint_sha256": "ca26d96329fc9721fb7cfbf2e6b2cf879047588f8c3121f5755ae7029333fa4e"
+    },
+    "R4": {
+      "queries_per_class": 4,
+      "final_cityscapes_miou": 0.6240832651012953,
+      "alpha": 0.26418545842170715,
+      "residual_mean_cosine": 0.7140970230102539,
+      "contextual_mean_cosine": {"original": 0.9991461038589478, "photometric": 0.9991381764411926},
+      "effective_query_count": {"original": 3.998056173324585, "photometric": 3.9980127811431885},
+      "effective_query_fraction": {"original": 0.9995140433311462, "photometric": 0.9995031952857971},
+      "dominant_query_share": {"original": 0.25572115182876587, "photometric": 0.25576356053352356},
+      "pixel_top1_responsibility": {"original": 0.2569003105163574, "photometric": 0.25694453716278076},
+      "cross_style_effect_variance": 0.0014038662193343043,
+      "training_git_sha": "84268a115400ef360270c2ed9d4a229041bfbbe5",
+      "checkpoint_sha256": "8e17b63970daf9604ddb0f907e8ff4192a8770074c8f04abe68fb4c60837fb0e"
+    }
+  }
+}

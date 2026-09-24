@@ -73,3 +73,15 @@ R=4 completes stably at `0.624083`, trailing R=2 by 1.9642 percentage points
 and R=3 by 1.4203 points. The complete final-mIoU ranking is therefore
 `R=2 > R=3 > R=4 > R=1`. Run the shared 500-image mechanism analysis on all
 four final checkpoints before selecting the Phase 12 default.
+
+The common mechanism analysis selects R=2. Both queries are active
+(`1.91/2` effective), while R=3/R=4 contextual query states are almost
+identical (mean cosine approximately `0.999`). R=3 has slightly lower effect
+variance but lower final mIoU and greater query cost. Phase 12 is closed with
+R=2 as the fixed query count.
+
+Phase 13 tests query interaction one mechanism at a time. The first control is
+static R=2 queries under the selected photometric-only protocol, compared with
+the existing one-way R=2 result. Run a 500-iteration GPU smoke before any full
+training. Bidirectional interaction is deferred until the static control is
+complete.

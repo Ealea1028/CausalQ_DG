@@ -1,4 +1,4 @@
-"""One-way grouped semantic-query branch for Phase 6."""
+"""Grouped semantic-query branches with controlled interaction modes."""
 
 from __future__ import annotations
 
@@ -213,7 +213,7 @@ class QuerySegmentorOutput:
 
 
 class QuerySegmentor(nn.Module):
-    """Frozen-DINOv3 baseline with an additive one-way query residual."""
+    """Frozen-DINOv3 baseline with an additive semantic-query residual."""
 
     def __init__(
         self,
@@ -227,6 +227,7 @@ class QuerySegmentor(nn.Module):
         cross_attention_layers: int = 1,
         temperature: float = 0.07,
         alpha_init: float = 0.0,
+        interaction: str = "one_way",
     ) -> None:
         super().__init__()
         if not backbone.freeze:
@@ -234,6 +235,9 @@ class QuerySegmentor(nn.Module):
         self.backbone = backbone
         self.num_classes = int(num_classes)
         self.queries_per_class = int(queries_per_class)
+        if interaction not in {"one_way", "static"}:
+            raise ValueError("interaction must be 'one_way' or 'static'")
+        self.interaction = interaction
         feature_count = max(1, len(backbone.intermediate_indices))
         self.decoder = BaselineDecoder(
             backbone.hidden_size,
@@ -247,10 +251,14 @@ class QuerySegmentor(nn.Module):
             num_classes=num_classes,
             queries_per_class=queries_per_class,
         )
-        self.query_attention = QueryCrossAttention(
-            backbone.hidden_size,
-            num_heads=num_heads,
-            num_layers=cross_attention_layers,
+        self.query_attention = (
+            QueryCrossAttention(
+                backbone.hidden_size,
+                num_heads=num_heads,
+                num_layers=cross_attention_layers,
+            )
+            if interaction == "one_way"
+            else None
         )
         self.query_head = QueryResidualHead(
             backbone.hidden_size,
@@ -271,16 +279,19 @@ class QuerySegmentor(nn.Module):
         base_patch_logits = self.decoder(feature_maps)
 
         grouped_queries = self.query_bank(images.shape[0])
-        flat_queries = grouped_queries.flatten(1, 2)
-        contextual_queries = self.query_attention(
-            flat_queries,
-            features.patch_tokens,
-        ).reshape(
-            images.shape[0],
-            self.num_classes,
-            self.queries_per_class,
-            self.backbone.hidden_size,
-        )
+        if self.query_attention is None:
+            contextual_queries = grouped_queries
+        else:
+            flat_queries = grouped_queries.flatten(1, 2)
+            contextual_queries = self.query_attention(
+                flat_queries,
+                features.patch_tokens,
+            ).reshape(
+                images.shape[0],
+                self.num_classes,
+                self.queries_per_class,
+                self.backbone.hidden_size,
+            )
         grid_size = features.patch_map.shape[-2:]
         query_score_maps = self.query_head.query_scores(
             features.patch_tokens,

@@ -4,10 +4,10 @@
 
 ## 1. 文档状态与阅读约定
 
-- 当前基准日期：2026-09-21。
-- 当前 Phase 11 最终实验证据提交：`4662cbadd4553728e521c351682da53545996a03`。
+- 当前基准日期：2026-09-24。
+- 当前 Phase 12 机制分析提交：`07ef4ce71d04cac432259f10d05693cdcecfdca8`。
 - 当前已完成主实验：A0–A5。
-- Phase 11 风格消融已完成；当前进行中为 Phase 12 Query 数量消融。
+- Phase 11 风格消融和 Phase 12 Query 数量消融均已完成。
 - 本文中的“已实现”“已验证”只指已进入 Git 并有实验证据的内容。
 - 本文中的“建议”“下一版”“拟议”均不是当前实现或现有实验结论。
 
@@ -542,7 +542,8 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 9 | A4 CQE 与效应方差分析 | 完成，结果为负 |
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
-| Phase 12 | Query 数量消融（R=1/2/3/4） | 四个 full run 已完成，R=2 当前最佳，等待机制诊断 |
+| Phase 12 | Query 数量消融（R=1/2/3/4） | 完成；机制诊断选择 R=2 |
+| Phase 13 | Query Interaction 消融 | 进行中；下一步为 Static Query smoke |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -786,16 +787,9 @@ for view_name, view_images in named_views:
 
 原始数据、权重、完整 checkpoints 和完整运行目录不进入 Git。Git 只保存精简后的 `summary.json`、必要日志摘录、运行清单和 `experiments/registry.csv`。
 
-## 18. 当前下一步：Phase 12 Query 数量消融
+## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-固定已选择的 photometric-only 风格协议与 seed 0，仅改变每类 residual Query 数量：
-
-1. `R=1`；
-2. `R=2`；
-3. 现有 photometric-only `R=3` 作为参考；
-4. `R=4`。
-
-`R=1/2/4` 的 500-iteration GPU smoke 和 40k full run 已全部完成。最终 mIoU 依次为 `R=1: 0.603711`、`R=2: 0.643725`、`R=3: 0.638287`、`R=4: 0.624083`，当前排序为 `R=2 > R=3 > R=4 > R=1`。下一步在四个最终 checkpoint 上统一比较 query similarity、active-query 行为和 query-effect variance，再关闭 Phase 12。
+Phase 12 已固定 `R=2`。Phase 13 按原项目计划验证 Query 与图像交互是否必要，保持 photometric-only、seed 0、优化器和训练长度不变。第一个受控变体是 Static Query：保留 grouped query bank 与 pixel/query residual head，但移除 Query→Image cross-attention。现有 R=2 one-way 结果 `0.643725` 是参考。先执行 500-iteration GPU smoke；在 Static Query 完成前不加入 bidirectional interaction 或 learned-null。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
