@@ -239,3 +239,10 @@ seeds 0/1/2, one-way obtains `0.633535 ± 0.008826` and Static obtains
 selected over one-way. Phase 13 continues only with the remaining planned
 bidirectional self-attention control; this does not reopen the completed
 Static-versus-One-way comparison.
+
+The bidirectional control concatenates the R=2 grouped query tokens with the
+DINOv3 patch tokens and applies one joint self-attention/FFN layer. The updated
+query and image streams are split and used only by the additive query-residual
+head; the frozen backbone and base segmentation decoder remain unchanged. This
+isolates bidirectional interaction from the already fixed architecture and
+losses. It must pass a 500-iteration GPU smoke before any full training.

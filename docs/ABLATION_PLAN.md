@@ -134,3 +134,9 @@ wins all three pairs, with mean paired gain `+1.9314 ± 1.9819` percentage
 points, and is selected over one-way. Implement and GPU-smoke the remaining
 bidirectional query-image self-attention control as one isolated Phase 13
 mechanism before considering a full run.
+
+The bidirectional control is implemented as one joint self-attention layer over
+the concatenated query and patch tokens, with the base decoder unchanged. Its
+configuration fixes R=2, photometric-only style, and all established training
+settings while excluding prediction consistency, CQE, diversity, and
+learned-null. Run only a 500-iteration, 50-image GPU smoke first.

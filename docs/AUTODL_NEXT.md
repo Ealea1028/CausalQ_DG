@@ -1,21 +1,25 @@
-# AutoDL next step: Static Query seed-2 paired full run
+# AutoDL next step: Bidirectional Query GPU smoke
 
-The one-way R=2 seed-2 member completed at exact implementation commit
-`3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497` with `0.628523` final
-Cityscapes mIoU. Run the paired Static Query seed-2 experiment under the same
-preprocessing, style protocol, and seed. This completes the prespecified
-three-seed interaction comparison. Do not add bidirectional interaction in
-this step.
+The three-seed interaction comparison selects Static over one-way. The remaining
+planned Phase 13 structural control is bidirectional query-image self-attention,
+implemented at exact commit
+`13667167b641209a35ddf437616ba11fb6d5c246`. Run only a 500-iteration,
+50-image GPU smoke. Do not start a full run or add learned-null.
 
-## 1. Verify source, tests, weights, and GPU
+## 1. Check out and verify the exact implementation
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
+
+test -z "$(git status --porcelain)"
+git fetch origin
+git checkout 13667167b641209a35ddf437616ba11fb6d5c246
+
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
 test "$(git rev-parse HEAD)" = \
-  "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497"
+  "13667167b641209a35ddf437616ba11fb6d5c246"
 test -z "$(git status --porcelain)"
 
 python -m pytest
@@ -27,93 +31,95 @@ nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 df -h /root/autodl-tmp
 ```
 
-Expected: `82 passed`, the DINOv3-L hash passes, and the GPU is the RTX
+Expected: `85 passed`, the DINOv3-L hash passes, and the GPU is the RTX
 4090 D. Stop if any check fails.
 
-## 2. Keep the one-way seed-2 final checkpoint and reclaim intermediates
+## 2. Keep the Static seed-2 final checkpoint and reclaim intermediates
 
-The one-way seed-2 result is recorded in Git. Delete only its 79 intermediate
+The Static seed-2 result is recorded in Git. Delete only its 79 intermediate
 checkpoints, retaining `iter_040000.pth`, metadata, summary, trace, and log.
 
 ```bash
-ONE_WAY_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q2_QUERY_COUNT_SEED2_40000_3860e69
+STATIC2_RUN=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED2_40000_3860e69
 
-test -f "$ONE_WAY_RUN/metadata.json"
-test -f "$ONE_WAY_RUN/summary.json"
-test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
-test "$(wc -l < "$ONE_WAY_RUN/train.jsonl")" -eq 40000
+test -f "$STATIC2_RUN/metadata.json"
+test -f "$STATIC2_RUN/summary.json"
+test -f "$STATIC2_RUN/checkpoints/iter_040000.pth"
+test "$(wc -l < "$STATIC2_RUN/train.jsonl")" -eq 40000
 
-ONE_WAY_CHECKPOINT_COUNT="$(
-  find "$ONE_WAY_RUN/checkpoints" \
+STATIC2_CHECKPOINT_COUNT="$(
+  find "$STATIC2_RUN/checkpoints" \
     -maxdepth 1 -type f -name 'iter_*.pth' \
     | wc -l
 )"
 
-ONE_WAY_INTERMEDIATE_COUNT="$(
-  find "$ONE_WAY_RUN/checkpoints" \
+STATIC2_INTERMEDIATE_COUNT="$(
+  find "$STATIC2_RUN/checkpoints" \
     -maxdepth 1 -type f \
     -name 'iter_*.pth' \
     ! -name 'iter_040000.pth' \
     | wc -l
 )"
 
-echo "one_way_checkpoint_count=$ONE_WAY_CHECKPOINT_COUNT"
-echo "one_way_intermediate_count=$ONE_WAY_INTERMEDIATE_COUNT"
+echo "static2_checkpoint_count=$STATIC2_CHECKPOINT_COUNT"
+echo "static2_intermediate_count=$STATIC2_INTERMEDIATE_COUNT"
 
-test "$ONE_WAY_CHECKPOINT_COUNT" -eq 80
-test "$ONE_WAY_INTERMEDIATE_COUNT" -eq 79
+test "$STATIC2_CHECKPOINT_COUNT" -eq 80
+test "$STATIC2_INTERMEDIATE_COUNT" -eq 79
 
-find "$ONE_WAY_RUN/checkpoints" \
+find "$STATIC2_RUN/checkpoints" \
   -maxdepth 1 -type f \
   -name 'iter_*.pth' \
   ! -name 'iter_040000.pth' \
   -print -delete
 
-test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
+test -f "$STATIC2_RUN/checkpoints/iter_040000.pth"
 
-ONE_WAY_REMAINING="$(
-  find "$ONE_WAY_RUN/checkpoints" \
+STATIC2_REMAINING="$(
+  find "$STATIC2_RUN/checkpoints" \
     -maxdepth 1 -type f -name 'iter_*.pth' \
     | wc -l
 )"
 
-echo "one_way_remaining_checkpoint_count=$ONE_WAY_REMAINING"
-test "$ONE_WAY_REMAINING" -eq 1
-du -sh "$ONE_WAY_RUN"
+echo "static2_remaining_checkpoint_count=$STATIC2_REMAINING"
+test "$STATIC2_REMAINING" -eq 1
+du -sh "$STATIC2_RUN"
 df -h /root/autodl-tmp
 ```
 
-## 3. Run Static Query seed 2 from random initialization
+## 3. Run the isolated Bidirectional smoke
 
 ```bash
-RUN_ID=I1_STATIC_QUERY_SEED2_40000_3860e69
-RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
-LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
+BIDIR_RUN_ID=I2_BIDIRECTIONAL_QUERY_SMOKE_500_1366716
+BIDIR_RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${BIDIR_RUN_ID}"
+BIDIR_LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${BIDIR_RUN_ID}.log"
 
-test ! -e "$RUN_DIR"
-test ! -e "$LOG_FILE"
+echo "BIDIR_RUN_DIR=$BIDIR_RUN_DIR"
+echo "BIDIR_LOG_FILE=$BIDIR_LOG_FILE"
+
+test ! -e "$BIDIR_RUN_DIR"
+test ! -e "$BIDIR_LOG_FILE"
 
 set -o pipefail
 
-MAX_ITERATIONS=40000 \
-VALIDATION_MAX_SAMPLES=500 \
-SEED=2 \
-RUN_ID="$RUN_ID" \
-bash scripts/train_static_query.sh \
-  2>&1 | tee "$LOG_FILE"
+MAX_ITERATIONS=500 \
+VALIDATION_MAX_SAMPLES=50 \
+SEED=0 \
+RUN_ID="$BIDIR_RUN_ID" \
+bash scripts/train_bidirectional_query.sh \
+  2>&1 | tee "$BIDIR_LOG_FILE"
 
 TRAIN_EXIT=${PIPESTATUS[0]}
 echo "train_exit_code=$TRAIN_EXIT"
 test "$TRAIN_EXIT" -eq 0
 ```
 
-## 4. Validate and return three-seed paired evidence
+## 4. Validate and return smoke evidence
 
 ```bash
-python - "$RUN_DIR" <<'PY'
+python - "$BIDIR_RUN_DIR" <<'PY'
 import json
 import math
-import statistics
 import sys
 from pathlib import Path
 
@@ -128,23 +134,24 @@ records = [
 validations = summary["validation_results"]
 checkpoints = sorted((run_dir / "checkpoints").glob("iter_*.pth"))
 
-assert metadata["experiment_id"] == "I1_STATIC_QUERY_SEED2_40000_3860e69"
+assert metadata["experiment_id"] == \
+    "I2_BIDIRECTIONAL_QUERY_SMOKE_500_1366716"
 assert metadata["phase"] == 13
 assert metadata["git_sha"] == \
-    "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497"
-assert metadata["seed"] == 2
-assert metadata["max_iterations"] == 40000
+    "13667167b641209a35ddf437616ba11fb6d5c246"
+assert metadata["seed"] == 0
+assert metadata["max_iterations"] == 500
 assert metadata["query"]["queries_per_class"] == 2
-assert metadata["query"]["interaction"] == "static"
-assert metadata["query"]["cross_attention_layers"] == 0
+assert metadata["query"]["interaction"] == "bidirectional"
+assert metadata["query"]["cross_attention_layers"] == 1
 assert metadata["style"]["views"] == ["original", "photometric"]
 assert "prediction_consistency" not in metadata
 assert "causal_query_effect" not in metadata
 assert "query_diversity" not in metadata
 
 assert summary["ok"] is True
-assert len(records) == 40000
-assert [row["iteration"] for row in records] == list(range(1, 40001))
+assert len(records) == 500
+assert [row["iteration"] for row in records] == list(range(1, 501))
 
 tracked = (
     "loss",
@@ -169,29 +176,14 @@ reconstruction_errors = [
 ]
 assert max(reconstruction_errors) <= 1e-5
 
-assert len(validations) == 80
-assert all(item["sample_count"] == 500 for item in validations)
-assert all(math.isfinite(float(item["miou"])) for item in validations)
-assert validations[-1]["iteration"] == 40000
-assert len(checkpoints) == 80
-assert checkpoints[-1].name == "iter_040000.pth"
+assert len(validations) == 1
+assert validations[0]["iteration"] == 500
+assert validations[0]["sample_count"] == 50
+assert math.isfinite(float(validations[0]["miou"]))
+assert len(checkpoints) == 1
+assert checkpoints[0].name == "iter_000500.pth"
 
-best = max(validations, key=lambda item: item["miou"])
-final = validations[-1]
-
-one_way = [
-    0.6437254689928078,
-    0.6283567654313249,
-    0.6285227921576786,
-]
-static = [
-    0.6473964462159979,
-    0.6699578268480332,
-    float(final["miou"]),
-]
-paired = [s - o for s, o in zip(static, one_way)]
-
-print("static_query_seed2_full_ok=true")
+print("bidirectional_query_smoke_ok=true")
 print("metadata:", metadata)
 print(
     "summary:",
@@ -201,41 +193,27 @@ print("record_count:", len(records))
 print("maximum_objective_reconstruction_error:", max(reconstruction_errors))
 print("first_record:", records[0])
 print("last_record:", records[-1])
-print("validation_count:", len(validations))
-print("final_validation:", final)
-print("best_validation:", best)
+print("validation:", validations[0])
 print("checkpoint_count:", len(checkpoints))
-print("final_checkpoint:", checkpoints[-1])
-
-print("===== final three-seed interaction comparison =====")
-print("one_way_values:", one_way)
-print("static_values:", static)
-print("paired_static_minus_one_way:", paired)
-print("one_way_mean:", statistics.fmean(one_way))
-print("one_way_sample_std:", statistics.stdev(one_way))
-print("static_mean:", statistics.fmean(static))
-print("static_sample_std:", statistics.stdev(static))
-print("paired_difference_mean:", statistics.fmean(paired))
-print("paired_difference_sample_std:", statistics.stdev(paired))
+print("checkpoint:", checkpoints[0])
 PY
 
 echo "===== checkpoint evidence ====="
-find "$RUN_DIR/checkpoints" \
+find "$BIDIR_RUN_DIR/checkpoints" \
   -maxdepth 1 -type f \
   -printf '%s %f\n' \
-  | sort -k2 \
-  | tail -n 5
+  | sort -k2
 
-du -sh "$RUN_DIR/checkpoints"
+du -sh "$BIDIR_RUN_DIR/checkpoints"
 
-echo "===== paired one-way preservation ====="
-test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
-find "$ONE_WAY_RUN/checkpoints" \
+echo "===== Static seed-2 final checkpoint ====="
+test -f "$STATIC2_RUN/checkpoints/iter_040000.pth"
+find "$STATIC2_RUN/checkpoints" \
   -maxdepth 1 -type f -name 'iter_*.pth' \
-  | wc -l
+  -printf '%s %f\n'
 
 echo "===== final log ====="
-tail -n 30 "$LOG_FILE"
+tail -n 30 "$BIDIR_LOG_FILE"
 
 echo "===== provenance ====="
 git rev-parse HEAD
@@ -245,6 +223,6 @@ echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
-Return the complete validator output and final evidence blocks. Stop after the
-run: do not delete the Static seed-2 checkpoints and do not start bidirectional
-interaction.
+Return the complete validator output and evidence blocks. Stop after the smoke:
+do not delete its checkpoint, do not start a 40k bidirectional run, and do not
+add learned-null.
