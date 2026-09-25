@@ -223,3 +223,10 @@ one-way by `4.1601` percentage points at seed 1, compared with `0.3671` points
 at seed 0. Both paired differences favor Static, but their magnitude is highly
 variable; complete the prespecified seed-2 pair before selecting the interaction
 or adding the bidirectional control.
+
+The one-way R=2 seed-2 member completes at `0.628523` final Cityscapes mIoU,
+with a best intermediate result of `0.632286` at iteration 21,000. Its 40,000
+records, 80 complete validations, exact objective reconstruction, isolation,
+and checkpoint evidence pass. Run the paired Static Query seed-2 member before
+computing the final three-seed interaction statistics or introducing the
+bidirectional control.

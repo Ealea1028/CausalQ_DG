@@ -121,3 +121,9 @@ Static-minus-One-way differences are `+0.3671/+4.1601` points. The direction is
 consistent but the magnitude is variable, so complete the prespecified third
 pair: run one-way R=2 seed 2 next, followed by Static Query seed 2. Do not add
 bidirectional interaction before the three-seed comparison is closed.
+
+One-way R=2 seed 2 completes at `0.628523` final mIoU with a finite contiguous
+trace and 80 full validations. Run Static Query seed 2 next under the identical
+commit and protocol. This is the remaining member of the prespecified
+three-seed Static-versus-One-way comparison; defer bidirectional interaction
+until it is accepted and the paired statistics are computed.
