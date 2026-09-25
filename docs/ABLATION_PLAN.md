@@ -114,3 +114,10 @@ with 40,000 finite contiguous records and 80 full validations. Run Static
 Query seed 1 next under the identical repaired preprocessing commit; defer all
 cross-seed conclusions and bidirectional interaction until the pair is
 complete.
+
+Static Query seed 1 completes at `0.669958`, exceeding the paired one-way
+result by 4.1601 percentage points. Together with seed 0, the paired
+Static-minus-One-way differences are `+0.3671/+4.1601` points. The direction is
+consistent but the magnitude is variable, so complete the prespecified third
+pair: run one-way R=2 seed 2 next, followed by Static Query seed 2. Do not add
+bidirectional interaction before the three-seed comparison is closed.

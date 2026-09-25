@@ -214,3 +214,12 @@ Cityscapes mIoU, with a best intermediate result of `0.637596` at iteration
 gradient norm is `72.1414`, but it is finite and is clipped by the fixed
 max-norm `1.0` before the optimizer step. The paired Static Query seed-1 run is
 required before interpreting this result.
+
+The paired Static Query seed-1 run completes at `0.669958` final Cityscapes
+mIoU, with a best intermediate result of `0.676172` at iteration 37,000. Its
+40,000 finite contiguous records, exact objective reconstruction, 80 complete
+500-image validations, and intended mechanism isolation all pass. Static leads
+one-way by `4.1601` percentage points at seed 1, compared with `0.3671` points
+at seed 0. Both paired differences favor Static, but their magnitude is highly
+variable; complete the prespecified seed-2 pair before selecting the interaction
+or adding the bidirectional control.
