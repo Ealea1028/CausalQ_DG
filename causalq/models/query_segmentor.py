@@ -105,6 +105,69 @@ class QueryCrossAttention(nn.Module):
         return queries
 
 
+class _QueryImageSelfAttentionLayer(nn.Module):
+    def __init__(self, hidden_size: int, num_heads: int) -> None:
+        super().__init__()
+        self.attention = nn.MultiheadAttention(
+            hidden_size,
+            num_heads,
+            batch_first=True,
+        )
+        self.attention_norm = nn.LayerNorm(hidden_size)
+        self.ffn = nn.Sequential(
+            nn.Linear(hidden_size, hidden_size * 4),
+            nn.GELU(),
+            nn.Linear(hidden_size * 4, hidden_size),
+        )
+        self.ffn_norm = nn.LayerNorm(hidden_size)
+
+    def forward(self, tokens: Tensor) -> Tensor:
+        attended, _ = self.attention(
+            tokens,
+            tokens,
+            tokens,
+            need_weights=False,
+        )
+        tokens = self.attention_norm(tokens + attended)
+        return self.ffn_norm(tokens + self.ffn(tokens))
+
+
+class QueryImageSelfAttention(nn.Module):
+    """Jointly update query and image tokens with bidirectional attention."""
+
+    def __init__(
+        self,
+        hidden_size: int,
+        *,
+        num_heads: int = 8,
+        num_layers: int = 1,
+    ) -> None:
+        super().__init__()
+        if hidden_size % num_heads:
+            raise ValueError("hidden_size must be divisible by num_heads")
+        if num_layers < 1:
+            raise ValueError("num_layers must be positive")
+        self.layers = nn.ModuleList(
+            _QueryImageSelfAttentionLayer(hidden_size, num_heads)
+            for _ in range(num_layers)
+        )
+
+    def forward(
+        self,
+        queries: Tensor,
+        image_tokens: Tensor,
+    ) -> tuple[Tensor, Tensor]:
+        if queries.ndim != 3 or image_tokens.ndim != 3:
+            raise ValueError("queries and image_tokens must both be BND tensors")
+        if queries.shape[0] != image_tokens.shape[0]:
+            raise ValueError("queries and image_tokens must share a batch size")
+        query_count = queries.shape[1]
+        tokens = torch.cat((queries, image_tokens), dim=1)
+        for layer in self.layers:
+            tokens = layer(tokens)
+        return tokens[:, :query_count], tokens[:, query_count:]
+
+
 class QueryResidualHead(nn.Module):
     """Produce per-class dense residual logits from pixels and grouped queries."""
 
@@ -235,8 +298,10 @@ class QuerySegmentor(nn.Module):
         self.backbone = backbone
         self.num_classes = int(num_classes)
         self.queries_per_class = int(queries_per_class)
-        if interaction not in {"one_way", "static"}:
-            raise ValueError("interaction must be 'one_way' or 'static'")
+        if interaction not in {"one_way", "static", "bidirectional"}:
+            raise ValueError(
+                "interaction must be 'one_way', 'static', or 'bidirectional'"
+            )
         self.interaction = interaction
         feature_count = max(1, len(backbone.intermediate_indices))
         self.decoder = BaselineDecoder(
@@ -251,15 +316,20 @@ class QuerySegmentor(nn.Module):
             num_classes=num_classes,
             queries_per_class=queries_per_class,
         )
-        self.query_attention = (
-            QueryCrossAttention(
+        if interaction == "one_way":
+            self.query_attention = QueryCrossAttention(
                 backbone.hidden_size,
                 num_heads=num_heads,
                 num_layers=cross_attention_layers,
             )
-            if interaction == "one_way"
-            else None
-        )
+        elif interaction == "bidirectional":
+            self.query_attention = QueryImageSelfAttention(
+                backbone.hidden_size,
+                num_heads=num_heads,
+                num_layers=cross_attention_layers,
+            )
+        else:
+            self.query_attention = None
         self.query_head = QueryResidualHead(
             backbone.hidden_size,
             num_classes=num_classes,
@@ -279,9 +349,10 @@ class QuerySegmentor(nn.Module):
         base_patch_logits = self.decoder(feature_maps)
 
         grouped_queries = self.query_bank(images.shape[0])
+        residual_image_tokens = features.patch_tokens
         if self.query_attention is None:
             contextual_queries = grouped_queries
-        else:
+        elif self.interaction == "one_way":
             flat_queries = grouped_queries.flatten(1, 2)
             contextual_queries = self.query_attention(
                 flat_queries,
@@ -292,9 +363,21 @@ class QuerySegmentor(nn.Module):
                 self.queries_per_class,
                 self.backbone.hidden_size,
             )
+        else:
+            flat_queries = grouped_queries.flatten(1, 2)
+            contextual_queries, residual_image_tokens = self.query_attention(
+                flat_queries,
+                features.patch_tokens,
+            )
+            contextual_queries = contextual_queries.reshape(
+                images.shape[0],
+                self.num_classes,
+                self.queries_per_class,
+                self.backbone.hidden_size,
+            )
         grid_size = features.patch_map.shape[-2:]
         query_score_maps = self.query_head.query_scores(
-            features.patch_tokens,
+            residual_image_tokens,
             contextual_queries,
             grid_size=grid_size,
         )

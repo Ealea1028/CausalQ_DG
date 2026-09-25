@@ -7,6 +7,7 @@ from torch import nn
 
 from causalq.models import (
     DINOv3Backbone,
+    QueryImageSelfAttention,
     QueryResidualHead,
     QuerySegmentor,
 )
@@ -149,8 +150,46 @@ def test_static_queries_skip_image_cross_attention() -> None:
 def test_query_interaction_rejects_unknown_mode() -> None:
     backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
 
-    with pytest.raises(ValueError, match="one_way.*static"):
-        QuerySegmentor(backbone, interaction="bidirectional")
+    with pytest.raises(ValueError, match="one_way.*static.*bidirectional"):
+        QuerySegmentor(backbone, interaction="unknown")
+
+
+def test_bidirectional_attention_updates_queries_and_image_tokens() -> None:
+    attention = QueryImageSelfAttention(
+        16,
+        num_heads=4,
+        num_layers=1,
+    ).eval()
+    queries = torch.randn(2, 8, 16)
+    image_tokens = torch.randn(2, 16, 16)
+
+    updated_queries, updated_image_tokens = attention(queries, image_tokens)
+
+    assert updated_queries.shape == queries.shape
+    assert updated_image_tokens.shape == image_tokens.shape
+    assert not torch.equal(updated_queries, queries)
+    assert not torch.equal(updated_image_tokens, image_tokens)
+
+
+def test_bidirectional_segmentor_uses_joint_attention() -> None:
+    backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
+    model = QuerySegmentor(
+        backbone,
+        decoder_channels=32,
+        num_classes=4,
+        dropout=0.0,
+        queries_per_class=2,
+        num_heads=4,
+        interaction="bidirectional",
+    ).eval()
+
+    output = model.forward_components(torch.randn(2, 3, 8, 8))
+
+    assert isinstance(model.query_attention, QueryImageSelfAttention)
+    assert model.interaction == "bidirectional"
+    assert output.query_states.shape == (2, 4, 2, 16)
+    assert output.query_score_maps.shape == (2, 4, 2, 4, 4)
+    assert output.logits.shape == (2, 4, 8, 8)
 
 
 def test_phase6_config_enables_only_query_mechanism() -> None:
@@ -176,6 +215,22 @@ def test_phase13_static_query_config_is_isolated() -> None:
     assert config["query"]["queries_per_class"] == 2
     assert config["query"]["interaction"] == "static"
     assert config["query"]["cross_attention_layers"] == 0
+    assert config["style"]["views"] == ["original", "photometric"]
+    assert "prediction_consistency" not in config
+    assert "causal_query_effect" not in config
+    assert "query_diversity" not in config
+
+
+def test_phase13_bidirectional_query_config_is_isolated() -> None:
+    root = Path(__file__).resolve().parents[1]
+    config = load_config(
+        root / "configs/query_interaction/gta_dinov3l_bidirectional.yaml"
+    )
+
+    assert config["experiment"]["phase"] == 13
+    assert config["query"]["queries_per_class"] == 2
+    assert config["query"]["interaction"] == "bidirectional"
+    assert config["query"]["cross_attention_layers"] == 1
     assert config["style"]["views"] == ["original", "photometric"]
     assert "prediction_consistency" not in config
     assert "causal_query_effect" not in config

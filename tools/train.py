@@ -127,15 +127,25 @@ def load_config(path: Path) -> dict[str, Any]:
     if phase == 12 and int(config["query"]["queries_per_class"]) not in (1, 2, 4):
         raise ValueError("Phase 12 query-count configs require R in {1, 2, 4}")
     interaction = config.get("query", {}).get("interaction", "one_way")
-    if interaction not in {"one_way", "static"}:
-        raise ValueError("query.interaction must be one_way or static")
+    if interaction not in {"one_way", "static", "bidirectional"}:
+        raise ValueError(
+            "query.interaction must be one_way, static, or bidirectional"
+        )
     if phase < 13 and interaction != "one_way":
-        raise ValueError("Static query interaction is reserved for Phase 13")
+        raise ValueError("Alternative query interactions are reserved for Phase 13")
     if phase == 13:
-        if interaction != "static":
-            raise ValueError("Phase 13 static-query control requires static interaction")
+        if interaction not in {"static", "bidirectional"}:
+            raise ValueError(
+                "Phase 13 requires static or bidirectional interaction"
+            )
         if int(config["query"]["queries_per_class"]) != 2:
             raise ValueError("Phase 13 fixes queries_per_class=2")
+    if phase in QUERY_PHASES:
+        interaction_layers = int(config["query"]["cross_attention_layers"])
+        if interaction == "static" and interaction_layers != 0:
+            raise ValueError("Static interaction requires zero attention layers")
+        if interaction != "static" and interaction_layers < 1:
+            raise ValueError("Attention-based interaction requires at least one layer")
     prediction = config.get("prediction_consistency", {})
     prediction_enabled = bool(prediction.get("enabled", False))
     if phase < 8 and prediction_enabled:

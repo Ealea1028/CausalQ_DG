@@ -10,6 +10,7 @@ from .dinov3_wrapper import (
 from .query_segmentor import (
     GroupedCausalQueryBank,
     QueryCrossAttention,
+    QueryImageSelfAttention,
     QueryResidualHead,
     QuerySegmentor,
     QuerySegmentorOutput,
@@ -24,6 +25,7 @@ __all__ = [
     "DINOv3Features",
     "GroupedCausalQueryBank",
     "QueryCrossAttention",
+    "QueryImageSelfAttention",
     "QueryResidualHead",
     "QuerySegmentor",
     "QuerySegmentorOutput",
