@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--12 ablations are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the small paired advantage reverses sign at seed 1, so photometric-only is the simpler default. Phase 12 final mIoU is `0.603711/0.643725/0.638287/0.624083` for `R=1/2/3/4`. The shared mechanism analysis selects R=2: it is most accurate, uses both queries, and avoids the approximately `0.999` contextual-query cosine redundancy observed at R=3/R=4. Phase 13 static R=2 reaches `0.647396` at seed 0, only 0.3671 percentage points above the one-way reference. The valid-pixel crop fallback at `3860e69` has passed its GPU smoke, so the paired comparison now restarts one-way R=2 seed 1 from random initialization.
+The A0--A5 core sequence and Phase 11--12 ablations are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the small paired advantage reverses sign at seed 1, so photometric-only is the simpler default. Phase 12 final mIoU is `0.603711/0.643725/0.638287/0.624083` for `R=1/2/3/4`. The shared mechanism analysis selects R=2: it is most accurate, uses both queries, and avoids the approximately `0.999` contextual-query cosine redundancy observed at R=3/R=4. Phase 13 static R=2 reaches `0.647396` at seed 0, only 0.3671 percentage points above the one-way reference. The repaired one-way R=2 seed-1 repeat is complete at `0.628357`; Static Query seed 1 is the next paired run.
 
 ## Working directories
 

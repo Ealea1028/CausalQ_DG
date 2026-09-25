@@ -207,3 +207,10 @@ completes a finite 50-image validation at `0.341777` mIoU. This short-run score
 is diagnostic only. The original 3,316-iteration attempt remains excluded;
 the formal seed-1 repeat restarts from random initialization at the repaired
 commit.
+
+The repaired one-way R=2 seed-1 full run completes at `0.628357` final
+Cityscapes mIoU, with a best intermediate result of `0.637596` at iteration
+23,500. All 40,000 records and 80 full validations pass. Its last pre-clipping
+gradient norm is `72.1414`, but it is finite and is clipped by the fixed
+max-norm `1.0` before the optimizer step. The paired Static Query seed-1 run is
+required before interpreting this result.

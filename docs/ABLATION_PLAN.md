@@ -108,3 +108,9 @@ The repaired path passes its 500-iteration GPU smoke at `3860e69`, producing
 one checkpoint and a finite 50-image diagnostic validation. Restart the
 one-way R=2 seed-1 40k run from random initialization under this exact commit;
 do not resume or compare the excluded 3,316-iteration attempt.
+
+The repaired one-way R=2 seed-1 full run completes at `0.628357` final mIoU
+with 40,000 finite contiguous records and 80 full validations. Run Static
+Query seed 1 next under the identical repaired preprocessing commit; defer all
+cross-seed conclusions and bidirectional interaction until the pair is
+complete.

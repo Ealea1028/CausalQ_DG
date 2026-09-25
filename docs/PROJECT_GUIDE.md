@@ -543,7 +543,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
 | Phase 12 | Query 数量消融（R=1/2/3/4） | 完成；机制诊断选择 R=2 |
-| Phase 13 | Query Interaction 消融 | Static seed 0 已完成；裁剪兜底 GPU smoke 通过，继续配对复验 |
+| Phase 13 | Query Interaction 消融 | one-way seed 1 已完成；下一步运行 Static seed 1 配对实验 |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -789,7 +789,7 @@ for view_name, view_images in named_views:
 
 ## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-Phase 12 已固定 `R=2`。Phase 13 按原项目计划验证 Query 与图像交互是否必要，保持 photometric-only、优化器和训练长度不变。第一个受控变体 Static Query 保留 grouped query bank 与 pixel/query residual head，但移除 Query→Image cross-attention。其 seed-0 full run 达到 `0.647396`，比现有 R=2 one-way 结果 `0.643725` 高 0.3671 个百分点。由于差距低于预设的 0.5 mIoU 复验阈值，当前不能宣布 Static Query 更优。第一次 one-way seed-1 运行在3316次迭代后暴露随机裁剪全空的边缘情况；全量24966标签审计确认数据完整，`3860e69` 已加入仅在随机候选全部为空时启用的有效像素兜底，并已通过500-iteration GPU smoke。下一步在该精确提交上从随机初始化重新运行 one-way seed 1；旧运行保持排除且不得续训。在配对结论明确前不加入 bidirectional interaction 或 learned-null。
+Phase 12 已固定 `R=2`。Phase 13 按原项目计划验证 Query 与图像交互是否必要，保持 photometric-only、优化器和训练长度不变。第一个受控变体 Static Query 保留 grouped query bank 与 pixel/query residual head，但移除 Query→Image cross-attention。其 seed-0 full run 达到 `0.647396`，比现有 R=2 one-way 结果 `0.643725` 高 0.3671 个百分点。由于差距低于预设的 0.5 mIoU 复验阈值，当前不能宣布 Static Query 更优。有效像素裁剪兜底已在 `3860e69` 通过 GPU smoke，修复后的 one-way seed-1 full run 达到 `0.628357`。下一步在同一精确提交上运行 Static Query seed 1，完成第二组配对；在配对结论明确前不加入 bidirectional interaction 或 learned-null。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 

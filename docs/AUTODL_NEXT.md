@@ -1,9 +1,10 @@
-# AutoDL next step: one-way R=2 seed-1 full retry
+# AutoDL next step: Static Query seed-1 paired full run
 
-The valid-crop fallback GPU smoke passed at exact implementation commit
-`3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497`. Restart the one-way R=2 seed-1
-40k paired-repeat member from random initialization on that commit. The failed
-`367694e` attempt is excluded and must not be resumed.
+The repaired one-way R=2 seed-1 run completed at exact implementation commit
+`3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497` with `0.628357` final
+Cityscapes mIoU. Run the paired Static Query seed-1 40k experiment under the
+same preprocessing, style protocol, and seed. Do not add bidirectional
+interaction or start seed 2 in this step.
 
 ## 1. Verify source, tests, weights, and GPU
 
@@ -28,49 +29,63 @@ df -h /root/autodl-tmp
 Expected: `82 passed`, the DINOv3-L hash passes, and the GPU is the RTX
 4090 D. Stop if any check fails.
 
-## 2. Reclaim only the excluded attempt's six checkpoints
+## 2. Keep the one-way final checkpoint and reclaim its intermediates
 
-Its compact failure evidence is already recorded in Git. Keep its metadata,
-trace, and external log; delete only the six exact-path checkpoint files.
+The one-way seed-1 result is recorded in Git. Delete only its 79 intermediate
+checkpoints, retaining `iter_040000.pth`, metadata, summary, trace, and log.
 
 ```bash
-FAILED_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q2_QUERY_COUNT_SEED1_40000_367694e
+ONE_WAY_RUN=/root/autodl-tmp/outputs/CausalQ_DG/Q2_QUERY_COUNT_SEED1_40000_3860e69
 
-test -d "$FAILED_RUN"
-test -f "$FAILED_RUN/metadata.json"
-test "$(wc -l < "$FAILED_RUN/train.jsonl")" -eq 3316
+test -f "$ONE_WAY_RUN/metadata.json"
+test -f "$ONE_WAY_RUN/summary.json"
+test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
+test "$(wc -l < "$ONE_WAY_RUN/train.jsonl")" -eq 40000
 
-FAILED_CHECKPOINT_COUNT="$(
-  find "$FAILED_RUN/checkpoints" \
+ONE_WAY_CHECKPOINT_COUNT="$(
+  find "$ONE_WAY_RUN/checkpoints" \
     -maxdepth 1 -type f -name 'iter_*.pth' \
     | wc -l
 )"
 
-echo "failed_checkpoint_count=$FAILED_CHECKPOINT_COUNT"
-test "$FAILED_CHECKPOINT_COUNT" -eq 6
+ONE_WAY_INTERMEDIATE_COUNT="$(
+  find "$ONE_WAY_RUN/checkpoints" \
+    -maxdepth 1 -type f \
+    -name 'iter_*.pth' \
+    ! -name 'iter_040000.pth' \
+    | wc -l
+)"
 
-find "$FAILED_RUN/checkpoints" \
-  -maxdepth 1 -type f -name 'iter_*.pth' \
+echo "one_way_checkpoint_count=$ONE_WAY_CHECKPOINT_COUNT"
+echo "one_way_intermediate_count=$ONE_WAY_INTERMEDIATE_COUNT"
+
+test "$ONE_WAY_CHECKPOINT_COUNT" -eq 80
+test "$ONE_WAY_INTERMEDIATE_COUNT" -eq 79
+
+find "$ONE_WAY_RUN/checkpoints" \
+  -maxdepth 1 -type f \
+  -name 'iter_*.pth' \
+  ! -name 'iter_040000.pth' \
   -print -delete
 
-REMAINING_FAILED_CHECKPOINTS="$(
-  find "$FAILED_RUN/checkpoints" \
+test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
+
+ONE_WAY_REMAINING="$(
+  find "$ONE_WAY_RUN/checkpoints" \
     -maxdepth 1 -type f -name 'iter_*.pth' \
     | wc -l
 )"
 
-echo "remaining_failed_checkpoints=$REMAINING_FAILED_CHECKPOINTS"
-test "$REMAINING_FAILED_CHECKPOINTS" -eq 0
-test "$(wc -l < "$FAILED_RUN/train.jsonl")" -eq 3316
-
-du -sh "$FAILED_RUN"
+echo "one_way_remaining_checkpoint_count=$ONE_WAY_REMAINING"
+test "$ONE_WAY_REMAINING" -eq 1
+du -sh "$ONE_WAY_RUN"
 df -h /root/autodl-tmp
 ```
 
-## 3. Run the fresh 40k experiment
+## 3. Run Static Query seed 1 from random initialization
 
 ```bash
-RUN_ID=Q2_QUERY_COUNT_SEED1_40000_3860e69
+RUN_ID=I1_STATIC_QUERY_SEED1_40000_3860e69
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}"
 LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${RUN_ID}.log"
 
@@ -79,12 +94,11 @@ test ! -e "$LOG_FILE"
 
 set -o pipefail
 
-QUERY_COUNT=2 \
 MAX_ITERATIONS=40000 \
 VALIDATION_MAX_SAMPLES=500 \
 SEED=1 \
 RUN_ID="$RUN_ID" \
-bash scripts/train_query_count.sh \
+bash scripts/train_static_query.sh \
   2>&1 | tee "$LOG_FILE"
 
 TRAIN_EXIT=${PIPESTATUS[0]}
@@ -92,7 +106,7 @@ echo "train_exit_code=$TRAIN_EXIT"
 test "$TRAIN_EXIT" -eq 0
 ```
 
-## 4. Validate and return full-run evidence
+## 4. Validate and return paired-run evidence
 
 ```bash
 python - "$RUN_DIR" <<'PY'
@@ -111,15 +125,15 @@ records = [
 validations = summary["validation_results"]
 checkpoints = sorted((run_dir / "checkpoints").glob("iter_*.pth"))
 
-assert metadata["experiment_id"] == "Q2_QUERY_COUNT_SEED1_40000_3860e69"
-assert metadata["phase"] == 12
+assert metadata["experiment_id"] == "I1_STATIC_QUERY_SEED1_40000_3860e69"
+assert metadata["phase"] == 13
 assert metadata["git_sha"] == \
     "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497"
 assert metadata["seed"] == 1
 assert metadata["max_iterations"] == 40000
 assert metadata["query"]["queries_per_class"] == 2
-assert metadata["query"]["interaction"] == "one_way"
-assert metadata["query"]["cross_attention_layers"] == 1
+assert metadata["query"]["interaction"] == "static"
+assert metadata["query"]["cross_attention_layers"] == 0
 assert metadata["style"]["views"] == ["original", "photometric"]
 assert "prediction_consistency" not in metadata
 assert "causal_query_effect" not in metadata
@@ -156,14 +170,14 @@ assert len(validations) == 80
 assert all(item["sample_count"] == 500 for item in validations)
 assert all(math.isfinite(float(item["miou"])) for item in validations)
 assert validations[-1]["iteration"] == 40000
-
 assert len(checkpoints) == 80
 assert checkpoints[-1].name == "iter_040000.pth"
 
 best = max(validations, key=lambda item: item["miou"])
 final = validations[-1]
+one_way_seed1 = 0.6283567654313249
 
-print("one_way_r2_seed1_full_retry_ok=true")
+print("static_query_seed1_full_ok=true")
 print("metadata:", metadata)
 print(
     "summary:",
@@ -176,6 +190,8 @@ print("last_record:", records[-1])
 print("validation_count:", len(validations))
 print("final_validation:", final)
 print("best_validation:", best)
+print("one_way_seed1_miou:", one_way_seed1)
+print("static_minus_one_way_seed1:", final["miou"] - one_way_seed1)
 print("checkpoint_count:", len(checkpoints))
 print("final_checkpoint:", checkpoints[-1])
 PY
@@ -189,12 +205,14 @@ find "$RUN_DIR/checkpoints" \
 
 du -sh "$RUN_DIR/checkpoints"
 
+echo "===== paired checkpoint preservation ====="
+test -f "$ONE_WAY_RUN/checkpoints/iter_040000.pth"
+find "$ONE_WAY_RUN/checkpoints" \
+  -maxdepth 1 -type f -name 'iter_*.pth' \
+  | wc -l
+
 echo "===== final log ====="
 tail -n 30 "$LOG_FILE"
-
-echo "===== excluded attempt retained evidence ====="
-test "$(wc -l < "$FAILED_RUN/train.jsonl")" -eq 3316
-test "$(find "$FAILED_RUN/checkpoints" -maxdepth 1 -type f -name 'iter_*.pth' | wc -l)" -eq 0
 
 echo "===== provenance ====="
 git rev-parse HEAD
@@ -205,4 +223,4 @@ df -h /root/autodl-tmp
 ```
 
 Return the complete validator output and final evidence blocks. Stop after the
-run: do not delete its checkpoints and do not start Static Query seed 1.
+run: do not delete Static Query checkpoints and do not start seed 2.
