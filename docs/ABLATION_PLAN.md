@@ -127,3 +127,10 @@ trace and 80 full validations. Run Static Query seed 2 next under the identical
 commit and protocol. This is the remaining member of the prespecified
 three-seed Static-versus-One-way comparison; defer bidirectional interaction
 until it is accepted and the paired statistics are computed.
+
+Static Query seed 2 completes at `0.641193`. The final three-seed means are
+`0.633535 ± 0.008826` for one-way and `0.652849 ± 0.015138` for Static. Static
+wins all three pairs, with mean paired gain `+1.9314 ± 1.9819` percentage
+points, and is selected over one-way. Implement and GPU-smoke the remaining
+bidirectional query-image self-attention control as one isolated Phase 13
+mechanism before considering a full run.

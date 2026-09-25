@@ -230,3 +230,12 @@ records, 80 complete validations, exact objective reconstruction, isolation,
 and checkpoint evidence pass. Run the paired Static Query seed-2 member before
 computing the final three-seed interaction statistics or introducing the
 bidirectional control.
+
+The paired Static Query seed-2 member completes at `0.641193` final mIoU and
+passes the same trace, validation, isolation, and checkpoint gates. Across
+seeds 0/1/2, one-way obtains `0.633535 ± 0.008826` and Static obtains
+`0.652849 ± 0.015138`. The paired Static-minus-One-way difference is
+`0.019314 ± 0.019819` and is positive for every seed. Static is therefore
+selected over one-way. Phase 13 continues only with the remaining planned
+bidirectional self-attention control; this does not reopen the completed
+Static-versus-One-way comparison.

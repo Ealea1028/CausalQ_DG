@@ -543,7 +543,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 10 | A5 Query Diversity | 完成，机制被拒绝 |
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
 | Phase 12 | Query 数量消融（R=1/2/3/4） | 完成；机制诊断选择 R=2 |
-| Phase 13 | Query Interaction 消融 | one-way seed 2 已完成；下一步运行 Static seed 2 完成三组配对 |
+| Phase 13 | Query Interaction 消融 | Static 三 seed 胜过 one-way；下一步实现 Bidirectional 对照并做 GPU smoke |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
 | 理论升级 | learned-null + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -789,7 +789,7 @@ for view_name, view_images in named_views:
 
 ## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-Phase 12 已固定 `R=2`。Phase 13 按原项目计划验证 Query 与图像交互是否必要，保持 photometric-only、优化器和训练长度不变。第一个受控变体 Static Query 保留 grouped query bank 与 pixel/query residual head，但移除 Query→Image cross-attention。seed 0 上 Static/one-way 分别为 `0.647396/0.643725`，Static 高 0.3671 个百分点；seed 1 上分别为 `0.669958/0.628357`，Static 高 4.1601 个百分点。两组配对方向一致，但幅度波动很大。one-way seed 2 已在精确提交 `3860e69` 完成，最终 mIoU 为 `0.628523`；下一步运行 Static seed 2，完成预设的三组配对。其验收和统计完成前不加入 bidirectional interaction 或 learned-null。
+Phase 12 已固定 `R=2`。Phase 13 保持 photometric-only、优化器和训练长度不变，比较 Query 与图像交互方式。Static Query 保留 grouped query bank 与 pixel/query residual head，但移除 Query→Image cross-attention。三 seed 最终结果为：one-way `0.633535 ± 0.008826`，Static `0.652849 ± 0.015138`；Static 在三个配对中都更高，平均配对优势为 `+1.9314 ± 1.9819` 个百分点，因此选为当前默认交互。按原计划仍需补齐 Bidirectional Self-Attention 结构对照：先独立实现并运行 500 iteration GPU smoke，通过前不启动 full run，也不加入 learned-null。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
