@@ -139,4 +139,8 @@ The bidirectional control is implemented as one joint self-attention layer over
 the concatenated query and patch tokens, with the base decoder unchanged. Its
 configuration fixes R=2, photometric-only style, and all established training
 settings while excluding prediction consistency, CQE, diversity, and
-learned-null. Run only a 500-iteration, 50-image GPU smoke first.
+learned-null. Its 500-iteration, 50-image GPU smoke passes at `1366716` with
+finite contiguous records, exact objective reconstruction, and `2.455 GiB`
+peak reserved memory. Proceed to one seed-0 40k run. Compare its final mIoU
+with the fixed seed-0 One-way and Static results before authorizing repeats or
+introducing learned-null.

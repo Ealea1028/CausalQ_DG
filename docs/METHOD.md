@@ -245,4 +245,9 @@ DINOv3 patch tokens and applies one joint self-attention/FFN layer. The updated
 query and image streams are split and used only by the additive query-residual
 head; the frozen backbone and base segmentation decoder remain unchanged. This
 isolates bidirectional interaction from the already fixed architecture and
-losses. It must pass a 500-iteration GPU smoke before any full training.
+losses. Its isolated 500-iteration GPU smoke passes at commit `1366716` with
+500 contiguous finite records, exact objective reconstruction, the intended
+metadata, one 50-image validation, and `2.455 GiB` peak reserved memory. The
+short-run mIoU is diagnostic only. Run one seed-0 40k experiment before deciding
+whether bidirectional interaction merits paired repeats; learned-null remains
+deferred.
