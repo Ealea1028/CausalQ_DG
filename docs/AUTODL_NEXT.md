@@ -1,168 +1,216 @@
-# AutoDL next step: paired learned-null effect localization
+# AutoDL next step: acquire and inspect BDD100K semantic segmentation data
 
-The Phase 14 seed-0 40k run passes at training SHA
-`d85db4e0dcf411681c1ddad09080dfeed1c419bd`, reaching `0.655364` final
-Cityscapes mIoU (`+0.7968` points versus paired Static). Before repeat seeds or
-new objectives, compare factual-minus-zero and factual-minus-learned-null
-effects on the same 500 validation images.
+Phase 14 closes as a negative learned-null mechanism ablation. External-domain
+evaluation now returns to the three-seed-supported Static R=2 model. Work on one
+target at a time, beginning with BDD100K.
 
-This step is read-only. It does not train, modify, or replace the final
-checkpoint.
+This step only acquires and inspects data. Do not train, evaluate, rename raw
+files, convert labels, or delete archives yet. BDD100K redistribution is
+license-controlled, so use the official BDD100K portal after accepting its
+terms. Generic unauthenticated direct URLs cannot be committed to this project.
 
-## 1. Check out the exact analysis implementation
+Required official archives:
+
+- `bdd100k_images_10k.zip`
+- `bdd100k_sem_seg_labels_trainval.zip`
+
+## 1. Verify repository and available storage
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
-
-test -z "$(git status --porcelain)"
-
-ANALYSIS_SHA=549a9753914b9868a852a65983fb8cf0f246462b
+source scripts/activate_autodl.sh
 
 git fetch origin main
-git cat-file -e "${ANALYSIS_SHA}^{commit}"
-git checkout --detach "$ANALYSIS_SHA"
+git checkout --detach 9bcc3d23e273cfcdcb36df12e8d17da25e9c3e84
 
-source scripts/activate_autodl.sh
-export OMP_NUM_THREADS=1
-
-test "$(git rev-parse HEAD)" = "$ANALYSIS_SHA"
+test "$(git rev-parse HEAD)" = \
+  "9bcc3d23e273cfcdcb36df12e8d17da25e9c3e84"
 test -z "$(git status --porcelain)"
 
-python -m pytest
+mkdir -p /root/autodl-tmp/uploads/bdd100k
+mkdir -p /root/autodl-tmp/datasets/bdd100k
 
-echo 'dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179  /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors' \
-  | sha256sum -c -
+df -h /root/autodl-tmp
+du -sh /root/autodl-tmp/uploads/bdd100k 2>/dev/null || true
+du -sh /root/autodl-tmp/datasets/bdd100k 2>/dev/null || true
 ```
 
-Expected: `96 passed` and the DINOv3-L hash reports `OK`.
+At least 15 GiB should remain before downloading. If either destination already
+contains files, stop and return their listing instead of overwriting them.
 
-## 2. Run the paired 500-image analysis
+## 2. Download directly on AutoDL using official authorized URLs
+
+Sign in to the official BDD100K download portal, accept the dataset terms, and
+copy the download URL for each required archive. Paste each URL only into the
+corresponding silent prompt below. The URL is held in a shell variable and is
+not printed.
 
 ```bash
-cd /root/autodl-tmp/CausalQ_DG
-source scripts/activate_autodl.sh
-export OMP_NUM_THREADS=1
+cd /root/autodl-tmp/uploads/bdd100k
 
-NULL_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/B4B_NULL_IQE_SEED0_40000_d85db4e/checkpoints/iter_040000.pth
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/B4B_NULL_IQE_SEED0_paired_effect_localization_549a975.json
-LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/B4B_NULL_IQE_SEED0_paired_effect_localization_549a975.log
+test ! -e bdd100k_images_10k.zip
+test ! -e bdd100k_sem_seg_labels_trainval.zip
 
-test -f "$NULL_CKPT"
-test ! -e "$REPORT"
-test ! -e "$LOG"
+read -r -s -p "Paste official 10K Images URL: " BDD_IMAGES_URL
+echo
+wget -c --tries=0 --timeout=60 --waitretry=10 \
+  -O bdd100k_images_10k.zip \
+  "$BDD_IMAGES_URL"
+unset BDD_IMAGES_URL
 
-mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
-
-set -o pipefail
-
-python tools/analyze_learned_null_effect.py \
-  --config configs/learned_null/gta_dinov3l_static_null.yaml \
-  --checkpoint "$NULL_CKPT" \
-  --max-samples 500 \
-  --output "$REPORT" \
-  2>&1 | tee "$LOG"
-
-ANALYSIS_EXIT=${PIPESTATUS[0]}
-echo "analysis_exit_code=$ANALYSIS_EXIT"
-test "$ANALYSIS_EXIT" -eq 0
+read -r -s -p "Paste official Semantic Segmentation Labels URL: " BDD_LABELS_URL
+echo
+wget -c --tries=0 --timeout=60 --waitretry=10 \
+  -O bdd100k_sem_seg_labels_trainval.zip \
+  "$BDD_LABELS_URL"
+unset BDD_LABELS_URL
 ```
 
-## 3. Validate and summarize the report
+If the official portal downloads files to the local computer instead, upload
+the two unchanged archives to `/root/autodl-tmp/uploads/bdd100k/` using the
+AutoDL file manager, preserving the exact filenames above, then continue.
+
+## 3. Validate the archives before extraction
 
 ```bash
-python - "$REPORT" <<'PY'
-import json
-import math
-import sys
-from pathlib import Path
+cd /root/autodl-tmp/uploads/bdd100k
 
-report_path = Path(sys.argv[1])
-report = json.loads(report_path.read_text())
+ls -lh \
+  bdd100k_images_10k.zip \
+  bdd100k_sem_seg_labels_trainval.zip
 
-expected_analysis_sha = "549a9753914b9868a852a65983fb8cf0f246462b"
-expected_training_sha = "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
+file \
+  bdd100k_images_10k.zip \
+  bdd100k_sem_seg_labels_trainval.zip
 
-assert report["ok"] is True
-assert report["evaluation_git_sha"] == expected_analysis_sha
-assert report["dataset"] == "cityscapes_val"
-assert report["requested_max_samples"] == 500
-assert report["metric"]["name"] == \
-    "paired_zero_and_learned_null_effect_localization"
+unzip -t bdd100k_images_10k.zip \
+  | tail -n 3
 
-model = report["model"]
-assert model["training_git_sha"] == expected_training_sha
-assert model["training_seed"] == 0
-assert model["iteration"] == 40000
-assert model["sample_count"] == 500
-assert model["present_class_map_count"] == 6005
+unzip -t bdd100k_sem_seg_labels_trainval.zip \
+  | tail -n 3
 
-zero = model["zero_ablation"]
-learned_null = model["learned_null"]
-paired = model["paired"]
+echo "===== image archive preview ====="
+unzip -l bdd100k_images_10k.zip \
+  | sed -n '1,25p'
 
-numeric = [
-    *zero.values(),
-    *learned_null.values(),
-    *paired.values(),
-    model["alpha"],
-    model["peak_allocated_gib"],
-    model["peak_reserved_gib"],
-]
-assert all(math.isfinite(float(value)) for value in numeric)
-assert zero["mean_inside_absolute_mean"] >= 0.0
-assert zero["mean_outside_absolute_mean"] >= 0.0
-assert learned_null["mean_inside_absolute_mean"] >= 0.0
-assert learned_null["mean_outside_absolute_mean"] >= 0.0
-assert 0.0 <= paired["fraction_learned_null_higher_absolute_ratio"] <= 1.0
-assert 0.0 <= paired["fraction_learned_null_lower_outside_absolute_mean"] <= 1.0
-
-print("paired_learned_null_effect_analysis_ok=true")
-print("===== provenance =====")
-print("evaluation_git_sha:", report["evaluation_git_sha"])
-print("training_git_sha:", model["training_git_sha"])
-print("training_seed:", model["training_seed"])
-print("checkpoint_sha256:", model["checkpoint_sha256"])
-print("===== coverage =====")
-print("sample_count:", model["sample_count"])
-print("present_class_map_count:", model["present_class_map_count"])
-print("===== zero ablation =====")
-print(zero)
-print("===== learned null =====")
-print(learned_null)
-print("===== paired comparison =====")
-print(paired)
-print(
-    "learned_null_passes_gt_region_magnitude_target:",
-    model["learned_null_passes_gt_region_magnitude_target"],
-)
-print("alpha:", model["alpha"])
-print("peak_allocated_gib:", model["peak_allocated_gib"])
-print("peak_reserved_gib:", model["peak_reserved_gib"])
-PY
+echo "===== label archive preview ====="
+unzip -l bdd100k_sem_seg_labels_trainval.zip \
+  | sed -n '1,35p'
 ```
 
-## 4. Return evidence and stop
+Both `unzip -t` commands must end without an error. HTML/XML login pages saved
+under a `.zip` name are invalid and must not be extracted.
+
+## 4. Extract without overwriting or restructuring
 
 ```bash
-echo "===== report ====="
-cat "$REPORT"
+test -z "$(find /root/autodl-tmp/datasets/bdd100k -mindepth 1 -print -quit)"
 
-echo "===== report integrity ====="
-sha256sum "$REPORT" "$NULL_CKPT"
+unzip -q -n \
+  /root/autodl-tmp/uploads/bdd100k/bdd100k_images_10k.zip \
+  -d /root/autodl-tmp/datasets/bdd100k
 
-echo "===== error scan ====="
-grep -E \
-  'Traceback|AssertionError|FloatingPointError|CUDA out of memory' \
-  "$LOG" || true
+unzip -q -n \
+  /root/autodl-tmp/uploads/bdd100k/bdd100k_sem_seg_labels_trainval.zip \
+  -d /root/autodl-tmp/datasets/bdd100k
+```
 
-echo "===== provenance ====="
-git rev-parse HEAD
-git status --short
+## 5. Inspect the real layout and counts
 
-echo "===== disk ====="
+```bash
+echo "===== directories ====="
+find /root/autodl-tmp/datasets/bdd100k \
+  -maxdepth 6 -type d \
+  | sort
+
+echo "===== representative files ====="
+find /root/autodl-tmp/datasets/bdd100k \
+  -type f \
+  | sort \
+  | sed -n '1,80p'
+
+echo "===== extension counts ====="
+find /root/autodl-tmp/datasets/bdd100k \
+  -type f \
+  | sed 's/.*\.//' \
+  | tr '[:upper:]' '[:lower:]' \
+  | sort \
+  | uniq -c \
+  | sort -nr
+
+echo "===== split/path counts ====="
+for token in train val test masks images sem_seg; do
+  count="$(
+    find /root/autodl-tmp/datasets/bdd100k \
+      -type f -path "*${token}*" \
+      | wc -l
+  )"
+  echo "$token $count"
+done
+
+echo "===== storage ====="
+du -sh /root/autodl-tmp/uploads/bdd100k
+du -sh /root/autodl-tmp/datasets/bdd100k
 df -h /root/autodl-tmp
 ```
 
-Return the validator output and report. Stop after this analysis. Do not launch
-seed 1/2, effect-invariance training, sufficiency, specificity, or semantic
-counterfactual experiments until the paired localization result is reviewed.
+## 6. Decode a sample of candidate masks
+
+This inspection is deliberately layout-agnostic. It scans PNG files whose path
+contains both `sem_seg` and `mask`, then reports dimensions, image modes, and
+pixel IDs without modifying any file.
+
+```bash
+python - <<'PY'
+from collections import Counter
+from pathlib import Path
+import random
+
+import numpy as np
+from PIL import Image
+
+root = Path("/root/autodl-tmp/datasets/bdd100k")
+candidates = sorted(
+    path
+    for path in root.rglob("*.png")
+    if "sem_seg" in str(path).lower()
+    and "mask" in str(path).lower()
+)
+
+print("candidate_mask_count:", len(candidates))
+assert candidates, "No semantic-segmentation mask candidates found"
+
+random.Random(20260926).shuffle(candidates)
+sample = candidates[: min(100, len(candidates))]
+
+modes = Counter()
+sizes = Counter()
+unique_ids = set()
+unreadable = []
+
+for path in sample:
+    try:
+        with Image.open(path) as image:
+            modes[image.mode] += 1
+            sizes[image.size] += 1
+            array = np.asarray(image)
+            if array.ndim == 2:
+                unique_ids.update(int(value) for value in np.unique(array))
+    except Exception as error:
+        unreadable.append((str(path), repr(error)))
+
+print("sampled_mask_count:", len(sample))
+print("modes:", dict(modes))
+print("sizes:", {str(key): value for key, value in sizes.items()})
+print("sampled_2d_unique_ids:", sorted(unique_ids))
+print("unreadable_count:", len(unreadable))
+print("unreadable_examples:", unreadable[:10])
+print("first_20_candidates:")
+for path in sorted(candidates)[:20]:
+    print(path)
+PY
+```
+
+Return all output from sections 3, 5, and 6, then stop. Do not delete the ZIP
+archives, convert masks, implement guessed directory rules, or start model
+evaluation until the observed official layout and label encoding are reviewed.
