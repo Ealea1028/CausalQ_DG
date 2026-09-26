@@ -294,3 +294,10 @@ constructed only after every factual-path module, and a regression test checks
 bitwise equality of all shared parameters with learned-null disabled. The old
 smoke remains numerical evidence but must be refreshed on the repaired SHA
 before a 40k comparison.
+
+The repaired smoke at `d85db4e` passes: all 500 records are finite and
+contiguous, reconstruction error is `1.790e-7`, peak reserved memory is
+`2.713 GiB`, and the null calibration loss decreases by approximately `84.8%`.
+This authorizes a single seed-0 40k learned-null run. Its segmentation metric
+tests whether the added baseline leaves the selected factual path intact; it
+does not by itself establish that learned-null effects are more causal.

@@ -169,3 +169,11 @@ the optional bank was initialized before the factual Query Head and therefore
 changed same-seed factual parameters through RNG consumption. Initialization
 order is repaired and covered by an exact shared-parameter test. Repeat only
 the 500-iteration smoke on the repaired SHA before authorizing the 40k run.
+
+The refreshed smoke at `d85db4e` passes the exact-isolation gate: 500 records
+are contiguous and finite, the objective reconstructs to `1.790e-7`, reserved
+VRAM peaks at `2.713 GiB`, and the first/last 20-step null-loss means are
+`2.141e-4/3.259e-5`. Proceed to one seed-0 40k run under the identical isolated
+configuration. Compare final factual-path mIoU with the fixed Static seed-0
+reference (`0.647396`) and inspect null-loss convergence before deciding the
+next learned-null analysis; do not start repeat seeds automatically.
