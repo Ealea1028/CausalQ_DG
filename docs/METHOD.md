@@ -69,6 +69,13 @@ full 40k results and matched style-effect analysis are required before making
 any scale claim. No other target dataset is included while its evaluation is
 deferred by the user.
 
+The ViT-B seed-0 40k trace, 80 full Cityscapes validations, and 80 checkpoints
+passed audit. Its final mIoU is `0.563382` versus `0.647396` for the matched
+ViT-L Static R=2 seed-0 run (ViT-B minus ViT-L: `-8.4014` percentage points).
+This is a segmentation result, not evidence that larger VFMs lower query-effect
+variance. That mechanism comparison remains pending and uses the same 500
+validation images, original/photometric views, and deterministic style seed.
+
 ## Query diversity
 
 Phase 10 composes the already implemented prediction-consistency and CQE
