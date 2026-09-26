@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--13 ablations are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the small paired advantage reverses sign at seed 1, so photometric-only is the simpler default. Phase 12 selects R=2. In Phase 13, one-way reaches `0.633535 ± 0.008826` and Static reaches `0.652849 ± 0.015138`; Static wins every paired seed. Bidirectional reaches only `0.630394` at seed 0, 1.7003 percentage points below Static, so no repeats are required and Static remains selected. Before implementing learned-null, the next analysis audits whether the existing factual-minus-zero query effect is actually localized to matching ground-truth regions.
+The A0--A5 core sequence and Phase 11--13 ablations are complete. Phase 12 selects R=2. In Phase 13, Static reaches `0.652849 ± 0.015138`, wins every paired seed against one-way, and also exceeds the `0.630394` seed-0 Bidirectional control. The subsequent three-seed zero-ablation audit finds an average inside/outside absolute-effect ratio of `2.913 ± 0.619`, with `86.48%` of GT-present class maps more strongly affected inside the matching region. This passes the semantic gate for Phase 14, which introduces only a shared learned-null query baseline before any invariance, sufficiency, or specificity objective.
 
 ## Working directories
 
@@ -43,5 +43,6 @@ Local verification is CPU-only. Do not use a local GPU for formal DINOv3-L train
 11. Style ablation
 12. Query-count ablation
 13. Query-interaction ablation
+14. Learned-null intervention baseline
 
 See `CausalQ_DG_Project_Plan.md` for the complete specification and `docs/AUTODL_NEXT.md` for the next remote action.

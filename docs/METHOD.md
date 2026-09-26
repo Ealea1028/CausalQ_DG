@@ -265,3 +265,21 @@ ground-truth-present class, the audit compares the absolute
 factual-minus-zero class-logit effect inside that class's valid GT pixels with
 the same effect on other valid pixels. This is a diagnostic only: it changes
 neither the model nor its training objective.
+
+The three-seed audit passes: the inside/outside absolute-effect ratios are
+`2.794/3.583/2.363`, with an across-seed mean of `2.913 ± 0.619`; `86.48%` of
+GT-present class maps have stronger effect magnitude inside their matching
+region. This supports a learned-null comparator while not yet establishing
+sufficiency or specificity.
+
+## Learned-null intervention baseline
+
+Phase 14 keeps the selected Static R=2 photometric-only factual path unchanged.
+It adds one class-agnostic `R x D` null bank shared by all classes. A
+stop-gradient SmoothL1 calibration fits its slots to the across-class centroid
+of the current factual query states; this gives the null parameters an explicit
+training signal without pulling factual queries toward the null. Replacing
+only class `c`'s residual with the calibrated null defines
+`Z_c(factual) - Z_c(null)`. Prediction consistency, CQE, diversity, effect
+invariance, sufficiency, and specificity remain disabled so the new
+intervention baseline is tested in isolation.

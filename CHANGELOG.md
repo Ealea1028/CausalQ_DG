@@ -24,6 +24,9 @@
   L2-normalized cross-style SmoothL1 effect distillation.
 - Zero-ablation effect localization metrics and a multi-checkpoint Cityscapes
   audit tool for the post-Phase-13 semantic gate.
+- Phase 14 class-agnostic learned-null query bank, factual/null intervention
+  forward contract, detached factual-centroid calibration, isolated config,
+  and AutoDL launcher.
 
 ### Changed
 

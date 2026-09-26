@@ -1,4 +1,4 @@
-"""Train the Phase-5--13 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--14 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -27,6 +27,7 @@ from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
 from causalq.interventions import StyleInterventionBank
 from causalq.losses import (
     causal_query_effect_loss,
+    null_query_centroid_loss,
     prediction_consistency_kl,
     query_diversity_loss,
     segmentation_cross_entropy,
@@ -37,9 +38,9 @@ from causalq.utils.checkpoint import save_training_checkpoint
 from causalq.utils.seed import seed_everything
 
 
-SUPPORTED_PHASES = frozenset(range(5, 14))
-QUERY_PHASES = frozenset(range(6, 14))
-STYLE_PHASES = frozenset(range(7, 14))
+SUPPORTED_PHASES = frozenset(range(5, 15))
+QUERY_PHASES = frozenset(range(6, 15))
+STYLE_PHASES = frozenset(range(7, 15))
 
 
 def parse_args() -> argparse.Namespace:
@@ -91,7 +92,7 @@ def load_config(path: Path) -> dict[str, Any]:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
     if phase not in SUPPORTED_PHASES:
-        raise ValueError("tools/train.py accepts only Phase 5--13 configs")
+        raise ValueError("tools/train.py accepts only Phase 5--14 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
@@ -99,23 +100,23 @@ def load_config(path: Path) -> dict[str, Any]:
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
     if phase in QUERY_PHASES and not query_enabled:
-        raise ValueError("Phase 6--13 requires the query branch")
+        raise ValueError("Phase 6--14 requires the query branch")
     if phase in QUERY_PHASES and "query" not in config:
-        raise ValueError("Phase 6--13 requires query configuration")
+        raise ValueError("Phase 6--14 requires query configuration")
     if phase in QUERY_PHASES and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--13 currently requires logsumexp query aggregation")
+        raise ValueError("Phase 6--14 currently requires logsumexp query aggregation")
     if phase in STYLE_PHASES:
         style = config.get("style", {})
         if not style_enabled:
             raise ValueError("Phase 7--13 requires style training")
         views = style.get("views")
-        if phase in (11, 12, 13):
+        if phase in (11, 12, 13, 14):
             allowed = (
                 ["original", "photometric"],
                 ["original", "fourier"],
             )
             if views not in allowed:
-                raise ValueError("Phase 11--13 requires exactly one counterfactual view")
+                raise ValueError("Phase 11--14 requires exactly one counterfactual view")
         elif views != ["original", "photometric", "fourier"]:
             raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
@@ -140,6 +141,29 @@ def load_config(path: Path) -> dict[str, Any]:
             )
         if int(config["query"]["queries_per_class"]) != 2:
             raise ValueError("Phase 13 fixes queries_per_class=2")
+    learned_null = config.get("learned_null", {})
+    learned_null_enabled = bool(learned_null.get("enabled", False))
+    if phase < 14 and learned_null_enabled:
+        raise ValueError("Learned-null intervention is disabled before Phase 14")
+    if phase == 14:
+        if interaction != "static":
+            raise ValueError("Phase 14 fixes static query interaction")
+        if int(config["query"]["queries_per_class"]) != 2:
+            raise ValueError("Phase 14 fixes queries_per_class=2")
+        if not learned_null_enabled:
+            raise ValueError("Phase 14 requires learned-null intervention")
+        required_null = {
+            "shared_across_classes": True,
+            "slots": "match_queries_per_class",
+            "calibration_target": "mean_factual_query_state",
+            "stop_gradient_target": True,
+            "loss": "smooth_l1",
+        }
+        for key, expected in required_null.items():
+            if learned_null.get(key) != expected:
+                raise ValueError(f"Phase 14 requires learned_null.{key}={expected}")
+        if float(learned_null.get("lambda_null", -1.0)) < 0:
+            raise ValueError("learned_null.lambda_null must be non-negative")
     if phase in QUERY_PHASES:
         interaction_layers = int(config["query"]["cross_attention_layers"])
         if interaction == "static" and interaction_layers != 0:
@@ -209,10 +233,10 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
         if float(diversity.get("lambda_div", -1.0)) != 0.01:
             raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
-    if phase in (11, 12, 13) and (
+    if phase in (11, 12, 13, 14) and (
         prediction_enabled or cqe_enabled or diversity_enabled
     ):
-        raise ValueError("Phase 11--13 ablations disable all consistency losses")
+        raise ValueError("Phase 11--14 controls disable prior consistency losses")
     return config
 
 
@@ -341,6 +365,9 @@ def main() -> int:
             temperature=float(query_config["temperature"]),
             alpha_init=float(query_config["alpha_init"]),
             interaction=query_config.get("interaction", "one_way"),
+            learned_null=bool(
+                config.get("learned_null", {}).get("enabled", False)
+            ),
         )
     model = model.to("cuda:0")
     model.train()
@@ -430,6 +457,9 @@ def main() -> int:
     diversity_enabled = bool(config.get("query_diversity", {}).get("enabled", False))
     if diversity_enabled:
         metadata["query_diversity"] = config["query_diversity"]
+    null_enabled = bool(config.get("learned_null", {}).get("enabled", False))
+    if null_enabled:
+        metadata["learned_null"] = config["learned_null"]
     (run_dir / "metadata.json").write_text(
         json.dumps(metadata, indent=2), encoding="utf-8"
     )
@@ -472,10 +502,11 @@ def main() -> int:
             reference_effect = None
             for view_name, view_images in named_views:
                 with torch.autocast("cuda", dtype=torch.bfloat16, enabled=amp):
-                    if cqe_enabled:
+                    if cqe_enabled or null_enabled:
                         model_output = model.forward_components(view_images)
                         logits = model_output.logits
-                        query_effect = model.get_query_effect(output=model_output)
+                        if cqe_enabled:
+                            query_effect = model.get_query_effect(output=model_output)
                     else:
                         logits = model(view_images)
                     if not torch.isfinite(logits).all():
@@ -489,6 +520,30 @@ def main() -> int:
                         f"{iteration}: {view_loss.item()}"
                     )
                 objective = view_loss * view_weights[view_name]
+                if null_enabled and view_name == "original":
+                    if (
+                        model_output.null_query_states is None
+                        or not isinstance(model, QuerySegmentor)
+                    ):
+                        raise RuntimeError("Learned-null states are unavailable")
+                    null_loss = null_query_centroid_loss(
+                        model_output.null_query_states,
+                        model_output.query_states,
+                        stop_gradient_target=bool(
+                            config["learned_null"]["stop_gradient_target"]
+                        ),
+                    )
+                    if not torch.isfinite(null_loss):
+                        raise FloatingPointError(
+                            f"Non-finite null calibration loss at iteration "
+                            f"{iteration}: {null_loss.item()}"
+                        )
+                    null_weight = float(config["learned_null"]["lambda_null"])
+                    objective = objective + null_weight * null_loss
+                    component_losses["null_calibration"] = (
+                        component_losses.get("null_calibration", 0.0)
+                        + null_loss.detach().item() / accumulation
+                    )
                 if prediction_enabled:
                     if view_name == "original":
                         reference_logits = logits.detach()
@@ -633,6 +688,15 @@ def main() -> int:
                 {
                     "loss_diversity": diversity_raw,
                     "loss_diversity_weighted": diversity_weight * diversity_raw,
+                }
+            )
+        if null_enabled:
+            null_raw = component_losses["null_calibration"]
+            null_weight = float(config["learned_null"]["lambda_null"])
+            record.update(
+                {
+                    "loss_null": null_raw,
+                    "loss_null_weighted": null_weight * null_raw,
                 }
             )
         if isinstance(model, QuerySegmentor):

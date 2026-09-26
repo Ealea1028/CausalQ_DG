@@ -1,0 +1,42 @@
+{
+  "ok": true,
+  "evaluation_git_sha": "cf83e7750a25b005d2c4940dcb829565dda16aae",
+  "gpu": "NVIDIA GeForce RTX 4090 D",
+  "pytorch": "2.7.0+cu126",
+  "cuda": "12.6",
+  "dataset": "cityscapes_val",
+  "sample_count_per_seed": 500,
+  "present_class_map_count_per_seed": 6005,
+  "metric": "zero_ablation_effect_localization",
+  "seeds": {
+    "0": {
+      "inside_absolute_mean": 1.8383316541889327,
+      "outside_absolute_mean": 0.7372441396228876,
+      "absolute_ratio": 2.7938018259656716,
+      "normalized_absolute_contrast": 0.3480846445228932,
+      "localized_class_map_fraction": 0.8524562864279767,
+      "checkpoint_sha256": "a0f9f8be54bd2a1027d183f52e08937db925ccd0ca4ab19815b42635ea06d407"
+    },
+    "1": {
+      "inside_absolute_mean": 2.262999960067965,
+      "outside_absolute_mean": 0.6760886665188601,
+      "absolute_ratio": 3.582957982342011,
+      "normalized_absolute_contrast": 0.47249626505881126,
+      "localized_class_map_fraction": 0.9250624479600333,
+      "checkpoint_sha256": "e2a3dd7f042cd752827a607bd5c55eacf28f83e53b4c9dc60a2ce9d3e8ca3292"
+    },
+    "2": {
+      "inside_absolute_mean": 1.773889202321201,
+      "outside_absolute_mean": 0.8099437661611667,
+      "absolute_ratio": 2.3630383165948694,
+      "normalized_absolute_contrast": 0.2909429996089078,
+      "localized_class_map_fraction": 0.8169858451290591,
+      "checkpoint_sha256": "580bf504b85bb1d5111937017c28012a97bc39d7e3bd8198185b99002b65fdb2"
+    }
+  },
+  "across_seed_mean_absolute_ratio": 2.9132660416341842,
+  "across_seed_sample_std_absolute_ratio": 0.6186717803796484,
+  "across_seed_mean_localized_class_map_fraction": 0.8648348598390231,
+  "all_seeds_pass_gt_region_magnitude_target": true,
+  "report_sha256": "bc7e0cdd2b6c77a5363cef167d36593defaf2983a8fa6b554e292287c2b3f561"
+}

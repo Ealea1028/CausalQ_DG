@@ -48,6 +48,28 @@ class GroupedCausalQueryBank(nn.Module):
         return queries.unsqueeze(0).expand(batch_size, -1, -1, -1)
 
 
+class NullQueryBank(nn.Module):
+    """Provide class-agnostic query slots shared by every semantic class."""
+
+    def __init__(self, hidden_size: int, *, queries_per_class: int) -> None:
+        super().__init__()
+        if hidden_size < 1 or queries_per_class < 1:
+            raise ValueError("Null-query dimensions must be positive")
+        self.hidden_size = int(hidden_size)
+        self.queries_per_class = int(queries_per_class)
+        self.null_queries = nn.Parameter(
+            torch.empty(self.queries_per_class, self.hidden_size)
+        )
+        nn.init.normal_(self.null_queries, std=0.02)
+
+    def forward(self, batch_size: int, num_classes: int) -> Tensor:
+        if batch_size < 1 or num_classes < 1:
+            raise ValueError("batch_size and num_classes must be positive")
+        return self.null_queries.view(
+            1, 1, self.queries_per_class, self.hidden_size
+        ).expand(batch_size, num_classes, -1, -1)
+
+
 class _QueryCrossAttentionLayer(nn.Module):
     def __init__(self, hidden_size: int, num_heads: int) -> None:
         super().__init__()
@@ -261,6 +283,9 @@ class QuerySegmentorOutput:
     scaled_delta_logits: Tensor
     query_states: Tensor
     query_score_maps: Tensor
+    null_delta_logits: Tensor | None = None
+    null_scaled_delta_logits: Tensor | None = None
+    null_query_states: Tensor | None = None
 
     def counterfactual_logits(self, class_index: int) -> Tensor:
         """Apply do(Q_c=0) by removing only class c's scaled residual."""
@@ -272,6 +297,19 @@ class QuerySegmentorOutput:
         # error, even though the counterfactual is defined to equal the base
         # path exactly for the intervened class.
         result[:, class_index] = self.base_logits[:, class_index]
+        return result
+
+    def null_counterfactual_logits(self, class_index: int) -> Tensor:
+        """Replace only class ``c`` factual residual with the null residual."""
+        if not 0 <= class_index < self.logits.shape[1]:
+            raise IndexError(f"class_index out of range: {class_index}")
+        if self.null_scaled_delta_logits is None:
+            raise RuntimeError("Learned-null intervention is not enabled")
+        result = self.logits.clone()
+        result[:, class_index] = (
+            self.base_logits[:, class_index]
+            + self.null_scaled_delta_logits[:, class_index]
+        )
         return result
 
 
@@ -291,6 +329,7 @@ class QuerySegmentor(nn.Module):
         temperature: float = 0.07,
         alpha_init: float = 0.0,
         interaction: str = "one_way",
+        learned_null: bool = False,
     ) -> None:
         super().__init__()
         if not backbone.freeze:
@@ -303,6 +342,11 @@ class QuerySegmentor(nn.Module):
                 "interaction must be 'one_way', 'static', or 'bidirectional'"
             )
         self.interaction = interaction
+        self.learned_null = bool(learned_null)
+        if self.learned_null and interaction != "static":
+            raise ValueError(
+                "The first learned-null control requires static interaction"
+            )
         feature_count = max(1, len(backbone.intermediate_indices))
         self.decoder = BaselineDecoder(
             backbone.hidden_size,
@@ -315,6 +359,14 @@ class QuerySegmentor(nn.Module):
             backbone.hidden_size,
             num_classes=num_classes,
             queries_per_class=queries_per_class,
+        )
+        self.null_query_bank = (
+            NullQueryBank(
+                backbone.hidden_size,
+                queries_per_class=queries_per_class,
+            )
+            if self.learned_null
+            else None
         )
         if interaction == "one_way":
             self.query_attention = QueryCrossAttention(
@@ -397,6 +449,26 @@ class QuerySegmentor(nn.Module):
             align_corners=False,
         )
         scaled_delta_logits = self.query_head.alpha * delta_logits
+        null_delta_logits = None
+        null_scaled_delta_logits = None
+        null_query_states = None
+        if self.null_query_bank is not None:
+            null_query_states = self.null_query_bank(
+                images.shape[0], self.num_classes
+            )
+            null_score_maps = self.query_head.query_scores(
+                residual_image_tokens,
+                null_query_states,
+                grid_size=grid_size,
+            )
+            null_patch_logits = torch.logsumexp(null_score_maps, dim=2)
+            null_delta_logits = F.interpolate(
+                null_patch_logits,
+                size=output_size,
+                mode="bilinear",
+                align_corners=False,
+            )
+            null_scaled_delta_logits = self.query_head.alpha * null_delta_logits
         return QuerySegmentorOutput(
             logits=base_logits + scaled_delta_logits,
             base_logits=base_logits,
@@ -404,6 +476,9 @@ class QuerySegmentor(nn.Module):
             scaled_delta_logits=scaled_delta_logits,
             query_states=contextual_queries,
             query_score_maps=query_score_maps,
+            null_delta_logits=null_delta_logits,
+            null_scaled_delta_logits=null_scaled_delta_logits,
+            null_query_states=null_query_states,
         )
 
     def forward(self, images: Tensor) -> Tensor:
@@ -421,6 +496,21 @@ class QuerySegmentor(nn.Module):
         if output is None:
             output = self.forward_components(images)
         return output.scaled_delta_logits
+
+    def get_null_query_effect(
+        self,
+        images: Tensor | None = None,
+        *,
+        output: QuerySegmentorOutput | None = None,
+    ) -> Tensor:
+        """Return factual-minus-null class-logit effects."""
+        if (images is None) == (output is None):
+            raise ValueError("Provide exactly one of images or output")
+        if output is None:
+            output = self.forward_components(images)
+        if output.null_scaled_delta_logits is None:
+            raise RuntimeError("Learned-null intervention is not enabled")
+        return output.scaled_delta_logits - output.null_scaled_delta_logits
 
     def get_query_residuals(self) -> Tensor:
         """Return the learnable within-class residual queries for regularization."""

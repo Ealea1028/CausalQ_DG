@@ -156,3 +156,9 @@ all 500 Cityscapes validation images for each selected Static seed. Report the
 inside-GT and outside-GT absolute effect, their ratio and normalized contrast,
 and the fraction of present class maps whose inside magnitude is larger. This
 is one read-only diagnostic phase and must not add a training loss.
+
+The audit passes all three seeds: mean inside/outside absolute-effect ratio is
+`2.913 ± 0.619` and mean localized-class-map fraction is `0.865`. Proceed to
+Phase 14 with only a shared R=2 learned-null bank and its stop-gradient factual
+centroid calibration. First run a 500-iteration, 50-image GPU smoke. Do not add
+effect invariance, sufficiency, specificity, or semantic counterfactuals.
