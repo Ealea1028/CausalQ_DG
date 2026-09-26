@@ -1,4 +1,44 @@
-# AutoDL next step: DINOv3-B Static R=2 scaling smoke
+# AutoDL next step: locate missing DINOv3-B weights
+
+The first scaling smoke did not reach training: AutoDL reported that
+`/root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors` is missing.
+An earlier backbone check verified this exact checkpoint at SHA256
+`9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`.
+Do not launch another smoke, substitute ViT-L weights, disable checksum
+validation, or overwrite the failed-attempt logs. First perform this read-only
+inventory on AutoDL and return its output:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+source scripts/activate_autodl.sh
+
+echo '===== source ====='
+git rev-parse HEAD
+git status --short
+
+echo '===== expected weight directory ====='
+ls -ld /root/autodl-tmp/pretrained /root/autodl-tmp/pretrained/dinov3_vitb16 2>&1 || true
+ls -la /root/autodl-tmp/pretrained/dinov3_vitb16 2>&1 || true
+
+echo '===== safetensors in AutoDL data volume ====='
+find /root/autodl-tmp -xdev -type f -name '*.safetensors' -printf '%s %p\n' 2>/dev/null
+
+echo '===== possible Hugging Face cache blob ====='
+if [ -d /root/.cache/huggingface/hub ]; then
+  find /root/.cache/huggingface/hub -type f -size +300M -size -400M -printf '%s %p\n' 2>/dev/null
+fi
+
+echo '===== failed smoke artifacts and disk ====='
+ls -ld /root/autodl-tmp/outputs/CausalQ_DG/SCALE_VITB_STATIC_R2_SEED0_SMOKE_500_d7913cf 2>&1 || true
+df -h /root/autodl-tmp
+```
+
+If a candidate checkpoint is found, verify its SHA256 before restoring it to
+the configured path. If no candidate exists, reacquire the authorized ViT-B
+checkpoint and verify the same SHA256 before retrying. The commands below are
+the subsequent scaling-smoke handoff, **not** the current action.
+
+## Subsequent action after the weight is restored and verified
 
 Project-plan §41's GTA5 → Cityscapes qualitative figures are provenance-matched
 and closed as a diagnostic, not a causal proof. Begin §42 scaling with **one**
