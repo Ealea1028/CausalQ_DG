@@ -308,3 +308,12 @@ Static) with finite 40k optimization and null calibration converged to
 effects from the same forward output and compares their localization on every
 GT-present class map. This separates segmentation retention from the stronger
 claim that the learned baseline yields a better-localized intervention effect.
+
+That diagnostic is negative. Learned-null reduces the mean inside/outside
+absolute-effect ratio from `3.773` to `1.845` and normalized contrast from
+`0.491` to `0.205`; only `4.71%` of paired present-class maps improve. Its
+outside-region magnitude also rises from `0.656` to `1.080`. Thus the improved
+segmentation score is not evidence for a better causal baseline. Learned-null
+is retained as a controlled negative ablation, zero remains a diagnostic, and
+the project does not proceed to sufficiency/specificity optimization on this
+mechanism.

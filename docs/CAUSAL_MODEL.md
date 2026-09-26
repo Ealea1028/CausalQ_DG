@@ -26,3 +26,9 @@ stop-gradient centroid of factual class-query states. The null intervention
 replaces only class `c`'s factual query residual with this comparable shared
 state. Its logit effect is `Z_c(factual) - Z_c(null)`. This phase does not yet
 optimize effect invariance, sufficiency, or specificity.
+
+The completed paired audit does not support learned-null as a superior causal
+baseline. Relative to zero ablation, it lowers effect localization ratio from
+`3.773` to `1.845`, lowers normalized contrast from `0.491` to `0.205`, and
+increases outside-region magnitude. The mechanism is retained for reproducible
+negative ablation only; later causal objectives must not assume it is valid.

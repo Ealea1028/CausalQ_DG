@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--13 ablations are complete. Phase 12 selects R=2. In Phase 13, Static reaches `0.652849 ± 0.015138`, wins every paired seed against one-way, and also exceeds the `0.630394` seed-0 Bidirectional control. The subsequent three-seed zero-ablation audit finds an average inside/outside absolute-effect ratio of `2.913 ± 0.619`, with `86.48%` of GT-present class maps more strongly affected inside the matching region. Phase 14's isolated learned-null seed-0 run is stable and reaches `0.655364` final mIoU, `+0.7968` points over paired Static, while its calibration loss converges to `2.61e-13`. The next action is a read-only, paired zero-versus-learned-null localization analysis before repeat seeds or new objectives.
+The A0--A5 core sequence and Phase 11--14 mechanism studies are complete. Static R=2 remains the supported model (`0.652849 ± 0.015138` over three seeds). Phase 14's learned-null run improves seed-0 segmentation by `0.7968` points, but its paired mechanism audit is negative: the effect localization ratio falls from `3.773` with zero ablation to `1.845`, normalized contrast falls from `0.491` to `0.205`, and only `4.71%` of GT-present class maps improve. Learned-null is therefore retained as a negative ablation rather than the causal baseline. The next phase begins external target-domain evaluation, starting with BDD100K data acquisition and inspection.
 
 ## Working directories
 

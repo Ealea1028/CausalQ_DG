@@ -1,0 +1,38 @@
+{
+  "ok": true,
+  "experiment_id": "B4B_NULL_IQE_SEED0_PAIRED_EFFECT_549a975",
+  "phase": 14,
+  "status": "analysis_complete_negative_mechanism_result",
+  "evaluation_git_sha": "549a9753914b9868a852a65983fb8cf0f246462b",
+  "training_git_sha": "d85db4e0dcf411681c1ddad09080dfeed1c419bd",
+  "training_seed": 0,
+  "checkpoint_sha256": "9f7bd35b36fce6b925c220e2ea44ce6065a5d467cf5b7f804823cdd5168a5c09",
+  "report_sha256": "36ea931326282548b2f71f3aa4166831d9c3cc09f22cbfedb13f58877ba2bfd5",
+  "dataset": "cityscapes_val",
+  "sample_count": 500,
+  "present_class_map_count": 6005,
+  "zero_ablation": {
+    "mean_inside_absolute_mean": 2.2954834973782328,
+    "mean_outside_absolute_mean": 0.655832242012818,
+    "mean_absolute_ratio": 3.7732519142633674,
+    "mean_normalized_absolute_contrast": 0.4906588992409464,
+    "mean_inside_signed_mean": 2.217233628059406,
+    "mean_outside_signed_mean": 0.14749697460347072
+  },
+  "learned_null": {
+    "mean_inside_absolute_mean": 1.8563490008434387,
+    "mean_outside_absolute_mean": 1.0804876462108983,
+    "mean_absolute_ratio": 1.8451280646677517,
+    "mean_normalized_absolute_contrast": 0.2051889668656924,
+    "mean_inside_signed_mean": 1.685432487463177,
+    "mean_outside_signed_mean": -0.667686548960596
+  },
+  "learned_null_minus_zero_absolute_ratio": -1.9281238495956157,
+  "learned_null_minus_zero_normalized_absolute_contrast": -0.285469932375254,
+  "fraction_learned_null_higher_absolute_ratio": 0.047127393838467944,
+  "fraction_learned_null_lower_outside_absolute_mean": 0.14154870940882597,
+  "learned_null_passes_gt_region_magnitude_target": true,
+  "alpha": 0.29338476061820984,
+  "peak_allocated_gib": 2.708,
+  "peak_reserved_gib": 3.666
+}

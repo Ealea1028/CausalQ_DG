@@ -29,6 +29,8 @@
   and AutoDL launcher.
 - Paired zero-ablation versus learned-null effect-localization diagnostics for
   the Phase 14 final checkpoint.
+- Phase 14 learned-null negative-result archive and decision to stop expanding
+  causal objectives on the degraded intervention baseline.
 
 ### Changed
 

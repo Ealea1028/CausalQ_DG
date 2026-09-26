@@ -185,3 +185,11 @@ seeds, run one read-only 500-image comparison of factual-minus-zero and
 factual-minus-learned-null effects from the final checkpoint. Report matching-
 region localization, outside-region magnitude, normalized contrast, and paired
 class-map fractions; add no training objective.
+
+The paired audit rejects learned-null as the primary effect baseline. Its
+inside/outside ratio is `1.845` versus `3.773` for zero, normalized contrast is
+`0.205` versus `0.491`, only `4.71%` of present class maps improve their ratio,
+and outside magnitude increases from `0.656` to `1.080`. Do not spend seed 1/2
+or add sufficiency/specificity losses to this failed baseline. Phase 14 closes
+as a negative mechanism result despite the segmentation gain. Retain the
+three-seed Static R=2 result and proceed to external-domain evaluation.
