@@ -14,9 +14,12 @@ Do not start another seed, target dataset, or training run at this handoff.
 
 ## Current AutoDL action
 
-Run the commands below from a fresh shell. Replace `EXPECTED_SHA` with the
-exact full Git SHA in the accompanying Codex handoff; never edit repository
-source on AutoDL. A failed check means stop and report its output.
+The first attempt on commit `de9379a4e18e3c4b30e932165561e8f7768541a6`
+stopped while constructing the model: the shared query-count loader treated
+the Static configuration as one-way attention with zero layers. The scaling
+comparison now constructs `interaction="static"` explicitly. The first log
+is preserved for provenance; use the retry filenames below. Run from a fresh
+shell and never edit repository source on AutoDL.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG || exit 1
@@ -45,8 +48,8 @@ test -f /root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors || exit 1
 test -f /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors || exit 1
 df -h /root/autodl-tmp
 
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/backbone_scaling_static_r2_seed0_style_seed20260927.json
-LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/backbone_scaling_static_r2_seed0_style_seed20260927.log
+REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/backbone_scaling_static_r2_seed0_style_retry1.json
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/backbone_scaling_static_r2_seed0_style_retry1.log
 test ! -e "$REPORT" || { echo "existing_report=$REPORT"; exit 1; }
 test ! -e "$LOG" || { echo "existing_log=$LOG"; exit 1; }
 mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis

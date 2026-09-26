@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from tools.compare_backbone_scaling import verify_protocol, verify_run
+from tools.compare_backbone_scaling import build_static_model, verify_protocol, verify_run
 from tools.train import load_config
 
 
@@ -68,3 +68,20 @@ def test_checkpoint_and_summary_provenance() -> None:
     bad_payload["metadata"]["backbone"] = "dinov3_vitl16"
     with pytest.raises(ValueError, match="backbone"):
         verify_run(B, bad_payload, summary, expected_sha="expected")
+
+
+def test_static_model_build_does_not_create_attention(monkeypatch, tmp_path: Path) -> None:
+    import torch
+
+    class FakeBackbone(torch.nn.Module):
+        freeze = True
+        hidden_size = 32
+        intermediate_indices = (3, 6, 9, 12)
+
+    monkeypatch.setattr(
+        "tools.compare_backbone_scaling.DINOv3Backbone.from_pretrained",
+        lambda *args, **kwargs: FakeBackbone(),
+    )
+    model = build_static_model(B, tmp_path)
+    assert model.interaction == "static"
+    assert model.query_attention is None

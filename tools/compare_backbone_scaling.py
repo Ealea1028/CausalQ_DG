@@ -17,7 +17,9 @@ if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
 from causalq.datasets import cityscapes_dataset
-from tools.analyze_query_count import evaluate, load_model, make_style_bank
+from tools.analyze_query_count import evaluate, make_style_bank
+from causalq.models import DINOv3Backbone, QuerySegmentor
+from causalq.utils.checkpoint import load_training_checkpoint
 from tools.train import git_sha, load_config, sha256
 
 
@@ -84,6 +86,55 @@ def verify_run(
     return float(validations[-1]["miou"])
 
 
+def build_static_model(
+    config: dict[str, Any], pretrained_root: Path
+) -> QuerySegmentor:
+    """Construct the configured Static segmentor without attention layers."""
+    model_config = config["model"]
+    query_config = config["query"]
+    backbone = DINOv3Backbone.from_pretrained(
+        model_config["backbone"],
+        weights=pretrained_root / model_config["weights_dir"],
+        freeze=True,
+        intermediate_indices=model_config["intermediate_indices"],
+        dtype=torch.bfloat16,
+        local_files_only=True,
+    )
+    return QuerySegmentor(
+        backbone,
+        decoder_channels=int(model_config["decoder_channels"]),
+        num_classes=int(config["data"]["num_classes"]),
+        dropout=float(model_config["dropout"]),
+        queries_per_class=int(query_config["queries_per_class"]),
+        num_heads=int(query_config["num_heads"]),
+        cross_attention_layers=int(query_config["cross_attention_layers"]),
+        temperature=float(query_config["temperature"]),
+        alpha_init=float(query_config["alpha_init"]),
+        interaction=str(query_config["interaction"]),
+    ).to("cuda:0")
+
+
+def load_static_model(
+    config: dict[str, Any], *, checkpoint_path: Path, pretrained_root: Path
+) -> tuple[QuerySegmentor, dict[str, Any]]:
+    model = build_static_model(config, pretrained_root)
+    payload = load_training_checkpoint(checkpoint_path)
+    missing, unexpected = model.load_state_dict(
+        payload["trainable_model"], strict=False
+    )
+    trainable_names = {
+        name for name, parameter in model.named_parameters() if parameter.requires_grad
+    }
+    missing_trainable = sorted(set(missing) & trainable_names)
+    if missing_trainable or unexpected:
+        raise RuntimeError(
+            "Checkpoint state mismatch: "
+            f"missing trainable={missing_trainable}, unexpected={unexpected}"
+        )
+    model.eval()
+    return model, payload
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--vitb-checkpoint", type=Path, required=True)
@@ -129,9 +180,8 @@ def main() -> int:
         if sha256(weights) != config["model"]["weights_sha256"]:
             raise RuntimeError(f"{name} pretrained-weight SHA mismatch")
         summary = json.loads(summary_path.read_text(encoding="utf-8"))
-        model, payload = load_model(
+        model, payload = load_static_model(
             config,
-            query_count=2,
             checkpoint_path=checkpoint,
             pretrained_root=pretrained_root,
         )
