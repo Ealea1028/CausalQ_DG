@@ -1,0 +1,59 @@
+{
+  "ok": true,
+  "scope": "GTA5_to_Cityscapes_val",
+  "purpose": "qualitative_diagnostic_not_causal_proof",
+  "evaluation_git_sha": "bdbbeb6c5c1418b470cb9f82aaa13c64142ff843",
+  "seed": 20260926,
+  "sample_selection": "first_distinct_GT_eligible_per_class",
+  "min_class_pixels": 1000,
+  "pretrained_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+  "baseline": {
+    "checkpoint": "/root/autodl-tmp/outputs/CausalQ_DG/A0_DINOV3L_BASE_SEED0_40000_REPAIRED_7eee12b/checkpoints/iter_040000.pth",
+    "sha256": "4f1c939fd56e0935e731fd8b2ab1b4b299984d41f6f6ce7efdf5a61c438d8b48",
+    "training_git_sha": "7eee12b3ad8c923de0e8557d3126f41c7b6cc617"
+  },
+  "static": {
+    "checkpoint": "/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED0_40000_367694e/checkpoints/iter_040000.pth",
+    "sha256": "a0f9f8be54bd2a1027d183f52e08937db925ccd0ca4ab19815b42635ea06d407",
+    "training_git_sha": "367694ee8bc2e670be0a896f40e089760fe2177a"
+  },
+  "effect": "signed_alpha_times_delta_logits; red_positive_blue_negative; shared_scale_per_sample",
+  "samples": [
+    {
+      "class": "road",
+      "class_id": 0,
+      "sample_id": "frankfurt/frankfurt_000000_000294",
+      "dataset_index": 0,
+      "gt_class_pixels": 624611,
+      "effect_color_scale": 3.2866761684417725,
+      "figure_sha256": "5bbe0a9e270c8a4cfb7d61294d93e804257cad02e86f4cf930e721df9a00461d"
+    },
+    {
+      "class": "car",
+      "class_id": 13,
+      "sample_id": "frankfurt/frankfurt_000000_000576",
+      "dataset_index": 1,
+      "gt_class_pixels": 315554,
+      "effect_color_scale": 3.493142604827881,
+      "figure_sha256": "6643a9a3bb6062e8c9fb66e580e734a53972eddfb942a38a6301b9f410f9162d"
+    },
+    {
+      "class": "person",
+      "class_id": 11,
+      "sample_id": "frankfurt/frankfurt_000000_001016",
+      "dataset_index": 2,
+      "gt_class_pixels": 19536,
+      "effect_color_scale": 2.8567211627960205,
+      "figure_sha256": "65a574fe3d9211f4e8cd3d8d045621ee3f73631f8902022c942169c8690972fe"
+    },
+    {
+      "class": "vegetation",
+      "class_id": 8,
+      "sample_id": "frankfurt/frankfurt_000000_001236",
+      "dataset_index": 3,
+      "gt_class_pixels": 538920,
+      "effect_color_scale": 3.498096466064453,
+      "figure_sha256": "d651d1afd577580777e5ea7f8c170106ac0452df9cb7362de412252029dead04"
+    }
+  ]
+}

@@ -1,10 +1,13 @@
-# GTA5 → Cityscapes Query Effect visual review (provisional)
+# GTA5 → Cityscapes Query Effect visual review
 
-The four user-provided PNG panels were inspected locally on 2026-09-26. They
-match the seven-panel layout in project-plan §41, but the corresponding AutoDL
-`report.json` and run log have not been supplied. Their checkpoint provenance,
-sample IDs, and exact evaluation SHA therefore remain **unverified**. The
-images are user-owned, untracked files and are not experimental records in Git.
+The four user-provided PNG panels were inspected locally on 2026-09-26. The
+AutoDL report subsequently identified the exact evaluation commit, DINOv3
+weight hash, A0 and Static R=2 checkpoint hashes, and four sample IDs. Each
+AutoDL PNG SHA-256 matched the corresponding local file. The compact evidence
+is in `experiments/QUERY_EFFECT_VISUAL_SEED20260926/report.json`. The run log
+itself was not supplied, but the user-reported error scan was empty and the
+report says `ok: true`. The images remain user-owned, untracked files; their
+hashes, not the images, are the versioned experimental record.
 
 | Class | Provisional observation |
 | --- | --- |
@@ -28,6 +31,7 @@ person.png      65a574fe3d9211f4e8cd3d8d045621ee3f73631f8902022c942169c8690972fe
 vegetation.png  d651d1afd577580777e5ea7f8c170106ac0452df9cb7362de412252029dead04
 ```
 
-Next gate: retrieve and check the existing AutoDL `report.json`, four original
-PNG hashes, and run log. Do not rerun inference or advance to scaling until the
-figure provenance has been reconciled.
+The §41 qualitative figure gate is closed with these limitations. The next
+single phase may test DINOv3-B scaling under the already selected Static R=2
+GTA5 → Cityscapes protocol; the negative CQE and learned-null findings remain
+negative rather than being silently promoted to the selected model.
