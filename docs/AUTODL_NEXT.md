@@ -1,42 +1,92 @@
-# AutoDL next step: locate missing DINOv3-B weights
+# AutoDL next step: restore and verify DINOv3-B weights
 
-The first scaling smoke did not reach training: AutoDL reported that
-`/root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors` is missing.
-An earlier backbone check verified this exact checkpoint at SHA256
-`9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`.
-Do not launch another smoke, substitute ViT-L weights, disable checksum
-validation, or overwrite the failed-attempt logs. First perform this read-only
-inventory on AutoDL and return its output:
+The scaling smoke did not reach training. AutoDL's read-only inventory found
+that `/root/autodl-tmp/pretrained/dinov3_vitb16` is absent, only the ViT-L
+safetensors remains on the data volume, no likely Hugging Face cache blob was
+found, and the failed smoke produced no run directory. The source commit is
+`d7913cf276bab6c96cfea4846dc6948bd38fb529` with a clean worktree; the
+disk has 26 GiB free. Preserve both failed-attempt logs.
+
+The checked-in `pretrained_manifest.yaml` records the previously used
+ModelScope distribution at
+`https://modelscope.cn/models/facebook/dinov3-vitb16-pretrain-lvd1689m`.
+Only the exact ViT-B safetensors with SHA256
+`9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`
+is admissible. Download into a new staging directory, verify before moving to
+the configured path, and stop on any mismatch. Do not substitute ViT-L, use a
+different ViT-B conversion, disable the SHA check, or launch training yet.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG || exit 1
 source scripts/activate_autodl.sh
+export OMP_NUM_THREADS=1
 
-echo '===== source ====='
+DOWNLOAD_ENV=/root/autodl-tmp/envs/modelscope-download-phase15
+STAGE=/root/autodl-tmp/pretrained/.dinov3_vitb16_restore_phase15
+DEST=/root/autodl-tmp/pretrained/dinov3_vitb16
+EXPECTED_SHA=9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b
+
+test ! -e "$DOWNLOAD_ENV" || { echo "existing_download_env=$DOWNLOAD_ENV"; exit 1; }
+test ! -e "$STAGE" || { echo "existing_stage=$STAGE"; exit 1; }
+test ! -e "$DEST" || { echo "existing_destination=$DEST"; exit 1; }
+
+python -m venv "$DOWNLOAD_ENV" || exit 1
+"$DOWNLOAD_ENV/bin/python" -m pip install modelscope-hub || exit 1
+"$DOWNLOAD_ENV/bin/ms-hub" download \
+  facebook/dinov3-vitb16-pretrain-lvd1689m \
+  --include config.json model.safetensors \
+  --local-dir "$STAGE" || exit 1
+
+test -s "$STAGE/config.json" || exit 1
+test -s "$STAGE/model.safetensors" || exit 1
+sha256sum "$STAGE/model.safetensors"
+ACTUAL_SHA="$(sha256sum "$STAGE/model.safetensors" | cut -d' ' -f1)"
+test "$ACTUAL_SHA" = "$EXPECTED_SHA" || {
+  echo "weight_sha_mismatch=$ACTUAL_SHA"; exit 1;
+}
+
+python - "$STAGE/config.json" <<'PY'
+import json
+import sys
+from pathlib import Path
+
+config = json.loads(Path(sys.argv[1]).read_text(encoding="utf-8"))
+assert config["hidden_size"] == 768, config["hidden_size"]
+assert config["patch_size"] == 16, config["patch_size"]
+assert config["num_register_tokens"] == 4, config["num_register_tokens"]
+print("vitb16_config_ok=true")
+PY
+test "$?" -eq 0 || exit 1
+
+test ! -e "$DEST" || exit 1
+mv -- "$STAGE" "$DEST" || exit 1
+test "$(sha256sum "$DEST/model.safetensors" | cut -d' ' -f1)" = "$EXPECTED_SHA" || exit 1
+
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/backbone_check
+CHECK_LOG=/root/autodl-tmp/outputs/CausalQ_DG/backbone_check/vitb16_restored_phase15.json
+test ! -e "$CHECK_LOG" || { echo "existing_check_log=$CHECK_LOG"; exit 1; }
+set -o pipefail
+python tools/check_backbone.py \
+  --model dinov3_vitb16 \
+  --weights "$DEST" \
+  --image-size 512 512 \
+  --batch-size 1 \
+  --dtype bfloat16 \
+  --intermediate-indices 3 6 9 12 \
+  2>&1 | tee "$CHECK_LOG"
+CHECK_EXIT=${PIPESTATUS[0]}
+echo "backbone_check_exit_code=$CHECK_EXIT"
+test "$CHECK_EXIT" -eq 0 || exit 1
 git rev-parse HEAD
 git status --short
-
-echo '===== expected weight directory ====='
-ls -ld /root/autodl-tmp/pretrained /root/autodl-tmp/pretrained/dinov3_vitb16 2>&1 || true
-ls -la /root/autodl-tmp/pretrained/dinov3_vitb16 2>&1 || true
-
-echo '===== safetensors in AutoDL data volume ====='
-find /root/autodl-tmp -xdev -type f -name '*.safetensors' -printf '%s %p\n' 2>/dev/null
-
-echo '===== possible Hugging Face cache blob ====='
-if [ -d /root/.cache/huggingface/hub ]; then
-  find /root/.cache/huggingface/hub -type f -size +300M -size -400M -printf '%s %p\n' 2>/dev/null
-fi
-
-echo '===== failed smoke artifacts and disk ====='
-ls -ld /root/autodl-tmp/outputs/CausalQ_DG/SCALE_VITB_STATIC_R2_SEED0_SMOKE_500_d7913cf 2>&1 || true
 df -h /root/autodl-tmp
 ```
 
-If a candidate checkpoint is found, verify its SHA256 before restoring it to
-the configured path. If no candidate exists, reacquire the authorized ViT-B
-checkpoint and verify the same SHA256 before retrying. The commands below are
-the subsequent scaling-smoke handoff, **not** the current action.
+Return the download result, both SHA256 checks, backbone-check JSON and exit
+code, Git SHA/status, and disk status. If installation, download, checksum, or
+GPU validation fails, stop with its output and leave the stage and logs for
+diagnosis. The following smoke commands are a later handoff, **not** the
+current action.
 
 ## Subsequent action after the weight is restored and verified
 
