@@ -1,4 +1,4 @@
-"""Train the Phase-5--14 frozen-DINOv3 source-only models."""
+"""Train the Phase-5--15 frozen-DINOv3 source-only models."""
 
 from __future__ import annotations
 
@@ -38,9 +38,9 @@ from causalq.utils.checkpoint import save_training_checkpoint
 from causalq.utils.seed import seed_everything
 
 
-SUPPORTED_PHASES = frozenset(range(5, 15))
-QUERY_PHASES = frozenset(range(6, 15))
-STYLE_PHASES = frozenset(range(7, 15))
+SUPPORTED_PHASES = frozenset(range(5, 16))
+QUERY_PHASES = frozenset(range(6, 16))
+STYLE_PHASES = frozenset(range(7, 16))
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,7 +92,7 @@ def load_config(path: Path) -> dict[str, Any]:
         config = yaml.safe_load(stream)
     phase = int(config["experiment"]["phase"])
     if phase not in SUPPORTED_PHASES:
-        raise ValueError("tools/train.py accepts only Phase 5--14 configs")
+        raise ValueError("tools/train.py accepts only Phase 5--15 configs")
     style_enabled = bool(config["train"].get("style", False))
     if phase in (5, 6) and style_enabled:
         raise ValueError("Phase 5/6 cannot enable style mechanisms")
@@ -100,23 +100,23 @@ def load_config(path: Path) -> dict[str, Any]:
     if phase == 5 and query_enabled:
         raise ValueError("Phase 5 baseline cannot enable queries")
     if phase in QUERY_PHASES and not query_enabled:
-        raise ValueError("Phase 6--14 requires the query branch")
+        raise ValueError("Phase 6--15 requires the query branch")
     if phase in QUERY_PHASES and "query" not in config:
-        raise ValueError("Phase 6--14 requires query configuration")
+        raise ValueError("Phase 6--15 requires query configuration")
     if phase in QUERY_PHASES and config["query"].get("aggregation") != "logsumexp":
-        raise ValueError("Phase 6--14 currently requires logsumexp query aggregation")
+        raise ValueError("Phase 6--15 currently requires logsumexp query aggregation")
     if phase in STYLE_PHASES:
         style = config.get("style", {})
         if not style_enabled:
-            raise ValueError("Phase 7--13 requires style training")
+            raise ValueError("Phase 7--15 requires style training")
         views = style.get("views")
-        if phase in (11, 12, 13, 14):
+        if phase in (11, 12, 13, 14, 15):
             allowed = (
                 ["original", "photometric"],
                 ["original", "fourier"],
             )
             if views not in allowed:
-                raise ValueError("Phase 11--14 requires exactly one counterfactual view")
+                raise ValueError("Phase 11--15 requires exactly one counterfactual view")
         elif views != ["original", "photometric", "fourier"]:
             raise ValueError("Phase 7--10 requires original, photometric, and fourier views")
         if not style.get("preserve_geometry", False):
@@ -164,6 +164,27 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 14 requires learned_null.{key}={expected}")
         if float(learned_null.get("lambda_null", -1.0)) < 0:
             raise ValueError("learned_null.lambda_null must be non-negative")
+    if phase == 15:
+        if interaction != "static" or int(config["query"]["queries_per_class"]) != 2:
+            raise ValueError("Phase 15 scaling fixes Static R=2")
+        if learned_null_enabled:
+            raise ValueError("Phase 15 scaling disables learned-null")
+        model = config["model"]
+        if (
+            model["backbone"] != "dinov3_vitb16"
+            or model["weights_dir"] != "dinov3_vitb16"
+            or model["weights_sha256"]
+            != "9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b"
+            or model["intermediate_indices"] != [3, 6, 9, 12]
+        ):
+            raise ValueError("Phase 15 scaling requires the verified DINOv3-B weights and layers")
+        if (
+            config["data"]["source"] != "gta5"
+            or config["data"]["validation"] != "cityscapes_val"
+            or config["data"]["targets"] != ["cityscapes"]
+            or config["style"]["views"] != ["original", "photometric"]
+        ):
+            raise ValueError("Phase 15 scaling is limited to GTA5-to-Cityscapes photometric-only")
     if phase in QUERY_PHASES:
         interaction_layers = int(config["query"]["cross_attention_layers"])
         if interaction == "static" and interaction_layers != 0:
@@ -233,10 +254,10 @@ def load_config(path: Path) -> dict[str, Any]:
                 raise ValueError(f"Phase 10 requires query_diversity.{key}={expected}")
         if float(diversity.get("lambda_div", -1.0)) != 0.01:
             raise ValueError("Phase 10 fixes query_diversity.lambda_div=0.01")
-    if phase in (11, 12, 13, 14) and (
+    if phase in (11, 12, 13, 14, 15) and (
         prediction_enabled or cqe_enabled or diversity_enabled
     ):
-        raise ValueError("Phase 11--14 controls disable prior consistency losses")
+        raise ValueError("Phase 11--15 controls disable prior consistency losses")
     return config
 
 
@@ -292,7 +313,7 @@ def main() -> int:
     args = parse_args()
     config = load_config(args.config)
     if not torch.cuda.is_available():
-        raise RuntimeError("Phase 5--13 training requires CUDA")
+        raise RuntimeError("Phase 5--15 training requires CUDA")
 
     seed = resolve_seed(config, args.seed)
     query_count = (
@@ -321,10 +342,10 @@ def main() -> int:
         crop_attempts=config["data"]["crop_attempts"],
     )
     if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5--13 trainer supports GTA5 source only")
+        raise NotImplementedError("The Phase 5--15 trainer supports GTA5 source only")
     train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
     if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5--13 validates on Cityscapes val")
+        raise NotImplementedError("Phase 5--15 validates on Cityscapes val")
     val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)

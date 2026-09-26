@@ -193,3 +193,12 @@ and outside magnitude increases from `0.656` to `1.080`. Do not spend seed 1/2
 or add sufficiency/specificity losses to this failed baseline. Phase 14 closes
 as a negative mechanism result despite the segmentation gain. Retain the
 three-seed Static R=2 result and proceed to external-domain evaluation.
+
+At the user's request, other target datasets are temporarily deferred. The
+§41 GTA5 → Cityscapes figures are provenance-matched and remain qualitative;
+they show visually similar effect regions under a modest photometric change
+but do not establish causal specificity. The next isolated §42 scaling control
+changes only the frozen DINOv3-L backbone to DINOv3-B while preserving the
+selected Static R=2 photometric-only protocol. Start with a seed-0 500-step
+smoke and 50-image diagnostic validation. Do not launch a 40k B run, retune
+Cityscapes, or resurrect CQE until that smoke has been inspected.

@@ -55,6 +55,20 @@ target: A4 reduces normalized effect variance by 99.47% relative to A3 while
 losing 2.95 Cityscapes mIoU percentage points. Both outcomes are retained; the
 variance result does not override the failed accuracy criterion.
 
+## Scaling control
+
+The project-plan §42 scaling check starts with an isolated DINOv3-B/16
+comparison against the selected DINOv3-L/16 Static R=2 model. The GTA5 source,
+Cityscapes-val target, frozen-backbone training, two static queries per class,
+photometric-only view, segmentation losses, crop, optimizer, schedule, and seed
+remain fixed. Only the pretrained backbone, its four intermediate layer
+indices, and resulting model dimensions change. Prediction consistency, CQE,
+diversity, and learned-null stay disabled because those mechanisms failed their
+earlier acceptance gates. A 500-step, 50-image GPU smoke is diagnostic only;
+full 40k results and matched style-effect analysis are required before making
+any scale claim. No other target dataset is included while its evaluation is
+deferred by the user.
+
 ## Query diversity
 
 Phase 10 composes the already implemented prediction-consistency and CQE
