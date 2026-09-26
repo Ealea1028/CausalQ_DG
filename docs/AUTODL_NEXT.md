@@ -1,13 +1,17 @@
-# AutoDL next step: Phase 14 learned-null GPU smoke
+# AutoDL next step: refresh the Phase 14 learned-null GPU smoke
 
 The three-seed zero-ablation audit passes the semantic localization gate. Phase
 14 adds only a class-agnostic R=2 learned-null bank to the selected Static Query
 model. The factual segmentation path is unchanged. A detached factual-query
 centroid calibrates the null slots; prediction consistency, CQE, diversity,
-effect invariance, sufficiency, and specificity remain disabled.
+effect invariance, sufficiency, and specificity remain disabled. The first
+smoke at `2882c87` is numerically healthy, but it is superseded for formal
+comparison because null-bank construction consumed RNG before factual modules
+were initialized. The repaired implementation creates every factual module
+first and regression-tests exact same-seed equality of their parameters.
 
-Run only a 500-iteration, 50-image GPU smoke from exact commit
-`2882c87fcd825754937e5346923bd64cf9b1d676`.
+Run only a refreshed 500-iteration, 50-image GPU smoke from exact commit
+`d85db4e0dcf411681c1ddad09080dfeed1c419bd`.
 
 ## 1. Check out and verify the exact implementation
 
@@ -16,13 +20,13 @@ cd /root/autodl-tmp/CausalQ_DG
 
 test -z "$(git status --porcelain)"
 git fetch origin
-git checkout 2882c87fcd825754937e5346923bd64cf9b1d676
+git checkout d85db4e0dcf411681c1ddad09080dfeed1c419bd
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
 test "$(git rev-parse HEAD)" = \
-  "2882c87fcd825754937e5346923bd64cf9b1d676"
+  "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
 test -z "$(git status --porcelain)"
 
 python -m pytest
@@ -34,13 +38,13 @@ nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 df -h /root/autodl-tmp
 ```
 
-Expected: `93 passed`, the DINOv3-L hash passes, the GPU is the RTX 4090 D,
+Expected: `94 passed`, the DINOv3-L hash passes, the GPU is the RTX 4090 D,
 and the three retained Static final checkpoints remain untouched.
 
 ## 2. Run the isolated 500-iteration learned-null smoke
 
 ```bash
-NULL_RUN_ID=B4B_NULL_IQE_SMOKE_500_2882c87
+NULL_RUN_ID=B4B_NULL_IQE_ISOLATED_SMOKE_500_d85db4e
 NULL_RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}"
 NULL_LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}.log"
 
@@ -85,10 +89,11 @@ records = [
 validations = summary["validation_results"]
 checkpoints = sorted((run_dir / "checkpoints").glob("iter_*.pth"))
 
-assert metadata["experiment_id"] == "B4B_NULL_IQE_SMOKE_500_2882c87"
+assert metadata["experiment_id"] == \
+    "B4B_NULL_IQE_ISOLATED_SMOKE_500_d85db4e"
 assert metadata["phase"] == 14
 assert metadata["git_sha"] == \
-    "2882c87fcd825754937e5346923bd64cf9b1d676"
+    "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
 assert metadata["seed"] == 0
 assert metadata["max_iterations"] == 500
 assert metadata["total_parameters"] == 306931476
@@ -215,6 +220,7 @@ echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
-Return the complete validator output and evidence blocks. Stop after the smoke.
-Do not start a 40k run and do not add effect invariance, sufficiency,
-specificity, or semantic counterfactuals.
+Return the complete validator output and evidence blocks. Stop after the
+refreshed smoke. Do not reuse or overwrite the `2882c87` smoke, do not start a
+40k run, and do not add effect invariance, sufficiency, specificity, or
+semantic counterfactuals.
