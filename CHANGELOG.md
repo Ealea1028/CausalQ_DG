@@ -22,6 +22,8 @@
   fixed control configuration, component logging, and a dedicated launcher.
 - Phase 9 public query-effect API and GT-present-class, valid-pixel,
   L2-normalized cross-style SmoothL1 effect distillation.
+- Zero-ablation effect localization metrics and a multi-checkpoint Cityscapes
+  audit tool for the post-Phase-13 semantic gate.
 
 ### Changed
 

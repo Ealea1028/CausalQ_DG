@@ -251,3 +251,17 @@ metadata, one 50-image validation, and `2.455 GiB` peak reserved memory. The
 short-run mIoU is diagnostic only. Run one seed-0 40k experiment before deciding
 whether bidirectional interaction merits paired repeats; learned-null remains
 deferred.
+
+The Bidirectional seed-0 full run reaches `0.630394` final mIoU, 1.3332
+percentage points below One-way and 1.7003 below Static. Its best intermediate
+result (`0.636628` at iteration 33,000) also remains below both final
+references. The deficit is outside the 0.5-point repeat band, so Bidirectional
+is retained as a negative structural ablation without seed-1/2 repeats. Phase
+13 is complete and selects Static interaction.
+
+Before learned-null changes the intervention baseline, the selected Static
+three-seed checkpoints undergo a zero-ablation semantic audit. For every
+ground-truth-present class, the audit compares the absolute
+factual-minus-zero class-logit effect inside that class's valid GT pixels with
+the same effect on other valid pixels. This is a diagnostic only: it changes
+neither the model nor its training objective.

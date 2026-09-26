@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--12 ablations are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the small paired advantage reverses sign at seed 1, so photometric-only is the simpler default. Phase 12 final mIoU is `0.603711/0.643725/0.638287/0.624083` for `R=1/2/3/4`. The shared mechanism analysis selects R=2. In Phase 13, one-way reaches `0.633535 ± 0.008826` and Static reaches `0.652849 ± 0.015138` across seeds 0/1/2; Static wins every pair by `1.9314 ± 1.9819` percentage points on average and is selected over one-way. The remaining bidirectional query-image self-attention control has passed its isolated GPU smoke and proceeds to one seed-0 40k run.
+The A0--A5 core sequence and Phase 11--13 ablations are complete. Across paired seeds 0/1/2, combined style reaches `0.640048 ± 0.010760` Cityscapes mIoU and photometric-only reaches `0.636201 ± 0.016427`; the small paired advantage reverses sign at seed 1, so photometric-only is the simpler default. Phase 12 selects R=2. In Phase 13, one-way reaches `0.633535 ± 0.008826` and Static reaches `0.652849 ± 0.015138`; Static wins every paired seed. Bidirectional reaches only `0.630394` at seed 0, 1.7003 percentage points below Static, so no repeats are required and Static remains selected. Before implementing learned-null, the next analysis audits whether the existing factual-minus-zero query effect is actually localized to matching ground-truth regions.
 
 ## Working directories
 

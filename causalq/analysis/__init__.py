@@ -9,6 +9,7 @@ from .query_behavior import (
     present_class_mask,
     within_class_query_similarity_values,
 )
+from .zero_effect import zero_effect_localization_values
 
 __all__ = [
     "cross_style_effect_variance",
@@ -16,4 +17,5 @@ __all__ = [
     "active_query_behavior_values",
     "present_class_mask",
     "within_class_query_similarity_values",
+    "zero_effect_localization_values",
 ]

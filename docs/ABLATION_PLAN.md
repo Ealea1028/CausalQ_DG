@@ -144,3 +144,15 @@ finite contiguous records, exact objective reconstruction, and `2.455 GiB`
 peak reserved memory. Proceed to one seed-0 40k run. Compare its final mIoU
 with the fixed seed-0 One-way and Static results before authorizing repeats or
 introducing learned-null.
+
+The Bidirectional seed-0 full run is stable but reaches only `0.630394` final
+mIoU, 1.7003 percentage points below Static. Its best intermediate mIoU is
+also lower than the fixed Static and One-way seed-0 final results. This exceeds
+the repeat band, closes Bidirectional without further seeds, and completes
+Phase 13 with Static selected.
+
+Before implementing learned-null, audit the existing zero-ablation effect on
+all 500 Cityscapes validation images for each selected Static seed. Report the
+inside-GT and outside-GT absolute effect, their ratio and normalized contrast,
+and the fraction of present class maps whose inside magnitude is larger. This
+is one read-only diagnostic phase and must not add a training loss.
