@@ -544,7 +544,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 11 | 风格消融与多种子复验 | 完成，默认选择 photometric-only |
 | Phase 12 | Query 数量消融（R=1/2/3/4） | 完成；机制诊断选择 R=2 |
 | Phase 13 | Query Interaction 消融 | 已完成；Static 胜过 one-way，Bidirectional seed 0 也低于 Static |
-| 扩展评估 | BDD100K、Mapillary、规模扩展 | 即将开始；先获取并检查 BDD100K |
+| 扩展评估 | BDD100K、Mapillary、规模扩展 | 按用户要求暂缓；不能计为已验证 |
 | Phase 14 | Learned-null 干预基线 | 已完成；分割提升但效应定位退化，作为负消融保留 |
 | 后续理论升级 | effect invariance + sufficiency + specificity | 仅为拟议路线，未实现 |
 
@@ -790,7 +790,7 @@ for view_name, view_images in named_views:
 
 ## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 虽在 seed 0 得到 `0.655364`，但配对审计显示效应定位比从 zero 的 `3.773` 降为 `1.845`，归一化对比度从 `0.491` 降为 `0.205`，仅 `4.71%` 的类别图改善。因此 learned-null 作为负机制消融关闭，不追加 seed，不在其上叠加 sufficiency/specificity。下一阶段回到三 seed 支持的 Static R=2，先获取并检查 BDD100K，再实现不使用目标域调参的外部评估。
+Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 虽在 seed 0 得到 `0.655364`，但配对审计显示效应定位比从 zero 的 `3.773` 降为 `1.845`，归一化对比度从 `0.491` 降为 `0.205`，仅 `4.71%` 的类别图改善。因此 learned-null 作为负机制消融关闭，不追加 seed，不在其上叠加 sufficiency/specificity。应用户要求，BDD100K、Mapillary 等外部目标域暂缓；下一步只在 GTA5 → Cityscapes val 上执行原方案 §41 的 Query Effect 定性诊断。该图不用于目标域调参，也不能证明真实因果效应或其他数据集的泛化。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 

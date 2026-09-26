@@ -1,216 +1,104 @@
-# AutoDL next step: acquire and inspect BDD100K semantic segmentation data
+# AutoDL next step: GTA5 → Cityscapes Query Effect qualitative audit
 
-Phase 14 closes as a negative learned-null mechanism ablation. External-domain
-evaluation now returns to the three-seed-supported Static R=2 model. Work on one
-target at a time, beginning with BDD100K.
+At the user's request, BDD100K, Mapillary, ACDC and other target-dataset
+verification is **deferred**, not completed. This handoff is limited to the
+existing GTA5-trained A0 baseline and selected Static R=2 seed-0 model on
+Cityscapes **val**. It implements §41 of `CausalQ_DG_Project_Plan.md` as a
+read-only diagnostic. Do not retrain, tune using Cityscapes, or claim that
+qualitative similarity establishes a real-world causal effect.
 
-This step only acquires and inspects data. Do not train, evaluate, rename raw
-files, convert labels, or delete archives yet. BDD100K redistribution is
-license-controlled, so use the official BDD100K portal after accepting its
-terms. Generic unauthenticated direct URLs cannot be committed to this project.
+The script chooses four distinct examples by ground-truth class presence only
+(road, car, person, vegetation), never by model success. It produces original
+image, GT, independent A0 prediction, photometric view, signed Query effect on
+both views (one shared color scale per sample), and Static R=2 prediction.
 
-Required official archives:
+## 1. Sync the exact Git source and check inputs
 
-- `bdd100k_images_10k.zip`
-- `bdd100k_sem_seg_labels_trainval.zip`
-
-## 1. Verify repository and available storage
+Use the exact implementation SHA supplied with this handoff; do not edit
+source on AutoDL. Replace `EXPECTED_SHA` below with that full SHA.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
+export OMP_NUM_THREADS=1
 
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
 git fetch origin main
-git checkout --detach 9bcc3d23e273cfcdcb36df12e8d17da25e9c3e84
-
-test "$(git rev-parse HEAD)" = \
-  "9bcc3d23e273cfcdcb36df12e8d17da25e9c3e84"
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
 test -z "$(git status --porcelain)"
 
-mkdir -p /root/autodl-tmp/uploads/bdd100k
-mkdir -p /root/autodl-tmp/datasets/bdd100k
+A0_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/A0_DINOV3L_BASE_SEED0_40000_REPAIRED_7eee12b/checkpoints/iter_040000.pth
+STATIC_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED0_40000_367694e/checkpoints/iter_040000.pth
+WEIGHTS=/root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors
 
-df -h /root/autodl-tmp
-du -sh /root/autodl-tmp/uploads/bdd100k 2>/dev/null || true
-du -sh /root/autodl-tmp/datasets/bdd100k 2>/dev/null || true
-```
-
-At least 15 GiB should remain before downloading. If either destination already
-contains files, stop and return their listing instead of overwriting them.
-
-## 2. Download directly on AutoDL using official authorized URLs
-
-Sign in to the official BDD100K download portal, accept the dataset terms, and
-copy the download URL for each required archive. Paste each URL only into the
-corresponding silent prompt below. The URL is held in a shell variable and is
-not printed.
-
-```bash
-cd /root/autodl-tmp/uploads/bdd100k
-
-test ! -e bdd100k_images_10k.zip
-test ! -e bdd100k_sem_seg_labels_trainval.zip
-
-read -r -s -p "Paste official 10K Images URL: " BDD_IMAGES_URL
-echo
-wget -c --tries=0 --timeout=60 --waitretry=10 \
-  -O bdd100k_images_10k.zip \
-  "$BDD_IMAGES_URL"
-unset BDD_IMAGES_URL
-
-read -r -s -p "Paste official Semantic Segmentation Labels URL: " BDD_LABELS_URL
-echo
-wget -c --tries=0 --timeout=60 --waitretry=10 \
-  -O bdd100k_sem_seg_labels_trainval.zip \
-  "$BDD_LABELS_URL"
-unset BDD_LABELS_URL
-```
-
-If the official portal downloads files to the local computer instead, upload
-the two unchanged archives to `/root/autodl-tmp/uploads/bdd100k/` using the
-AutoDL file manager, preserving the exact filenames above, then continue.
-
-## 3. Validate the archives before extraction
-
-```bash
-cd /root/autodl-tmp/uploads/bdd100k
-
-ls -lh \
-  bdd100k_images_10k.zip \
-  bdd100k_sem_seg_labels_trainval.zip
-
-file \
-  bdd100k_images_10k.zip \
-  bdd100k_sem_seg_labels_trainval.zip
-
-unzip -t bdd100k_images_10k.zip \
-  | tail -n 3
-
-unzip -t bdd100k_sem_seg_labels_trainval.zip \
-  | tail -n 3
-
-echo "===== image archive preview ====="
-unzip -l bdd100k_images_10k.zip \
-  | sed -n '1,25p'
-
-echo "===== label archive preview ====="
-unzip -l bdd100k_sem_seg_labels_trainval.zip \
-  | sed -n '1,35p'
-```
-
-Both `unzip -t` commands must end without an error. HTML/XML login pages saved
-under a `.zip` name are invalid and must not be extracted.
-
-## 4. Extract without overwriting or restructuring
-
-```bash
-test -z "$(find /root/autodl-tmp/datasets/bdd100k -mindepth 1 -print -quit)"
-
-unzip -q -n \
-  /root/autodl-tmp/uploads/bdd100k/bdd100k_images_10k.zip \
-  -d /root/autodl-tmp/datasets/bdd100k
-
-unzip -q -n \
-  /root/autodl-tmp/uploads/bdd100k/bdd100k_sem_seg_labels_trainval.zip \
-  -d /root/autodl-tmp/datasets/bdd100k
-```
-
-## 5. Inspect the real layout and counts
-
-```bash
-echo "===== directories ====="
-find /root/autodl-tmp/datasets/bdd100k \
-  -maxdepth 6 -type d \
-  | sort
-
-echo "===== representative files ====="
-find /root/autodl-tmp/datasets/bdd100k \
-  -type f \
-  | sort \
-  | sed -n '1,80p'
-
-echo "===== extension counts ====="
-find /root/autodl-tmp/datasets/bdd100k \
-  -type f \
-  | sed 's/.*\.//' \
-  | tr '[:upper:]' '[:lower:]' \
-  | sort \
-  | uniq -c \
-  | sort -nr
-
-echo "===== split/path counts ====="
-for token in train val test masks images sem_seg; do
-  count="$(
-    find /root/autodl-tmp/datasets/bdd100k \
-      -type f -path "*${token}*" \
-      | wc -l
-  )"
-  echo "$token $count"
-done
-
-echo "===== storage ====="
-du -sh /root/autodl-tmp/uploads/bdd100k
-du -sh /root/autodl-tmp/datasets/bdd100k
+test -f "$A0_CKPT"
+test -f "$STATIC_CKPT"
+test -f "$WEIGHTS"
+sha256sum "$WEIGHTS" "$A0_CKPT" "$STATIC_CKPT"
 df -h /root/autodl-tmp
 ```
 
-## 6. Decode a sample of candidate masks
+If any `test` fails, stop and return its output. Do not substitute an arbitrary
+checkpoint. At least 2 GiB available disk is recommended for this diagnostic.
 
-This inspection is deliberately layout-agnostic. It scans PNG files whose path
-contains both `sem_seg` and `mask`, then reports dimensions, image modes, and
-pixel IDs without modifying any file.
+## 2. Run the read-only GPU diagnostic
 
 ```bash
-python - <<'PY'
-from collections import Counter
+VIS_DIR=/root/autodl-tmp/outputs/CausalQ_DG/analysis/query_effect_static_r2_seed0_v1
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/query_effect_static_r2_seed0_v1.log
+
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
+test ! -e "$VIS_DIR"
+test ! -e "$LOG"
+
+set -o pipefail
+python tools/visualize_query_effect.py \
+  --static-config configs/query_interaction/gta_dinov3l_static.yaml \
+  --baseline-config configs/baseline/gta_dinov3l.yaml \
+  --static-checkpoint "$STATIC_CKPT" \
+  --baseline-checkpoint "$A0_CKPT" \
+  --output-dir "$VIS_DIR" \
+  --seed 20260926 \
+  --min-class-pixels 1000 \
+  2>&1 | tee "$LOG"
+VIS_EXIT=${PIPESTATUS[0]}
+echo "visualization_exit_code=$VIS_EXIT"
+```
+
+If `VIS_EXIT` is not zero, stop. Retain the log and any partial output; do not
+rerun into the same directory or overwrite files. Return the traceback.
+
+## 3. Verify and send back the evidence
+
+```bash
+python - "$VIS_DIR" <<'PY'
+import json
+import sys
 from pathlib import Path
-import random
 
-import numpy as np
-from PIL import Image
-
-root = Path("/root/autodl-tmp/datasets/bdd100k")
-candidates = sorted(
-    path
-    for path in root.rglob("*.png")
-    if "sem_seg" in str(path).lower()
-    and "mask" in str(path).lower()
-)
-
-print("candidate_mask_count:", len(candidates))
-assert candidates, "No semantic-segmentation mask candidates found"
-
-random.Random(20260926).shuffle(candidates)
-sample = candidates[: min(100, len(candidates))]
-
-modes = Counter()
-sizes = Counter()
-unique_ids = set()
-unreadable = []
-
-for path in sample:
-    try:
-        with Image.open(path) as image:
-            modes[image.mode] += 1
-            sizes[image.size] += 1
-            array = np.asarray(image)
-            if array.ndim == 2:
-                unique_ids.update(int(value) for value in np.unique(array))
-    except Exception as error:
-        unreadable.append((str(path), repr(error)))
-
-print("sampled_mask_count:", len(sample))
-print("modes:", dict(modes))
-print("sizes:", {str(key): value for key, value in sizes.items()})
-print("sampled_2d_unique_ids:", sorted(unique_ids))
-print("unreadable_count:", len(unreadable))
-print("unreadable_examples:", unreadable[:10])
-print("first_20_candidates:")
-for path in sorted(candidates)[:20]:
-    print(path)
+root = Path(sys.argv[1])
+report = json.loads((root / "report.json").read_text(encoding="utf-8"))
+assert report["ok"] is True
+assert report["scope"] == "GTA5_to_Cityscapes_val"
+assert [item["class"] for item in report["samples"]] == [
+    "road", "car", "person", "vegetation"
+]
+assert len({item["sample_id"] for item in report["samples"]}) == 4
+assert all(Path(item["figure"]).is_file() for item in report["samples"])
+print("visualization_audit_ok=true")
+print("evaluation_git_sha:", report["evaluation_git_sha"])
+for item in report["samples"]:
+    print(item["class"], item["sample_id"], item["gt_class_pixels"], item["figure"])
 PY
+
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
 ```
 
-Return all output from sections 3, 5, and 6, then stop. Do not delete the ZIP
-archives, convert masks, implement guessed directory rules, or start model
-evaluation until the observed official layout and label encoding are reviewed.
+Send back the command output, `report.json`, and four PNG panels (or a contact
+sheet). Visual review must explicitly note whether style changed visibly,
+whether effect localization persisted, and whether prediction improved or
+degraded. The figures cannot replace quantitative Cityscapes mIoU or prove
+generalization to any deferred target dataset.

@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--14 mechanism studies are complete. Static R=2 remains the supported model (`0.652849 ± 0.015138` over three seeds). Phase 14's learned-null run improves seed-0 segmentation by `0.7968` points, but its paired mechanism audit is negative: the effect localization ratio falls from `3.773` with zero ablation to `1.845`, normalized contrast falls from `0.491` to `0.205`, and only `4.71%` of GT-present class maps improve. Learned-null is therefore retained as a negative ablation rather than the causal baseline. The next phase begins external target-domain evaluation, starting with BDD100K data acquisition and inspection.
+The A0--A5 core sequence and Phase 11--14 mechanism studies are complete. Static R=2 remains the supported model (`0.652849 ± 0.015138` over three seeds). Phase 14's learned-null run improves seed-0 segmentation by `0.7968` points, but its paired mechanism audit is negative: the effect localization ratio falls from `3.773` with zero ablation to `1.845`, normalized contrast falls from `0.491` to `0.205`, and only `4.71%` of GT-present class maps improve. Learned-null is therefore retained as a negative ablation rather than the causal baseline. At the user's request, evaluation on datasets other than Cityscapes is deferred. The next step is a read-only §41 Query Effect visualization on GTA5 → Cityscapes val; see `docs/AUTODL_NEXT.md`.
 
 ## Working directories
 
