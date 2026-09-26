@@ -283,3 +283,14 @@ only class `c`'s residual with the calibrated null defines
 `Z_c(factual) - Z_c(null)`. Prediction consistency, CQE, diversity, effect
 invariance, sufficiency, and specificity remain disabled so the new
 intervention baseline is tested in isolation.
+
+The first 500-step GPU smoke at `2882c87` is numerically healthy: all records
+are finite, objective reconstruction is exact to `1.159e-7`, the learned-null
+loss falls from a first-20 mean of `1.965e-4` to a last-20 mean of `2.636e-5`,
+and peak reserved memory is `2.713 GiB`. A stricter isolation audit then found
+that constructing the optional null bank before the factual Query Head consumed
+random numbers and changed its same-seed initialization. The null bank is now
+constructed only after every factual-path module, and a regression test checks
+bitwise equality of all shared parameters with learned-null disabled. The old
+smoke remains numerical evidence but must be refreshed on the repaired SHA
+before a 40k comparison.

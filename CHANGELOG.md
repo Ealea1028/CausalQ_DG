@@ -30,6 +30,10 @@
 
 ### Changed
 
+- Phase 14 now initializes the optional learned-null bank after every factual
+  module, preserving exact same-seed Static initialization; an exact shared-
+  parameter regression test guards the paired-comparison contract.
+
 - Removed any dependency on historical DAFormer/MRM and QK Adapter projects.
 - Environment checks now use documented AutoDL path defaults when variables have not been exported.
 - GTA5 validation now unwraps one redundant archive directory such as `images/images` or `labels_trainIds/labels`.

@@ -360,14 +360,6 @@ class QuerySegmentor(nn.Module):
             num_classes=num_classes,
             queries_per_class=queries_per_class,
         )
-        self.null_query_bank = (
-            NullQueryBank(
-                backbone.hidden_size,
-                queries_per_class=queries_per_class,
-            )
-            if self.learned_null
-            else None
-        )
         if interaction == "one_way":
             self.query_attention = QueryCrossAttention(
                 backbone.hidden_size,
@@ -388,6 +380,17 @@ class QuerySegmentor(nn.Module):
             queries_per_class=queries_per_class,
             temperature=temperature,
             alpha_init=alpha_init,
+        )
+        # Initialize the optional null bank only after every factual-path
+        # parameter. This preserves exact same-seed initialization of the
+        # selected Static model, so Phase 14 changes only the null mechanism.
+        self.null_query_bank = (
+            NullQueryBank(
+                backbone.hidden_size,
+                queries_per_class=queries_per_class,
+            )
+            if self.learned_null
+            else None
         )
 
     def train(self, mode: bool = True) -> "QuerySegmentor":

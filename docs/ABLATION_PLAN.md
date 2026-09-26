@@ -162,3 +162,10 @@ The audit passes all three seeds: mean inside/outside absolute-effect ratio is
 Phase 14 with only a shared R=2 learned-null bank and its stop-gradient factual
 centroid calibration. First run a 500-iteration, 50-image GPU smoke. Do not add
 effect invariance, sufficiency, specificity, or semantic counterfactuals.
+
+The initial learned-null smoke at `2882c87` passes its numerical checks and the
+null calibration loss decreases, but it is superseded for formal comparison:
+the optional bank was initialized before the factual Query Head and therefore
+changed same-seed factual parameters through RNG consumption. Initialization
+order is repaired and covered by an exact shared-parameter test. Repeat only
+the 500-iteration smoke on the repaired SHA before authorizing the 40k run.

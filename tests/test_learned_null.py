@@ -88,6 +88,32 @@ def test_learned_null_requires_static_interaction() -> None:
         QuerySegmentor(backbone, learned_null=True, interaction="one_way")
 
 
+def test_learned_null_preserves_same_seed_factual_initialization() -> None:
+    def build(enabled: bool) -> QuerySegmentor:
+        torch.manual_seed(20260926)
+        backbone = DINOv3Backbone(FakeBackbone(), freeze=True)
+        return QuerySegmentor(
+            backbone,
+            decoder_channels=32,
+            num_classes=4,
+            dropout=0.0,
+            queries_per_class=2,
+            num_heads=4,
+            cross_attention_layers=0,
+            interaction="static",
+            learned_null=enabled,
+        )
+
+    reference = dict(build(False).named_parameters())
+    candidate = dict(build(True).named_parameters())
+
+    assert set(candidate) - set(reference) == {"null_query_bank.null_queries"}
+    assert all(
+        torch.equal(parameter, candidate[name])
+        for name, parameter in reference.items()
+    )
+
+
 def test_phase14_config_isolates_learned_null() -> None:
     root = Path(__file__).resolve().parents[1]
     config = load_config(
