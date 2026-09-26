@@ -1,81 +1,28 @@
-# AutoDL next step: Static zero-effect localization audit
+# AutoDL next step: Phase 14 learned-null GPU smoke
 
-Phase 13 is complete: Bidirectional seed 0 is a negative ablation and Static
-remains selected. Before implementing learned-null, audit whether the current
-factual-minus-zero class-logit effect is stronger inside the matching GT region
-than outside it. Use all three selected Static seeds and all 500 Cityscapes
-validation images. This step is read-only and must not train or modify a model.
+The three-seed zero-ablation audit passes the semantic localization gate. Phase
+14 adds only a class-agnostic R=2 learned-null bank to the selected Static Query
+model. The factual segmentation path is unchanged. A detached factual-query
+centroid calibrates the null slots; prediction consistency, CQE, diversity,
+effect invariance, sufficiency, and specificity remain disabled.
 
-Run the analysis from exact commit
-`cf83e7750a25b005d2c4940dcb829565dda16aae`.
+Run only a 500-iteration, 50-image GPU smoke from exact commit
+`2882c87fcd825754937e5346923bd64cf9b1d676`.
 
-## 1. Reclaim only Bidirectional intermediate checkpoints
-
-The accepted result is recorded in Git. Preserve the final checkpoint,
-metadata, summary, trace, and external log; delete only the 79 intermediate
-checkpoints.
-
-```bash
-cd /root/autodl-tmp/CausalQ_DG
-
-BIDIR_FULL_RUN=/root/autodl-tmp/outputs/CausalQ_DG/I2_BIDIRECTIONAL_QUERY_SEED0_40000_1366716
-
-test -f "$BIDIR_FULL_RUN/metadata.json"
-test -f "$BIDIR_FULL_RUN/summary.json"
-test -f "$BIDIR_FULL_RUN/checkpoints/iter_040000.pth"
-test "$(wc -l < "$BIDIR_FULL_RUN/train.jsonl")" -eq 40000
-
-BIDIR_CHECKPOINT_COUNT="$(
-  find "$BIDIR_FULL_RUN/checkpoints" \
-    -maxdepth 1 -type f -name 'iter_*.pth' \
-    | wc -l
-)"
-
-BIDIR_INTERMEDIATE_COUNT="$(
-  find "$BIDIR_FULL_RUN/checkpoints" \
-    -maxdepth 1 -type f \
-    -name 'iter_*.pth' \
-    ! -name 'iter_040000.pth' \
-    | wc -l
-)"
-
-echo "bidirectional_checkpoint_count=$BIDIR_CHECKPOINT_COUNT"
-echo "bidirectional_intermediate_count=$BIDIR_INTERMEDIATE_COUNT"
-
-test "$BIDIR_CHECKPOINT_COUNT" -eq 80
-test "$BIDIR_INTERMEDIATE_COUNT" -eq 79
-
-find "$BIDIR_FULL_RUN/checkpoints" \
-  -maxdepth 1 -type f \
-  -name 'iter_*.pth' \
-  ! -name 'iter_040000.pth' \
-  -print -delete
-
-test -f "$BIDIR_FULL_RUN/checkpoints/iter_040000.pth"
-test "$(
-  find "$BIDIR_FULL_RUN/checkpoints" \
-    -maxdepth 1 -type f -name 'iter_*.pth' \
-    | wc -l
-)" -eq 1
-
-du -sh "$BIDIR_FULL_RUN"
-df -h /root/autodl-tmp
-```
-
-## 2. Check out and verify the analysis implementation
+## 1. Check out and verify the exact implementation
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 
 test -z "$(git status --porcelain)"
 git fetch origin
-git checkout cf83e7750a25b005d2c4940dcb829565dda16aae
+git checkout 2882c87fcd825754937e5346923bd64cf9b1d676
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
 test "$(git rev-parse HEAD)" = \
-  "cf83e7750a25b005d2c4940dcb829565dda16aae"
+  "2882c87fcd825754937e5346923bd64cf9b1d676"
 test -z "$(git status --porcelain)"
 
 python -m pytest
@@ -87,127 +34,178 @@ nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
 df -h /root/autodl-tmp
 ```
 
-Expected: `88 passed`, the DINOv3-L hash passes, and the GPU is the RTX
-4090 D. Stop if any check fails.
+Expected: `93 passed`, the DINOv3-L hash passes, the GPU is the RTX 4090 D,
+and the three retained Static final checkpoints remain untouched.
 
-## 3. Verify the three retained Static final checkpoints
-
-```bash
-STATIC0_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED0_40000_367694e/checkpoints/iter_040000.pth
-STATIC1_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED1_40000_3860e69/checkpoints/iter_040000.pth
-STATIC2_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED2_40000_3860e69/checkpoints/iter_040000.pth
-
-test -f "$STATIC0_CKPT"
-test -f "$STATIC1_CKPT"
-test -f "$STATIC2_CKPT"
-
-sha256sum "$STATIC0_CKPT" "$STATIC1_CKPT" "$STATIC2_CKPT"
-```
-
-If any checkpoint is absent, stop and return the output. Do not substitute an
-intermediate checkpoint.
-
-## 4. Run the common 500-image zero-effect audit
+## 2. Run the isolated 500-iteration learned-null smoke
 
 ```bash
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/STATIC_ZERO_EFFECT_LOCALIZATION_SEEDS012_20260926.json
-LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/STATIC_ZERO_EFFECT_LOCALIZATION_SEEDS012_20260926.log
+NULL_RUN_ID=B4B_NULL_IQE_SMOKE_500_2882c87
+NULL_RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}"
+NULL_LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}.log"
 
-mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
+echo "NULL_RUN_DIR=$NULL_RUN_DIR"
+echo "NULL_LOG_FILE=$NULL_LOG_FILE"
 
-test ! -e "$REPORT"
-test ! -e "$LOG"
+test ! -e "$NULL_RUN_DIR"
+test ! -e "$NULL_LOG_FILE"
 
 set -o pipefail
 
-python tools/analyze_zero_effect.py \
-  --config configs/query_interaction/gta_dinov3l_static.yaml \
-  --checkpoint "STATIC_SEED0=$STATIC0_CKPT" \
-  --checkpoint "STATIC_SEED1=$STATIC1_CKPT" \
-  --checkpoint "STATIC_SEED2=$STATIC2_CKPT" \
-  --max-samples 500 \
-  --output "$REPORT" \
-  2>&1 | tee "$LOG"
+MAX_ITERATIONS=500 \
+VALIDATION_MAX_SAMPLES=50 \
+SEED=0 \
+RUN_ID="$NULL_RUN_ID" \
+bash scripts/train_learned_null.sh \
+  2>&1 | tee "$NULL_LOG_FILE"
 
-ANALYSIS_EXIT=${PIPESTATUS[0]}
-echo "analysis_exit_code=$ANALYSIS_EXIT"
-test "$ANALYSIS_EXIT" -eq 0
+TRAIN_EXIT=${PIPESTATUS[0]}
+echo "train_exit_code=$TRAIN_EXIT"
+test "$TRAIN_EXIT" -eq 0
 ```
 
-## 5. Validate and return the report
+## 3. Validate the smoke
 
 ```bash
-python - "$REPORT" <<'PY'
+python - "$NULL_RUN_DIR" <<'PY'
 import json
 import math
+import statistics
 import sys
 from pathlib import Path
 
-report = json.loads(Path(sys.argv[1]).read_text())
+run_dir = Path(sys.argv[1])
+metadata = json.loads((run_dir / "metadata.json").read_text())
+summary = json.loads((run_dir / "summary.json").read_text())
+records = [
+    json.loads(line)
+    for line in (run_dir / "train.jsonl").read_text().splitlines()
+    if line.strip()
+]
+validations = summary["validation_results"]
+checkpoints = sorted((run_dir / "checkpoints").glob("iter_*.pth"))
 
-assert report["ok"] is True
-assert report["evaluation_git_sha"] == \
-    "cf83e7750a25b005d2c4940dcb829565dda16aae"
-assert report["dataset"] == "cityscapes_val"
-assert report["requested_max_samples"] == 500
-assert report["metric"]["name"] == "zero_ablation_effect_localization"
-assert set(report["models"]) == {
-    "STATIC_SEED0",
-    "STATIC_SEED1",
-    "STATIC_SEED2",
-}
+assert metadata["experiment_id"] == "B4B_NULL_IQE_SMOKE_500_2882c87"
+assert metadata["phase"] == 14
+assert metadata["git_sha"] == \
+    "2882c87fcd825754937e5346923bd64cf9b1d676"
+assert metadata["seed"] == 0
+assert metadata["max_iterations"] == 500
+assert metadata["total_parameters"] == 306931476
+assert metadata["trainable_parameters"] == 3801876
+assert metadata["query"]["queries_per_class"] == 2
+assert metadata["query"]["interaction"] == "static"
+assert metadata["query"]["cross_attention_layers"] == 0
+assert metadata["style"]["views"] == ["original", "photometric"]
 
-expected = {
-    "STATIC_SEED0": (0, "367694ee8bc2e670be0a896f40e089760fe2177a"),
-    "STATIC_SEED1": (1, "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497"),
-    "STATIC_SEED2": (2, "3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497"),
+null_config = metadata["learned_null"]
+assert null_config == {
+    "enabled": True,
+    "shared_across_classes": True,
+    "slots": "match_queries_per_class",
+    "calibration_target": "mean_factual_query_state",
+    "stop_gradient_target": True,
+    "loss": "smooth_l1",
+    "lambda_null": 1.0,
 }
-numeric_keys = (
-    "mean_inside_absolute_mean",
-    "mean_outside_absolute_mean",
-    "mean_absolute_ratio",
-    "mean_normalized_absolute_contrast",
-    "mean_inside_signed_mean",
-    "mean_outside_signed_mean",
-    "localized_class_map_fraction",
+assert "prediction_consistency" not in metadata
+assert "causal_query_effect" not in metadata
+assert "query_diversity" not in metadata
+
+assert summary["ok"] is True
+assert len(records) == 500
+assert [row["iteration"] for row in records] == list(range(1, 501))
+
+tracked = (
+    "loss",
+    "loss_original",
+    "loss_photometric",
+    "loss_null",
+    "loss_null_weighted",
+    "gradient_norm",
     "alpha",
-    "peak_allocated_gib",
-    "peak_reserved_gib",
+)
+assert all(
+    math.isfinite(float(row[key]))
+    for row in records
+    for key in tracked
+)
+assert all(float(row["loss_null"]) > 0.0 for row in records)
+
+errors = [
+    abs(
+        float(row["loss"])
+        - float(row["loss_original"])
+        - float(row["loss_photometric"])
+        - float(row["loss_null_weighted"])
+    )
+    for row in records
+]
+assert max(errors) <= 1e-5
+
+first_20_null = statistics.fmean(
+    float(row["loss_null"]) for row in records[:20]
+)
+last_20_null = statistics.fmean(
+    float(row["loss_null"]) for row in records[-20:]
 )
 
-for name, result in report["models"].items():
-    seed, training_sha = expected[name]
-    assert result["sample_count"] == 500
-    assert result["present_class_map_count"] > 0
-    assert result["iteration"] == 40000
-    assert result["training_seed"] == seed
-    assert result["training_git_sha"] == training_sha
-    assert all(math.isfinite(float(result[key])) for key in numeric_keys)
-    assert 0.0 <= result["localized_class_map_fraction"] <= 1.0
+assert len(validations) == 1
+assert validations[0]["iteration"] == 500
+assert validations[0]["sample_count"] == 50
+assert math.isfinite(float(validations[0]["miou"]))
+assert len(checkpoints) == 1
+assert checkpoints[0].name == "iter_000500.pth"
 
-assert math.isfinite(float(report["across_seed_mean_absolute_ratio"]))
-assert math.isfinite(float(report["across_seed_sample_std_absolute_ratio"]))
-assert math.isfinite(
-    float(report["across_seed_mean_localized_class_map_fraction"])
-)
-
-print("static_zero_effect_localization_audit_ok=true")
-print(json.dumps(report, indent=2))
+print("learned_null_smoke_ok=true")
+print("===== metadata =====")
+print(metadata)
+print("===== summary =====")
+print({k: v for k, v in summary.items() if k != "validation_results"})
+print("===== trace =====")
+print("record_count:", len(records))
+print("iterations_contiguous:", True)
+print("all_tracked_values_finite:", True)
+print("maximum_objective_reconstruction_error:", max(errors))
+print("first_20_null_loss_mean:", first_20_null)
+print("last_20_null_loss_mean:", last_20_null)
+print("null_loss_decreased:", last_20_null < first_20_null)
+print("first_record:", records[0])
+print("last_record:", records[-1])
+print("===== validation =====")
+print(validations[0])
+print("===== checkpoint =====")
+print("checkpoint_count:", len(checkpoints))
+print("checkpoint:", checkpoints[0])
 PY
+```
 
-echo "===== report hash ====="
-sha256sum "$REPORT"
+## 4. Return evidence and stop
 
-echo "===== analysis log tail ====="
-tail -n 30 "$LOG"
+```bash
+echo "===== checkpoint evidence ====="
+find "$NULL_RUN_DIR/checkpoints" \
+  -maxdepth 1 -type f \
+  -printf '%s %f\n' \
+  | sort -k2
 
-echo "===== retained Static checkpoints ====="
+du -sh "$NULL_RUN_DIR/checkpoints"
+
+echo "===== final log ====="
+tail -n 30 "$NULL_LOG_FILE"
+
+echo "===== retained Static final checkpoints ====="
 find \
   /root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED0_40000_367694e/checkpoints \
   /root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED1_40000_3860e69/checkpoints \
   /root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED2_40000_3860e69/checkpoints \
   -maxdepth 1 -type f -name 'iter_040000.pth' \
   -printf '%s %p\n'
+
+echo "===== training exit evidence ====="
+grep -E \
+  'train_exit_code=|Traceback|FloatingPointError|CUDA out of memory' \
+  "$NULL_LOG_FILE" || true
 
 echo "===== provenance ====="
 git rev-parse HEAD
@@ -217,8 +215,6 @@ echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
-Return the complete JSON validator output plus all evidence blocks. Stop after
-the audit. Do not delete the three Static final checkpoints, train learned-null,
-or add sufficiency/specificity. The audit determines whether the existing query
-effect has enough class-localized semantics to justify learned-null as the next
-intervention baseline.
+Return the complete validator output and evidence blocks. Stop after the smoke.
+Do not start a 40k run and do not add effect invariance, sufficiency,
+specificity, or semantic counterfactuals.
