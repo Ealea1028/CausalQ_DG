@@ -1,267 +1,168 @@
-# AutoDL next step: Phase 14 learned-null seed-0 40k run
+# AutoDL next step: paired learned-null effect localization
 
-The exact-isolation smoke passes at implementation commit
-`d85db4e0dcf411681c1ddad09080dfeed1c419bd`: 500 records are contiguous and
-finite, objective reconstruction error is `1.790e-7`, peak reserved memory is
-`2.713 GiB`, and null calibration loss decreases by approximately `84.8%`.
+The Phase 14 seed-0 40k run passes at training SHA
+`d85db4e0dcf411681c1ddad09080dfeed1c419bd`, reaching `0.655364` final
+Cityscapes mIoU (`+0.7968` points versus paired Static). Before repeat seeds or
+new objectives, compare factual-minus-zero and factual-minus-learned-null
+effects on the same 500 validation images.
 
-Run one seed-0 40k experiment with the identical mechanism. Do not add effect
-invariance, sufficiency, specificity, semantic counterfactuals, or repeat
-seeds. The fixed paired factual-path reference is Static seed 0 at final mIoU
-`0.6473964462159979`.
+This step is read-only. It does not train, modify, or replace the final
+checkpoint.
 
-## 1. Check out the exact implementation
+## 1. Check out the exact analysis implementation
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 
 test -z "$(git status --porcelain)"
 
-IMPL_SHA=d85db4e0dcf411681c1ddad09080dfeed1c419bd
+ANALYSIS_SHA=549a9753914b9868a852a65983fb8cf0f246462b
 
 git fetch origin main
-git cat-file -e "${IMPL_SHA}^{commit}"
-git checkout --detach "$IMPL_SHA"
+git cat-file -e "${ANALYSIS_SHA}^{commit}"
+git checkout --detach "$ANALYSIS_SHA"
 
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
-test "$(git rev-parse HEAD)" = "$IMPL_SHA"
+test "$(git rev-parse HEAD)" = "$ANALYSIS_SHA"
 test -z "$(git status --porcelain)"
 
 python -m pytest
 
 echo 'dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179  /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors' \
   | sha256sum -c -
-
-nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv
-df -h /root/autodl-tmp
 ```
 
-Expected: `94 passed`, the DINOv3-L hash passes, the repository is clean, and
-at least 10 GiB remains free. The observed 29 GiB is sufficient for the
-approximately 3.4 GiB compact checkpoint set.
+Expected: `96 passed` and the DINOv3-L hash reports `OK`.
 
-## 2. Run seed 0 for 40k iterations
+## 2. Run the paired 500-image analysis
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
 source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
-test "$(git rev-parse HEAD)" = \
-  "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
+NULL_CKPT=/root/autodl-tmp/outputs/CausalQ_DG/B4B_NULL_IQE_SEED0_40000_d85db4e/checkpoints/iter_040000.pth
+REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/B4B_NULL_IQE_SEED0_paired_effect_localization_549a975.json
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/B4B_NULL_IQE_SEED0_paired_effect_localization_549a975.log
 
-NULL_RUN_ID=B4B_NULL_IQE_SEED0_40000_d85db4e
-NULL_RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}"
-NULL_LOG_FILE="/root/autodl-tmp/outputs/CausalQ_DG/${NULL_RUN_ID}.log"
+test -f "$NULL_CKPT"
+test ! -e "$REPORT"
+test ! -e "$LOG"
 
-echo "NULL_RUN_DIR=$NULL_RUN_DIR"
-echo "NULL_LOG_FILE=$NULL_LOG_FILE"
-
-test ! -e "$NULL_RUN_DIR"
-test ! -e "$NULL_LOG_FILE"
+mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
 
 set -o pipefail
 
-MAX_ITERATIONS=40000 \
-VALIDATION_MAX_SAMPLES=500 \
-SEED=0 \
-RUN_ID="$NULL_RUN_ID" \
-bash scripts/train_learned_null.sh \
-  2>&1 | tee "$NULL_LOG_FILE"
+python tools/analyze_learned_null_effect.py \
+  --config configs/learned_null/gta_dinov3l_static_null.yaml \
+  --checkpoint "$NULL_CKPT" \
+  --max-samples 500 \
+  --output "$REPORT" \
+  2>&1 | tee "$LOG"
 
-TRAIN_EXIT=${PIPESTATUS[0]}
-echo "train_exit_code=$TRAIN_EXIT"
-test "$TRAIN_EXIT" -eq 0
+ANALYSIS_EXIT=${PIPESTATUS[0]}
+echo "analysis_exit_code=$ANALYSIS_EXIT"
+test "$ANALYSIS_EXIT" -eq 0
 ```
 
-## 3. Validate the complete run
+## 3. Validate and summarize the report
 
 ```bash
-python - "$NULL_RUN_DIR" <<'PY'
+python - "$REPORT" <<'PY'
 import json
 import math
-import statistics
 import sys
 from pathlib import Path
 
-run_dir = Path(sys.argv[1])
-metadata = json.loads((run_dir / "metadata.json").read_text())
-summary = json.loads((run_dir / "summary.json").read_text())
-records = [
-    json.loads(line)
-    for line in (run_dir / "train.jsonl").read_text().splitlines()
-    if line.strip()
+report_path = Path(sys.argv[1])
+report = json.loads(report_path.read_text())
+
+expected_analysis_sha = "549a9753914b9868a852a65983fb8cf0f246462b"
+expected_training_sha = "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
+
+assert report["ok"] is True
+assert report["evaluation_git_sha"] == expected_analysis_sha
+assert report["dataset"] == "cityscapes_val"
+assert report["requested_max_samples"] == 500
+assert report["metric"]["name"] == \
+    "paired_zero_and_learned_null_effect_localization"
+
+model = report["model"]
+assert model["training_git_sha"] == expected_training_sha
+assert model["training_seed"] == 0
+assert model["iteration"] == 40000
+assert model["sample_count"] == 500
+assert model["present_class_map_count"] == 6005
+
+zero = model["zero_ablation"]
+learned_null = model["learned_null"]
+paired = model["paired"]
+
+numeric = [
+    *zero.values(),
+    *learned_null.values(),
+    *paired.values(),
+    model["alpha"],
+    model["peak_allocated_gib"],
+    model["peak_reserved_gib"],
 ]
-validations = summary["validation_results"]
-checkpoints = sorted((run_dir / "checkpoints").glob("iter_*.pth"))
+assert all(math.isfinite(float(value)) for value in numeric)
+assert zero["mean_inside_absolute_mean"] >= 0.0
+assert zero["mean_outside_absolute_mean"] >= 0.0
+assert learned_null["mean_inside_absolute_mean"] >= 0.0
+assert learned_null["mean_outside_absolute_mean"] >= 0.0
+assert 0.0 <= paired["fraction_learned_null_higher_absolute_ratio"] <= 1.0
+assert 0.0 <= paired["fraction_learned_null_lower_outside_absolute_mean"] <= 1.0
 
-expected_id = "B4B_NULL_IQE_SEED0_40000_d85db4e"
-expected_sha = "d85db4e0dcf411681c1ddad09080dfeed1c419bd"
-
-assert metadata["experiment_id"] == expected_id
-assert metadata["git_sha"] == expected_sha
-assert metadata["phase"] == 14
-assert metadata["seed"] == 0
-assert metadata["max_iterations"] == 40000
-assert metadata["total_parameters"] == 306931476
-assert metadata["trainable_parameters"] == 3801876
-
-assert metadata["query"]["queries_per_class"] == 2
-assert metadata["query"]["interaction"] == "static"
-assert metadata["query"]["cross_attention_layers"] == 0
-assert metadata["style"]["views"] == ["original", "photometric"]
-assert metadata["learned_null"] == {
-    "enabled": True,
-    "shared_across_classes": True,
-    "slots": "match_queries_per_class",
-    "calibration_target": "mean_factual_query_state",
-    "stop_gradient_target": True,
-    "loss": "smooth_l1",
-    "lambda_null": 1.0,
-}
-assert "prediction_consistency" not in metadata
-assert "causal_query_effect" not in metadata
-assert "query_diversity" not in metadata
-
-assert summary["ok"] is True
-assert len(records) == 40000
-assert [row["iteration"] for row in records] == list(range(1, 40001))
-
-tracked = (
-    "loss",
-    "loss_original",
-    "loss_photometric",
-    "loss_null",
-    "loss_null_weighted",
-    "gradient_norm",
-    "alpha",
-)
-assert all(
-    math.isfinite(float(row[key]))
-    for row in records
-    for key in tracked
-)
-
-errors = [
-    abs(
-        float(row["loss"])
-        - float(row["loss_original"])
-        - float(row["loss_photometric"])
-        - float(row["loss_null_weighted"])
-    )
-    for row in records
-]
-assert max(errors) <= 1e-5
-
-assert len(validations) == 80
-assert [row["iteration"] for row in validations] == \
-    list(range(500, 40001, 500))
-assert all(row["sample_count"] == 500 for row in validations)
-assert all(math.isfinite(float(row["miou"])) for row in validations)
-
-assert len(checkpoints) == 80
-assert checkpoints[-1].name == "iter_040000.pth"
-
-first_20_null = statistics.fmean(
-    float(row["loss_null"]) for row in records[:20]
-)
-last_20_null = statistics.fmean(
-    float(row["loss_null"]) for row in records[-20:]
-)
-best_validation = max(validations, key=lambda row: float(row["miou"]))
-final_validation = validations[-1]
-static_seed0 = 0.6473964462159979
-
-print("learned_null_40k_ok=true")
-print("===== metadata =====")
-print(metadata)
-print("===== summary =====")
-print({k: v for k, v in summary.items() if k != "validation_results"})
-print("===== trace =====")
-print("record_count:", len(records))
-print("iterations_contiguous:", True)
-print("all_tracked_values_finite:", True)
-print("maximum_objective_reconstruction_error:", max(errors))
-print("first_20_null_loss_mean:", first_20_null)
-print("last_20_null_loss_mean:", last_20_null)
-print("null_loss_decreased:", last_20_null < first_20_null)
-print("first_record:", records[0])
-print("last_record:", records[-1])
-print("===== validation =====")
-print("validation_count:", len(validations))
-print("final_validation:", final_validation)
-print("best_validation:", best_validation)
-print("===== factual-path comparison =====")
-print("static_seed0_miou:", static_seed0)
-print("learned_null_seed0_miou:", final_validation["miou"])
+print("paired_learned_null_effect_analysis_ok=true")
+print("===== provenance =====")
+print("evaluation_git_sha:", report["evaluation_git_sha"])
+print("training_git_sha:", model["training_git_sha"])
+print("training_seed:", model["training_seed"])
+print("checkpoint_sha256:", model["checkpoint_sha256"])
+print("===== coverage =====")
+print("sample_count:", model["sample_count"])
+print("present_class_map_count:", model["present_class_map_count"])
+print("===== zero ablation =====")
+print(zero)
+print("===== learned null =====")
+print(learned_null)
+print("===== paired comparison =====")
+print(paired)
 print(
-    "learned_null_minus_static:",
-    float(final_validation["miou"]) - static_seed0,
+    "learned_null_passes_gt_region_magnitude_target:",
+    model["learned_null_passes_gt_region_magnitude_target"],
 )
-print(
-    "learned_null_minus_static_percentage_points:",
-    100.0 * (float(final_validation["miou"]) - static_seed0),
-)
-print("===== checkpoints =====")
-print("checkpoint_count:", len(checkpoints))
-print("final_checkpoint:", checkpoints[-1])
+print("alpha:", model["alpha"])
+print("peak_allocated_gib:", model["peak_allocated_gib"])
+print("peak_reserved_gib:", model["peak_reserved_gib"])
 PY
 ```
 
 ## 4. Return evidence and stop
 
 ```bash
-echo "===== checkpoint evidence ====="
+echo "===== report ====="
+cat "$REPORT"
 
-CHECKPOINT_COUNT="$(
-  find "$NULL_RUN_DIR/checkpoints" \
-    -maxdepth 1 -type f -name 'iter_*.pth' \
-    | wc -l
-)"
+echo "===== report integrity ====="
+sha256sum "$REPORT" "$NULL_CKPT"
 
-echo "checkpoint_count=$CHECKPOINT_COUNT"
-test "$CHECKPOINT_COUNT" -eq 80
-
-find "$NULL_RUN_DIR/checkpoints" \
-  -maxdepth 1 -type f \
-  -printf '%s %f\n' \
-  | sort -k2 \
-  | tail -n 5
-
-test -f "$NULL_RUN_DIR/checkpoints/iter_040000.pth" \
-  && echo "final_checkpoint_ok=true"
-
-du -sh "$NULL_RUN_DIR/checkpoints"
-
-echo "===== final log ====="
-tail -n 30 "$NULL_LOG_FILE"
+echo "===== error scan ====="
+grep -E \
+  'Traceback|AssertionError|FloatingPointError|CUDA out of memory' \
+  "$LOG" || true
 
 echo "===== provenance ====="
 git rev-parse HEAD
 git status --short
 
-python - "$NULL_RUN_DIR" <<'PY'
-import json
-import sys
-from pathlib import Path
-
-run_dir = Path(sys.argv[1])
-metadata = json.loads((run_dir / "metadata.json").read_text())
-print("experiment_id:", metadata["experiment_id"])
-print("metadata_git_sha:", metadata["git_sha"])
-PY
-
-echo "===== error scan ====="
-grep -E \
-  'Traceback|AssertionError|FloatingPointError|CUDA out of memory' \
-  "$NULL_LOG_FILE" || true
-
 echo "===== disk ====="
 df -h /root/autodl-tmp
 ```
 
-Return the complete validator output and evidence blocks. Stop after this
-seed-0 run. Do not start seed 1/2 or any learned-null effect analysis until the
-factual-path result and null calibration trace have been reviewed.
+Return the validator output and report. Stop after this analysis. Do not launch
+seed 1/2, effect-invariance training, sufficiency, specificity, or semantic
+counterfactual experiments until the paired localization result is reviewed.
