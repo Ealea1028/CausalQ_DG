@@ -1,4 +1,15 @@
-# AutoDL next step: restore and verify DINOv3-B weights
+# AutoDL next step: DINOv3-B Static R=2 scaling smoke
+
+The ViT-B weights have been restored from the distribution recorded in
+`pretrained_manifest.yaml`. Their SHA256 is again
+`9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b`.
+On AutoDL commit `d7913cf276bab6c96cfea4846dc6948bd38fb529`, the
+separate backbone check passed on RTX 4090 D with bfloat16,
+768-dimensional patch features, four requested intermediate maps, and zero
+NaN/Inf; 25 GiB remained free. The next action is one 500-iteration training
+smoke, not a 40k experiment.
+
+## Completed recovery record (do not repeat)
 
 The scaling smoke did not reach training. AutoDL's read-only inventory found
 that `/root/autodl-tmp/pretrained/dinov3_vitb16` is absent, only the ViT-L
@@ -82,13 +93,12 @@ git status --short
 df -h /root/autodl-tmp
 ```
 
-Return the download result, both SHA256 checks, backbone-check JSON and exit
-code, Git SHA/status, and disk status. If installation, download, checksum, or
-GPU validation fails, stop with its output and leave the stage and logs for
-diagnosis. The following smoke commands are a later handoff, **not** the
-current action.
+The recovery and GPU check above passed. These commands are retained for
+provenance only; their staging and download-environment directories now exist,
+so do not rerun them. Preserve the two failed smoke logs. The commands below
+are the current handoff.
 
-## Subsequent action after the weight is restored and verified
+## Current action after the weight is restored and verified
 
 Project-plan §41's GTA5 → Cityscapes qualitative figures are provenance-matched
 and closed as a diagnostic, not a causal proof. Begin §42 scaling with **one**
@@ -133,7 +143,7 @@ make space without a separate reviewed cleanup plan.
 ## 2. Run only the 500-iteration smoke
 
 ```bash
-RUN_ID="SCALE_VITB_STATIC_R2_SEED0_SMOKE_500_$(git rev-parse --short HEAD)"
+RUN_ID="SCALE_VITB_STATIC_R2_SEED0_SMOKE_500_RESTORED_$(git rev-parse --short HEAD)"
 RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID"
 LOG="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID.log"
 
