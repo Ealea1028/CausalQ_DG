@@ -177,3 +177,11 @@ VRAM peaks at `2.713 GiB`, and the first/last 20-step null-loss means are
 configuration. Compare final factual-path mIoU with the fixed Static seed-0
 reference (`0.647396`) and inspect null-loss convergence before deciding the
 next learned-null analysis; do not start repeat seeds automatically.
+
+The seed-0 40k run completes with `0.655364` final mIoU and `0.662705` best
+mIoU, improving on paired Static by `0.7968` percentage points. Its null loss
+converges from a first-20 mean of `2.139e-4` to `2.614e-13`. Before repeat
+seeds, run one read-only 500-image comparison of factual-minus-zero and
+factual-minus-learned-null effects from the final checkpoint. Report matching-
+region localization, outside-region magnitude, normalized contrast, and paired
+class-map fractions; add no training objective.

@@ -27,6 +27,8 @@
 - Phase 14 class-agnostic learned-null query bank, factual/null intervention
   forward contract, detached factual-centroid calibration, isolated config,
   and AutoDL launcher.
+- Paired zero-ablation versus learned-null effect-localization diagnostics for
+  the Phase 14 final checkpoint.
 
 ### Changed
 

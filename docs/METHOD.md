@@ -301,3 +301,10 @@ contiguous, reconstruction error is `1.790e-7`, peak reserved memory is
 This authorizes a single seed-0 40k learned-null run. Its segmentation metric
 tests whether the added baseline leaves the selected factual path intact; it
 does not by itself establish that learned-null effects are more causal.
+
+The seed-0 run reaches `0.655364` final mIoU (`+0.7968` points versus paired
+Static) with finite 40k optimization and null calibration converged to
+`2.614e-13`. The next diagnostic computes zero and learned-null class-logit
+effects from the same forward output and compares their localization on every
+GT-present class map. This separates segmentation retention from the stronger
+claim that the learned baseline yields a better-localized intervention effect.

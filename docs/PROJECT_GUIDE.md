@@ -545,7 +545,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 12 | Query 数量消融（R=1/2/3/4） | 完成；机制诊断选择 R=2 |
 | Phase 13 | Query Interaction 消融 | 已完成；Static 胜过 one-way，Bidirectional seed 0 也低于 Static |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 未执行 |
-| Phase 14 | Learned-null 干预基线 | 修复后的隔离 smoke 已通过；等待 seed-0 40k 正式运行 |
+| Phase 14 | Learned-null 干预基线 | seed-0 40k 已完成；等待 zero/learned-null 配对效应定位分析 |
 | 后续理论升级 | effect invariance + sufficiency + specificity | 仅为拟议路线，未实现 |
 
 ## 12. 代码与文档地图
@@ -790,7 +790,7 @@ for view_name, view_images in named_views:
 
 ## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`，且 seed-0 Bidirectional 只有 `0.630394`。随后的零消融定位审计在三个 Static seed 上得到 `2.913 ± 0.619` 的类内/类外绝对效应比，平均 `86.48%` 的 GT-present 类别图在对应区域内效应更强，证明现有 Query effect 具有可复现的区域语义。Phase 14 因此只加入所有类别共享的 R=2 learned-null bank，并用 stop-gradient factual-query centroid 校准。修复初始化顺序后的 `d85db4e` smoke 已通过：500 条记录连续有限、目标重构误差 `1.790e-7`，null loss 下降约 `84.8%`。下一步只运行 seed-0 40k learned-null，不同时加入 effect invariance、sufficiency 或 specificity，也不自动启动重复种子。
+Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`，且 seed-0 Bidirectional 只有 `0.630394`。随后的零消融定位审计在三个 Static seed 上得到 `2.913 ± 0.619` 的类内/类外绝对效应比，平均 `86.48%` 的 GT-present 类别图在对应区域内效应更强。Phase 14 的 learned-null seed-0 40k 已完成：最终 mIoU `0.655364`，比配对 Static 高 `0.7968` 个百分点，null loss 收敛至 `2.614e-13`。下一步只读比较同一 final checkpoint 的 zero 与 learned-null effect 定位和背景幅度，不同时加入 effect invariance、sufficiency 或 specificity，也不自动启动重复种子。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 

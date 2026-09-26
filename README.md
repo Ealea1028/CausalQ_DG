@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--13 ablations are complete. Phase 12 selects R=2. In Phase 13, Static reaches `0.652849 ± 0.015138`, wins every paired seed against one-way, and also exceeds the `0.630394` seed-0 Bidirectional control. The subsequent three-seed zero-ablation audit finds an average inside/outside absolute-effect ratio of `2.913 ± 0.619`, with `86.48%` of GT-present class maps more strongly affected inside the matching region. This passes the semantic gate for Phase 14. After repairing and regression-testing same-seed factual initialization, the refreshed learned-null smoke at `d85db4e` passes with 500 finite steps, exact objective reconstruction, and an `84.8%` drop in null calibration loss. The next action is one isolated seed-0 40k learned-null run.
+The A0--A5 core sequence and Phase 11--13 ablations are complete. Phase 12 selects R=2. In Phase 13, Static reaches `0.652849 ± 0.015138`, wins every paired seed against one-way, and also exceeds the `0.630394` seed-0 Bidirectional control. The subsequent three-seed zero-ablation audit finds an average inside/outside absolute-effect ratio of `2.913 ± 0.619`, with `86.48%` of GT-present class maps more strongly affected inside the matching region. Phase 14's isolated learned-null seed-0 run is stable and reaches `0.655364` final mIoU, `+0.7968` points over paired Static, while its calibration loss converges to `2.61e-13`. The next action is a read-only, paired zero-versus-learned-null localization analysis before repeat seeds or new objectives.
 
 ## Working directories
 
