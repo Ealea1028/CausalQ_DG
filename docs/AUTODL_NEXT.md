@@ -1,4 +1,17 @@
-# AutoDL next step: DINOv3-B Static R=2 scaling smoke
+# AutoDL next step: DINOv3-B Static R=2 full seed-0 training
+
+The restored ViT-B Static R=2 500-step smoke on AutoDL commit
+`915e872ca080eae74eef387e7990ad6e3cecbdc5` produced a complete
+`summary.json` (`ok: true`, finite losses), 500 training records, one
+50-image Cityscapes validation at iteration 500 (`mIoU: 0.337162`), and the
+final smoke checkpoint. Peak reserved GPU memory was 1.512 GiB; 25 GiB of
+disk remained free. That short-run mIoU is diagnostic only. The next action
+first audits the saved trace for contiguity and objective reconstruction,
+then starts a fresh 40,000-iteration seed-0 run on all 500 validation images.
+Do not resume the smoke checkpoint, overwrite an existing run, or start seed
+1/2 or another target dataset at this stage.
+
+## Completed smoke and recovery records (do not repeat)
 
 The ViT-B weights have been restored from the distribution recorded in
 `pretrained_manifest.yaml`. Their SHA256 is again
@@ -98,7 +111,7 @@ provenance only; their staging and download-environment directories now exist,
 so do not rerun them. Preserve the two failed smoke logs. The commands below
 are the current handoff.
 
-## Current action after the weight is restored and verified
+## Completed smoke handoff after the weight was restored
 
 Project-plan §41's GTA5 → Cityscapes qualitative figures are provenance-matched
 and closed as a diagnostic, not a causal proof. Begin §42 scaling with **one**
@@ -211,3 +224,143 @@ Return `train_exit_code`, the audit output, checkpoint hash, final Git SHA and
 status, and any errors. Only after checking those results may the 40k B run be
 considered. §42's question about effect variance requires a later matched
 full-validation analysis; this smoke cannot answer it.
+
+## Current action: audit smoke, then run one 40k seed-0 experiment
+
+Replace `EXPECTED_SHA` below with the exact commit from the new handoff. Run
+from a clean AutoDL checkout. The local smoke audit must pass before the full
+run begins. The full run starts from random head initialization and the
+verified frozen ViT-B weights; it must not resume the smoke checkpoint.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+source scripts/activate_autodl.sh
+export OMP_NUM_THREADS=1
+
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+git fetch origin main
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || exit 1
+
+SMOKE=/root/autodl-tmp/outputs/CausalQ_DG/SCALE_VITB_STATIC_R2_SEED0_SMOKE_500_RESTORED_915e872
+python - "$SMOKE" <<'PY'
+import json
+import math
+import sys
+from pathlib import Path
+
+run = Path(sys.argv[1])
+metadata = json.loads((run / "metadata.json").read_text(encoding="utf-8"))
+summary = json.loads((run / "summary.json").read_text(encoding="utf-8"))
+records = [json.loads(line) for line in (run / "train.jsonl").read_text(encoding="utf-8").splitlines()]
+assert metadata["git_sha"] == "915e872ca080eae74eef387e7990ad6e3cecbdc5"
+assert metadata["phase"] == 15 and metadata["backbone"] == "dinov3_vitb16"
+assert metadata["pretrained_checkpoint_sha256"] == "9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b"
+assert metadata["seed"] == 0 and metadata["max_iterations"] == 500
+assert metadata["query"]["interaction"] == "static"
+assert metadata["query"]["queries_per_class"] == 2
+assert metadata["style"]["views"] == ["original", "photometric"]
+assert all(key not in metadata for key in ("prediction_consistency", "causal_query_effect", "query_diversity", "learned_null"))
+assert summary["ok"] is True and summary["finite_losses"] is True
+assert [record["iteration"] for record in records] == list(range(1, 501))
+assert all(math.isfinite(record[key]) for record in records for key in ("loss", "loss_original", "loss_photometric", "gradient_norm", "alpha"))
+error = max(abs(record["loss"] - record["loss_original"] - record["loss_photometric"]) for record in records)
+assert error < 1e-5, error
+assert len(summary["validation_results"]) == 1
+assert summary["validation_results"][0]["sample_count"] == 50
+assert summary["validation_results"][0]["iteration"] == 500
+assert (run / "checkpoints" / "iter_000500.pth").is_file()
+print("smoke_audit_ok=true")
+print("maximum_objective_reconstruction_error:", error)
+print("smoke_validation:", summary["validation_results"][0])
+PY
+test "$?" -eq 0 || exit 1
+
+WEIGHTS=/root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors
+test -f "$WEIGHTS" || exit 1
+test "$(sha256sum "$WEIGHTS" | cut -d' ' -f1)" = \
+  '9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b' || exit 1
+test -d /root/autodl-tmp/datasets/gta5 || exit 1
+test -d /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val || exit 1
+test -d /root/autodl-tmp/datasets/cityscapes/gtFine/val || exit 1
+df -h /root/autodl-tmp
+
+RUN_ID="SCALE_VITB_STATIC_R2_SEED0_40000_$(git rev-parse --short HEAD)"
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID"
+LOG="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID.log"
+echo "run_id=$RUN_ID"
+test ! -e "$RUN_DIR" || { echo "existing_run=$RUN_DIR"; exit 1; }
+test ! -e "$LOG" || { echo "existing_log=$LOG"; exit 1; }
+
+set -o pipefail
+python tools/train.py \
+  --config configs/scaling/gta_dinov3b_static.yaml \
+  --run-id "$RUN_ID" \
+  --max-iterations 40000 \
+  --validation-max-samples 500 \
+  --seed 0 \
+  2>&1 | tee "$LOG"
+TRAIN_EXIT=${PIPESTATUS[0]}
+echo "train_exit_code=$TRAIN_EXIT"
+test "$TRAIN_EXIT" -eq 0 || exit 1
+```
+
+Do not delete intermediate checkpoints before auditing the run. After the
+command returns, report `train_exit_code`, the following evidence, and any
+traceback. A final mIoU alone is not sufficient to accept a full run.
+
+```bash
+RUN_ID="SCALE_VITB_STATIC_R2_SEED0_40000_$(git rev-parse --short HEAD)"
+RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID"
+LOG="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID.log"
+
+python - "$RUN_DIR" <<'PY'
+import json
+import math
+import sys
+from pathlib import Path
+
+run = Path(sys.argv[1])
+metadata = json.loads((run / "metadata.json").read_text(encoding="utf-8"))
+summary = json.loads((run / "summary.json").read_text(encoding="utf-8"))
+records = [json.loads(line) for line in (run / "train.jsonl").read_text(encoding="utf-8").splitlines()]
+validations = summary["validation_results"]
+checkpoints = sorted((run / "checkpoints").glob("iter_*.pth"))
+assert summary["ok"] is True and summary["finite_losses"] is True
+assert metadata["phase"] == 15 and metadata["max_iterations"] == 40000
+assert metadata["backbone"] == "dinov3_vitb16" and metadata["seed"] == 0
+assert metadata["query"]["interaction"] == "static"
+assert metadata["query"]["queries_per_class"] == 2
+assert metadata["style"]["views"] == ["original", "photometric"]
+assert [record["iteration"] for record in records] == list(range(1, 40001))
+assert all(math.isfinite(record[key]) for record in records for key in ("loss", "loss_original", "loss_photometric", "gradient_norm", "alpha"))
+error = max(abs(record["loss"] - record["loss_original"] - record["loss_photometric"]) for record in records)
+assert error < 1e-5, error
+assert len(validations) == 80
+assert all(item["sample_count"] == 500 for item in validations)
+assert validations[-1]["iteration"] == 40000
+assert len(checkpoints) == 80 and checkpoints[-1].name == "iter_040000.pth"
+print("full_run_audit_ok=true")
+print("experiment_id:", metadata["experiment_id"])
+print("training_git_sha:", metadata["git_sha"])
+print("pretrained_checkpoint_sha256:", metadata["pretrained_checkpoint_sha256"])
+print("maximum_objective_reconstruction_error:", error)
+print("peak_reserved_gib:", summary["peak_reserved_gib"])
+print("final_alpha:", summary["final_alpha"])
+print("final_validation:", validations[-1])
+print("best_validation:", max(validations, key=lambda item: item["miou"]))
+print("checkpoint_count:", len(checkpoints))
+PY
+
+sha256sum "$RUN_DIR/checkpoints/iter_040000.pth"
+tail -n 20 "$LOG"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+After the 40k evidence is accepted, compare ViT-B and the fixed ViT-L Static
+R=2 seed-0 result on the same 500 Cityscapes validation images. A later paired
+style-effect analysis is also required before any scale-dependent variance
+claim. Do not start these analyses or additional seeds as part of this handoff.
