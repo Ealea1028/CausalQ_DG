@@ -790,7 +790,7 @@ for view_name, view_images in named_views:
 
 ## 18. 当前下一步：Phase 13 Query Interaction 消融
 
-Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 虽在 seed 0 得到 `0.655364`，但配对审计显示效应定位比从 zero 的 `3.773` 降为 `1.845`，归一化对比度从 `0.491` 降为 `0.205`，仅 `4.71%` 的类别图改善。因此 learned-null 作为负机制消融关闭，不追加 seed，不在其上叠加 sufficiency/specificity。应用户要求，BDD100K、Mapillary 等外部目标域暂缓；下一步只在 GTA5 → Cityscapes val 上执行原方案 §41 的 Query Effect 定性诊断。该图不用于目标域调参，也不能证明真实因果效应或其他数据集的泛化。
+Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 虽在 seed 0 得到 `0.655364`，但配对审计显示效应定位比从 zero 的 `3.773` 降为 `1.845`，归一化对比度从 `0.491` 降为 `0.205`，仅 `4.71%` 的类别图改善。因此 learned-null 作为负机制消融关闭，不追加 seed，不在其上叠加 sufficiency/specificity。应用户要求，BDD100K、Mapillary 等外部目标域暂缓；当前只在 GTA5 → Cityscapes val 上执行原方案 §41 的 Query Effect 定性诊断。四张图已有临时目视评估，但 AutoDL `report.json` 和原图哈希尚未核对，阶段不能结项。该图不用于目标域调参，也不能证明真实因果效应或其他数据集的泛化。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
