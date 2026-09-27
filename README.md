@@ -45,5 +45,6 @@ Local verification is CPU-only. Do not use a local GPU for formal DINOv3-L train
 13. Query-interaction ablation
 14. Learned-null intervention baseline
 15. DINOv3-B scaling control (GTA5 → Cityscapes only)
+16. DINOv2-L/REIN transfer feasibility (in progress; GTA5 → Cityscapes only)
 
 See `CausalQ_DG_Project_Plan.md` for the complete specification and `docs/AUTODL_NEXT.md` for the next remote action.

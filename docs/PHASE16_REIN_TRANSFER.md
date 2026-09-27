@@ -67,8 +67,18 @@ tensor conversion, checks the pinned input SHA before deserialization, uses
 `weights_only=True`, refuses an existing output, and reports the converted
 file SHA. A converted checkpoint is not an end-to-end REIN smoke test.
 
-The next AutoDL step converts only this audited file into a new path and
-checks its tensor layout. It does not install OpenMMLab, load REIN, train,
-or overwrite the original. REIN's 100 Mask2Former prediction queries are
+The conversion passed on AutoDL at Git SHA
+`a3331a6520c01f8f8f0f8a65073bde85e11dda25`. The new file is
+`/root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth`, size
+`1,216,918,112` bytes, SHA256
+`91730ebf59fb634f5572cf5071fef8665473dcffcbef7ba4f4fa497533a8c837`.
+The report confirms 343 tensors, patch embedding `1024×3×16×16`, and
+position embedding `1×1025×1024`; its own SHA256 is
+`a77862783c247208d867f564d51b118336db4475e759f26ff198b2ce6e6b9fbb`.
+The AutoDL disk still has 16 GiB free. The next step is an independent
+on-disk audit: reload both files with `weights_only=True`, reconstruct the
+expected conversion, and require exact equality for all 343 tensors. It
+does not install OpenMMLab, load REIN, train, or overwrite either checkpoint.
+REIN's 100 Mask2Former prediction queries are
 not intrinsically class-specific; a faithful class-specific CQE intervention
 still needs an explicit design and isolated unit tests before any training.
