@@ -48,7 +48,27 @@ The official DINOv2-L weight was downloaded on AutoDL to
 the author-linked URL. The transfer returned success, its size is
 `1,217,586,395` bytes, and its SHA256 is
 `d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428`.
-These facts establish a reproducible byte identity but not yet a compatible
-model state dict. The next AutoDL step runs the repository's hash-pinned,
-`weights_only=True` CPU inspector on the staged file. Do not move, convert,
-install, train, or overwrite anything until that audit passes.
+The hash-pinned, `weights_only=True` CPU audit passed at Git SHA
+`26ea45f41a7b09e163ba87d2351a5c5d0108a2ff`: 343 tensors,
+304,368,640 parameters, 24 blocks, 1,024 channels, a 14×14 patch kernel,
+and a 37×37 patch-position grid plus one class token. The audit report is
+`/root/autodl-tmp/outputs/CausalQ_DG/analysis/dinov2_vitl14_staged_audit.json`
+with SHA256
+`689e52472cf0ddf1bcae257d03e3685bcc565ce73d8f071a7137f2e4dd3b9368`.
+This validates the original checkpoint's structure, not REIN compatibility or
+segmentation quality.
+
+The official REIN repository is pinned for protocol inspection at commit
+`dc063429c4dadc0da9c6252b3db22fc55a9882ab`. Its DINOv2 conversion
+uses bicubic interpolation (`align_corners=False`) to change the 14×14 patch
+kernel to 16×16 and its 37×37 position grid to 32×32 for 512×512 crops.
+The repository's `tools/convert_dinov2_for_rein.py` reproduces just this
+tensor conversion, checks the pinned input SHA before deserialization, uses
+`weights_only=True`, refuses an existing output, and reports the converted
+file SHA. A converted checkpoint is not an end-to-end REIN smoke test.
+
+The next AutoDL step converts only this audited file into a new path and
+checks its tensor layout. It does not install OpenMMLab, load REIN, train,
+or overwrite the original. REIN's 100 Mask2Former prediction queries are
+not intrinsically class-specific; a faithful class-specific CQE intervention
+still needs an explicit design and isolated unit tests before any training.

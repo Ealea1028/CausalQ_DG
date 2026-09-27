@@ -1,4 +1,4 @@
-# AutoDL next step: audit the staged DINOv2-L checkpoint
+# AutoDL next step: convert the audited DINOv2-L checkpoint for REIN
 
 Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
 report has `ok: true`, 500 matched Cityscapes validation images, 6,005
@@ -8,22 +8,24 @@ Across seeds 0/1/2, ViT-L has higher final mIoU and lower normalized
 query-effect style variance in every pair. See the versioned three-seed
 report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
 
-The original plan's §43 DINOv2/REIN transfer check is the next single phase.
-The read-only inventory found no existing DINOv2/REIN assets or OpenMMLab
-packages. The official DINOv2-L weight download subsequently succeeded at
-AutoDL commit `9517909955d11dc238ccfff31d741a062d29cd15`: the staged file
-is `1,217,586,395` bytes, SHA256
+The original plan's §43 DINOv2/REIN transfer check is the current single
+phase. The official DINOv2-L file, staged on AutoDL with SHA256
 `d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428`,
-with 17 GiB remaining free. The next operation runs a CPU-only, hash-pinned
-tensor-structure audit. See `docs/PHASE16_REIN_TRANSFER.md` for the controlled
-protocol. Do not install packages, convert, train, or claim CQE transfer yet.
+passed the pinned CPU tensor audit at Git SHA
+`26ea45f41a7b09e163ba87d2351a5c5d0108a2ff`. The audit confirms the
+unconverted 14×14/37×37 layout and 24-block non-register architecture. Disk
+space was 17 GiB. The next operation creates a separate REIN-compatible
+16×16/32×32 tensor layout. This remains a CPU data-conversion step, not a
+REIN installation, model load, GPU smoke, or CQE transfer claim.
 
 ## Current AutoDL action
 
-Use the full Git SHA from the handoff because the checker is new code. The
-staged file remains at its existing path; the command neither renames nor
-overwrites it. `torch.load` is used with `weights_only=True` and CPU mapping,
-and only after the pinned hash has been checked. This is not a GPU smoke test.
+Use the full Git SHA from the handoff. The original staged file and its audit
+report stay untouched. Conversion refuses existing destination, temporary
+file, or report paths. It verifies the source SHA before CPU-only
+`weights_only=True` loading, then writes a new checkpoint and records its SHA.
+Do not run this if available disk is under 5 GiB. The existing `causalq-dg`
+environment is used only for tensor conversion, not REIN package installation.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -31,7 +33,8 @@ source scripts/activate_autodl.sh
 EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
 STAGE=/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part
 EXPECTED_WEIGHTS_SHA=d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/dinov2_vitl14_staged_audit.json
+OUTPUT=/root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth
+REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/dinov2_vitl14_rein_patch16_512_conversion.json
 
 if git fetch origin main \
   && git checkout --detach "$EXPECTED_SHA" \
@@ -39,31 +42,44 @@ if git fetch origin main \
   && [ -z "$(git status --porcelain)" ] \
   && [ -f "$STAGE" ] \
   && [ "$(sha256sum "$STAGE" | cut -d' ' -f1)" = "$EXPECTED_WEIGHTS_SHA" ] \
+  && [ ! -e "$OUTPUT" ] \
+  && [ ! -e "$OUTPUT.part" ] \
   && [ ! -e "$REPORT" ]; then
   mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
-  echo '===== source and staged weight ====='
+  echo '===== source, weight, and capacity ====='
   git rev-parse HEAD
   stat -c '%s %n' "$STAGE"
   sha256sum "$STAGE"
+  df -h /root/autodl-tmp
+  AVAILABLE_KIB=$(df -Pk /root/autodl-tmp | awk 'NR==2 {print $4}')
+  test "$AVAILABLE_KIB" -ge 5242880 || { echo 'less_than_5GiB_free'; exit 1; }
   set -o pipefail
-  python tools/check_dinov2_checkpoint.py \
+  python -m tools.convert_dinov2_for_rein \
     --weights "$STAGE" \
-    --expected-sha256 "$EXPECTED_WEIGHTS_SHA" | tee "$REPORT"
-  AUDIT_EXIT=${PIPESTATUS[0]}
-  echo "audit_exit_code=$AUDIT_EXIT"
+    --expected-sha256 "$EXPECTED_WEIGHTS_SHA" \
+    --output "$OUTPUT" | tee "$REPORT"
+  CONVERT_EXIT=${PIPESTATUS[0]}
+  echo "convert_exit_code=$CONVERT_EXIT"
+  if [ "$CONVERT_EXIT" -eq 0 ]; then
+    stat -c '%s %n' "$OUTPUT"
+    sha256sum "$OUTPUT" "$REPORT"
+  fi
+  git status --short
   df -h /root/autodl-tmp
 else
-  echo 'preflight_failed; audit_not_started'
+  echo 'preflight_failed; conversion_not_started'
   git rev-parse HEAD
   git status --short
   ls -lh "$STAGE" 2>/dev/null || true
 fi
 ```
 
-Return the complete JSON report, `audit_exit_code`, Git SHA/status, and disk
-space. If the audit fails, leave the file and report untouched and stop. A
-passing audit establishes structure, not segmentation quality; the next
-phase still requires a separately specified REIN integration and smoke test.
+Return the complete JSON report, `convert_exit_code`, the output and report
+SHA256 values, Git SHA/status, and disk space. If conversion fails, retain
+the original, any `.part` output, and the error report for diagnosis; do not
+rerun over them. A passing conversion establishes tensor layout only. The
+next step must still audit the converted checkpoint and specify an isolated
+REIN integration and class-specific CQE intervention before GPU training.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 
@@ -176,7 +192,7 @@ df -h /root/autodl-tmp
 The recovery and GPU check above passed. These commands are retained for
 provenance only; their staging and download-environment directories now exist,
 so do not rerun them. Preserve the two failed smoke logs. The commands below
-are the current handoff.
+are historical handoffs, not the current Phase 16 action.
 
 ## Completed smoke handoff after the weight was restored
 
@@ -292,7 +308,7 @@ status, and any errors. Only after checking those results may the 40k B run be
 considered. §42's question about effect variance requires a later matched
 full-validation analysis; this smoke cannot answer it.
 
-## Current action: audit smoke, then run one 40k seed-0 experiment
+## Historical action: audit smoke, then run one 40k seed-0 experiment
 
 Replace `EXPECTED_SHA` below with the exact commit from the new handoff. Run
 from a clean AutoDL checkout. The local smoke audit must pass before the full
