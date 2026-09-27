@@ -81,9 +81,19 @@ reaches `0.555294` mIoU versus `0.669958` for ViT-L seed-1 (a gap of
 `11.4664` percentage points). The seed-1 matched style-effect variance is
 `0.000999` for ViT-B and `0.000620` for ViT-L, with 6,005 present-class maps
 each; ViT-L is 37.9% lower. Both seed pairs point in the same direction.
-The ViT-B seed-2 40k run passed its training audit with final Cityscapes mIoU
-`0.572957`. The three-seed summary awaits its paired style-effect evaluation
-against the existing ViT-L seed-2 run.
+The ViT-B seed-2 run passed its 40k audit and the matched 500-image effect
+evaluation. Its final mIoU is `0.572957` versus `0.641193` for ViT-L;
+normalized effect variance is `0.000740077` versus `0.000501017` (32.30%
+lower for ViT-L). Across three seeds, ViT-B and ViT-L respectively reach
+`0.563878 ± 0.008842` and `0.652849 ± 0.015138` final mIoU; the paired
+ViT-L advantage is `8.8971 ± 2.3608` percentage points. Their normalized
+effect variances are `0.000961160 ± 0.000204922` and
+`0.000567443 ± 0.000060839`, with ViT-L lower for all three seeds. This is
+evidence for a consistent two-size association in this protocol, not a
+scaling law or causal proof. The original scaling question about CQE gain
+remains unanswered because CQE failed its earlier segmentation acceptance
+gate and was not added to the selected Static model. See the versioned
+three-seed report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
 
 ## Query diversity
 

@@ -546,7 +546,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 13 | Query Interaction 消融 | 已完成；Static 胜过 one-way，Bidirectional seed 0 也低于 Static |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 按用户要求暂缓；不能计为已验证 |
 | Phase 14 | Learned-null 干预基线 | 已完成；分割提升但效应定位退化，作为负消融保留 |
-| Phase 15 / 原方案 §42 | DINOv3-B 缩放对照 | seed-0/1 配对分析完成：ViT-L 效应方差分别低 49.2%/37.9%；ViT-B seed-2 训练 mIoU 0.572957 且通过审计，待配对方差分析 |
+| Phase 15 / 原方案 §42 | DINOv3-B 缩放对照 | 三 seed 配对分析完成：ViT-L mIoU 均值 0.652849 对 ViT-B 0.563878；归一化效应方差均值 0.000567443 对 0.000961160；仅支持当前协议下的两规模关联 |
 | 后续理论升级 | effect invariance + sufficiency + specificity | 仅为拟议路线，未实现 |
 
 ## 12. 代码与文档地图
@@ -789,9 +789,9 @@ for view_name, view_images in named_views:
 
 原始数据、权重、完整 checkpoints 和完整运行目录不进入 Git。Git 只保存精简后的 `summary.json`、必要日志摘录、运行清单和 `experiments/registry.csv`。
 
-## 18. 当前下一步：Phase 13 Query Interaction 消融
+## 18. 当前下一步：原方案 §43 DINOv2/REIN 可行性核对
 
-Phase 12 已固定 `R=2`。Phase 13 最终选择 Static：其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 虽在 seed 0 得到 `0.655364`，但配对审计显示效应定位比从 zero 的 `3.773` 降为 `1.845`，归一化对比度从 `0.491` 降为 `0.205`，仅 `4.71%` 的类别图改善。因此 learned-null 作为负机制消融关闭，不追加 seed，不在其上叠加 sufficiency/specificity。应用户要求，BDD100K、Mapillary 等外部目标域暂缓。原方案 §41 的四张 GTA5 → Cityscapes val 图已核对 AutoDL `report.json` 和 PNG 哈希，效应图在轻度光度变化下形状相近，但类外效应仍可见；这不证明真实因果效应。下一单阶段为 §42 DINOv3-B 的 Static R=2 缩放对照，先执行 500 步 GPU smoke，不启动完整训练。
+Phase 12 已固定 `R=2`，Phase 13 最终选择 Static，其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 的效应定位退化，因此仅作负消融。应用户要求，BDD100K、Mapillary 等外部目标域暂缓。原方案 §41 的图像仅供定性诊断。§42 ViT-B/ViT-L 对照已完成三 seed 配对：ViT-L 的 mIoU 每次更高、归一化效应方差每次更低，但这不是严格的缩放律或因果证明。下一单阶段按原方案 §43 核对 DINOv2/REIN 所需的资源与协议；鉴于 CQE 在 DINOv3-L 上未通过分割验收，不能预设其迁移后会改善性能，也不能把资源清点当作模型验证。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 

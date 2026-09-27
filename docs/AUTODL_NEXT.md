@@ -1,20 +1,24 @@
-# AutoDL next step: paired backbone-scaling analysis for seed 2
+# AutoDL next step: DINOv2/REIN resource preflight
 
-Phase-15 ViT-B Static R=2 seed-2 training has passed its 40k audit: 80
-500-image validations, 80 checkpoints, finite tracked values, zero objective
-reconstruction error, final Cityscapes mIoU `0.572956945791638`, and final
-checkpoint SHA256
-`30049a8eb10885dd625fa1afd0204acc85713fa15ad7a239ce077030f8f38a93`.
-The training Git SHA is `2b827eac3f30e54ed6797d4dbe869287e22f0c92`.
-The seed-0 and seed-1 paired analyses found ViT-L normalized query-effect
-style variance 49.2% and 37.9% lower than ViT-B. The next GPU task is the
-matching seed-2 evaluation on the same 500 Cityscapes validation images.
+Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
+report has `ok: true`, 500 matched Cityscapes validation images, 6,005
+present-class effect maps per backbone, and report SHA256
+`2761a9264593aba81712f9a5ad0ef2006c0a1b533e99a0987cd57654f3ae357b`.
+Across seeds 0/1/2, ViT-L has higher final mIoU and lower normalized
+query-effect style variance in every pair. See the versioned three-seed
+report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
+
+The next single phase is the original plan's §43 DINOv2/REIN transfer check.
+Start with a **read-only** AutoDL resource inventory. Do not install packages,
+download weights, run training, or claim CQE transfer at this point. The
+original CQE objective failed its DINOv3-L mIoU retention gate; any transfer
+experiment is exploratory and requires a separately specified, controlled
+protocol. Continue to use only GTA5 → Cityscapes as requested.
 
 ## Current AutoDL action
 
-Use the full Git SHA from the handoff. Preserve all training runs and prior
-reports. This evaluation writes one new report and does not train or alter
-checkpoints.
+Use the full Git SHA from the handoff. Preserve all existing datasets,
+weights, checkpoints, and reports. This inventory changes no project files.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -22,52 +26,51 @@ source scripts/activate_autodl.sh
 export OMP_NUM_THREADS=1
 
 EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
-git fetch origin main
-git checkout --detach "$EXPECTED_SHA"
+if git fetch origin main \
+  && git checkout --detach "$EXPECTED_SHA" \
+  && [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
+  && [ -z "$(git status --porcelain)" ]; then
+  echo '===== exact source ====='
+  git rev-parse HEAD
+  git status --short
 
-VITB_RUN=/root/autodl-tmp/outputs/CausalQ_DG/SCALE_VITB_STATIC_R2_SEED2_40000_2b827ea
-VITL_RUN=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED2_40000_3860e69
-ANALYSIS_DIR=/root/autodl-tmp/outputs/CausalQ_DG/analysis
-REPORT="$ANALYSIS_DIR/backbone_scaling_static_r2_seed2_style_seed20260927.json"
-LOG="$ANALYSIS_DIR/backbone_scaling_static_r2_seed2_style_seed20260927.log"
-PIDFILE="$ANALYSIS_DIR/backbone_scaling_static_r2_seed2_style_seed20260927.pid"
-mkdir -p "$ANALYSIS_DIR"
-df -h /root/autodl-tmp
+  echo '===== storage ====='
+  df -h /root/autodl-tmp
 
-if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
-  && [ -z "$(git status --porcelain)" ] \
-  && [ -f "$VITB_RUN/summary.json" ] \
-  && [ -f "$VITL_RUN/summary.json" ] \
-  && [ -f "$VITB_RUN/checkpoints/iter_040000.pth" ] \
-  && [ -f "$VITL_RUN/checkpoints/iter_040000.pth" ] \
-  && [ "$(sha256sum "$VITB_RUN/checkpoints/iter_040000.pth" | cut -d' ' -f1)" = "30049a8eb10885dd625fa1afd0204acc85713fa15ad7a239ce077030f8f38a93" ] \
-  && [ ! -e "$REPORT" ] && [ ! -e "$LOG" ] && [ ! -e "$PIDFILE" ]; then
-  nohup python tools/compare_backbone_scaling.py \
-    --vitb-checkpoint "$VITB_RUN/checkpoints/iter_040000.pth" \
-    --vitb-summary "$VITB_RUN/summary.json" \
-    --vitl-checkpoint "$VITL_RUN/checkpoints/iter_040000.pth" \
-    --vitl-summary "$VITL_RUN/summary.json" \
-    --training-seed 2 \
-    --vitb-training-sha 2b827eac3f30e54ed6797d4dbe869287e22f0c92 \
-    --vitl-training-sha 3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497 \
-    --max-samples 500 \
-    --seed 20260927 \
-    --output "$REPORT" > "$LOG" 2>&1 < /dev/null &
-  echo $! > "$PIDFILE"
-  echo "analysis_pid=$(cat "$PIDFILE")"
-  echo "analysis_log=$LOG"
+  echo '===== existing pretrained files ====='
+  find /root/autodl-tmp/pretrained -maxdepth 3 -type f -printf '%s %p\n' 2>/dev/null
+
+  echo '===== possible DINOv2 or REIN directories ====='
+  find /root/autodl-tmp -maxdepth 3 -type d \
+    \( -iname '*dinov2*' -o -iname '*rein*' \) -print 2>/dev/null
+
+  echo '===== installed relevant packages ====='
+  python - <<'PY'
+from importlib.metadata import PackageNotFoundError, version
+
+for name in ("torch", "torchvision", "transformers", "mmcv", "mmengine", "mmsegmentation", "timm"):
+    try:
+        installed = version(name)
+    except PackageNotFoundError:
+        installed = "not_installed"
+    print(f"{name}={installed}")
+PY
+
+  echo '===== existing GTA5 and Cityscapes roots ====='
+  ls -ld /root/autodl-tmp/datasets/gta5 \
+    /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val \
+    /root/autodl-tmp/datasets/cityscapes/gtFine/val
 else
-  echo "preflight_failed; analysis_not_started"
+  echo 'preflight_failed; inventory_not_run'
   git rev-parse HEAD
   git status --short
 fi
 ```
 
-Check progress later with `ps -p "$(cat "$PIDFILE")" -o pid,stat,etime,cmd`, then
-`tail -n 30 "$LOG"`. Once the process has ended, verify `test -s "$REPORT"`,
-then return `cat "$REPORT"`, `sha256sum "$REPORT"`, `git rev-parse HEAD`,
-`git status --short`, and `df -h /root/autodl-tmp`. The three-seed analysis
-and formal conclusion follow only after this report passes audit.
+Return the complete output. If Git checkout or any inventory command fails,
+stop without attempting package or weight installation. Local implementation
+and a focused CPU test plan follow only after the assets and disk situation
+are known; a later, separate handoff will specify any GPU smoke test.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 
