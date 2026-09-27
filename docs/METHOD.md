@@ -78,7 +78,10 @@ for ViT-L; the ViT-L value is 49.2% lower. The matching class-map coverage is
 6,005 per backbone. This supports the scale hypothesis for this seed pair but
 does not establish a multi-seed scaling law. The audited ViT-B seed-1 run
 reaches `0.555294` mIoU versus `0.669958` for ViT-L seed-1 (a gap of
-`11.4664` percentage points). Its matched style-effect analysis is pending.
+`11.4664` percentage points). The seed-1 matched style-effect variance is
+`0.000999` for ViT-B and `0.000620` for ViT-L, with 6,005 present-class maps
+each; ViT-L is 37.9% lower. Both seed pairs point in the same direction.
+The three-seed summary awaits ViT-B seed-2 training and paired evaluation.
 
 ## Query diversity
 
