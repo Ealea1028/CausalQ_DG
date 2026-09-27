@@ -72,9 +72,12 @@ deferred by the user.
 The ViT-B seed-0 40k trace, 80 full Cityscapes validations, and 80 checkpoints
 passed audit. Its final mIoU is `0.563382` versus `0.647396` for the matched
 ViT-L Static R=2 seed-0 run (ViT-B minus ViT-L: `-8.4014` percentage points).
-This is a segmentation result, not evidence that larger VFMs lower query-effect
-variance. That mechanism comparison remains pending and uses the same 500
-validation images, original/photometric views, and deterministic style seed.
+On the same 500 validation images and deterministic original/photometric
+views, normalized query-effect variance is `0.001145` for ViT-B and `0.000581`
+for ViT-L; the ViT-L value is 49.2% lower. The matching class-map coverage is
+6,005 per backbone. This supports the scale hypothesis for this seed pair but
+does not establish a multi-seed scaling law. ViT-B seed-1 is the next
+replication, paired with the existing ViT-L seed-1 result.
 
 ## Query diversity
 
