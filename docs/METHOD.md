@@ -81,7 +81,9 @@ reaches `0.555294` mIoU versus `0.669958` for ViT-L seed-1 (a gap of
 `11.4664` percentage points). The seed-1 matched style-effect variance is
 `0.000999` for ViT-B and `0.000620` for ViT-L, with 6,005 present-class maps
 each; ViT-L is 37.9% lower. Both seed pairs point in the same direction.
-The three-seed summary awaits ViT-B seed-2 training and paired evaluation.
+The ViT-B seed-2 40k run passed its training audit with final Cityscapes mIoU
+`0.572957`. The three-seed summary awaits its paired style-effect evaluation
+against the existing ViT-L seed-2 run.
 
 ## Query diversity
 

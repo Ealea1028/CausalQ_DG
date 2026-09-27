@@ -546,7 +546,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | Phase 13 | Query Interaction 消融 | 已完成；Static 胜过 one-way，Bidirectional seed 0 也低于 Static |
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 按用户要求暂缓；不能计为已验证 |
 | Phase 14 | Learned-null 干预基线 | 已完成；分割提升但效应定位退化，作为负消融保留 |
-| Phase 15 / 原方案 §42 | DINOv3-B 缩放对照 | seed-0/1 配对分析完成：ViT-L 效应方差分别低 49.2%/37.9%，mIoU 均更高；待 ViT-B seed-2 正式复验 |
+| Phase 15 / 原方案 §42 | DINOv3-B 缩放对照 | seed-0/1 配对分析完成：ViT-L 效应方差分别低 49.2%/37.9%；ViT-B seed-2 训练 mIoU 0.572957 且通过审计，待配对方差分析 |
 | 后续理论升级 | effect invariance + sufficiency + specificity | 仅为拟议路线，未实现 |
 
 ## 12. 代码与文档地图
