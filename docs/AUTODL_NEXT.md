@@ -1,4 +1,4 @@
-# AutoDL next step: stage the official DINOv2-L weight
+# AutoDL next step: audit the staged DINOv2-L checkpoint
 
 Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
 report has `ok: true`, 500 matched Cityscapes validation images, 6,005
@@ -9,66 +9,61 @@ query-effect style variance in every pair. See the versioned three-seed
 report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
 
 The original plan's §43 DINOv2/REIN transfer check is the next single phase.
-The read-only AutoDL inventory succeeded at commit
-`9517909955d11dc238ccfff31d741a062d29cd15`: GTA5 and Cityscapes val
-remain present, but no DINOv2/REIN assets or OpenMMLab packages are present;
-18 GiB remains free. The next operation only downloads the official DINOv2-L
-weight to a new staging file. See `docs/PHASE16_REIN_TRANSFER.md` for the
-controlled protocol and compatibility caveats. Do not install packages, load
-the checkpoint, train, or claim CQE transfer yet.
+The read-only inventory found no existing DINOv2/REIN assets or OpenMMLab
+packages. The official DINOv2-L weight download subsequently succeeded at
+AutoDL commit `9517909955d11dc238ccfff31d741a062d29cd15`: the staged file
+is `1,217,586,395` bytes, SHA256
+`d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428`,
+with 17 GiB remaining free. The next operation runs a CPU-only, hash-pinned
+tensor-structure audit. See `docs/PHASE16_REIN_TRANSFER.md` for the controlled
+protocol. Do not install packages, convert, train, or claim CQE transfer yet.
 
 ## Current AutoDL action
 
-This is an asset-acquisition step, not an experiment. The existing clean
-AutoDL commit `9517909955d11dc238ccfff31d741a062d29cd15` is sufficient;
-it does not need to fetch the newer documentation-only handoff. Preserve all
-existing datasets, weights, checkpoints, and reports. The official download
-URL is linked by the [REIN repository](https://github.com/w1oves/Rein) and
-belongs to the [DINOv2 project](https://github.com/facebookresearch/dinov2).
+Use the full Git SHA from the handoff because the checker is new code. The
+staged file remains at its existing path; the command neither renames nor
+overwrites it. `torch.load` is used with `weights_only=True` and CPU mapping,
+and only after the pinned hash has been checked. This is not a GPU smoke test.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
-EXPECTED_SHA=9517909955d11dc238ccfff31d741a062d29cd15
-URL=https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth
+source scripts/activate_autodl.sh
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
 STAGE=/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part
+EXPECTED_WEIGHTS_SHA=d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
+REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/dinov2_vitl14_staged_audit.json
 
-if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
+if git fetch origin main \
+  && git checkout --detach "$EXPECTED_SHA" \
+  && [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
   && [ -z "$(git status --porcelain)" ] \
-  && [ ! -e "$STAGE" ] \
-  && [ ! -e /root/autodl-tmp/pretrained/dinov2_vitl14 ]; then
-  echo '===== source and disk ====='
+  && [ -f "$STAGE" ] \
+  && [ "$(sha256sum "$STAGE" | cut -d' ' -f1)" = "$EXPECTED_WEIGHTS_SHA" ] \
+  && [ ! -e "$REPORT" ]; then
+  mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
+  echo '===== source and staged weight ====='
   git rev-parse HEAD
-  df -h /root/autodl-tmp
-  curl --fail --location --retry 3 --retry-delay 5 \
-    --output "$STAGE" "$URL"
-  DOWNLOAD_EXIT=$?
-  echo "download_exit_code=$DOWNLOAD_EXIT"
-  if [ "$DOWNLOAD_EXIT" -eq 0 ]; then
-    echo '===== staged file size and SHA256 ====='
-    stat -c '%s %n' "$STAGE"
-    sha256sum "$STAGE"
-    if [ "$(stat -c %s "$STAGE")" -gt 1000000000 ]; then
-      echo 'size_gate_passed=true'
-    else
-      echo 'size_gate_passed=false; do_not_load'
-    fi
-  else
-    echo 'download_failed; partial_file_retained; do_not_load'
-  fi
+  stat -c '%s %n' "$STAGE"
+  sha256sum "$STAGE"
+  set -o pipefail
+  python tools/check_dinov2_checkpoint.py \
+    --weights "$STAGE" \
+    --expected-sha256 "$EXPECTED_WEIGHTS_SHA" | tee "$REPORT"
+  AUDIT_EXIT=${PIPESTATUS[0]}
+  echo "audit_exit_code=$AUDIT_EXIT"
   df -h /root/autodl-tmp
 else
-  echo 'preflight_failed; download_not_started'
+  echo 'preflight_failed; audit_not_started'
   git rev-parse HEAD
   git status --short
   ls -lh "$STAGE" 2>/dev/null || true
 fi
 ```
 
-Return the complete output, particularly `download_exit_code`, byte count,
-SHA256, and remaining disk space. A failed download leaves the partial file
-untouched for diagnosis; do not rerun the same command over it. A successful
-download still remains staged: its hash and checkpoint format must be
-reviewed before it is moved, loaded, or used by any experiment.
+Return the complete JSON report, `audit_exit_code`, Git SHA/status, and disk
+space. If the audit fails, leave the file and report untouched and stop. A
+passing audit establishes structure, not segmentation quality; the next
+phase still requires a separately specified REIN integration and smoke test.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 

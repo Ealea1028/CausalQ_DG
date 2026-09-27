@@ -43,6 +43,12 @@ without matching data, crop, validation, and checkpoint-selection rules.
 The CQE objective failed the DINOv3-L segmentation acceptance gate. Its
 transfer is therefore exploratory; it is not an established improvement and
 cannot prove the method is backbone-agnostic without the matched control.
-The immediate AutoDL step only acquires the official DINOv2-L weight into a
-staging path. It must **not** load, convert, install, train, or overwrite
-anything until its size, SHA256, and provenance are reviewed locally.
+The official DINOv2-L weight was downloaded on AutoDL to
+`/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part` from
+the author-linked URL. The transfer returned success, its size is
+`1,217,586,395` bytes, and its SHA256 is
+`d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428`.
+These facts establish a reproducible byte identity but not yet a compatible
+model state dict. The next AutoDL step runs the repository's hash-pinned,
+`weights_only=True` CPU inspector on the staged file. Do not move, convert,
+install, train, or overwrite anything until that audit passes.

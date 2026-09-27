@@ -30,3 +30,17 @@ models:
     hidden_size: 768
     num_register_tokens: 4
     sha256: 9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b
+  dinov2_vitl14:
+    family: dinov2
+    architecture: vit_large_patch14
+    pretraining: LVD-142M
+    status: staged_pending_tensor_audit
+    source: https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth
+    staging_file: .dinov2_vitl14_pretrain_phase16.pth.part
+    format: pytorch_state_dict
+    patch_size: 14
+    hidden_size: 1024
+    num_register_tokens: 0
+    depth: 24
+    size_bytes: 1217586395
+    sha256: d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
