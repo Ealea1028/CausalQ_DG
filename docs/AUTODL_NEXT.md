@@ -1,4 +1,4 @@
-# AutoDL next step: DINOv2/REIN resource preflight
+# AutoDL next step: stage the official DINOv2-L weight
 
 Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
 report has `ok: true`, 500 matched Cityscapes validation images, 6,005
@@ -8,69 +8,67 @@ Across seeds 0/1/2, ViT-L has higher final mIoU and lower normalized
 query-effect style variance in every pair. See the versioned three-seed
 report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
 
-The next single phase is the original plan's §43 DINOv2/REIN transfer check.
-Start with a **read-only** AutoDL resource inventory. Do not install packages,
-download weights, run training, or claim CQE transfer at this point. The
-original CQE objective failed its DINOv3-L mIoU retention gate; any transfer
-experiment is exploratory and requires a separately specified, controlled
-protocol. Continue to use only GTA5 → Cityscapes as requested.
+The original plan's §43 DINOv2/REIN transfer check is the next single phase.
+The read-only AutoDL inventory succeeded at commit
+`9517909955d11dc238ccfff31d741a062d29cd15`: GTA5 and Cityscapes val
+remain present, but no DINOv2/REIN assets or OpenMMLab packages are present;
+18 GiB remains free. The next operation only downloads the official DINOv2-L
+weight to a new staging file. See `docs/PHASE16_REIN_TRANSFER.md` for the
+controlled protocol and compatibility caveats. Do not install packages, load
+the checkpoint, train, or claim CQE transfer yet.
 
 ## Current AutoDL action
 
-Use the full Git SHA from the handoff. Preserve all existing datasets,
-weights, checkpoints, and reports. This inventory changes no project files.
+This is an asset-acquisition step, not an experiment. The existing clean
+AutoDL commit `9517909955d11dc238ccfff31d741a062d29cd15` is sufficient;
+it does not need to fetch the newer documentation-only handoff. Preserve all
+existing datasets, weights, checkpoints, and reports. The official download
+URL is linked by the [REIN repository](https://github.com/w1oves/Rein) and
+belongs to the [DINOv2 project](https://github.com/facebookresearch/dinov2).
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
-source scripts/activate_autodl.sh
-export OMP_NUM_THREADS=1
+EXPECTED_SHA=9517909955d11dc238ccfff31d741a062d29cd15
+URL=https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth
+STAGE=/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part
 
-EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
-if git fetch origin main \
-  && git checkout --detach "$EXPECTED_SHA" \
-  && [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
-  && [ -z "$(git status --porcelain)" ]; then
-  echo '===== exact source ====='
+if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
+  && [ -z "$(git status --porcelain)" ] \
+  && [ ! -e "$STAGE" ] \
+  && [ ! -e /root/autodl-tmp/pretrained/dinov2_vitl14 ]; then
+  echo '===== source and disk ====='
   git rev-parse HEAD
-  git status --short
-
-  echo '===== storage ====='
   df -h /root/autodl-tmp
-
-  echo '===== existing pretrained files ====='
-  find /root/autodl-tmp/pretrained -maxdepth 3 -type f -printf '%s %p\n' 2>/dev/null
-
-  echo '===== possible DINOv2 or REIN directories ====='
-  find /root/autodl-tmp -maxdepth 3 -type d \
-    \( -iname '*dinov2*' -o -iname '*rein*' \) -print 2>/dev/null
-
-  echo '===== installed relevant packages ====='
-  python - <<'PY'
-from importlib.metadata import PackageNotFoundError, version
-
-for name in ("torch", "torchvision", "transformers", "mmcv", "mmengine", "mmsegmentation", "timm"):
-    try:
-        installed = version(name)
-    except PackageNotFoundError:
-        installed = "not_installed"
-    print(f"{name}={installed}")
-PY
-
-  echo '===== existing GTA5 and Cityscapes roots ====='
-  ls -ld /root/autodl-tmp/datasets/gta5 \
-    /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val \
-    /root/autodl-tmp/datasets/cityscapes/gtFine/val
+  curl --fail --location --retry 3 --retry-delay 5 \
+    --output "$STAGE" "$URL"
+  DOWNLOAD_EXIT=$?
+  echo "download_exit_code=$DOWNLOAD_EXIT"
+  if [ "$DOWNLOAD_EXIT" -eq 0 ]; then
+    echo '===== staged file size and SHA256 ====='
+    stat -c '%s %n' "$STAGE"
+    sha256sum "$STAGE"
+    if [ "$(stat -c %s "$STAGE")" -gt 1000000000 ]; then
+      echo 'size_gate_passed=true'
+    else
+      echo 'size_gate_passed=false; do_not_load'
+    fi
+  else
+    echo 'download_failed; partial_file_retained; do_not_load'
+  fi
+  df -h /root/autodl-tmp
 else
-  echo 'preflight_failed; inventory_not_run'
+  echo 'preflight_failed; download_not_started'
   git rev-parse HEAD
   git status --short
+  ls -lh "$STAGE" 2>/dev/null || true
 fi
 ```
 
-Return the complete output. If Git checkout or any inventory command fails,
-stop without attempting package or weight installation. Local implementation
-and a focused CPU test plan follow only after the assets and disk situation
-are known; a later, separate handoff will specify any GPU smoke test.
+Return the complete output, particularly `download_exit_code`, byte count,
+SHA256, and remaining disk space. A failed download leaves the partial file
+untouched for diagnosis; do not rerun the same command over it. A successful
+download still remains staged: its hash and checkpoint format must be
+reviewed before it is moved, loaded, or used by any experiment.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 
