@@ -76,8 +76,9 @@ On the same 500 validation images and deterministic original/photometric
 views, normalized query-effect variance is `0.001145` for ViT-B and `0.000581`
 for ViT-L; the ViT-L value is 49.2% lower. The matching class-map coverage is
 6,005 per backbone. This supports the scale hypothesis for this seed pair but
-does not establish a multi-seed scaling law. ViT-B seed-1 is the next
-replication, paired with the existing ViT-L seed-1 result.
+does not establish a multi-seed scaling law. The audited ViT-B seed-1 run
+reaches `0.555294` mIoU versus `0.669958` for ViT-L seed-1 (a gap of
+`11.4664` percentage points). Its matched style-effect analysis is pending.
 
 ## Query diversity
 

@@ -1,23 +1,20 @@
-# AutoDL next step: replicate DINOv3-B scaling run at seed 1
+# AutoDL next step: matched seed-1 backbone style-effect analysis
 
-The Phase-15 ViT-B Static R=2 seed-0 40k run passed audit: 40,000 contiguous
-finite records, 80 validations on all 500 Cityscapes-val images, 80
-checkpoints, and zero objective-reconstruction error. Its final mIoU is
-`0.563382495383709`, versus `0.6473964462159979` for the matched ViT-L run.
-The matched 500-image style-effect analysis reports variance `0.001144741`
-for ViT-B and `0.000580858` for ViT-L (ViT-L is 49.2% lower), with 6,005
-present-class maps for each model. This supports the scale hypothesis in the
-seed-0 pair, but one seed does not establish a stable scaling effect.
-
-The project plan's formal results use seeds 0, 1, and 2. ViT-L Static R=2
-seed-1 is already available, so the next step is one ViT-B seed-1 40k run.
-Do not run other datasets or auxiliary mechanisms.
+The ViT-B Static R=2 seed-1 40k run passed audit: 40,000 contiguous finite
+records, 80 complete Cityscapes-val validations, 80 checkpoints, and zero
+objective-reconstruction error. The final checkpoint SHA256 is
+`9c3cead3e66b9d552bf523974a8dba9955d4b5bac2b29e4e74da978d991cd332`.
+Its final mIoU is `0.5552936123010652`; the matched ViT-L seed-1 run reaches
+`0.6699578268480332`, an 11.4664 percentage-point gap. Seed-0 had an 8.4014
+point gap and a 49.2% lower normalized query-effect variance for ViT-L.
+The next GPU step tests whether the variance pattern repeats at seed 1, on the
+same 500 Cityscapes-val images and deterministic original/photometric views.
 
 ## Current AutoDL action
 
-Use the full Git SHA supplied in the handoff. Run commands in the existing
-AutoDL environment; if a guard prints an error, stop and return it rather than
-continuing to training.
+Use the full Git SHA from the handoff. The training runs remain at their
+original SHAs; this commit changes only evaluation and documentation. The
+analysis runs in the background and writes a fresh report and log.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
@@ -27,47 +24,54 @@ export OMP_NUM_THREADS=1
 EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
 git fetch origin main
 git checkout --detach "$EXPECTED_SHA"
-echo "expected=$EXPECTED_SHA actual=$(git rev-parse HEAD)"
-git status --short
 
-WEIGHTS=/root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors
-EXPECTED_WEIGHTS_SHA=9a21ac3df0c63839d62612dda6f454d816c25611cc7a52966ed5a5a94921dc8b
-ACTUAL_WEIGHTS_SHA=$(sha256sum "$WEIGHTS" | cut -d' ' -f1)
-echo "vitb_weights_sha=$ACTUAL_WEIGHTS_SHA"
-df -h /root/autodl-tmp
-
-RUN_ID="SCALE_VITB_STATIC_R2_SEED1_40000_$(git rev-parse --short HEAD)"
-RUN_DIR="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID"
-LOG="/root/autodl-tmp/outputs/CausalQ_DG/$RUN_ID.log"
-echo "run_id=$RUN_ID"
+VITB_RUN=/root/autodl-tmp/outputs/CausalQ_DG/SCALE_VITB_STATIC_R2_SEED1_40000_fb36bcc
+VITL_RUN=/root/autodl-tmp/outputs/CausalQ_DG/I1_STATIC_QUERY_SEED1_40000_3860e69
+VITB_CKPT="$VITB_RUN/checkpoints/iter_040000.pth"
+VITL_CKPT="$VITL_RUN/checkpoints/iter_040000.pth"
+ANALYSIS_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/analysis
+REPORT="$ANALYSIS_ROOT/backbone_scaling_static_r2_seed1_style_seed20260927.json"
+LOG="$ANALYSIS_ROOT/backbone_scaling_static_r2_seed1_style_seed20260927.log"
+PIDFILE="$ANALYSIS_ROOT/backbone_scaling_static_r2_seed1_style_seed20260927.pid"
+mkdir -p "$ANALYSIS_ROOT"
 
 if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
   && [ -z "$(git status --porcelain)" ] \
-  && [ "$ACTUAL_WEIGHTS_SHA" = "$EXPECTED_WEIGHTS_SHA" ] \
-  && [ -d /root/autodl-tmp/datasets/gta5 ] \
-  && [ -d /root/autodl-tmp/datasets/cityscapes/leftImg8bit/val ] \
-  && [ -d /root/autodl-tmp/datasets/cityscapes/gtFine/val ] \
-  && [ ! -e "$RUN_DIR" ] && [ ! -e "$LOG" ]; then
-  set -o pipefail
-  python tools/train.py \
-    --config configs/scaling/gta_dinov3b_static.yaml \
-    --run-id "$RUN_ID" \
-    --max-iterations 40000 \
-    --validation-max-samples 500 \
-    --seed 1 \
-    2>&1 | tee "$LOG"
-  TRAIN_EXIT=${PIPESTATUS[0]}
-  echo "train_exit_code=$TRAIN_EXIT"
+  && [ -f "$VITB_RUN/summary.json" ] && [ -f "$VITL_RUN/summary.json" ] \
+  && [ -f "$VITB_CKPT" ] && [ -f "$VITL_CKPT" ] \
+  && [ "$(sha256sum "$VITB_CKPT" | cut -d' ' -f1)" = \
+       9c3cead3e66b9d552bf523974a8dba9955d4b5bac2b29e4e74da978d991cd332 ] \
+  && [ -f /root/autodl-tmp/pretrained/dinov3_vitb16/model.safetensors ] \
+  && [ -f /root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors ] \
+  && [ ! -e "$REPORT" ] && [ ! -e "$LOG" ] && [ ! -e "$PIDFILE" ]; then
+  nohup python tools/compare_backbone_scaling.py \
+    --vitb-checkpoint "$VITB_CKPT" \
+    --vitb-summary "$VITB_RUN/summary.json" \
+    --vitl-checkpoint "$VITL_CKPT" \
+    --vitl-summary "$VITL_RUN/summary.json" \
+    --training-seed 1 \
+    --vitb-training-sha fb36bcc76d412a28f573eea8c4f8e2f7a78f8e30 \
+    --vitl-training-sha 3860e69b560ad8ce6f4d7ba1d7b83eb7448b2497 \
+    --max-samples 500 \
+    --seed 20260927 \
+    --output "$REPORT" \
+    > "$LOG" 2>&1 < /dev/null &
+  echo $! > "$PIDFILE"
+  echo "analysis_pid=$(cat "$PIDFILE")"
+  echo "analysis_log=$LOG"
+  echo "analysis_report=$REPORT"
 else
-  echo "preflight_failed; training_not_started"
+  echo "preflight_failed; analysis_not_started"
+  git rev-parse HEAD
+  git status --short
 fi
 ```
 
-After the run, return `train_exit_code`, the final and best Cityscapes mIoU,
-metadata, trace/checkpoint audit, final checkpoint SHA256, Git status, and disk
-space. Keep all checkpoints. The seed-1 ViT-L comparator is
-`I1_STATIC_QUERY_SEED1_40000_3860e69`; its reported final mIoU is
-`0.6699578268480332`.
+After completion, print the report, its SHA256, the log tail, Git SHA/status,
+and disk space. The report must show `training_seed: 1`, `sample_count: 500`,
+equal `effect_class_map_count` for both models, the accepted checkpoint
+training SHAs and final mIoUs above, and finite effect-variance values. Keep
+the report and the earlier seed-0 report unchanged.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 

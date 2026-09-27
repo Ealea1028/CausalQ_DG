@@ -58,6 +58,7 @@ def verify_run(
     summary: dict[str, Any],
     *,
     expected_sha: str,
+    expected_seed: int = 0,
 ) -> float:
     metadata = payload["metadata"]
     if metadata["git_sha"] != expected_sha:
@@ -66,8 +67,8 @@ def verify_run(
         raise ValueError("Checkpoint backbone mismatch")
     if metadata["pretrained_checkpoint_sha256"] != config["model"]["weights_sha256"]:
         raise ValueError("Checkpoint pretrained-weight SHA mismatch")
-    if metadata["seed"] != 0 or metadata["max_iterations"] != 40000:
-        raise ValueError("Expected seed-0 40k checkpoint")
+    if metadata["seed"] != expected_seed or metadata["max_iterations"] != 40000:
+        raise ValueError(f"Expected seed-{expected_seed} 40k checkpoint")
     if metadata["source"] != "gta5" or metadata["validation"] != "cityscapes_val":
         raise ValueError("Checkpoint dataset protocol mismatch")
     if metadata["query"] != config["query"] or metadata["style"] != config["style"]:
@@ -78,6 +79,8 @@ def verify_run(
         raise ValueError("Training summary did not pass")
     if summary["git_sha"] != expected_sha:
         raise ValueError("Summary training SHA mismatch")
+    if summary["seed"] != expected_seed or summary["experiment_id"] != metadata["experiment_id"]:
+        raise ValueError("Summary training seed or experiment ID mismatch")
     validations = summary["validation_results"]
     if len(validations) != 80 or validations[-1]["iteration"] != 40000:
         raise ValueError("Expected 80 validations ending at iteration 40000")
@@ -141,6 +144,15 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--vitb-summary", type=Path, required=True)
     parser.add_argument("--vitl-checkpoint", type=Path, required=True)
     parser.add_argument("--vitl-summary", type=Path, required=True)
+    parser.add_argument("--training-seed", type=int, default=0)
+    parser.add_argument(
+        "--vitb-training-sha",
+        default="10993b605b53bcf1d7f67f93602ed62ced9b9a97",
+    )
+    parser.add_argument(
+        "--vitl-training-sha",
+        default="367694ee8bc2e670be0a896f40e089760fe2177a",
+    )
     parser.add_argument("--max-samples", type=int, default=500)
     parser.add_argument("--seed", type=int, default=20260927)
     parser.add_argument("--output", type=Path, required=True)
@@ -155,6 +167,8 @@ def main() -> int:
         raise RuntimeError("Backbone-scaling comparison requires CUDA")
     if args.max_samples != 500:
         raise ValueError("This controlled comparison requires all 500 validation images")
+    if args.training_seed < 0:
+        raise ValueError("training-seed must be nonnegative")
 
     configs = {
         "vitb16": load_config(PROJECT_ROOT / "configs/scaling/gta_dinov3b_static.yaml"),
@@ -170,8 +184,8 @@ def main() -> int:
     torch.backends.cuda.matmul.allow_tf32 = True
 
     specs = (
-        ("vitb16", args.vitb_checkpoint, args.vitb_summary, "10993b605b53bcf1d7f67f93602ed62ced9b9a97"),
-        ("vitl16", args.vitl_checkpoint, args.vitl_summary, "367694ee8bc2e670be0a896f40e089760fe2177a"),
+        ("vitb16", args.vitb_checkpoint, args.vitb_summary, args.vitb_training_sha),
+        ("vitl16", args.vitl_checkpoint, args.vitl_summary, args.vitl_training_sha),
     )
     results: dict[str, dict[str, Any]] = {}
     for name, checkpoint, summary_path, training_sha in specs:
@@ -185,7 +199,13 @@ def main() -> int:
             checkpoint_path=checkpoint,
             pretrained_root=pretrained_root,
         )
-        final_miou = verify_run(config, payload, summary, expected_sha=training_sha)
+        final_miou = verify_run(
+            config,
+            payload,
+            summary,
+            expected_sha=training_sha,
+            expected_seed=args.training_seed,
+        )
         style_bank = make_style_bank(config)
         result = evaluate(model, loader, style_bank, max_samples=500, seed=args.seed)
         result.update(
@@ -218,6 +238,7 @@ def main() -> int:
         "cuda": torch.version.cuda,
         "gpu": torch.cuda.get_device_name(torch.cuda.current_device()),
         "seed": args.seed,
+        "training_seed": args.training_seed,
         "sample_count": 500,
         "views": ["original", "photometric"],
         "metric": "population variance across normalized valid-pixel class-logit query-effect maps, mean over GT-present classes",

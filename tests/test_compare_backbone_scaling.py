@@ -39,6 +39,7 @@ def test_checkpoint_and_summary_provenance() -> None:
     payload = {
         "iteration": 40000,
         "metadata": {
+            "experiment_id": "test_seed0",
             "git_sha": "expected",
             "backbone": B["model"]["backbone"],
             "pretrained_checkpoint_sha256": B["model"]["weights_sha256"],
@@ -54,6 +55,8 @@ def test_checkpoint_and_summary_provenance() -> None:
         "ok": True,
         "finite_losses": True,
         "git_sha": "expected",
+        "seed": 0,
+        "experiment_id": "test_seed0",
         "validation_results": [
             {"iteration": iteration, "sample_count": 500, "miou": 0.5}
             for iteration in range(500, 40001, 500)
@@ -68,6 +71,16 @@ def test_checkpoint_and_summary_provenance() -> None:
     bad_payload["metadata"]["backbone"] = "dinov3_vitl16"
     with pytest.raises(ValueError, match="backbone"):
         verify_run(B, bad_payload, summary, expected_sha="expected")
+    seed_one_payload = deepcopy(payload)
+    seed_one_payload["metadata"].update(seed=1, experiment_id="test_seed1")
+    seed_one_summary = deepcopy(summary)
+    seed_one_summary.update(seed=1, experiment_id="test_seed1")
+    assert verify_run(
+        B, seed_one_payload, seed_one_summary,
+        expected_sha="expected", expected_seed=1,
+    ) == 0.5
+    with pytest.raises(ValueError, match="seed-0"):
+        verify_run(B, seed_one_payload, seed_one_summary, expected_sha="expected")
 
 
 def test_static_model_build_does_not_create_attention(monkeypatch, tmp_path: Path) -> None:
