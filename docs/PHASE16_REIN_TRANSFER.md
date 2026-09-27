@@ -75,10 +75,39 @@ The conversion passed on AutoDL at Git SHA
 The report confirms 343 tensors, patch embedding `1024×3×16×16`, and
 position embedding `1×1025×1024`; its own SHA256 is
 `a77862783c247208d867f564d51b118336db4475e759f26ff198b2ce6e6b9fbb`.
-The AutoDL disk still has 16 GiB free. The next step is an independent
-on-disk audit: reload both files with `weights_only=True`, reconstruct the
-expected conversion, and require exact equality for all 343 tensors. It
-does not install OpenMMLab, load REIN, train, or overwrite either checkpoint.
+The independent on-disk audit passed at Git SHA
+`8ee5abf9d927743a5a88fa8b4691fd0cd4bb2301`: both fixed hashes matched,
+and all 343 keys, shapes, dtypes, and tensor values matched a newly computed
+conversion. The audit report SHA256 is
+`6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
+AutoDL had 476 GiB available system RAM and 16 GiB free data volume.
+
+The pinned upstream REIN commit still contains the DINOv2-L GTAV configuration
+and `ReinMask2FormerHead`, despite its current README warning that a newer
+feature-extractor path omits Mask2Former features. Its config uses 100
+Mask2Former prediction queries, a 24-layer DINOv2-L backbone, a 16×16 patch
+kernel, 512×512 crops, and 40k iterations. It also validates a concatenated
+Cityscapes/BDD100K/Mapillary dataset by default, which must be replaced by
+Cityscapes-only for this user-scoped study. Its GTA path and label suffix do
+not match the inspected AutoDL GTA5 tree; those must be overridden in a
+versioned experiment configuration, not altered in the datasets or upstream
+source. The upstream repository is GPL-3.0; it is checked out separately,
+not vendored into this project.
+
+The next gate creates an isolated Python 3.10 / PyTorch 2.0.1 CUDA 11.8 /
+MMCV 2.1 runtime and checks package pins, a CUDA extension, REIN imports,
+and config parsing. This does not load the 1.2 GB backbone or build a
+segmentor. Keep the existing `causalq-dg` environment untouched. A clean
+runtime is a prerequisite, not evidence of model compatibility or quality.
+
+Before a CQE experiment, define a small class-specific residual branch on
+top of a fixed REIN segmentor and compare that branch **without CQE** against
+the same branch **with CQE**. Native REIN remains a separate reference. The
+100 native Mask2Former queries are not class-indexed; assigning class labels
+to them post hoc would change the meaning of the original `do(Q_c=0)` and
+cannot by itself substantiate a faithful CQE transfer. No full run is
+authorized until this branch, its class-isolation tests, and a matched short
+GPU smoke are ready.
 REIN's 100 Mask2Former prediction queries are
 not intrinsically class-specific; a faithful class-specific CQE intervention
 still needs an explicit design and isolated unit tests before any training.

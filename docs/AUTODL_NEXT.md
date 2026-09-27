@@ -1,4 +1,4 @@
-# AutoDL next step: independently audit the converted REIN checkpoint
+# AutoDL next step: isolate and probe the pinned REIN runtime
 
 Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
 report has `ok: true`, 500 matched Cityscapes validation images, 6,005
@@ -9,71 +9,59 @@ query-effect style variance in every pair. See the versioned three-seed
 report in `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md`.
 
 The original plan's §43 DINOv2/REIN transfer check is the current single
-phase. The official DINOv2-L checkpoint passed its hash-pinned structure
-audit. The conversion run at Git SHA `a3331a6520c01f8f8f0f8a65073bde85e11dda25`
-returned `ok: true`, `convert_exit_code=0`, 343 tensors, a 16×16 patch
-kernel, and 1,025 positional tokens. The output is 1,216,918,112 bytes with
-SHA256 `91730ebf59fb634f5572cf5071fef8665473dcffcbef7ba4f4fa497533a8c837`.
-The next operation reopens both on-disk files, verifies their pinned hashes,
-recomputes the conversion, and compares every tensor exactly. It is CPU-only;
-no REIN environment, model load, GPU smoke, or CQE transfer is claimed.
+phase. The converted DINOv2-L checkpoint passed an independent on-disk audit
+at Git SHA `8ee5abf9d927743a5a88fa8b4691fd0cd4bb2301`: both pinned hashes
+matched, and all 343 tensor keys, shapes, dtypes, and values matched a fresh
+conversion. The audit report SHA256 is
+`6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
+There were 476 GiB available system RAM and 16 GiB free data volume.
 
 ## Current AutoDL action
 
-Use the full Git SHA from the handoff. Both checkpoint files remain untouched.
-The checker refuses to load either file if its SHA256 differs from the pinned
-value. It uses CPU-only `weights_only=True`, verifies every key, shape, dtype,
-and value, and writes only a new JSON report. Ensure at least 6 GiB of
-available system RAM. Do not install REIN packages into `causalq-dg`.
+Use the full Git SHA from the handoff. The versioned bootstrap script checks
+both checkpoint hashes and at least 14 GiB free before creating anything.
+It clones only the official REIN commit
+`dc063429c4dadc0da9c6252b3db22fc55a9882ab` to a separate external
+directory, creates a separate Python 3.10 environment, installs pinned
+PyTorch/OpenMMLab dependencies without a pip cache, and probes CUDA NMS,
+REIN imports, and configuration parsing. It neither edits the upstream
+checkout nor loads a segmentor or trains. If any installation fails, preserve
+the partial environment and log; do not install into `causalq-dg` or rerun
+over the same paths. The official REIN repository is GPL-3.0 and is not
+copied into this Git project.
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG
-source scripts/activate_autodl.sh
 EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
-SOURCE=/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part
-SOURCE_SHA=d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
-CONVERTED=/root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth
-CONVERTED_SHA=91730ebf59fb634f5572cf5071fef8665473dcffcbef7ba4f4fa497533a8c837
-REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/dinov2_vitl14_rein_patch16_512_audit.json
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_bootstrap.log
 
 if [ -n "$(git status --porcelain)" ]; then
   echo 'preflight_failed: Git worktree is not clean'
 elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
-  AVAILABLE_MIB=$(free -m | awk 'NR==2 {print $7}')
   if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ] \
     || [ -n "$(git status --porcelain)" ] \
-    || [ ! -f "$SOURCE" ] \
-    || [ ! -f "$CONVERTED" ] \
-    || [ -e "$REPORT" ] \
-    || [ "$AVAILABLE_MIB" -lt 6144 ]; then
-    echo 'preflight_failed: source, report, or available RAM'
+    || [ -e "$LOG" ]; then
+    echo 'preflight_failed: wrong source or existing log'
   else
     mkdir -p /root/autodl-tmp/outputs/CausalQ_DG/analysis
-    python -m tools.check_dinov2_rein_conversion \
-      --source "$SOURCE" \
-      --expected-source-sha256 "$SOURCE_SHA" \
-      --converted "$CONVERTED" \
-      --expected-converted-sha256 "$CONVERTED_SHA" \
-      2>&1 | tee "$REPORT"
-    AUDIT_EXIT=${PIPESTATUS[0]}
-    echo "audit_exit_code=$AUDIT_EXIT"
-    sha256sum "$REPORT"
+    bash scripts/bootstrap_rein_phase16.sh 2>&1 | tee "$LOG"
+    BOOTSTRAP_EXIT=${PIPESTATUS[0]}
+    echo "bootstrap_exit_code=$BOOTSTRAP_EXIT"
   fi
 else
   echo 'git_fetch_or_checkout_failed'
 fi
 git rev-parse HEAD
 git status --short
-free -h
 df -h /root/autodl-tmp
 ```
 
-Return the complete JSON report, `audit_exit_code`, report SHA256, Git
-SHA/status, available RAM, and disk space. On failure retain both checkpoint
-files and the report; do not rerun over it. Passing this audit validates the
-converted tensor file, but does not establish REIN runtime compatibility or
-segmentation quality. The next phase step is an isolated REIN integration
-design and environment compatibility gate before GPU training.
+Return `bootstrap_exit_code`, the runtime JSON (if created), report and
+environment-freeze SHA256 values, Git SHA/status, and disk space. On failure,
+also return the last 50 log lines and preserve all created paths. A passing
+runtime gate does not prove the full REIN model loads or fits RTX 4090 D;
+the next action is a separate model-build and weight-load smoke after the
+GTA5/Cityscapes-only configuration is versioned.
 
 ## Completed handoff: DINOv3-B Static R=2 full seed-0 training (do not repeat)
 
