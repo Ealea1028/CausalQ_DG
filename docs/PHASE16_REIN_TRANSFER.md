@@ -100,6 +100,17 @@ and config parsing. This does not load the 1.2 GB backbone or build a
 segmentor. Keep the existing `causalq-dg` environment untouched. A clean
 runtime is a prerequisite, not evidence of model compatibility or quality.
 
+The first bootstrap at `893c9de308a868e2b9cbe6f9cab054c5916090b9`
+cloned the pinned REIN source successfully but stopped during Conda metadata
+retrieval from `repo.anaconda.com` (HTTP 000). No PyTorch installation or
+runtime compatibility result was obtained; the converted weights remain
+valid. Recovery explicitly reuses the clean pinned external checkout and
+creates a new `rein-phase16-py310-cu118-tuna-retry1` prefix. Conda uses
+`--override-channels` and the Tsinghua main mirror for this command only,
+without altering global configuration or TLS verification. All old paths
+and logs are retained. The runtime gate remains pending; no training is
+authorized by this network recovery.
+
 Before a CQE experiment, define a small class-specific residual branch on
 top of a fixed REIN segmentor and compare that branch **without CQE** against
 the same branch **with CQE**. Native REIN remains a separate reference. The

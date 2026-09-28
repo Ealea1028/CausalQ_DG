@@ -10,6 +10,18 @@ ENV_DIR=/root/autodl-tmp/envs/rein-phase16-py310-cu118
 ANALYSIS_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/analysis
 REPORT="$ANALYSIS_ROOT/rein_phase16_runtime.json"
 FREEZE="$ANALYSIS_ROOT/rein_phase16_pip_freeze.txt"
+MODE=${1:-fresh}
+case "$MODE" in
+  fresh) ;;
+  --recover-conda)
+    # Preserve the failed prefix, original log, and already pinned source.
+    ENV_DIR=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1
+    REPORT="$ANALYSIS_ROOT/rein_phase16_runtime_tuna_retry1.json"
+    FREEZE="$ANALYSIS_ROOT/rein_phase16_pip_freeze_tuna_retry1.txt"
+    ;;
+  *) echo 'Usage: bootstrap_rein_phase16.sh [--recover-conda]' >&2; exit 2 ;;
+esac
+test "$#" -le 1
 SOURCE=/root/autodl-tmp/pretrained/.dinov2_vitl14_pretrain_phase16.pth.part
 SOURCE_SHA=d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428
 CONVERTED=/root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth
@@ -21,7 +33,13 @@ test -f "$SOURCE"
 test -f "$CONVERTED"
 test "$(sha256sum "$SOURCE" | cut -d' ' -f1)" = "$SOURCE_SHA"
 test "$(sha256sum "$CONVERTED" | cut -d' ' -f1)" = "$CONVERTED_SHA"
-test ! -e "$REIN_ROOT"
+if [ "$MODE" = fresh ]; then
+  test ! -e "$REIN_ROOT"
+else
+  test -d "$REIN_ROOT/.git"
+  test "$(git -C "$REIN_ROOT" rev-parse HEAD)" = "$REIN_SHA"
+  test -z "$(git -C "$REIN_ROOT" status --porcelain)"
+fi
 test ! -e "$ENV_DIR"
 test ! -e "$REPORT"
 test ! -e "$FREEZE"
@@ -33,12 +51,17 @@ test "$AVAILABLE_KIB" -ge 14680064 || {
 command -v conda >/dev/null
 mkdir -p "$EXTERNAL_ROOT" "$ANALYSIS_ROOT"
 
-git clone https://github.com/w1oves/Rein.git "$REIN_ROOT"
-git -C "$REIN_ROOT" checkout --detach "$REIN_SHA"
+if [ "$MODE" = fresh ]; then
+  git clone https://github.com/w1oves/Rein.git "$REIN_ROOT"
+  git -C "$REIN_ROOT" checkout --detach "$REIN_SHA"
+fi
 test "$(git -C "$REIN_ROOT" rev-parse HEAD)" = "$REIN_SHA"
 test -z "$(git -C "$REIN_ROOT" status --porcelain)"
 
-conda create --prefix "$ENV_DIR" python=3.10 pip -y
+# Ignore .condarc/defaults for this command only; retain TLS verification.
+conda create --prefix "$ENV_DIR" --override-channels \
+  -c https://mirrors.tuna.tsinghua.edu.cn/anaconda/pkgs/main \
+  --no-default-packages python=3.10 pip -y
 PYTHON="$ENV_DIR/bin/python"
 "$PYTHON" -m pip install --no-cache-dir numpy==1.26.4
 "$PYTHON" -m pip install --no-cache-dir \

@@ -16,7 +16,55 @@ conversion. The audit report SHA256 is
 `6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
 There were 476 GiB available system RAM and 16 GiB free data volume.
 
-## Current AutoDL action
+## Current AutoDL action: recover the Conda metadata failure
+
+At `893c9de308a868e2b9cbe6f9cab054c5916090b9`, the upstream REIN
+checkout succeeded, but Conda metadata retrieval from `repo.anaconda.com`
+failed with HTTP 000. No runtime gate or model loading was reached. Preserve
+the old bootstrap log, upstream checkout, and any partial environment.
+
+The recovery mode verifies and reuses the clean pinned REIN checkout. It
+creates a **new** prefix `rein-phase16-py310-cu118-tuna-retry1`, refuses
+existing retry outputs, and uses `--override-channels` with only Tsinghua's
+main channel for Python/pip creation. It does not change `.condarc`, disable
+TLS, delete files, or install into `causalq-dg`. PyTorch and MMCV still use
+their previously pinned official wheel sources. A mirror network failure
+must stop this gate; it does not authorize a model run.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_bootstrap_tuna_retry1.log
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ] \
+    || [ -n "$(git status --porcelain)" ] || [ -e "$LOG" ]; then
+    echo 'preflight_failed: wrong source or existing retry log'
+  else
+    bash scripts/bootstrap_rein_phase16.sh --recover-conda 2>&1 | tee "$LOG"
+    BOOTSTRAP_EXIT=${PIPESTATUS[0]}
+    echo "bootstrap_exit_code=$BOOTSTRAP_EXIT"
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+
+tail -n 50 "$LOG"
+REPORT=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_runtime_tuna_retry1.json
+if [ -f "$REPORT" ]; then cat "$REPORT"; fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the exit code, runtime JSON if created, report/freeze hashes printed by
+the script, and source/disk evidence. This block does not use `exit` in the
+interactive shell. Do not rerun over the retry prefix after a failure;
+preserve it and return the log. Stop here until this remote gate is accepted.
+
+## Previous bootstrap handoff (failed; do not repeat)
 
 Use the full Git SHA from the handoff. The versioned bootstrap script checks
 both checkpoint hashes and at least 14 GiB free before creating anything.
