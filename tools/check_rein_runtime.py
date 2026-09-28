@@ -79,8 +79,13 @@ def main() -> int:
         report["versions"] = versions
         validate_versions(versions)
         report["torch_cuda_runtime"] = torch.version.cuda
-        if torch.version.cuda != "11.8" or not torch.cuda.is_available():
-            raise RuntimeError("CUDA 11.8 runtime or GPU is unavailable")
+        report["cuda_available"] = torch.cuda.is_available()
+        report["device_count"] = torch.cuda.device_count()
+        if torch.version.cuda != "11.8":
+            raise RuntimeError("Expected CUDA 11.8 runtime")
+        if not report["cuda_available"]:
+            torch.cuda.init()  # Expose the actual initialization error in the report.
+            raise RuntimeError("GPU is unavailable despite successful CUDA initialization")
         report["gpu"] = torch.cuda.get_device_name(0)
         report["capability"] = list(torch.cuda.get_device_capability(0))
 

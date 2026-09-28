@@ -111,6 +111,18 @@ without altering global configuration or TLS verification. All old paths
 and logs are retained. The runtime gate remains pending; no training is
 authorized by this network recovery.
 
+Recovery at `035a3faaa90365286db06f0f728a023fcb1e47a3` installed all
+seven pinned packages and passed `pip check`. Source provenance matched,
+but GPU availability failed even though `torch.version.cuda` was `11.8`.
+MMCV CUDA NMS and REIN imports were not reached. Runtime-report SHA256:
+`a24a1fefce3d2a0a233010e2af567c10094c55d75e1845f0ccc86aa29e4ff44b`;
+freeze SHA256:
+`dd00674c5a9b5361730fdcaeaedf25e883befa0cc9d5f1e56df69f7f26d3fbfd`.
+There were 11 GiB free. Preserve this installed prefix and all reports. The
+next gate diagnoses GPU initialization with both existing interpreters;
+package reinstallation and model loading remain deferred until the actual
+driver/visibility/library error is known.
+
 Before a CQE experiment, define a small class-specific residual branch on
 top of a fixed REIN segmentor and compare that branch **without CQE** against
 the same branch **with CQE**. Native REIN remains a separate reference. The

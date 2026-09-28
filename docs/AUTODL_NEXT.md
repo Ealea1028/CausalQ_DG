@@ -16,7 +16,69 @@ conversion. The audit report SHA256 is
 `6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
 There were 476 GiB available system RAM and 16 GiB free data volume.
 
-## Current AutoDL action: recover the Conda metadata failure
+## Current AutoDL action: diagnose CUDA visibility in both environments
+
+At `035a3faaa90365286db06f0f728a023fcb1e47a3`, recovery installed all
+seven pinned packages and `pip check` passed. The REIN source SHA matched,
+but the runtime gate stopped at GPU availability, before MMCV CUDA NMS or
+REIN imports. CUDA runtime was already the expected 11.8. The failed report
+SHA256 is `a24a1fefce3d2a0a233010e2af567c10094c55d75e1845f0ccc86aa29e4ff44b`;
+pip-freeze SHA256 is
+`dd00674c5a9b5361730fdcaeaedf25e883befa0cc9d5f1e56df69f7f26d3fbfd`.
+The data volume has 11 GiB free. Do not reinstall or create another environment.
+
+The next action is a diagnostic, not a model smoke. It runs the same source
+with the main and isolated interpreters, reports selected visibility/library
+variables, NVIDIA device nodes and `nvidia-smi`, forces CUDA initialization
+to retain its real exception, and attempts a one-scalar GPU computation.
+It does not load weights/data or override visibility/library paths. An
+installed CUDA wheel alone does not establish GPU access.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ] \
+    && [ -z "$(git status --porcelain)" ]; then
+    for NAME in main rein; do
+      if [ "$NAME" = main ]; then
+        DIAG_PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+      else
+        DIAG_PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
+      fi
+      DIAG_LOG="/root/autodl-tmp/outputs/CausalQ_DG/analysis/cuda_diagnostic_${NAME}_$(git rev-parse --short HEAD).log"
+      if [ ! -x "$DIAG_PY" ] || [ -e "$DIAG_LOG" ]; then
+        echo "diagnostic_preflight_failed=$NAME"
+      else
+        "$DIAG_PY" -m tools.diagnose_cuda 2>&1 | tee "$DIAG_LOG"
+        DIAG_EXIT=${PIPESTATUS[0]}
+        echo "diagnostic_${NAME}_exit_code=$DIAG_EXIT"
+        sha256sum "$DIAG_LOG"
+      fi
+    done
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return both complete logs and exit codes. If `nvidia-smi` and both probes
+fail, check the AutoDL console's GPU allocation/boot mode and contact AutoDL
+support with the diagnostic; this is not evidence that package replacement
+is needed. If the main probe passes but REIN fails, retain the exact init
+error and library paths for environment-specific diagnosis. Do not unset
+GPU allocation variables, remove drivers, disable the gate, or start training.
+If both pass, the isolated REIN runtime gate still must be rerun into a fresh
+report before model construction. Stop for remote diagnosis now.
+
+## Previous Conda recovery handoff (installation completed; do not repeat)
 
 At `893c9de308a868e2b9cbe6f9cab054c5916090b9`, the upstream REIN
 checkout succeeded, but Conda metadata retrieval from `repo.anaconda.com`
