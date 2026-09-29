@@ -1,4 +1,54 @@
-# AutoDL next step: Phase 16 REIN backbone forward/backward gate
+# AutoDL next step: Phase 16 full REIN segmentor synthetic gate
+
+The backbone gate passed at `ed3dcfe202435f4d7893681054473724e19e1ad6`:
+343 pretrained tensors loaded, four expected feature maps and `[100,256]`
+linked queries, 11 nonzero adapter gradients, no frozen backbone gradients.
+Peak allocated/reserved memory was `2.767/2.982 GiB`, with 9.9 GiB disk free.
+Report SHA256: `317dff2553f4674f9363d8660ce369245863676866fa0cf5ed0745db1bb53706`.
+stderr SHA256: `c4775f166f11b2cbb18b26ecb5487133076edf537e05943acf6e29501284ed1f`.
+
+Next execute the full upstream EncoderDecoder + REIN + Mask2Former with one
+512x512 synthetic image and synthetic labels containing all 19 classes and
+255 ignore pixels. This checks preprocessing, full-resolution semantic scores,
+all 30 final/auxiliary classification-mask-Dice losses, and a single backward
+pass through adapters and the head including the deformable-attention pixel
+decoder. Use float32, without autocast, so mixed-precision kernel compatibility
+is not confounded with model compatibility. Actual GPU memory remains untested.
+
+No optimizer, dataset loading, checkpoint saving, downloads or installation.
+No CQE or other experimental objective. Synthetic losses/scores are NOT accuracy
+results. Real GTA5/Cityscapes data protocol, optimizer steps, mixed precision
+and formal baseline training remain later gates. Stop after this one test.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/check_rein_segmentor_phase16.sh
+    echo "segmentor_gate_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the JSON, exit code, stderr tail, report hashes, Git and disk evidence.
+Pass requires `ok: true`, `stage: complete`, exit 0, 343 loaded tensors,
+semantic scores `[1,19,512,512]`, finite 30 losses, positive finite total loss,
+nonzero `adapter/head/pixel_decoder` gradient counts and no frozen backbone
+gradients. Preserve reports on failure. Do not edit upstream or upgrade packages,
+delete data or start training. The child `bash` protects the interactive terminal
+from script exits; existing output names are never overwritten.
+
+## Completed backbone handoff (do not rerun)
 
 The xformers recovery runtime gate passed at `0e0ef7c7bb1588cb0ba190c652fbce926c257121`.
 CUDA NMS returned `[0]`; fp16 xformers attention max error was
@@ -65,7 +115,7 @@ conversion. The audit report SHA256 is
 `6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
 There were 476 GiB available system RAM and 16 GiB free data volume.
 
-## Current AutoDL action: recover the missing xformers dependency
+## Historical action: recover the missing xformers dependency
 
 The runtime recheck at `44d30fa397205b10a75d08fb60b62ffcc055872c`
 passed all seven package pins, CUDA availability and MMCV CUDA NMS (`[0]`),

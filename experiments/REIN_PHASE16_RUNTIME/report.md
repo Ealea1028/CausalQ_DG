@@ -38,5 +38,32 @@ and the single target constrain generalization claims.
 - Installed freeze SHA256: `47f0e84c38075e5c2f70ffba58746844e0cc8f206f430f2b295fb928008e3245`.
 - Available disk approximately 9.9 GiB; no formal training authorized yet.
 
-Next boundary: synthetic backbone weight loading, forward and adapter backward
-on AutoDL. Mask2Former execution, dataset protocol and training remain pending.
+## Accepted backbone evidence
+
+- Project source: `ed3dcfe202435f4d7893681054473724e19e1ad6`.
+- Upstream and all eight runtime versions unchanged from accepted runtime above.
+- Converted weights SHA256: `91730ebf59fb634f5572cf5071fef8665473dcffcbef7ba4f4fa497533a8c837`.
+- 343 loaded tensors; 2,990,081 trainable adapter parameters.
+- Feature shapes: `[1,1024,128,128]`, `[1,1024,64,64]`,
+  `[1,1024,32,32]`, `[1,1024,16,16]`; linked queries `[100,256]`.
+- Synthetic objective `8.531936645507812`; 11 nonzero adapter gradients;
+  frozen-backbone gradients absent. This is not a segmentation loss.
+- Peak allocated/reserved memory `2.767/2.982 GiB`; exit 0 and `ok: true`.
+- Report SHA256: `317dff2553f4674f9363d8660ce369245863676866fa0cf5ed0745db1bb53706`.
+- stderr SHA256: `c4775f166f11b2cbb18b26ecb5487133076edf537e05943acf6e29501284ed1f`.
+- Disk available 9.9 GiB. Optional ConvNeXt and TypedStorage warnings are not
+  failures of this gate.
+
+Next boundary: synthetic full Mask2Former prediction/loss/backward on AutoDL.
+The pinned upstream model config is used unchanged except disabling automatic
+pretrained initialization, followed by our safe explicit checkpoint load.
+The test has no dataset/optimizer/checkpoints/CQE; real protocol and training
+remain pending. MMSegmentation interfaces were checked against
+[v1.2.2 EncoderDecoder](https://github.com/open-mmlab/mmsegmentation/blob/v1.2.2/mmseg/models/segmentors/encoder_decoder.py)
+and [Mask2FormerHead](https://github.com/open-mmlab/mmsegmentation/blob/v1.2.2/mmseg/models/decode_heads/mask2former_head.py).
+
+Local verification: 142 CPU tests pass using the existing local PyTorch
+interpreter with pytest from the base Anaconda site-packages; plain
+`python -m pytest` in that interpreter could not find pytest. No OpenMMLab
+model/real checkpoint was loaded locally. Bash execution and full GPU model
+execution are pending AutoDL verification.

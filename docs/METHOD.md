@@ -4,9 +4,13 @@
 
 REIN transfer remains exploratory after CQE's failed accuracy acceptance.
 The isolated runtime passes package pins, CUDA NMS and xformers attention.
-Next, an upstream backbone-only synthetic gate checks complete converted-weight
-coverage, feature/query shapes and adapter-only finite backward gradients.
-No segmentation loss, dataset, optimization step or CQE term is introduced.
+The upstream backbone gate passes complete 343-tensor weight coverage,
+feature/query shapes and adapter-only finite backward gradients at `ed3dcfe`.
+Next, a synthetic full-segmentor gate checks preprocessing, 19-class scores,
+all 30 upstream Mask2Former losses and finite head/adapter backward gradients,
+including the deformable-attention pixel decoder. It uses float32 with no
+autocast. No dataset, optimization step or CQE term is introduced. Synthetic
+losses are compatibility diagnostics, not segmentation accuracy evidence.
 Full Mask2Former execution and a source-only REIN baseline are prerequisites
 for any later transfer claim. The main implementation remains DINOv3 Static R=2.
 
