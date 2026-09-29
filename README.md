@@ -14,6 +14,11 @@ The A0--A5 core sequence and Phase 11--15 studies are complete. Static R=2 remai
 
 ## Working directories
 
+Phase 16's pinned REIN runtime now passes CUDA NMS and xformers attention.
+The next gate is synthetic backbone loading/forward/backward, not full training
+or CQE transfer. See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
+feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
+
 - Local development: this repository
 - AutoDL project: `/root/autodl-tmp/CausalQ_DG`
 - AutoDL datasets: `/root/autodl-tmp/datasets`

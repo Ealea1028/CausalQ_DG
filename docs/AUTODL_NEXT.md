@@ -1,4 +1,53 @@
-# AutoDL next step: isolate and probe the pinned REIN runtime
+# AutoDL next step: Phase 16 REIN backbone forward/backward gate
+
+The xformers recovery runtime gate passed at `0e0ef7c7bb1588cb0ba190c652fbce926c257121`.
+CUDA NMS returned `[0]`; fp16 xformers attention max error was
+`0.0005131959915161133` (limit `0.005`). All eight package pins and both
+REIN registrations passed. The optional missing `mmpretrain` message concerns
+ConvNeXt, not this DINOv2 path; do not install it. Runtime report SHA256:
+`2d3498fc8343927da29dfa2e73bb5fb89ad46132248d15e6a323cdef4adcdfcb`.
+The upstream informational print preceded that old report's JSON, so it is
+preserved as textual evidence; the new probe redirects upstream prints to stderr.
+
+Proceed only with a synthetic 512x512 batch-1 backbone test. It builds the
+pinned upstream backbone, disables automatic checkpoint initialization, safely
+loads all 343 converted tensors, freezes the pretrained path, checks four
+feature maps and linked queries, and performs one diagnostic backward pass.
+There is no optimizer, dataset, segmentation head, checkpoint write or CQE.
+This does NOT validate full Mask2Former/deformable-attention training or prove
+CQE transfer. Those gates remain later. Free space is approximately 9.9 GiB;
+this test produces only small logs and needs no new installation/download.
+
+Run this block in AutoDL (the `bash` child keeps failure from closing your terminal):
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/check_rein_backbone_phase16.sh
+    echo "backbone_gate_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the JSON, stderr, exit code, hashes and source/disk evidence. Pass requires
+`ok: true`, 343 loaded tensors, feature shapes `[1,1024,128,128]`,
+`[1,1024,64,64]`, `[1,1024,32,32]`, `[1,1024,16,16]`, queries `[100,256]`,
+finite outputs/gradients, nonzero adapter gradients and no frozen-backbone
+gradients. If it fails, preserve all artifacts; do not upgrade packages, modify
+upstream source, start training or rerun against existing output filenames.
+
+## Historical runtime handoffs (do not rerun)
 
 Phase 15's three-seed ViT-B/ViT-L comparison is complete. The seed-2 paired
 report has `ok: true`, 500 matched Cityscapes validation images, 6,005

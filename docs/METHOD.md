@@ -1,5 +1,15 @@
 # Method contract
 
+## Phase 16 boundary
+
+REIN transfer remains exploratory after CQE's failed accuracy acceptance.
+The isolated runtime passes package pins, CUDA NMS and xformers attention.
+Next, an upstream backbone-only synthetic gate checks complete converted-weight
+coverage, feature/query shapes and adapter-only finite backward gradients.
+No segmentation loss, dataset, optimization step or CQE term is introduced.
+Full Mask2Former execution and a source-only REIN baseline are prerequisites
+for any later transfer claim. The main implementation remains DINOv3 Static R=2.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.
