@@ -27,7 +27,9 @@ Five-image original-resolution slide evaluation exits 0 at 59d522b; its low
 exits 0 at b4e292d and passes saved-evidence audit at 3601ecd (50-image
 diagnostic mIoU 0.235189, checkpoint roundtrip 0, peak reserved 4.217 GiB).
 Cache inventory finds no useful data-volume cache savings. Next verify bounded
-checkpoint continuation including RNG and source sampler before the formal baseline;
+checkpoint continuation including RNG and source sampler before the formal baseline.
+The a10c1f6 continuation attempt failed optimizer-state comparison; checkpoint
+loading now preserves its input dictionaries and checks full restoration before replay;
 formal source-only training and
 CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the

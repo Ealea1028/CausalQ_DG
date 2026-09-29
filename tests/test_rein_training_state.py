@@ -4,7 +4,53 @@ import numpy as np
 import pytest
 import torch
 
-from tools.rein_training_state import SourceSampler, capture_rng, compare_trees, cpu_tree, restore_rng
+from tools.rein_training_state import SourceSampler, capture_rng, compare_trees, cpu_tree, restore_rng, restore_optimizer_scheduler
+
+
+def test_mmengine_pop_on_load_does_not_mutate_saved_optimizer_or_drift_base_lr():
+    class Wrapper:
+        base_param_settings = dict(lr=1e-4)
+
+        def load_state_dict(self, state):
+            # Match the pinned BaseOptimWrapper destructive-pop contract.
+            base = state.pop('base_param_settings', None)
+            if base is not None:
+                self.base_param_settings = base
+            self.state = state
+
+        def state_dict(self):
+            return dict(self.state, base_param_settings=self.base_param_settings)
+
+    class Scheduler:
+        def load_state_dict(self, state):
+            self.state = state
+
+        def state_dict(self):
+            return self.state
+
+    wrapper, scheduler = Wrapper(), Scheduler()
+    saved = dict(state={0: dict(step=torch.tensor(20.))}, param_groups=[dict(lr=9e-5)],
+                 base_param_settings=dict(lr=9e-5, params=torch.tensor([0.])))
+    scheduled = dict(last_step=20, values=[9e-5])
+    original = cpu_tree(saved)
+    for _ in range(2):
+        restore_optimizer_scheduler(wrapper, scheduler, saved, scheduled)
+        assert wrapper.base_param_settings['lr'] == 9e-5
+        wrapper.base_param_settings['lr'] = 8e-5
+        wrapper.state['state'][0]['step'].add_(1)
+        scheduler.state['values'][0] = 0.
+        assert compare_trees(saved, original) == 0
+        assert scheduled['values'] == [9e-5]
+    incomplete = dict(original)
+    incomplete.pop('base_param_settings')
+    with pytest.raises(ValueError, match='base_param_settings'):
+        restore_optimizer_scheduler(wrapper, scheduler, incomplete, scheduled)
+
+
+def test_scalar_mismatch_identifies_nested_path_without_relaxing_equality():
+    with pytest.raises(ValueError, match=r'optimizer.base_param_settings.lr'):
+        compare_trees(dict(base_param_settings=dict(lr=1e-4)),
+                      dict(base_param_settings=dict(lr=9e-5)), 'optimizer')
 
 
 def test_sampler_safe_reload_across_epoch_boundary(tmp_path):

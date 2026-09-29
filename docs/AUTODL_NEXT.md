@@ -1,5 +1,28 @@
 # AutoDL next step: Phase 16 bounded continuation state gate
 
+## Current action: retry after destructive optimizer-load repair
+
+The attempt at `a10c1f6bfd02bfa0d53267a5df2d169ee7898bcf` FAILS:
+ok false, stage continuation_replay, exit 1, optimizer scalar mismatch.
+Its 80 records / 20 updates are finite and prediction roundtrip error is zero,
+but the continuation gate is NOT accepted. Preserve these artifacts:
+
+- JSON SHA `a06408898be8b84f243326099c78916c0a10e72963da7db99c850e9f36b92e40`.
+- stderr SHA `46bc2079c4b3a31681e3209075ffc2c3fc59656e500c51eb0faf8b23e245f010`.
+- checkpoint SHA `a9787b93cef0324e4d4149c15dff664c4d8b938d1ca7db0a65bd087cc90fcd76`.
+
+Cause: the initial roundtrip called wrapper.load_state_dict on the actual
+payload optimizer dictionary. Pinned MMEngine pops base_param_settings from
+that input, so the subsequent branch reload lacked its base LR. Now clone
+every optimizer/scheduler payload before loading; require and compare all
+restored fields before the replay. Strict scalar equality and existing tensor
+tolerances are unchanged. Failures now identify the exact nested state path.
+
+Retry ONLY the same 20-update plus two update-21 replays using the new handoff
+SHA in the command below. Script output names include the new SHA; failures
+are not overwritten. No installs, target evaluation, cleanup, 500-update rerun
+or formal training. Current 9.1 GiB free covers one extra ~270 MiB checkpoint.
+
 The saved pilot audit PASSES at `3601ecd0ccc5425de3080d44ccca4186d72aebe7`:
 2,000 microbatches, 500 updates, 50 targets, diagnostic mIoU 0.2351890098,
 checkpoint roundtrip zero, checkpoint 283,250,650 bytes, peak reserved 4.217 GiB.

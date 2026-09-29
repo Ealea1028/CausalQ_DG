@@ -262,8 +262,8 @@ def main():
                 named[first].add_(1)
                 for name, tensor in payload["model"].items():
                     named[name].copy_(tensor.to(named[name].device))
-            wrapper.load_state_dict(payload["optimizer"])
-            scheduler.load_state_dict(payload["scheduler"])
+            from tools.rein_training_state import restore_optimizer_scheduler
+            restore_optimizer_scheduler(wrapper, scheduler, payload['optimizer'], payload['scheduler'])
             with torch.no_grad():
                 after = model.encode_decode(inputs, meta)
             validate_prediction(after)

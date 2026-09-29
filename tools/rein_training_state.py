@@ -77,33 +77,43 @@ def cpu_tree(value):
     return value
 
 
-def compare_trees(first, second):
+def compare_trees(first, second, path='state'):
     """Require structural equality; GPU floating arithmetic allows small error."""
     import torch
     if type(first) is not type(second):
-        raise ValueError('Continuation state type mismatch')
+        raise ValueError(f'Continuation state type mismatch at {path}')
     if isinstance(first, dict):
         if first.keys() != second.keys():
-            raise ValueError('Continuation state keys mismatch')
-        return max((compare_trees(first[k], second[k]) for k in first), default=0.)
+            raise ValueError(f'Continuation state keys mismatch at {path}')
+        return max((compare_trees(first[k], second[k], f'{path}.{k}') for k in first), default=0.)
     if isinstance(first, (list, tuple)):
         if len(first) != len(second):
-            raise ValueError('Continuation state length mismatch')
-        return max((compare_trees(a, b) for a, b in zip(first, second)), default=0.)
+            raise ValueError(f'Continuation state length mismatch at {path}')
+        return max((compare_trees(a, b, f'{path}[{i}]') for i, (a, b) in enumerate(zip(first, second))), default=0.)
     if isinstance(first, torch.Tensor):
         if first.shape != second.shape or first.dtype != second.dtype:
-            raise ValueError('Continuation tensor contract mismatch')
+            raise ValueError(f'Continuation tensor contract mismatch at {path}')
         if first.is_floating_point():
             if not torch.isfinite(first).all() or not torch.isfinite(second).all():
-                raise ValueError('Nonfinite continuation tensor')
+                raise ValueError(f'Nonfinite continuation tensor at {path}')
             if not torch.allclose(first, second, atol=1e-6, rtol=1e-5):
-                raise ValueError('Continuation floating tensor mismatch')
+                raise ValueError(f'Continuation floating tensor mismatch at {path}')
             return (first-second).abs().max().item() if first.numel() else 0.
         if not torch.equal(first, second):
-            raise ValueError('Continuation integer tensor mismatch')
+            raise ValueError(f'Continuation integer tensor mismatch at {path}')
     elif first != second:
-        raise ValueError('Continuation scalar mismatch')
+        raise ValueError(f'Continuation scalar mismatch at {path}: {first!r} != {second!r}')
     return 0.
+
+
+def restore_optimizer_scheduler(wrapper, scheduler, optimizer_state, scheduler_state):
+    """MMEngine pops base_param_settings on load: never pass checkpoint storage."""
+    if getattr(wrapper, 'base_param_settings', None) is not None and 'base_param_settings' not in optimizer_state:
+        raise ValueError('Checkpoint lacks optimizer base_param_settings')
+    wrapper.load_state_dict(cpu_tree(optimizer_state))
+    scheduler.load_state_dict(cpu_tree(scheduler_state))
+    compare_trees(cpu_tree(wrapper.state_dict()), optimizer_state, 'restored_optimizer')
+    compare_trees(cpu_tree(scheduler.state_dict()), scheduler_state, 'restored_scheduler')
 
 
 def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
@@ -117,8 +127,7 @@ def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
     results = []
     for replay in range(2):
         restore_compact(model, payload['model'])
-        wrapper.load_state_dict(cpu_tree(payload['optimizer']))
-        scheduler.load_state_dict(cpu_tree(payload['scheduler']))
+        restore_optimizer_scheduler(wrapper, scheduler, payload['optimizer'], payload['scheduler'])
         sampler.load_state_dict(payload['sampler'])
         wrapper.initialize_count_status(model, 80, 84)
         wrapper.zero_grad(set_to_none=True)
@@ -157,12 +166,11 @@ def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
     parameter_error = compare_trees(results[0]['model'], results[1]['model'])
     if parameter_error > 1e-5:
         raise ValueError('Continuation parameter difference exceeds 1e-5')
-    optimizer_error = compare_trees(results[0]['optimizer'], results[1]['optimizer'])
+    optimizer_error = compare_trees(results[0]['optimizer'], results[1]['optimizer'], 'optimizer')
     compare_trees(results[0]['scheduler'], results[1]['scheduler'])
     compare_trees(results[0]['sampler'], results[1]['sampler'])
     restore_compact(model, payload['model'])
-    wrapper.load_state_dict(cpu_tree(payload['optimizer']))
-    scheduler.load_state_dict(cpu_tree(payload['scheduler']))
+    restore_optimizer_scheduler(wrapper, scheduler, payload['optimizer'], payload['scheduler'])
     sampler.load_state_dict(payload['sampler'])
     wrapper.initialize_count_status(model, 80, 84)
     wrapper.zero_grad(set_to_none=True)

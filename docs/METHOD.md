@@ -81,6 +81,16 @@ requiring matching source indices, losses, parameters and optimizer state.
 This is SAME-process continuation verification, not yet fresh-process resume,
 bitwise CUDA determinism, target accuracy or formal 40k authorization.
 
+The `a10c1f6` attempt FAILED at optimizer scalar comparison after 20 finite
+updates and zero prediction-roundtrip error. The roundtrip loader passed the
+checkpoint optimizer dictionary directly to MMEngine BaseOptimWrapper, which
+pops `base_param_settings` from its input. Subsequent replay therefore lacked
+the saved base LR and retained the previous branch's value. The loader now
+clones optimizer/scheduler trees for every restore, rejects missing base
+settings, and checks complete restored state before executing either branch.
+Scalar equality and GPU tolerances are unchanged; mismatch errors include the
+nested path. The corrected same bounded gate still needs AutoDL acceptance.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.
