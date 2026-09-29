@@ -15,8 +15,9 @@ The A0--A5 core sequence and Phase 11--15 studies are complete. Static R=2 remai
 ## Working directories
 
 Phase 16's pinned REIN runtime now passes CUDA NMS and xformers attention.
-The backbone loading/forward/backward gate also passes. The next gate is full
-Mask2Former synthetic prediction/loss/backward, not training or CQE transfer.
+The backbone and full Mask2Former synthetic forward/backward gates also pass.
+The next gate is 20 source-data optimizer updates and five target inference
+diagnostics, not formal training or CQE transfer.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

@@ -67,3 +67,23 @@ interpreter with pytest from the base Anaconda site-packages; plain
 `python -m pytest` in that interpreter could not find pytest. No OpenMMLab
 model/real checkpoint was loaded locally. Bash execution and full GPU model
 execution are pending AutoDL verification.
+
+## Accepted full-segmentor synthetic evidence
+
+- Source `86fb3ffdc7a13285965f0df825472625f9e52ed4`; pinned upstream/runtime/weights unchanged.
+- Upstream model-config hash `2f51a8ac089848f5e276028801983c95bf5f89e688753c1fff5a9e64bb766868`.
+- 343 loaded tensors; 23,569,877 trainable parameters; 19-class scores `[1,19,512,512]`.
+- Float32; all 30 losses finite; total `124.92772674560547`.
+- Nonzero adapter/head/pixel-decoder gradient counts `11/291/116`; no frozen gradients.
+- Peak allocated/reserved `3.400/3.662 GiB`; `ok: true`, stage complete, exit 0.
+- Report hash `87ba441bb9f879fd4048c18518477e8294c06dfa27335f7811954bd0c7552301`.
+- stderr hash `05a9a5cc9f11d36804cb7a20fa4832afbe547937dde1d678284a69e28cd2bca3`.
+- 9.9 GiB disk free. Synthetic loss is NOT an accuracy result.
+
+Next: 20 GTA5 optimizer updates and five Cityscapes center-crop inference
+diagnostics in float32. Uses existing project preprocessing rather than
+claiming exact upstream training reproduction. The inverse RGB-to-BGR bridge
+must round-trip through upstream preprocessing within 1e-5; target labels
+never enter optimization. No checkpoints/mIoU/CQE. Formal source-only schedule
+and full-target evaluation remain pending. Local CPU tests: 145 pass; actual
+isolated-runtime dataset imports and optimizer GPU memory await AutoDL.

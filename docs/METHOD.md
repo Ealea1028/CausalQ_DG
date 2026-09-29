@@ -6,12 +6,14 @@ REIN transfer remains exploratory after CQE's failed accuracy acceptance.
 The isolated runtime passes package pins, CUDA NMS and xformers attention.
 The upstream backbone gate passes complete 343-tensor weight coverage,
 feature/query shapes and adapter-only finite backward gradients at `ed3dcfe`.
-Next, a synthetic full-segmentor gate checks preprocessing, 19-class scores,
-all 30 upstream Mask2Former losses and finite head/adapter backward gradients,
-including the deformable-attention pixel decoder. It uses float32 with no
-autocast. No dataset, optimization step or CQE term is introduced. Synthetic
-losses are compatibility diagnostics, not segmentation accuracy evidence.
-Full Mask2Former execution and a source-only REIN baseline are prerequisites
+The synthetic full-segmentor gate also passes at `86fb3ff`: all 30 Mask2Former
+losses and head/adapter/pixel-decoder gradients are finite in float32, with
+3.662 GiB peak reserved memory. Next is a bounded 20-step source-data optimizer
+diagnostic using existing project GTA5 geometry/crop logic and an audited
+normalization bridge. Five target center-crop predictions are compatibility
+checks only; Cityscapes labels are never optimized and no mIoU is reported.
+There is no CQE, checkpoint or formal training in this smoke.
+An accepted real-data smoke and a source-only REIN baseline are prerequisites
 for any later transfer claim. The main implementation remains DINOv3 Static R=2.
 
 ## Objective

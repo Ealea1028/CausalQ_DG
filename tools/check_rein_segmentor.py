@@ -55,11 +55,16 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--rein-root", type=Path, required=True)
     parser.add_argument("--weights", type=Path, required=True)
+    parser.add_argument("--data-root", type=Path,
+                        help="Opt into the bounded 20-step real-data smoke after the synthetic gate")
     args = parser.parse_args()
     report = dict(ok=False, purpose="synthetic_full_segmentor_not_accuracy_evaluation",
                   git_sha=git_output(Path(__file__).resolve().parents[1], "rev-parse", "HEAD"),
                   python=platform.python_version(), seed=20260929, dtype="float32",
                   rein_root=str(args.rein_root), weights=str(args.weights), stage="preflight")
+    if args.data_root is not None:
+        report["purpose"] = "real_data_20step_optimization_smoke_not_accuracy_evaluation"
+        report["data_root"] = str(args.data_root)
     try:
         if platform.python_version_tuple()[:2] != ("3", "10"):
             raise ValueError("Use the isolated Python 3.10 environment")
@@ -164,6 +169,17 @@ def main():
                           frozen_backbone_gradients_absent=True,
                           peak_allocated_gib=round(torch.cuda.max_memory_allocated(0) / 2**30, 3),
                           peak_reserved_gib=round(torch.cuda.max_memory_reserved(0) / 2**30, 3))
+            if args.data_root is not None:
+                from tools.rein_real_data_smoke import run_real_data_smoke
+
+                report["ok"] = False
+                model.zero_grad(set_to_none=True)
+                del losses, total, gradient
+                report.update(run_real_data_smoke(model, args.data_root, report))
+                torch.cuda.synchronize()
+                report.update(ok=True, stage="complete",
+                              peak_allocated_gib=round(torch.cuda.max_memory_allocated(0) / 2**30, 3),
+                              peak_reserved_gib=round(torch.cuda.max_memory_reserved(0) / 2**30, 3))
     except Exception as exc:
         traceback.print_exc(file=sys.stderr)
         report["error"] = f"{type(exc).__name__}: {exc}"

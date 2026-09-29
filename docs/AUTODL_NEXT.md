@@ -1,4 +1,66 @@
-# AutoDL next step: Phase 16 full REIN segmentor synthetic gate
+# AutoDL next step: Phase 16 real-data 20-step optimization smoke
+
+The full float32 segmentor gate passes at `86fb3ffdc7a13285965f0df825472625f9e52ed4`:
+343 loaded tensors; 23,569,877 trainable parameters; scores `[1,19,512,512]`;
+all 30 losses finite, total `124.92772674560547`; nonzero gradients in adapter,
+head and pixel decoder `11/291/116`; frozen backbone gradients absent.
+Peak allocated/reserved memory `3.400/3.662 GiB`, exit 0. Report/stderr hashes:
+`87ba441bb9f879fd4048c18518477e8294c06dfa27335f7811954bd0c7552301`,
+`05a9a5cc9f11d36804cb7a20fa4832afbe547937dde1d678284a69e28cd2bca3`.
+
+Next run ONLY a 20-update real-data diagnostic, not a formal 40k baseline.
+The previously accepted synthetic gate is rerun as a prerequisite in the same
+process; its backward gradients are cleared and no synthetic optimizer step
+occurs. Existing project GTA5 pairing/geometry/crop-fallback code is reused.
+Source crops are 512x512, batch 1, workers 0. AdamW lr `1e-4`, weight decay
+`0.05`, betas `(0.9,0.999)`, clip norm `1.0`, constant lr, float32.
+These are smoke settings, not a claim of exact official REIN reproduction.
+The model initialization seed remains 20260929; data selection/augmentation
+seed is 0. No CQE, appearance consistency or diversity is enabled.
+
+The bridge reverses the project's RGB normalization to floating BGR 0..255
+before the unchanged upstream preprocessor, with round-trip error <=1e-5.
+This prevents double normalization/channel swapping. Pair counts must be
+24966 GTA5 / 500 Cityscapes-val; inventory hashes cover paths, NOT full file
+contents. Only selected files are decoded. Five Cityscapes samples undergo
+aspect-preserving resize and deterministic 512x512 center-crop inference;
+target labels never enter a loss or optimizer update. No mIoU is computed:
+this cropped inference is not the formal target evaluation protocol.
+
+No checkpoint, data copy, installation or download. Existing 9.9 GiB disk
+space suffices for small reports; optimizer GPU memory is still to be measured.
+Do not start formal training or clean up evidence as part of this action.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/check_rein_real_data_phase16.sh
+    echo "real_data_gate_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the complete JSON, stderr tail, hashes and Git/disk evidence. Pass:
+exit 0; `ok` and `real_data_smoke_ok` true; `optimizer_steps: 20`; 20 finite
+contiguous source records, each with 30 finite losses and positive valid pixels;
+adapter scale changed; reference frozen patch weight unchanged; five finite
+target score maps; normalization round-trip error <=1e-5. Loss decrease over
+20 different crops is not a pass criterion. Preserve partial reports on failure;
+do not edit source on AutoDL, upgrade packages or reuse existing report paths.
+Stop for review before selecting a formal baseline schedule/data protocol.
+
+## Completed full-segmentor synthetic handoff (do not rerun separately)
 
 The backbone gate passed at `ed3dcfe202435f4d7893681054473724e19e1ad6`:
 343 pretrained tensors loaded, four expected feature maps and `[100,256]`
