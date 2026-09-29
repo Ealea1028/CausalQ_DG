@@ -1,4 +1,54 @@
-# AutoDL next step: Phase 16 adapted data-pipeline gate
+# AutoDL next step: Phase 16 scheduled source-only GPU smoke
+
+The operator accepts the adapted data gate at
+`b645793ff8fcdd12b0cdd8078b64dc929f107a70`, exit 0. Accepted JSON SHA:
+`b893b991c4bc85eb6105e8d8ae1f39df670b256ce12a10aaca8c1a7c89d71c69`;
+stderr SHA `b7ddc04bfe4985764aca1bcc163b5a1b8dca7298da3e21acaeaee9d5e8f04776`.
+The next runner checks that complete saved report before consuming its exact
+adapted configuration. No installs or dataset/weight copies are required.
+
+Run only 80 source microbatches, with accumulation 4 (=20 optimizer updates).
+Use upstream PEFT paramwise AdamW and clipping 1, float32, seed 0. PolyLR's
+40k horizon is explicitly measured in OPTIMIZER UPDATES, stepping once per four
+microbatches, not per source sample. Future 40k-update training would require
+160k microbatches and a separate runner/authorization; the saved adapted upstream
+40k iteration config is not yet a formal accumulation-aware training config.
+
+The gate writes one compact trainable-parameters-plus-buffers checkpoint with
+optimizer and scheduler state (maximum 1 GiB), verifies safe reload, perturbs a
+parameter before restoration, and compares semantic scores before/after. It
+does not claim exact training resumption (sampler/RNG continuation is not saved),
+target mIoU, paper reproduction or CQE transfer. At least 2 GiB free is required;
+the returned 9.9 GiB is adequate for this bounded gate, not an unrestricted run.
+No existing checkpoints are deleted. GPU verification remains pending.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/check_rein_schedule_phase16.sh
+    echo "schedule_gate_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return complete JSON and stderr tail printed by this child script, hashes,
+exit code and disk. Pass: ok true, stage complete, optimizer_updates 20,
+checkpoint under 1 GiB, prediction_roundtrip_max_error <=1e-5. Trace contains
+80 contiguous records and exactly 20 update boundaries. Stop before formal
+training; a Cityscapes full-resolution sliding evaluation gate is still pending.
+
+## Completed adapted data-pipeline gate (do not rerun)
 
 The repaired inventory exits 0 at `ede170c4fa2c5c330581771e9cf5c4f659360e9d`;
 JSON SHA `2cdf617c9370735ac275c4875af52f3a017898dd690ff3cc793298322298e64a`.
