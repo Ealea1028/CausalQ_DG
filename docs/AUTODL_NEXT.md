@@ -1,4 +1,55 @@
-# AutoDL next step: Phase 16 fresh-process restore replay
+# AutoDL next step: Phase 16 source-only runner integration
+
+## Current handoff — execute only this section
+
+Fresh-process restore replay PASSES at
+`1671f1a07441868e464776cfbf9305308187c289`: two isolated processes,
+loss difference zero, parameter maximum difference `1.7881393432617188e-7`,
+optimizer maximum difference `1.0710209608078003e-8`, RNG/sampler equality.
+Report SHA `586e96ec63c481a9f9bf2b3c62754d96c98001123bc57fa34254f2361a9d01e7`;
+stderr SHA `c6d89954053c0a21e6570b4c0dcd33ae594aaee4bceebfd648730ba068d4bca2`.
+No accuracy or uninterrupted-resume equivalence claim is made.
+
+Next verify the new long-run integration path with only 20 fresh seed-0 source
+updates / 80 microbatches. It uses the accepted typed protocol, epoch-aware
+source sampler, accumulation 4 and unchanged 40k-update PolyLR. Save every five
+updates using exclusive pending writes, safe CPU reload/full-state comparison,
+then same-directory atomic rotation. Retain only last.pth (update 20) and
+previous.pth (update 15) within this NEW run; older run evidence is untouched.
+Superseded update-5/10 checkpoint contents are replaced intentionally; their
+hashes remain in summary. If writing fails, pending.pth remains for diagnosis.
+Only original-resolution FIVE-image target diagnostics follow. This is NOT
+formal 40k training; CLI cannot launch it. No CQE, new datasets, installs or cleanup.
+
+8.3 GiB free is enough: ~540 MiB retained and a transient ~270 MiB pending file.
+Keep all historical checkpoints and reports. Next 40k baseline will use final
+500-image evaluation, with no target-based checkpoint selection, after this gate.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo dirty_worktree; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/check_rein_runner_phase16.sh
+RESULT=$?
+echo "runner_gate_exit_code=$RESULT"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+Return complete JSON, checkpoint listing, report/log hashes, exit and disk.
+Pass: ok true/stage complete, 20 optimizer updates, 80 trace records,
+sampler_cursor 80, checkpoint history updates [5,10,15,20], two retained
+checkpoints, five original-resolution target samples, no target optimization.
+Stop for review before formal training. Expected short-run mIoU is diagnostic only.
+
+## Archived fresh-process handoff — do not execute
 
 ## Current action (supersedes all archived commands below)
 

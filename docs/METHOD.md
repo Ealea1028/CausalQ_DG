@@ -97,6 +97,16 @@ Snapshots include post-update RNG. This is fresh-process restore replay only,
 not uninterrupted-versus-resumed equivalence or formal accuracy. No target
 optimization, CQE or 40k training is introduced.
 
+The independent-process replay PASSES at `1671f1a`: loss difference zero,
+parameter maximum difference `1.7881393432617188e-7`, optimizer maximum
+difference `1.0710209608078003e-8`; saved sampler and post-update RNG agree.
+Next exercise a fresh-source runner with 20 updates, epoch-aware sampling and
+atomic rolling saves every five updates. It keeps latest/previous only in a
+new run, validates complete checkpoint serialization, then diagnoses five
+original-resolution Cityscapes images. Prior artifacts remain untouched.
+This is the long-run integration gate, not another accuracy experiment; formal
+40k and full 500-image final evaluation remain pending its acceptance.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

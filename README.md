@@ -31,7 +31,8 @@ checkpoint continuation including RNG and source sampler before the formal basel
 The a10c1f6 continuation attempt failed optimizer-state comparison; checkpoint
 loading now preserves its input dictionaries and checks full restoration before replay.
 The corrected same-process gate passes at 5fee730 (parameter error 1.28e-7).
-Next verify two independent process restores of the accepted checkpoint;
+Independent-process restore replay passes at 1671f1a (parameter error 1.79e-7).
+Next verify the fresh source runner's cyclic sampling and two-file rolling saves;
 formal source-only training and
 CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the

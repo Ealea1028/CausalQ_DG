@@ -1,5 +1,30 @@
 # Phase 16 feasibility and runtime acceptance
 
+## Latest: fresh-process replay accepted; runner integration pending
+
+Operator evidence at `1671f1a07441868e464776cfbf9305308187c289` passes:
+two independent construction seeds 17/91 restored the saved seed-0 state.
+Each worker's repeated update 21 passes; cross-process loss difference zero,
+parameter difference `1.7881393432617188e-7`, optimizer difference
+`1.0710209608078003e-8`, sampler and post-update RNG equal. Peak reserved
+3.877 GiB each, exit 0. This is restore-replay verification only.
+Report SHA `586e96ec63c481a9f9bf2b3c62754d96c98001123bc57fa34254f2361a9d01e7`;
+stderr SHA `c6d89954053c0a21e6570b4c0dcd33ae594aaee4bceebfd648730ba068d4bca2`.
+Snapshots SHA `4854edf61a2e644c49987a510640cb00178d7abe24b55ef5dd2c6067b14878eb`
+and `ac9d68a4746fb4b747c58ee374edaafd3a82a55ac8ddf9ae097313d1676131d5`.
+
+Next fresh-source runner gate: 80 microbatches / 20 updates, save at updates
+5/10/15/20, keep latest and previous (20/15), five-image diagnostic only.
+No previous checkpoint resumes this run. Data-volume 8.3 GiB free is sufficient;
+no cleanup. Formal 40k/CQE transfer remain pending, and no REIN-versus-DINOv3
+accuracy comparison can be made from the short pilot or integration gate.
+
+Local verification: 192 CPU tests pass (Python 3.10.20 / PyTorch 2.10.0+cu128,
+pytest loaded from the base Anaconda site-packages). No local GPU/data/weights
+used. Focused tests cover atomic two-file rotation, pending-write preservation,
+RNG invariance during saves and accepted-evidence rejection. Existing sampler
+tests cover epoch wraparound; the 20-update GPU gate itself does not span an epoch.
+
 ## Current boundary: independent-process restore replay (pending AutoDL)
 
 Same-process continuation accepted from operator evidence at
