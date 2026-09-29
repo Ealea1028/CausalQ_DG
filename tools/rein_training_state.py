@@ -116,7 +116,7 @@ def restore_optimizer_scheduler(wrapper, scheduler, optimizer_state, scheduler_s
     compare_trees(cpu_tree(scheduler.state_dict()), scheduler_state, 'restored_scheduler')
 
 
-def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
+def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload, snapshot_path=None):
     """Two replays from the SAME disk checkpoint, not a fresh-process resume."""
     import math
     import torch
@@ -157,7 +157,7 @@ def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
             raise ValueError('Continuation LR mismatch')
         results.append(dict(indices=indices, losses=losses_seen, model=compact_state(model),
                             optimizer=cpu_tree(wrapper.state_dict()), scheduler=cpu_tree(scheduler.state_dict()),
-                            sampler=sampler.state_dict()))
+                            sampler=sampler.state_dict(), rng=capture_rng(include_cuda=True)))
     if results[0]['indices'] != results[1]['indices']:
         raise ValueError('Continuation source indices mismatch')
     loss_error = max(abs(a-b) for a, b in zip(results[0]['losses'], results[1]['losses']))
@@ -169,6 +169,11 @@ def verify_next_update(model, dataset, wrapper, scheduler, sampler, payload):
     optimizer_error = compare_trees(results[0]['optimizer'], results[1]['optimizer'], 'optimizer')
     compare_trees(results[0]['scheduler'], results[1]['scheduler'])
     compare_trees(results[0]['sampler'], results[1]['sampler'])
+    compare_trees(results[0]['rng'], results[1]['rng'], 'rng')
+    if snapshot_path is not None:
+        # Exclusive output: retain update-21 diagnostics without altering checkpoint 20.
+        with snapshot_path.open('xb') as stream:
+            torch.save(results[0], stream)
     restore_compact(model, payload['model'])
     restore_optimizer_scheduler(wrapper, scheduler, payload['optimizer'], payload['scheduler'])
     sampler.load_state_dict(payload['sampler'])

@@ -1,5 +1,30 @@
 # Phase 16 feasibility and runtime acceptance
 
+## Current boundary: independent-process restore replay (pending AutoDL)
+
+Same-process continuation accepted from operator evidence at
+`5fee730e98d0a62535d93dd310a7a6dd334a36a3`: 80 microbatches / 20 updates,
+two update-21 diagnostic replays; source indices `[22892,5750,13022,5583]`,
+loss difference zero, parameter maximum difference `1.2759119272232056e-7`,
+optimizer maximum difference `1.3969838619232178e-8`; peak reserved 3.920 GiB.
+Report SHA `bec27b5dfa5a23e09915993ac13c8a403186314d55d03bb1c096d9ae5d11c82e`;
+stderr SHA `3b020f67b5f578e7c8ae11e887061a2cd067c893946df362d3c8a5115adc7aa2`;
+checkpoint SHA `e160cb17c3a708d2592016961bcde1eaa061abdddb5d9e0980dfe2d823e84678`
+(283,344,599 bytes). The earlier failed attempt remains excluded and preserved.
+
+Next gate builds two fresh processes with distinct construction seeds and
+restores the same accepted model/optimizer/scheduler/sampler/RNG checkpoint.
+Each replays update 21 twice; parent compares update-21 snapshots, including
+post-update RNG. Only 16 extra source microbatches; no target evaluation,
+formal training or CQE. This tests fresh-process restore replay, not full
+uninterrupted-versus-resumed equivalence. No accuracy claim is added.
+Operator disk free 8.8 GiB covers two ~270 MiB audit snapshots; no cleanup.
+
+Local CPU suite: 189 tests pass. GPU execution, pinned OpenMMLab model
+construction and remote dataset/checkpoint use remain AutoDL-only.
+
+## Archived earlier evidence and handoffs
+
 ## Adapted protocol data gate (pending)
 
 Repaired inventory exit 0 at `ede170c4fa2c5c330581771e9cf5c4f659360e9d`.

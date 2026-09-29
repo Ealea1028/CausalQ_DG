@@ -89,7 +89,13 @@ the saved base LR and retained the previous branch's value. The loader now
 clones optimizer/scheduler trees for every restore, rejects missing base
 settings, and checks complete restored state before executing either branch.
 Scalar equality and GPU tolerances are unchanged; mismatch errors include the
-nested path. The corrected same bounded gate still needs AutoDL acceptance.
+nested path. The corrected bounded gate PASSES at `5fee730`: loss difference
+zero, parameter maximum difference `1.2759119272232056e-7`, optimizer maximum
+difference `1.3969838619232178e-8`. Next two independent processes use distinct
+construction seeds before restoring saved RNG/state and replaying update 21.
+Snapshots include post-update RNG. This is fresh-process restore replay only,
+not uninterrupted-versus-resumed equivalence or formal accuracy. No target
+optimization, CQE or 40k training is introduced.
 
 ## Objective
 

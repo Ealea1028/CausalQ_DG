@@ -1,4 +1,55 @@
-# AutoDL next step: Phase 16 bounded continuation state gate
+# AutoDL next step: Phase 16 fresh-process restore replay
+
+## Current action (supersedes all archived commands below)
+
+Same-process continuation PASSES at `5fee730e98d0a62535d93dd310a7a6dd334a36a3`:
+20 updates, two update-21 replays, identical source indices and losses,
+parameter maximum difference `1.2759119272232056e-7`, optimizer maximum
+difference `1.3969838619232178e-8`.
+Report SHA `bec27b5dfa5a23e09915993ac13c8a403186314d55d03bb1c096d9ae5d11c82e`;
+stderr SHA `3b020f67b5f578e7c8ae11e887061a2cd067c893946df362d3c8a5115adc7aa2`.
+Checkpoint SHA `e160cb17c3a708d2592016961bcde1eaa061abdddb5d9e0980dfe2d823e84678`.
+Preserve these and the failed a10c1f6 attempt unchanged.
+
+Next run TWO sequential independent processes with construction seeds 17 and 91.
+Each safely loads the accepted update-20 checkpoint, restores saved seed-0 RNG,
+sampler/model/optimizer/scheduler after construction, and replays update 21 twice.
+Compare update-21 snapshots across processes: indices, losses, trainable tensors/
+buffers, optimizer, scheduler, sampler and post-update RNG. Total 16 diagnostic
+microbatches; no new 20-update run, target evaluation, CQE, formal training,
+installation or deletion. Retain two ~270 MiB snapshots for audit; minimum
+free 2 GiB, each snapshot capped at 1 GiB. Current 8.8 GiB free is sufficient.
+
+This verifies fresh-process RESTORE REPLAY, not uninterrupted-versus-resumed
+equivalence, arbitrary interruption recovery, dataloader-worker recovery,
+bitwise GPU determinism or formal accuracy. Formal 40k remains pending.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo dirty_worktree; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/check_rein_fresh_process_phase16.sh
+RESULT=$?
+echo "fresh_process_gate_exit_code=$RESULT"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+Return complete JSON, hashes, exit and disk. Pass: ok true,
+fresh_process_restore_replay_verified true, both worker replays pass,
+cross-process loss difference <=1e-4, parameter difference <=1e-5,
+optimizer tensor atol1e-6/rtol1e-5 and scalar/RNG/sampler equality.
+If a worker fails, also return its retained worker JSON and stderr tail.
+Stop for review before formal training.
+
+## Archived previous handoff — do not execute
 
 ## Current action: retry after destructive optimizer-load repair
 
