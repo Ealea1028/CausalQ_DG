@@ -23,8 +23,10 @@ Adapted GTA5/Cityscapes data pipelines now pass the operator's gate at b645793.
 The 80-microbatch / 20-update accumulated PolyLR gate passes at 3ca6731,
 including exact compact checkpoint restoration (3.920 GiB peak reserved).
 Five-image original-resolution slide evaluation exits 0 at 59d522b; its low
-20-update diagnostic scores are not accuracy acceptance. Next run a bounded
-fresh-seed 500-update source pilot and 50-image diagnostic;
+20-update diagnostic scores are not accuracy acceptance. The 500-update pilot
+exits 0 at b4e292d and learns several common classes. Next audit the saved
+2,000-record trace, checkpoint and 50-image metrics, and inventory safe cache
+cleanup before preparing the formal baseline;
 formal source-only training and
 CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the

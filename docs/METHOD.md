@@ -60,6 +60,14 @@ checkpoint, and diagnoses 50 original-resolution target images. Target labels
 are never optimized. It is neither an exact-resume run nor formal 40k training,
 and has no accuracy threshold, target checkpoint selection, or CQE mechanism.
 
+The pilot operator reports exit 0 at `b4e292d`, with road 95.15%, building
+76.04%, vegetation 81.15% and car 51.88% IoU on the 50-image diagnostic.
+Many minority classes remain zero. This supports optimization feasibility,
+not formal accuracy or comparison with the 500-image DINOv3 experiments.
+The full saved report, trace and compact checkpoint need a read-only audit
+before formal training. Disk free is 9.3 GiB; inventory cache/mount usage first.
+Never delete datasets, current environments, final checkpoints or evidence.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

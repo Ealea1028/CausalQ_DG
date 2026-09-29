@@ -1,4 +1,49 @@
-# AutoDL next step: Phase 16 bounded 500-update source pilot
+# AutoDL next step: Phase 16 saved pilot audit and storage inventory
+
+Pilot producer `b4e292d8da87d186f03ac4a4769f7464a2499ef8` exits 0.
+Report SHA `c90169ad57ea39a937bbd2760aff3122758399c28dc6138a6822689212fc789a`;
+stderr SHA `83ac1b99558f5fde68b18b5a7f39f5520569d083bf1a91319d472dcfa490ca43`.
+Only the per-class metric tail was supplied. Do not rerun the pilot or declare
+formal accuracy accepted. Next audit the complete existing report, metadata,
+summary, 2,000 trace records, 500 accumulation boundaries, update-based LR,
+checkpoint path/size/SHA, roundtrip and 50-image confusion/metric agreement.
+No GPU, checkpoint deserialization, image decoding or optimization is required.
+
+Storage cleanup priority:
+
+1. Inventory pip download/wheel cache and conda package tarballs/index cache.
+   Use conda dry-run, not `--force-pkgs-dirs` or removal of the package directory.
+2. Compare cache mount identities with `/root/autodl-tmp`: freeing system-disk
+   cache may NOT increase the data-volume free space.
+3. If still necessary, inspect completed experiments' intermediate checkpoints.
+   Preserve final, useful best checkpoints, full metadata/trace/reports/logs,
+   active jobs and all checkpoints referenced by analysis reports. No blanket
+   deletion of `outputs`, `pretrained`, `envs`, raw datasets or staging evidence.
+4. Only after the exact space inventory is returned prepare explicit cleanup
+   targets and formal runner storage/resumption policy. No cleanup happens in
+   this script. Current 9.3 GiB is sufficient for this read-only audit.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo 'dirty_worktree'; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/audit_rein_pilot_storage_phase16.sh
+RESULT=$?
+echo "audit_and_inventory_exit_code=$RESULT"
+)
+```
+
+Return the entire compact audit JSON and storage inventory (a text attachment
+is fine). Audit pass is engineering evidence only, not a CQE claim, exact paper
+reproduction, formal training authorization or accuracy acceptance. Stop here
+before formal 40k updates / 160k microbatches; that runner remains unimplemented.
+
+## Archived 500-update pilot instructions (do not rerun)
 
 The operator reports slide evaluation exit 0 at
 `59d522bcac07a73c4cd0b1cb1185983a389b7281`.
