@@ -16,8 +16,9 @@ The A0--A5 core sequence and Phase 11--15 studies are complete. Static R=2 remai
 
 Phase 16's pinned REIN runtime now passes CUDA NMS and xformers attention.
 The backbone and full Mask2Former synthetic forward/backward gates also pass.
-The next gate is 20 source-data optimizer updates and five target inference
-diagnostics, not formal training or CQE transfer.
+The 20 source-data optimizer updates returned finite losses and exit 0.
+The next gate audits the saved complete report for target inference, frozen
+weights, normalization and memory; formal training and CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

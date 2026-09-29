@@ -1,4 +1,48 @@
-# AutoDL next step: Phase 16 real-data 20-step optimization smoke
+# AutoDL next step: Phase 16 saved real-data report audit
+
+The operator returned all 20 finite source losses/norms, positive valid pixels,
+exit 0, source `17883de0c87abe3ed9bd051b260ba20bc259999e`, and 9.9 GiB free.
+The meshgrid warning is nonfatal. Norms are measured BEFORE clipping to 1.0.
+The complete JSON was not returned: target inference, frozen-weight invariance,
+normalization and peak memory fields remain unreviewed. Do not call the full
+gate accepted or launch formal training based only on this log excerpt.
+
+Next run ONLY the read-only saved-report audit. No GPU, dataset decoding,
+installation, download, new reports or checkpoints. It pins the supplied JSON
+and stderr hashes, checks source/runtime/weights, 20 complete 30-loss records,
+normalization, frozen weight and adapter update flags, five target score shapes
+and peak memory. Finite predictions/gradients rely on the hash-matched producer's
+checks; this is not an independent rerun. No accuracy claim or training authority.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    /root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python \
+      -m tools.audit_rein_real_data \
+      --report /root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_real_data_17883de_v1.json \
+      --stderr-log /root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_real_data_17883de_v1.stderr.log
+    echo "saved_report_audit_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the full compact audit JSON, exit code and Git/disk evidence. On failure,
+return the existing complete real-data JSON; do not overwrite or rerun it.
+Stop for review before defining the source-only formal schedule and full-target
+evaluation. Only GTA5 to Cityscapes remains in scope.
+
+## Completed execution: real-data 20-step optimization smoke (audit pending)
 
 The full float32 segmentor gate passes at `86fb3ffdc7a13285965f0df825472625f9e52ed4`:
 343 loaded tensors; 23,569,877 trainable parameters; scores `[1,19,512,512]`;

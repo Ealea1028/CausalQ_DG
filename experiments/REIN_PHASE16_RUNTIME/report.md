@@ -3,6 +3,23 @@
 Scope: GTA5 to Cityscapes only. Evidence supplied by the AutoDL operator;
 no local GPU results are claimed.
 
+## Real-data execution excerpt (complete report audit pending)
+
+Operator source `17883de0c87abe3ed9bd051b260ba20bc259999e`; exit 0;
+20 contiguous finite loss/norm records with positive valid source pixels.
+First/last loss `139.721939/83.330597`; these are different crops and not
+an accuracy or convergence result. Maximum printed pre-clip norm `1161.029907`;
+the producer clips to 1.0 before every optimizer update.
+JSON SHA256 `9ed6e11b7e66e481aac9ea7a7d8b2a8f8d090b592acfa91c97d71d7b8d2a8ab5`;
+stderr SHA256 `186be4d21cfb4b3ae1f84d5c08b198ab37404df762bb7b4079c261218b31f2c1`.
+Disk free 9.9 GiB. Meshgrid deprecation warning is nonfatal.
+Complete target/normalization/frozen-weight/peak-memory fields were not supplied,
+so full acceptance and formal training remain pending. Next remote action reads
+and audits those existing files without GPU execution or artifact mutation.
+Local verification: 150 CPU tests pass using the existing PyTorch interpreter
+with pytest loaded from base Anaconda site-packages (same workaround as before).
+The new fixtures are fabricated schema tests, not remote experiment evidence.
+
 ## Feasibility assessment
 
 Engineering remains feasible: the pinned DINOv2 conversion passed exact
