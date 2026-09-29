@@ -95,6 +95,9 @@ def test_json_config_restoration_routes_through_recursive_config(monkeypatch):
 def test_update_schedule_units():
     assert scheduled_lr(0) == 1e-4
     assert scheduled_lr(40000) == 0
+    assert scheduled_lr(1760) == pytest.approx(1e-4 * (1 - 1760 / 39999) ** 0.9)
+    assert scheduled_lr(39998) > 0
+    assert scheduled_lr(39999) == 0
     assert scheduled_lr(20) > scheduled_lr(80)
     with pytest.raises(ValueError):
         scheduled_lr(-1)

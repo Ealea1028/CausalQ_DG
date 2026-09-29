@@ -59,7 +59,12 @@ def accepted_protocol(report):
 def scheduled_lr(updates):
     if not 0 <= updates <= 40000:
         raise ValueError("Invalid optimizer update count")
-    return 1e-4 * (1 - updates / 40000) ** 0.9
+    # MMEngine PolyParamScheduler defines total_iters as end - begin - 1.
+    # For begin=0,end=40000 this is 39999, and the last in-range update is
+    # zero-LR; the scheduler is inactive at update 40000.
+    if updates >= 39999:
+        return 0.0
+    return 1e-4 * (1 - updates / 39999) ** 0.9
 
 
 def rebuild_protocol(report, upstream):

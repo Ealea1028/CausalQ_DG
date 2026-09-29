@@ -107,9 +107,9 @@ original-resolution Cityscapes images. Prior artifacts remain untouched.
 This is the long-run integration gate, not another accuracy experiment; formal
 40k and full 500-image final evaluation remain pending its acceptance.
 
-The runner operator returns exit 0 at `7a3a1c6` and two 283,336,151-byte files.
-Full saved evidence still needs read-only hash/trace/metric audit. Only after it
-passes is one fresh source-only REIN seed-0 baseline permitted: 40k optimizer
+The runner operator returns exit 0 at `7a3a1c6` and two 283,336,151-byte files;
+the saved-evidence audit was passed before the formal attempt. One fresh
+source-only REIN seed-0 baseline was then permitted: 40k optimizer
 updates, 160k microbatches, accumulation4, unchanged typed source protocol and
 FP32. Latest/previous rolling checkpoints are saved every 1k updates; source
 sampler spans epochs. Final checkpoint alone receives full 500-image original-GT
@@ -117,6 +117,14 @@ Cityscapes evaluation; no target-based checkpoint selection or CQE. Compared
 with DINOv3, backbone/head/augmentation/evaluation and training exposure differ,
 so a metric gap cannot isolate an adapter or CQE effect. Formal results and
 arbitrary interruption equivalence remain unverified until real evidence returns.
+
+The first formal attempt at `ef91451` stopped at the LR guard after update 1,760.
+Its logged LR (`9.603104465931869e-05`) agrees with MMEngine 0.10.7 PolyLR's
+`total_iters=end-begin-1=39,999`; the project-side expected schedule had divided
+by 40,000. This is an implementation-check failure, not evidence of model
+instability or accuracy. Preserve that partial run as failed evidence and
+rerun from fresh seed-0 initialization only after the corrected schedule gate
+is committed and deployed. No resume is authorized.
 
 ## Objective
 

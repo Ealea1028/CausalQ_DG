@@ -1,6 +1,82 @@
-# AutoDL next step: Phase 16 saved-runner audit then source-only 40k baseline
+# AutoDL next step: Phase 16 PolyLR boundary fix then source-only 40k rerun
 
 ## Current action — only this section is active
+
+The source-only formal attempt at `ef91451c42a7eb591aff3ee98864d7f1304dd8e0`
+FAILED at the `LR mismatch` guard after logging update 1,760 LR
+`9.603104465931869e-05`. Preserve its run directory, partial trace, rolling
+checkpoints, report and stderr unchanged; it is not a completed experiment.
+The likely defect is our guard, not the schedule: this value matches MMEngine
+0.10.7 `PolyParamScheduler`, whose `total_iters` is `end-begin-1` (39,999 here),
+while our helper used 40,000. The old absolute `1e-10` tolerance hides this
+off-by-one initially, and the discrepancy grows during the run. Code now models
+the 39,999-step decay and zero boundary; tests cover update 1,760 and the final
+in-range update. The reported LR strongly supports this diagnosis, but the
+failed run remains excluded evidence.
+
+Local `python -m pytest` could not collect because the Windows interpreter lacks
+PyTorch (`ModuleNotFoundError: torch`). Static compilation and a focused pure
+schedule check must pass before commit. Never edit source on AutoDL. After the
+new pushed SHA is supplied, inspect the failed run read-only and confirm its
+artifacts remain; do not resume from it. Then run ONE fresh seed-0 source-only
+REIN baseline: 40,000 optimizer updates = 160,000 microbatches, physical batch 1,
+accumulation 4, FP32, max-norm 1, workers 0, fixed 40k PolyLR. No CQE/query/null
+addition, other target datasets or target-label optimization. Retain rolling
+last/previous every 1,000 updates. Only the final checkpoint evaluates all 500
+Cityscapes-val images; no target-based checkpoint selection. Adapted REIN
+baseline, not exact paper reproduction.
+
+The reported 7.7 GiB free covers the failed attempt and a fresh run's rolling
+pair, but stop below the runner's 2 GiB safety floor. No cleanup. No resume CLI
+is offered; arbitrary interruption/uninterrupted equivalence is not verified.
+If the corrected guard fails, preserve evidence and stop. Backbone/head,
+augmentation, evaluation and source exposure differ from DINOv3; do not attribute
+metric gaps solely to REIN or CQE.
+
+First preserve-check the failed run (read-only; do not modify it):
+
+```bash
+(
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+RUN="$BASE/REIN_SOURCE_ONLY_SEED0_40000_ef91451"
+test -f "$RUN/summary.json" && test -f "$RUN/train.jsonl"
+test -f "$BASE/analysis/rein_phase16_source40k_ef91451_v1.json"
+test -f "$BASE/analysis/rein_phase16_source40k_ef91451_v1.stderr.log"
+test -f "$BASE/analysis/rein_phase16_source40k_ef91451_v1.exit.txt"
+wc -l "$RUN/train.jsonl"
+tail -n 3 "$RUN/train.jsonl"
+tail -n 12 "$BASE/analysis/rein_phase16_source40k_ef91451_v1.stderr.log"
+find "$RUN" -maxdepth 1 -type f -name '*.pth' -printf '%s %f\n'
+cat "$BASE/analysis/rein_phase16_source40k_ef91451_v1.exit.txt"
+df -h /root/autodl-tmp
+)
+```
+
+After confirming the failed evidence is present, checkout the exact new SHA and
+launch only once. Replace the placeholder with the full SHA from the handoff:
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo dirty_worktree; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+SHORT_SHA=$(git rev-parse --short HEAD)
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+RUN="$BASE/REIN_SOURCE_ONLY_SEED0_40000_${SHORT_SHA}"
+LAUNCH_LOG="$BASE/analysis/rein_source40k_${SHORT_SHA}_launch.log"
+test ! -e "$RUN" || { echo existing_run; exit 1; }
+test ! -e "$LAUNCH_LOG" || { echo existing_launch_log; exit 1; }
+nohup bash scripts/train_rein_source_phase16.sh > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "launcher_pid=$!"
+echo "launch_log=$LAUNCH_LOG"
+)
+```
+
+<!-- Archived audit and launch details from the previous handoff follow. -->
 
 Operator reports exit 0 for runner `7a3a1c699f5b00ed4b6cc76055457beec374e05d`,
 with last/previous each 283,336,151 bytes. Only the metric tail was returned;
