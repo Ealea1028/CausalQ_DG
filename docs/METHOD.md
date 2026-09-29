@@ -68,6 +68,19 @@ The full saved report, trace and compact checkpoint need a read-only audit
 before formal training. Disk free is 9.3 GiB; inventory cache/mount usage first.
 Never delete datasets, current environments, final checkpoints or evidence.
 
+The saved pilot audit passes at `3601ecd`: 2,000 contiguous source records,
+500 updates, 50 original-resolution targets, diagnostic mIoU `0.235189`,
+first/last-20 loss means `122.3003/57.5609`, checkpoint roundtrip zero and
+4.217 GiB peak reserved memory. The checkpoint SHA is
+`b9747a71b1871e201a7730d7b92ca1daf836c7fdc0bcf61b06bd2c9b40fbfda0`.
+Cache savings are negligible and on the system overlay, not the data volume.
+The next engineering gate stores source permutation/cursor/generator and
+Python/NumPy/CPU/CUDA RNG with model/optimizer/scheduler state. It executes
+20 source updates then replays update 21 twice from the same disk checkpoint,
+requiring matching source indices, losses, parameters and optimizer state.
+This is SAME-process continuation verification, not yet fresh-process resume,
+bitwise CUDA determinism, target accuracy or formal 40k authorization.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

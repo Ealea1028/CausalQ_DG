@@ -104,6 +104,7 @@ def main():
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--optimizer-updates", type=int, choices=(20, 500), default=20)
     parser.add_argument("--slide-report", type=Path)
+    parser.add_argument("--verify-continuation", action="store_true")
     args = parser.parse_args()
     report = dict(ok=False, purpose="scheduled_source_smoke_not_accuracy_or_exact_resume",
                   git_sha=git_output(Path(__file__).resolve().parents[1], "rev-parse", "HEAD"),
@@ -111,6 +112,8 @@ def main():
                   schedule_horizon_optimizer_updates=40000, target_labels_optimized=False,
                   formal_training_authorized=False, stage="preflight")
     try:
+        if args.verify_continuation and args.optimizer_updates != 20:
+            raise ValueError('Continuation verification is restricted to the 20-update gate')
         if args.run_dir.exists():
             raise FileExistsError("Run directory already exists; preserve it")
         if platform.python_version_tuple()[:2] != ("3", "10"):
@@ -178,6 +181,13 @@ def main():
             if len(dataset) != 24966:
                 raise ValueError("Source coverage changed")
             indices = torch.randperm(len(dataset), generator=torch.Generator().manual_seed(0))[:report['microbatches']].tolist()
+            sampler = None
+            if args.verify_continuation:
+                from tools.rein_training_state import SourceSampler
+                sampler = SourceSampler(len(dataset), seed=0)
+                if sampler.take(80) != indices:
+                    raise ValueError('Stateful sampler differs from accepted source prefix')
+                report['purpose'] = 'bounded_same_process_checkpoint_continuation_not_formal_training'
             args.run_dir.mkdir(parents=False)
             (args.run_dir / "metadata.json").write_text(json.dumps(report, indent=2))
             torch.cuda.reset_peak_memory_stats(0)
@@ -233,9 +243,13 @@ def main():
             report["stage"] = "checkpoint_roundtrip"
             checkpoint = args.run_dir / f"checkpoint_{args.optimizer_updates}updates.pth"
             saved = compact_state(model)
+            continuation = {}
+            if sampler is not None:
+                from tools.rein_training_state import capture_rng
+                continuation = dict(rng=capture_rng(include_cuda=True), sampler=sampler.state_dict())
             with checkpoint.open("xb") as stream:
                 torch.save(dict(model=saved, optimizer=wrapper.state_dict(), scheduler=scheduler.state_dict(),
-                                metadata=dict(report)), stream)
+                                metadata=dict(report), **continuation), stream)
             if checkpoint.stat().st_size > 2**30:
                 raise ValueError("Checkpoint exceeded 1 GiB budget; preserved for inspection")
             payload = torch.load(checkpoint, map_location="cpu", weights_only=True)
@@ -262,6 +276,10 @@ def main():
                           train_record_count=len(losses_seen), all_losses_finite=True,
                           checkpoint=str(checkpoint), checkpoint_sha256=digest(checkpoint),
                           checkpoint_bytes=checkpoint.stat().st_size, prediction_roundtrip_max_error=error)
+            if sampler is not None:
+                from tools.rein_training_state import verify_next_update
+                report['stage'] = 'continuation_replay'
+                report['continuation'] = verify_next_update(model, dataset, wrapper, scheduler, sampler, payload)
             if args.optimizer_updates == 500:
                 from mmseg.registry import METRICS
                 from tools.check_rein_slide_eval import evaluate_target

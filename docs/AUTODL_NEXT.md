@@ -1,4 +1,54 @@
-# AutoDL next step: Phase 16 saved pilot audit and storage inventory
+# AutoDL next step: Phase 16 bounded continuation state gate
+
+The saved pilot audit PASSES at `3601ecd0ccc5425de3080d44ccca4186d72aebe7`:
+2,000 microbatches, 500 updates, 50 targets, diagnostic mIoU 0.2351890098,
+checkpoint roundtrip zero, checkpoint 283,250,650 bytes, peak reserved 4.217 GiB.
+Checkpoint SHA `b9747a71b1871e201a7730d7b92ca1daf836c7fdc0bcf61b06bd2c9b40fbfda0`.
+Formal accuracy/CQE transfer remain unverified.
+
+Storage decision: pip cache 8 MB and conda disposable tarballs 161,065,321 bytes
+are on the system overlay, NOT `/dev/md0`. Cleaning them will not increase
+the data-volume 9.3 GiB free. Most older full runs already retain only finals.
+The three ViT-B runs (2.4 GiB each) and learned-null run (3.5 GiB) could contain
+intermediate checkpoints, but must not be blanket-deleted. No cleanup needed
+for the next gate; preserve all datasets, environments, weights and evidence.
+
+Next save a serializable source permutation/cursor/generator and primitive-only
+Python/NumPy RNG plus CPU/CUDA RNG tensors with the existing compact checkpoint.
+Bounded gate: fresh seed 0, 80 microbatches / 20 updates, unchanged 40k PolyLR,
+then TWO replays of the next four microbatches / update 21 from the SAME saved
+disk state. Extra 8 microbatches are diagnostic branches; neither is committed
+to the retained 20-update checkpoint. Check source indices, losses, parameters,
+optimizer moments, scheduler and sampler agreement, then restore the saved state.
+It does NOT verify fresh-process resume or exact bitwise GPU determinism.
+No target evaluation, CQE, formal training, environment installs or deletion.
+One checkpoint ~270 MiB, hard cap 1 GiB, minimum free 2 GiB.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo 'dirty_worktree'; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/check_rein_continuation_phase16.sh
+RESULT=$?
+echo "continuation_gate_exit_code=$RESULT"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+Return complete JSON, log tail, hashes, exit and disk. Pass: ok true, complete,
+optimizer_updates 20, continuation_replay_ok true, replay_count 2, extra microbatches
+8, matching indices, maximum loss difference <=1e-4, maximum parameter difference
+<=1e-5. Optimizer floating tensors allow atol 1e-6 / rtol 1e-5; integer states and
+sampler are exact. Stop for review before formal runner/fresh-process continuation.
+
+## Archived pilot audit and inventory (do not rerun separately)
 
 Pilot producer `b4e292d8da87d186f03ac4a4769f7464a2499ef8` exits 0.
 Report SHA `c90169ad57ea39a937bbd2760aff3122758399c28dc6138a6822689212fc789a`;
