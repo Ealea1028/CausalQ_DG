@@ -1,6 +1,23 @@
 # AutoDL next step: Phase 16 scheduled source-only GPU smoke
 
-## Recovery: JSON configuration containers (current action)
+## Recovery: restore tuple types from pinned source (current action)
+
+The `9ac1f8083f6bb446b4da1ec5c1e1b45d1701aa10` retry builds the model
+but FAILS constructing RandomCrop: JSON changed `(512, 512)` into a list.
+Exit 1 is not acceptance. This is still a runner serialization defect.
+Failed report SHA `8639e7def5339968bb8d9a46d8d8b78dffc3e5e27fcee561f5b134f6b6e2bbd8`;
+stderr SHA `bd5ed92d5e2c8b6cce6f2d69d882e1ad26df3e41121857e7bda088ad6e00fd16`.
+
+Now load the full typed configuration from the pinned upstream entry point,
+reapply the SAME versioned adapter using accepted physical dataset roots, and
+compare every JSON-normalized configuration value with the hash-pinned saved
+report. Fail on any drift. Only then wrap in mmengine.Config. This restores
+all original tuple/list distinctions (crop/resize/preprocessor/stride/betas),
+not just the field encountered so far; no protocol values are changed. Tests
+cover actual JSON roundtrip, tuple/list preservation and rejection of drift.
+Retry the same 80-microbatch gate; preserve both failed attempts. No installs.
+
+## Previous repair: JSON configuration containers
 
 The attempt at `d5558e19809ebb0b0f51957c8d21276a72cbce18` FAILED before
 optimization (`optimizer_updates=0`, exit 1): Mask2Former accesses

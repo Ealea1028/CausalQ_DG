@@ -44,11 +44,27 @@ def scheduled_lr(updates):
     return 1e-4 * (1 - updates / 40000) ** 0.9
 
 
-def restore_protocol_config(report):
-    """Restore recursive ConfigDict semantics lost during JSON serialization."""
-    from mmengine.config import Config
+def rebuild_protocol(report, upstream):
+    """Reapply the audited adapter to typed source; JSON is evidence, not code."""
+    from tools.rein_protocol_adapter import adapt_protocol
 
-    config = Config(accepted_protocol(report))
+    saved = accepted_protocol(report)
+    dataset = saved["train_dataloader"]["dataset"]
+    rebuilt = adapt_protocol(upstream, Path(dataset["data_root"]),
+                             Path(dataset["data_prefix"]["img_path"]),
+                             Path(dataset["data_prefix"]["seg_map_path"]))
+    if json.loads(json.dumps(rebuilt, default=str)) != saved:
+        raise ValueError("Reconstructed protocol differs from accepted JSON values")
+    return rebuilt
+
+
+def restore_protocol_config(report, rein_root):
+    """Restore both recursive ConfigDict and original tuple/list distinctions."""
+    from mmengine.config import Config
+    from tools.inspect_rein_protocol import CONFIG
+
+    upstream = Config.fromfile(Path(rein_root) / CONFIG).to_dict()
+    config = Config(rebuild_protocol(report, upstream))
     if config.model.decode_head.transformer_decoder.layer_cfg.cross_attn_cfg.num_heads <= 0:
         raise ValueError("Invalid transformer decoder head count")
     return config
@@ -109,8 +125,8 @@ def main():
             init_default_scope("mmseg")
             register_data_transforms()
             report["stage"] = "config_restore"
-            config = restore_protocol_config(data_report)
-            report["config_container"] = "mmengine.Config_recursive_ConfigDict"
+            config = restore_protocol_config(data_report, args.rein_root)
+            report["config_container"] = "typed_pinned_upstream_plus_audited_adapter"
             report["stage"] = "model_build"
             model = MODELS.build(config["model"])
             model.decode_head.init_weights()
@@ -131,6 +147,7 @@ def main():
                 raise ValueError("Expected accumulation 4")
             wrapper.initialize_count_status(model, 0, 80)
             scheduler = PolyLR(wrapper, eta_min=0, power=0.9, begin=0, end=40000, by_epoch=False)
+            report["stage"] = "dataset_build"
             dataset = DATASETS.build(config["train_dataloader"]["dataset"])
             if len(dataset) != 24966:
                 raise ValueError("Source coverage changed")

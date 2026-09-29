@@ -29,3 +29,12 @@ stderr SHA `effe107293daf24abbf0caec31531b86488b4cb7689470ece011b3295af9c6fe`.
 Restoring the accepted configuration through mmengine.Config fixes the caller
 contract without changing model values or experiment protocol. CPU tests cover
 the restoration boundary; no GPU success is inferred from them.
+
+The `9ac1f80` retry successfully constructs the model, but dataset construction
+fails because JSON also erased tuple types required by RandomCrop. Exit 1;
+report SHA `8639e7def5339968bb8d9a46d8d8b78dffc3e5e27fcee561f5b134f6b6e2bbd8`,
+stderr SHA `bd5ed92d5e2c8b6cce6f2d69d882e1ad26df3e41121857e7bda088ad6e00fd16`.
+The current repair reconstructs the full typed pinned-source configuration via
+the same adapter and rejects any JSON-normalized value difference from the
+accepted report. Both recursive attribute semantics and all original tuples
+are preserved, while ordinary lists remain lists. GPU integration is pending.

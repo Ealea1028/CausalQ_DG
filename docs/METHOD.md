@@ -33,6 +33,14 @@ after input resize, unlike the earlier cropped inference smoke. Adapted data
 pipelines require AutoDL acceptance before any scheduled GPU run. This is not
 an exact paper reproduction or evidence of successful CQE transfer.
 
+The adapted data gate is accepted at `b645793`. The scheduled accumulation
+gate has not passed: attempts `d5558e1` and `9ac1f80` failed on configuration
+types lost in JSON, before source optimization. Runtime configuration must be
+rebuilt from the pinned typed upstream source through the unchanged adapter,
+then checked for complete JSON-value equality with the accepted report before
+model/dataset construction. Saved JSON remains provenance evidence, not a
+lossless executable configuration. Formal REIN training is still deferred.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

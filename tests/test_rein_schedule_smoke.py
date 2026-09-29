@@ -3,8 +3,51 @@ import torch
 import copy
 import sys
 from types import ModuleType, SimpleNamespace
+import json
+from pathlib import Path
 
-from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr, restore_protocol_config
+from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr, restore_protocol_config, rebuild_protocol
+
+
+def protocol_fixture():
+    from tools.rein_protocol_adapter import adapt_protocol
+    upstream = dict(
+        model=dict(backbone=dict(init_cfg="old"), decode_head=dict(transformer_decoder=dict(
+            layer_cfg=dict(cross_attn_cfg=dict(num_heads=8))))),
+        train_dataloader=dict(dataset=dict(pipeline=[dict(type="LoadAnnotations"),
+            dict(type="RandomCrop", crop_size=(512, 512))])),
+        val_dataloader=dict(dataset=dict(datasets=[dict(type="CityscapesDataset", pipeline=[],
+            scale=(1024, 512))])),
+        optim_wrapper=dict(optimizer=dict(betas=(0.9, 0.999))),
+        default_hooks=dict(checkpoint=dict(interval=4000)),
+        model_test_sizes=dict(crop_size=(512, 512), stride=(341, 341)),
+        scales=[256, 512, 1024])
+    adapted = adapt_protocol(upstream, Path('/data'), Path('/images'), Path('/labels'))
+    report = dict(ok=True, stage="complete", exact_project_pairing=True, source_pairs=24966,
+                  target_pairs=500, samples=[{}]*10, target_labels_optimized=False,
+                  adapted_protocol=json.loads(json.dumps(adapted)))
+    return upstream, report
+
+
+def test_rebuild_preserves_all_original_container_types_and_values():
+    upstream, report = protocol_fixture()
+    original = copy.deepcopy(report)
+    result = rebuild_protocol(report, upstream)
+    crop = next(step for step in result['train_dataloader']['dataset']['pipeline']
+                if step['type'] == 'ReinValidRandomCrop')
+    assert crop['crop_size'] == (512, 512) and isinstance(crop['crop_size'], tuple)
+    assert isinstance(result['optim_wrapper']['optimizer']['betas'], tuple)
+    assert isinstance(result['model_test_sizes']['stride'], tuple)
+    assert isinstance(result['scales'], list)
+    assert json.loads(json.dumps(result)) == report['adapted_protocol']
+    assert report == original
+
+
+def test_rebuild_rejects_config_drift():
+    upstream, report = protocol_fixture()
+    upstream['scales'].append(2048)
+    with pytest.raises(ValueError, match='differs'):
+        rebuild_protocol(report, upstream)
 
 
 def test_json_config_restoration_routes_through_recursive_config(monkeypatch):
@@ -19,18 +62,17 @@ def test_json_config_restoration_routes_through_recursive_config(monkeypatch):
         calls.append(copy.deepcopy(value))
         return recursive(value)
     module.Config = factory
+    upstream, report = protocol_fixture()
+    factory.fromfile = lambda path: SimpleNamespace(to_dict=lambda: copy.deepcopy(upstream))
     monkeypatch.setitem(sys.modules, "mmengine.config", module)
-    raw = {"model": {"decode_head": {"transformer_decoder": {
-        "layer_cfg": {"cross_attn_cfg": {"num_heads": 8}}}}}}
-    report = dict(ok=True, stage="complete", exact_project_pairing=True, source_pairs=24966,
-                  target_pairs=500, samples=[{}]*10, target_labels_optimized=False, adapted_protocol=raw)
     original = copy.deepcopy(report)
-    result = restore_protocol_config(report)
+    result = restore_protocol_config(report, Path('/rein'))
     assert result.model.decode_head.transformer_decoder.layer_cfg.cross_attn_cfg.num_heads == 8
-    assert calls == [raw] and report == original
+    assert json.loads(json.dumps(calls[0])) == report['adapted_protocol'] and report == original
     module.Config = lambda value: value
+    module.Config.fromfile = factory.fromfile
     with pytest.raises(AttributeError):
-        restore_protocol_config(report)
+        restore_protocol_config(report, Path('/rein'))
 
 
 def test_update_schedule_units():
