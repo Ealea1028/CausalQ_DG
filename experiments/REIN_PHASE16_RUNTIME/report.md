@@ -1,5 +1,20 @@
 # Phase 16 feasibility and runtime acceptance
 
+## Adapted protocol data gate (pending)
+
+Repaired inventory exit 0 at `ede170c4fa2c5c330581771e9cf5c4f659360e9d`.
+JSON hash `2cdf617c9370735ac275c4875af52f3a017898dd690ff3cc793298322298e64a`;
+stderr hash `df377c839408bd0115d8ec0bc1708542b1ac7b3ff7f59be67e800ebbcab302c6`.
+Only the report tail was supplied; next gate verifies full saved JSON before use.
+The versioned protocol adapter resolves project paths/train IDs, narrows datasets
+and evaluator to Cityscapes and declares batch/clip/crop/storage deviations.
+Next AutoDL action checks path pairing and ten pipeline samples without model,
+GPU or optimizer. Formal scheduled training and checkpoint loading stay pending.
+Local verification: 156 CPU tests pass with the existing PyTorch interpreter
+and base-Anaconda pytest workaround. Tests cover nonmutating adaptation,
+single-target isolation, batch accumulation, valid-pixel crop fallback and
+train-ID rejection. OpenMMLab dataset execution remains AutoDL-only.
+
 Scope: GTA5 to Cityscapes only. Evidence supplied by the AutoDL operator;
 no local GPU results are claimed.
 

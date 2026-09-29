@@ -23,6 +23,16 @@ full Cityscapes-only evaluation must be explicit before formal training.
 An accepted real-data smoke and a source-only REIN baseline are prerequisites
 for any later transfer claim. The main implementation remains DINOv3 Static R=2.
 
+The upstream protocol inventory exits 0 at `ede170c`. The adapted baseline keeps
+the upstream model, photometric distortion and paramwise 40k PolyLR protocol,
+with physical batch 1/accumulation 4, clip 1, workers 0, seed 0 and one retained
+checkpoint. GTA5 converted `.png` train IDs must not be remapped; scale-only
+alignment and valid-pixel crop fallback are declared safety deviations. Both
+target dataset and metric are narrowed to Cityscapes; full original GT is kept
+after input resize, unlike the earlier cropped inference smoke. Adapted data
+pipelines require AutoDL acceptance before any scheduled GPU run. This is not
+an exact paper reproduction or evidence of successful CQE transfer.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

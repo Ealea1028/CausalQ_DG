@@ -1,4 +1,58 @@
-# AutoDL next step: Phase 16 pinned REIN formal-protocol inventory
+# AutoDL next step: Phase 16 adapted data-pipeline gate
+
+The repaired inventory exits 0 at `ede170c4fa2c5c330581771e9cf5c4f659360e9d`;
+JSON SHA `2cdf617c9370735ac275c4875af52f3a017898dd690ff3cc793298322298e64a`.
+The operator returned only the inventory tail; the next script reads and checks
+the complete saved JSON (ok/stage/hash) before adaptation. Do not rerun inventory.
+
+The versioned adapter retains upstream architecture, source shortest-edge resize,
+cat-ratio crop, flip, photometric distortion, paramwise AdamW, and 40k PolyLR.
+Explicit deviations: physical batch 1/accumulation 4, clipping 1, workers 0,
+seed 0, one retained checkpoint; no best-by-target checkpoint selection.
+This is an adapted REIN baseline, NOT exact paper reproduction. Future runner
+must safely load the accepted frozen weights because automatic init is disabled.
+The next action is NOT that runner and does not train or save checkpoints.
+
+GTA5 roots are resolved with existing project pairing logic, `.png` labels are
+already train IDs (no remap or reduce-zero). Source-only label alignment uses
+the existing nearest resampling/aspect gate before official resize; an all-ignore
+random crop alone triggers a valid-pixel fallback. These safety deviations are
+explicit, not new learning mechanisms. Cityscapes-only dataset and IoUMetric
+replace both upstream multi-target components. Target input retains upstream
+1024x512 resize; labels retain ORIGINAL resolution. Model test policy remains
+512 slide crops, stride 341. No target labels enter source optimization.
+
+Run only a dataset gate: compare all 24966/500 path pairs with existing project
+pairing, then decode five source and five target samples through adapted pipelines.
+No model, GPU, weight load, optimizer, installs or data copies; small reports only.
+Existing 9.9 GiB free is sufficient. This does not authorize formal training.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/check_rein_data_protocol_phase16.sh
+    echo "data_protocol_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return complete JSON, stderr tail, hashes and Git/disk evidence. Pass: ok true,
+stage complete, exact pairing true, source/target counts 24966/500, ten pipeline
+samples with valid IDs, matched source image/label shapes and original target GT.
+Preserve failures. Stop before scheduled GPU training/accumulation/checkpoint gates.
+
+## Completed upstream protocol inventory (do not repeat)
 
 ## Recovery of the inventory tool (current action)
 

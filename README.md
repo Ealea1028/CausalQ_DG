@@ -18,8 +18,8 @@ Phase 16's pinned REIN runtime now passes CUDA NMS and xformers attention.
 The backbone and full Mask2Former synthetic forward/backward gates also pass.
 The 20 source-data optimizer updates returned finite losses and exit 0.
 The complete report passes target inference, frozen-weight, normalization and
-memory audit (3.881 GiB peak reserved). Next inspect the pinned upstream formal
-training/data protocol before adapting the source-only baseline; training and
+memory audit (3.881 GiB peak reserved). Pinned protocol inventory exits 0.
+Next verify adapted GTA5/Cityscapes data pipelines before source-only training;
 CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
