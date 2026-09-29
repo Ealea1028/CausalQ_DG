@@ -18,6 +18,24 @@ from tools.check_rein_runtime import EXPECTED_VERSIONS, git_output, validate_ver
 from tools.check_rein_segmentor import validate_losses, validate_prediction
 
 DATA_SHA = "b893b991c4bc85eb6105e8d8ae1f39df670b256ce12a10aaca8c1a7c89d71c69"
+SLIDE_SHA = "a97165a09f67d49f38c11e82e9a8341f56720471148b0eabea02ae76ce4fcfc7"
+
+
+def training_budget(updates):
+    if updates not in (20, 500):
+        raise ValueError("Only accepted bounded budgets 20 or 500 updates are allowed")
+    return 4 * updates
+
+
+def validate_slide_gate(report):
+    if (report.get('ok') is not True or report.get('stage') != 'complete'
+            or report.get('sample_count') != 5 or report.get('target_labels_optimized') is not False
+            or report.get('git_sha') != '59d522bcac07a73c4cd0b1cb1185983a389b7281'
+            or len(report.get('samples', [])) != 5):
+        raise ValueError("Accepted slide evaluation report is incomplete")
+    for sample in report['samples']:
+        if sample['prediction_shape'] != [1024, 2048] or sample['gt_shape'] != [1024, 2048]:
+            raise ValueError("Accepted slide geometry mismatch")
 
 
 def digest(path):
@@ -84,10 +102,12 @@ def main():
     parser.add_argument("--weights", type=Path, required=True)
     parser.add_argument("--data-report", type=Path, required=True)
     parser.add_argument("--run-dir", type=Path, required=True)
+    parser.add_argument("--optimizer-updates", type=int, choices=(20, 500), default=20)
+    parser.add_argument("--slide-report", type=Path)
     args = parser.parse_args()
     report = dict(ok=False, purpose="scheduled_source_smoke_not_accuracy_or_exact_resume",
                   git_sha=git_output(Path(__file__).resolve().parents[1], "rev-parse", "HEAD"),
-                  seed=0, microbatches=80, accumulation=4, optimizer_updates=0,
+                  seed=0, microbatches=training_budget(args.optimizer_updates), accumulation=4, optimizer_updates=0,
                   schedule_horizon_optimizer_updates=40000, target_labels_optimized=False,
                   formal_training_authorized=False, stage="preflight")
     try:
@@ -99,6 +119,12 @@ def main():
             raise ValueError("Accepted report/weights hash mismatch")
         data_report = json.loads(args.data_report.read_text())
         accepted_protocol(data_report)
+        if args.optimizer_updates == 500:
+            if args.slide_report is None or digest(args.slide_report) != SLIDE_SHA:
+                raise ValueError("500-update pilot requires accepted slide-report SHA")
+            validate_slide_gate(json.loads(args.slide_report.read_text()))
+            report.update(purpose="500update_source_pilot_with_50image_diagnostic_not_formal_accuracy",
+                          slide_report_sha256=SLIDE_SHA, initialization="fresh_seed0_not_resume")
         if git_output(args.rein_root, "rev-parse", "HEAD") != REIN_SHA or git_output(args.rein_root, "status", "--porcelain"):
             raise ValueError("REIN source must be pinned and clean")
         if shutil.disk_usage(args.run_dir.parent).free < 2 * 2**30:
@@ -145,17 +171,18 @@ def main():
             wrapper = build_optim_wrapper(model, config["optim_wrapper"])
             if wrapper._accumulative_counts != 4:
                 raise ValueError("Expected accumulation 4")
-            wrapper.initialize_count_status(model, 0, 80)
+            wrapper.initialize_count_status(model, 0, report['microbatches'])
             scheduler = PolyLR(wrapper, eta_min=0, power=0.9, begin=0, end=40000, by_epoch=False)
             report["stage"] = "dataset_build"
             dataset = DATASETS.build(config["train_dataloader"]["dataset"])
             if len(dataset) != 24966:
                 raise ValueError("Source coverage changed")
-            indices = torch.randperm(len(dataset), generator=torch.Generator().manual_seed(0))[:80].tolist()
+            indices = torch.randperm(len(dataset), generator=torch.Generator().manual_seed(0))[:report['microbatches']].tolist()
             args.run_dir.mkdir(parents=False)
             (args.run_dir / "metadata.json").write_text(json.dumps(report, indent=2))
             torch.cuda.reset_peak_memory_stats(0)
             report["stage"] = "source_optimization"
+            losses_seen = []
             with (args.run_dir / "train.jsonl").open("x") as trace:
                 for iteration, index in enumerate(indices, 1):
                     item = dataset[index]
@@ -188,11 +215,12 @@ def main():
                         raise ValueError("Optimizer-update PolyLR mismatch")
                     record = dict(iteration=iteration, dataset_index=index, loss=total.item(),
                                   gradient_norm=norm, optimizer_update=update, lr=rates[0])
+                    losses_seen.append(record['loss'])
                     trace.write(json.dumps(record) + "\n")
                     trace.flush()
                     print(json.dumps(record), file=sys.stderr)
                     del total, losses
-            if report["optimizer_updates"] != 20 or not torch.equal(frozen, model.backbone.patch_embed.proj.weight):
+            if report["optimizer_updates"] != args.optimizer_updates or not torch.equal(frozen, model.backbone.patch_embed.proj.weight):
                 raise ValueError("Update count/frozen backbone gate failed")
             if any(not torch.isfinite(p).all().item() for p in model.parameters() if p.requires_grad):
                 raise FloatingPointError("Non-finite trained parameter")
@@ -203,7 +231,7 @@ def main():
                 before = model.encode_decode(inputs, meta)
             validate_prediction(before)
             report["stage"] = "checkpoint_roundtrip"
-            checkpoint = args.run_dir / "checkpoint_20updates.pth"
+            checkpoint = args.run_dir / f"checkpoint_{args.optimizer_updates}updates.pth"
             saved = compact_state(model)
             with checkpoint.open("xb") as stream:
                 torch.save(dict(model=saved, optimizer=wrapper.state_dict(), scheduler=scheduler.state_dict(),
@@ -228,8 +256,19 @@ def main():
             error = (before - after).abs().max().item()
             if error > 1e-5 or any(not torch.equal(named[name].detach().cpu(), tensor) for name, tensor in saved.items()):
                 raise ValueError("Checkpoint restoration mismatch")
-            if any(abs(group["lr"] - scheduled_lr(20)) > 1e-10 for group in wrapper.optimizer.param_groups):
+            if any(abs(group["lr"] - scheduled_lr(args.optimizer_updates)) > 1e-10 for group in wrapper.optimizer.param_groups):
                 raise ValueError("Restored optimizer LR mismatch")
+            report.update(first_20_loss_mean=sum(losses_seen[:20])/20, last_20_loss_mean=sum(losses_seen[-20:])/20,
+                          train_record_count=len(losses_seen), all_losses_finite=True,
+                          checkpoint=str(checkpoint), checkpoint_sha256=digest(checkpoint),
+                          checkpoint_bytes=checkpoint.stat().st_size, prediction_roundtrip_max_error=error)
+            if args.optimizer_updates == 500:
+                from mmseg.registry import METRICS
+                from tools.check_rein_slide_eval import evaluate_target
+                report['stage'] = 'target_diagnostic'
+                target = DATASETS.build(config.val_dataloader.dataset)
+                metric = METRICS.build(config.val_evaluator)
+                report['validation'] = evaluate_target(model, target, metric, 50)
             report.update(ok=True, stage="complete", checkpoint=str(checkpoint), checkpoint_sha256=digest(checkpoint),
                           checkpoint_bytes=checkpoint.stat().st_size, prediction_roundtrip_max_error=error,
                           peak_allocated_gib=round(torch.cuda.max_memory_allocated(0)/2**30, 3),

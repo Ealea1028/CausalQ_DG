@@ -2,8 +2,15 @@ import numpy as np
 import pytest
 import torch
 
-from tools.check_rein_slide_eval import confusion, restore_compact
+from tools.check_rein_slide_eval import confusion, evaluate_target, restore_compact
 from tools.rein_schedule_smoke import compact_state
+
+
+def test_target_evaluation_rejects_unbounded_or_incomplete_coverage():
+    with pytest.raises(ValueError, match='bounded'):
+        evaluate_target(None, [None] * 500, None, 500)
+    with pytest.raises(ValueError, match='bounded'):
+        evaluate_target(None, [None] * 50, None, 50)
 
 
 def test_confusion_gt_rows_prediction_columns_ignore_excluded():

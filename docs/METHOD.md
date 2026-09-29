@@ -50,6 +50,16 @@ official IoUMetric counts on five images. No target optimization or accuracy
 acceptance is permitted by that short evaluation. Formal REIN training remains
 deferred.
 
+The five-image slide gate exits 0 at `59d522b`. The reported zero/low IoUs
+after only 20 updates are not a successful segmentation baseline; absent-class
+metric NaNs must be distinguished from non-finite logits. Before proceeding,
+the saved report is hash-pinned and checked for complete original geometry.
+The next bounded pilot starts fresh at seed 0, uses 2,000 source microbatches
+and 500 updates with the SAME 40k-update PolyLR horizon, retains one compact
+checkpoint, and diagnoses 50 original-resolution target images. Target labels
+are never optimized. It is neither an exact-resume run nor formal 40k training,
+and has no accuracy threshold, target checkpoint selection, or CQE mechanism.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

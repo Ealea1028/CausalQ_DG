@@ -45,6 +45,54 @@ def confusion(prediction, label):
     return np.bincount(19 * label[valid].astype(np.int64) + prediction[valid], minlength=361).reshape(19, 19)
 
 
+def evaluate_target(model, dataset, metric, count):
+    """Shared bounded metric path; never optimizes target labels."""
+    import torch
+    import numpy as np
+
+    if count not in (5, 50) or len(dataset) != 500:
+        raise ValueError("Expected bounded sample count and full Cityscapes dataset")
+    metric.dataset_meta = dataset.metainfo
+    matrix = np.zeros((19, 19), dtype=np.int64)
+    samples = []
+    model.eval()
+    for index in range(count):
+        item = dataset[index]
+        gt = item['data_samples'].gt_sem_seg.data[0].cpu().numpy().copy()
+        shape = tuple(item['data_samples'].metainfo['ori_shape'])
+        if gt.shape != shape or shape != (1024, 2048):
+            raise ValueError("Original Cityscapes GT resolution required")
+        with torch.no_grad():
+            outputs = model.test_step(dict(inputs=[item['inputs']], data_samples=[item['data_samples']]))
+        output = outputs[0]
+        scores = output.seg_logits.data
+        pred = output.pred_sem_seg.data[0].cpu().numpy()
+        if tuple(scores.shape) != (19, *shape) or not torch.isfinite(scores).all().item():
+            raise ValueError("Invalid original-resolution logits")
+        if not np.array_equal(output.gt_sem_seg.data[0].cpu().numpy(), gt):
+            raise ValueError("Inference changed target GT")
+        current = confusion(pred, gt)
+        metric.process({}, [output.to_dict()])
+        expected = (current.diagonal(), current.sum(0) + current.sum(1) - current.diagonal(), current.sum(0), current.sum(1))
+        if any(not np.array_equal(a.cpu().numpy(), b) for a, b in zip(metric.results[-1], expected)):
+            raise ValueError("Official/independent metric count mismatch")
+        matrix += current
+        samples.append(dict(index=index, img_path=output.metainfo['img_path'],
+                            prediction_shape=list(pred.shape), gt_shape=list(gt.shape), valid_pixel_count=int(current.sum())))
+        print(f"slide_sample_complete={index + 1}/{count}", file=sys.stderr)
+        del outputs, output, scores
+    union = matrix.sum(0) + matrix.sum(1) - matrix.diagonal()
+    valid = union > 0
+    iou = np.divide(matrix.diagonal(), union, out=np.zeros(19, dtype=float), where=valid)
+    official = metric.compute_metrics(metric.results)
+    if abs(float(official['mIoU']) / 100 - float(iou[valid].mean())) > 5.1e-5:
+        raise ValueError("Rounded official/independent mIoU mismatch")
+    return dict(sample_count=count, samples=samples, diagnostic_miou=float(iou[valid].mean()),
+                official_diagnostic_metrics={key: float(value) for key, value in official.items()},
+                class_iou=[float(iou[i]) if valid[i] else None for i in range(19)],
+                valid_classes=int(valid.sum()), confusion_matrix=matrix.tolist(), total_valid_pixels=int(matrix.sum()))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ("rein-root", "weights", "data-report", "schedule-report", "checkpoint"):

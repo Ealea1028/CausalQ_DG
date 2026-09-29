@@ -6,7 +6,24 @@ from types import ModuleType, SimpleNamespace
 import json
 from pathlib import Path
 
-from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr, restore_protocol_config, rebuild_protocol
+from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr, restore_protocol_config, rebuild_protocol, training_budget, validate_slide_gate
+
+
+def test_bounded_pilot_budget_cannot_start_formal_training():
+    assert training_budget(20) == 80
+    assert training_budget(500) == 2000
+    with pytest.raises(ValueError):
+        training_budget(40000)
+
+
+def test_pilot_requires_original_resolution_slide_acceptance():
+    report = dict(ok=True, stage='complete', sample_count=5, target_labels_optimized=False,
+                  git_sha='59d522bcac07a73c4cd0b1cb1185983a389b7281',
+                  samples=[dict(prediction_shape=[1024, 2048], gt_shape=[1024, 2048]) for _ in range(5)])
+    validate_slide_gate(report)
+    report['samples'][0]['gt_shape'] = [512, 512]
+    with pytest.raises(ValueError):
+        validate_slide_gate(report)
 
 
 def protocol_fixture():

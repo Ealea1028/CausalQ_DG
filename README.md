@@ -22,8 +22,10 @@ memory audit (3.881 GiB peak reserved). Pinned protocol inventory exits 0.
 Adapted GTA5/Cityscapes data pipelines now pass the operator's gate at b645793.
 The 80-microbatch / 20-update accumulated PolyLR gate passes at 3ca6731,
 including exact compact checkpoint restoration (3.920 GiB peak reserved).
-Next verify five original-resolution Cityscapes sliding predictions and
-IoUMetric plumbing before any formal source-only training;
+Five-image original-resolution slide evaluation exits 0 at 59d522b; its low
+20-update diagnostic scores are not accuracy acceptance. Next run a bounded
+fresh-seed 500-update source pilot and 50-image diagnostic;
+formal source-only training and
 CQE transfer remain pending.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.

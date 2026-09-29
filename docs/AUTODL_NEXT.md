@@ -1,4 +1,50 @@
-# AutoDL next step: Phase 16 five-image original-resolution slide evaluation
+# AutoDL next step: Phase 16 bounded 500-update source pilot
+
+The operator reports slide evaluation exit 0 at
+`59d522bcac07a73c4cd0b1cb1185983a389b7281`.
+Report SHA `a97165a09f67d49f38c11e82e9a8341f56720471148b0eabea02ae76ce4fcfc7`;
+stderr SHA `8e3c8dd0e4ad3d07513c6303a5e05ac69a36fd5978244e5d1b54597fbb5b55b2`.
+Only the metric tail was supplied; the pilot must verify the full saved report
+hash, ok/complete state and all five original-resolution geometries before
+optimization. Low scores after 20 updates are not accuracy acceptance.
+
+Run only a fresh seed-0 source pilot: 500 optimizer updates, 2,000 microbatches,
+accumulation 4, unchanged 40k-update PolyLR horizon, float32, pinned isolated
+runtime, unchanged accepted model/data protocol. Then restore one compact
+checkpoint and diagnose the first 50 Cityscapes-val images with standard slide
+postprocessing and independent versus official metric counts. No CQE, target
+optimization, model selection, formal 40k training or exact-resume claim.
+
+One checkpoint is expected near 270 MiB (hard cap 1 GiB); no datasets or frozen
+weights are copied. Require at least 2 GiB free; current 9.6 GiB is sufficient
+for this bounded action. Preserve all earlier reports/checkpoints. No cleanup.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo 'dirty_worktree'; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/train_rein_pilot_phase16.sh
+RESULT=$?
+echo "pilot_exit_code=$RESULT"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+The outer subshell prevents a failing preflight from closing the interactive
+terminal. Return full pilot JSON, stderr tail, hashes, exit and disk. Acceptance
+requires ok/complete, 2,000 contiguous finite training records, 500 updates,
+checkpoint roundtrip <=1e-5, 50 original-resolution predictions and metric
+agreement. The diagnostic mIoU is reported without a score acceptance floor.
+Stop here until AutoDL returns this evidence.
+
+## Archived five-image evaluation instructions (do not rerun)
 
 The scheduled source gate PASSES at
 `3ca67315bc4f1dc91f1891de3f305e3162a0a53a`: 80 microbatches, 20 updates,
