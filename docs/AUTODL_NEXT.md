@@ -1,4 +1,55 @@
-# AutoDL next step: Phase 16 saved real-data report audit
+# AutoDL next step: Phase 16 pinned REIN formal-protocol inventory
+
+The complete real-data report passed audit at
+`b85f105384d07c88f23f89bec1723aa6a6c92c7e`: 20 optimizer steps, five target
+predictions, maximum objective reconstruction error `1.7642974853515625e-05`,
+normalization error `4.76837158203125e-07`, allocated/reserved memory
+`3.537/3.881 GiB`. Adapter update and frozen patch invariance pass. This accepts
+the engineering smoke, NOT accuracy, the formal baseline or CQE transfer.
+
+Before defining formal training, inspect the effective pinned upstream config:
+`configs/dinov2/rein_dinov2_mask2former_512x512_bs1x4.py`.
+Its leaf source declares batch 4, PhotoMetricDistortion, parameter-specific
+decay, PolyLR over 40k, validation every 10k and three retained checkpoints.
+These differ from the accepted batch-1, constant-lr, project-transform smoke.
+Inherited GTA5 label handling, nested local image/label paths and full target
+test pipeline still need inspection. Do not blindly use smoke settings or
+remap existing train IDs a second time. Only Cityscapes validation is in scope,
+even if the upstream inherited config references other target datasets.
+
+Next operation reads the pinned upstream configuration/source and writes small
+JSON/stderr files. It builds NO model/dataset, decodes no images, loads no
+weights, and does not install, train, delete or save checkpoints. At 9.9 GiB
+free, avoid launching unrestricted checkpoint generation. Formal storage policy
+and effective-batch adaptation must be versioned after reviewing this inventory.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" = "$EXPECTED_SHA" ]; then
+    bash scripts/inspect_rein_protocol_phase16.sh
+    echo "protocol_inventory_exit_code=$?"
+  else
+    echo 'preflight_failed: wrong source'
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the complete JSON (a text attachment is fine), stderr tail, hashes, exit
+code and Git/disk evidence. Pass: `ok: true`, stage complete, pinned clean
+upstream, effective loaders/optimizer/schedule/test policy and source hashes.
+This inventory is not a GPU result or training authorization. Stop here before
+adapting/running a fresh scheduled baseline smoke. No CQE or additional targets.
+
+## Completed saved real-data report audit (do not repeat)
 
 The operator returned all 20 finite source losses/norms, positive valid pixels,
 exit 0, source `17883de0c87abe3ed9bd051b260ba20bc259999e`, and 9.9 GiB free.

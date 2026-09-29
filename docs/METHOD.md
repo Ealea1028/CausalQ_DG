@@ -13,9 +13,13 @@ diagnostic using existing project GTA5 geometry/crop logic and an audited
 normalization bridge. Five target center-crop predictions are compatibility
 checks only; Cityscapes labels are never optimized and no mIoU is reported.
 There is no CQE, checkpoint or formal training in this smoke.
-The operator's 20-step trace at `17883de` is finite and exits 0, but full JSON
-acceptance remains pending the read-only saved-report audit. High reported
-gradient norms are pre-clipping; they alone do not invalidate the smoke.
+The operator's 20-step trace at `17883de` is finite and exits 0; full saved-report
+audit passes at `b85f105`, with normalization error `4.768e-7` and peak reserved
+memory `3.881 GiB`. High norms are pre-clipping. The real-data engineering gate
+is accepted, not accuracy. Next inspect pinned upstream effective data/optimizer/
+schedule/evaluation settings before versioning a project source-only protocol.
+Smoke settings are not exact upstream reproduction; train-ID conversion and
+full Cityscapes-only evaluation must be explicit before formal training.
 An accepted real-data smoke and a source-only REIN baseline are prerequisites
 for any later transfer claim. The main implementation remains DINOv3 Static R=2.
 

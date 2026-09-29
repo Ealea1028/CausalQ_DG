@@ -3,6 +3,28 @@
 Scope: GTA5 to Cityscapes only. Evidence supplied by the AutoDL operator;
 no local GPU results are claimed.
 
+## Accepted real-data smoke audit
+
+Saved-report audit source `b85f105384d07c88f23f89bec1723aa6a6c92c7e` returns
+true and exit 0 for producer `17883de0c87abe3ed9bd051b260ba20bc259999e`.
+Twenty optimizer steps and five target predictions; maximum objective error
+`1.7642974853515625e-05`; normalization round-trip error
+`4.76837158203125e-07`; peak allocated/reserved `3.537/3.881 GiB`.
+This also accepts adapter-change and frozen-patch invariance producer checks.
+The hashes in the historical excerpt below are matched by the audit.
+Disk remains 9.9 GiB. No accuracy claim or formal training authorization.
+
+Next boundary: inspect effective configuration and dataset source in the pinned
+AutoDL REIN checkout. The [official pinned entry configuration](https://github.com/w1oves/Rein/blob/dc063429c4dadc0da9c6252b3db22fc55a9882ab/configs/dinov2/rein_dinov2_mask2former_512x512_bs1x4.py)
+declares batch 4, appearance augmentation, parameter-wise decay and 40k PolyLR.
+The project smoke is not that protocol. Source paths/train-ID mapping, full
+target evaluation, single-GPU effective batch and checkpoint storage require
+explicit adaptation before claiming a comparable baseline. The next remote
+inspection does not build a model or decode any dataset.
+Local verification: 152 CPU tests pass with the existing PyTorch interpreter
+and base Anaconda pytest workaround. Upstream configuration parsing remains
+an AutoDL-only check; no local REIN runtime or weights were loaded.
+
 ## Real-data execution excerpt (complete report audit pending)
 
 Operator source `17883de0c87abe3ed9bd051b260ba20bc259999e`; exit 0;
