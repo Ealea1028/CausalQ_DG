@@ -16,7 +16,67 @@ conversion. The audit report SHA256 is
 `6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
 There were 476 GiB available system RAM and 16 GiB free data volume.
 
-## Current AutoDL action: diagnose CUDA visibility in both environments
+## Current AutoDL action: rerun the complete REIN runtime gate
+
+Both CUDA diagnostics passed at `1badc850f35817352e943139baf94b12eee965f4`:
+the main PyTorch 2.7/cu126 and isolated PyTorch 2.0.1/cu118 environments
+each saw one RTX 4090 D (capability 8.9, driver 595.71.05) and completed
+the scalar compute probe. Main/rein log hashes respectively:
+`cbf3646e2b74c4205b30b9c57e7d58cb33e1d4ca888a42d7bf1784bbb878cfaf`
+and `4f7736a3ac085b86ccadffcf10b47d87b079072ccb57622a4fffe3792c831a39`.
+This establishes current basic GPU access, not the cause of the earlier
+failure or full REIN compatibility. Preserve `NVIDIA_VISIBLE_DEVICES=void`:
+the actual probes succeeded without overriding it. Both runs emitted an
+invalid `OMP_NUM_THREADS` warning; set a valid value for the next process.
+There are still 11 GiB free; no installation or download is needed.
+
+Run only the existing runtime gate in the installed isolated prefix. It
+checks exact package/source pins, CUDA NMS, REIN model registration and
+configuration parsing. It does not build a model, load weights or datasets,
+or execute deformable-attention forward. New output paths preserve all
+previous reports. No training is authorized until this result is reviewed.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+REIN_PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
+BASE=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_runtime_gpu_recheck_v1
+REPORT="$BASE.json"
+ERROR_LOG="$BASE.stderr.log"
+
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ] \
+    || [ -n "$(git status --porcelain)" ] \
+    || [ ! -x "$REIN_PY" ] \
+    || [ -e "$REPORT" ] || [ -e "$ERROR_LOG" ]; then
+    echo 'preflight_failed: wrong source, missing interpreter or existing outputs'
+  else
+    OMP_NUM_THREADS=1 "$REIN_PY" -m tools.check_rein_runtime \
+      --rein-root /root/autodl-tmp/external/rein-phase16-dc063429 \
+      --expected-rein-sha dc063429c4dadc0da9c6252b3db22fc55a9882ab \
+      2> "$ERROR_LOG" | tee "$REPORT"
+    RUNTIME_EXIT=${PIPESTATUS[0]}
+    echo "runtime_exit_code=$RUNTIME_EXIT"
+    cat "$ERROR_LOG"
+    sha256sum "$REPORT" "$ERROR_LOG"
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the JSON, runtime exit code, stderr, hashes and source/disk evidence.
+Success requires `ok: true`, CUDA NMS kept indices `[0]`, and both REIN
+registrations true. If it fails, preserve the installed environment and
+outputs and return the actual error; do not rerun bootstrap or edit upstream
+source. Stop at this remote verification boundary.
+
+## Completed paired CUDA diagnostic handoff (do not repeat)
 
 At `035a3faaa90365286db06f0f728a023fcb1e47a3`, recovery installed all
 seven pinned packages and `pip check` passed. The REIN source SHA matched,

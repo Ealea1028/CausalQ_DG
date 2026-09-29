@@ -123,6 +123,20 @@ next gate diagnoses GPU initialization with both existing interpreters;
 package reinstallation and model loading remain deferred until the actual
 driver/visibility/library error is known.
 
+Both diagnostics subsequently passed at
+`1badc850f35817352e943139baf94b12eee965f4`: main and isolated REIN
+interpreters each detected RTX 4090 D, driver 595.71.05, capability 8.9,
+and executed the one-scalar CUDA probe. Main log SHA256 is
+`cbf3646e2b74c4205b30b9c57e7d58cb33e1d4ca888a42d7bf1784bbb878cfaf`;
+REIN log SHA256 is
+`4f7736a3ac085b86ccadffcf10b47d87b079072ccb57622a4fffe3792c831a39`.
+The cause of the earlier unavailable-GPU result remains unestablished.
+Do not change `NVIDIA_VISIBLE_DEVICES` merely because its string is `void`:
+the actual CUDA tests passed. The next process sets `OMP_NUM_THREADS=1` to
+address the observed invalid-value warning. The full runtime gate must now
+be rerun without reinstallation and with new report/stderr paths; model
+build, weight load, deformable-attention execution and training remain untested.
+
 Before a CQE experiment, define a small class-specific residual branch on
 top of a fixed REIN segmentor and compare that branch **without CQE** against
 the same branch **with CQE**. Native REIN remains a separate reference. The
