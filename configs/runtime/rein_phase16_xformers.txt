@@ -1,0 +1,2 @@
+# Official PyPI CPython 3.10/Linux wheel (109067679 bytes).
+https://files.pythonhosted.org/packages/4b/b0/dfbb3b0ceafdb73cd1b2bbe33f65dc1c5c47dcb0d4b03ba6f95da6557306/xformers-0.0.20-cp310-cp310-manylinux2014_x86_64.whl --hash=sha256:905a9bedf18c8feb68c9143df0dadba708ec1efb947bcc97c4f9e5b30fd79c42

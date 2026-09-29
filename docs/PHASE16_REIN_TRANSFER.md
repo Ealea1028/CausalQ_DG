@@ -137,6 +137,20 @@ address the observed invalid-value warning. The full runtime gate must now
 be rerun without reinstallation and with new report/stderr paths; model
 build, weight load, deformable-attention execution and training remain untested.
 
+At `44d30fa397205b10a75d08fb60b62ffcc055872c`, the runtime gate
+passed the seven core pins and MMCV CUDA NMS, then failed on missing xformers.
+The pinned REIN package imports `eva_02.py` unconditionally, so xformers is
+required at package-import time even though its DINO layers warn and fall back.
+This corrects the earlier assumption that it could be omitted. Recovery pins
+[xformers 0.0.20](https://pypi.org/project/xformers/0.0.20/) (official metadata:
+torch==2.0.1, pyre-extensions==0.0.29) and hash-checks its CPython 3.10 Linux
+wheel. It preserves the installed core pins, runs a tiny CUDA attention
+reference check and repeats the original import/config gate. No REIN source
+patch or model/training change is involved. Report and stderr hashes are
+`b7ef215f8ec60e6c4e7d0c06a1074169b39d6fa8a4f77bafa21e505ea45626be`
+and `f2d119b131234a5049ca7ad999c4e62fb3fd50cea8233300f09e1d20434f34b3`.
+Remote recovery and kernel compatibility are still pending.
+
 Before a CQE experiment, define a small class-specific residual branch on
 top of a fixed REIN segmentor and compare that branch **without CQE** against
 the same branch **with CQE**. Native REIN remains a separate reference. The

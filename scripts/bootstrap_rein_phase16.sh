@@ -75,6 +75,11 @@ PYTHON="$ENV_DIR/bin/python"
   ftfy==6.2.0 scipy==1.11.4 prettytable==3.10.0 \
   matplotlib==3.8.4 regex==2024.4.16 \
   timm==0.9.12 einops==0.7.0
+"$PYTHON" -m pip install --no-cache-dir --only-binary=:all: \
+  --index-url https://pypi.org/simple \
+  -c configs/runtime/rein_phase16_constraints.txt pyre-extensions==0.0.29
+"$PYTHON" -m pip install --no-cache-dir --no-deps --require-hashes \
+  -r configs/runtime/rein_phase16_xformers.txt
 "$PYTHON" -m pip check
 "$PYTHON" -m pip freeze > "$FREEZE"
 "$PYTHON" -m tools.check_rein_runtime \

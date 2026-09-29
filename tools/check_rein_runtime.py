@@ -17,6 +17,7 @@ EXPECTED_VERSIONS = {
     "mmengine": "0.10.7",
     "mmseg": "1.2.2",
     "mmdet": "3.3.0",
+    "xformers": "0.0.20",
 }
 
 
@@ -66,6 +67,7 @@ def main() -> int:
         import numpy
         import torch
         import torchvision
+        import xformers
 
         versions = {
             "torch": torch.__version__,
@@ -75,6 +77,7 @@ def main() -> int:
             "mmengine": mmengine.__version__,
             "mmseg": mmseg.__version__,
             "mmdet": mmdet.__version__,
+            "xformers": xformers.__version__,
         }
         report["versions"] = versions
         validate_versions(versions)
@@ -101,6 +104,19 @@ def main() -> int:
         report["cuda_nms_kept_indices"] = keep.cpu().tolist()
         if report["cuda_nms_kept_indices"] != [0]:
             raise RuntimeError("MMCV CUDA NMS returned an unexpected result")
+
+        from xformers.ops import memory_efficient_attention
+
+        generator = torch.Generator(device="cuda:0").manual_seed(20260929)
+        q, k, v = [torch.randn(1, 16, 2, 32, device="cuda:0", dtype=torch.float16,
+                              generator=generator) for _ in range(3)]
+        actual = memory_efficient_attention(q, k, v)
+        qh, kh, vh = [value.transpose(1, 2).float() for value in (q, k, v)]
+        expected = ((qh @ kh.transpose(-1, -2) / (32 ** 0.5)).softmax(-1) @ vh).transpose(1, 2)
+        error = (actual.float() - expected).abs().max().item()
+        report["xformers_attention_max_abs_error"] = error
+        if not torch.isfinite(actual).all().item() or error > 0.005:
+            raise RuntimeError("xformers CUDA attention failed the reference check")
 
         import sys
 

@@ -16,7 +16,66 @@ conversion. The audit report SHA256 is
 `6cdbdf1b503f7f6c7eb58287088d99de1edde8b378e7304add140e5418a4c120`.
 There were 476 GiB available system RAM and 16 GiB free data volume.
 
-## Current AutoDL action: rerun the complete REIN runtime gate
+## Current AutoDL action: recover the missing xformers dependency
+
+The runtime recheck at `44d30fa397205b10a75d08fb60b62ffcc055872c`
+passed all seven package pins, CUDA availability and MMCV CUDA NMS (`[0]`),
+then failed during REIN import with `ModuleNotFoundError: xformers`.
+Report/stderr SHA256:
+`b7ef215f8ec60e6c4e7d0c06a1074169b39d6fa8a4f77bafa21e505ea45626be`
+and `f2d119b131234a5049ca7ad999c4e62fb3fd50cea8233300f09e1d20434f34b3`.
+The pinned upstream package imports `eva_02.py`, which unconditionally imports
+`xformers.ops`; DINO layers' optional fallback does not avoid this import.
+
+Install only xformers 0.0.20 and its Python helper dependency in the existing
+isolated REIN environment. The official PyPI metadata requires torch 2.0.1
+and pyre-extensions 0.0.29. The exact CPython 3.10 Linux wheel (109067679
+bytes) is hash-verified; core package constraints and `--no-deps` on this wheel
+prevent replacement of the validated CUDA/PyTorch/OpenMMLab stack. No source
+build, upstream edit, new environment, dataset or weight download is involved.
+The gate also executes a tiny fp16 xformers CUDA attention probe and compares
+it with a float32 reference before importing REIN. GPU compatibility remains
+pending until this AutoDL run. Existing reports and freezes are preserved.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+LOG=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_xformers_recovery_v1.log
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+elif git fetch origin main && git checkout --detach "$EXPECTED_SHA"; then
+  if [ "$(git rev-parse HEAD)" != "$EXPECTED_SHA" ] \
+    || [ -n "$(git status --porcelain)" ] || [ -e "$LOG" ]; then
+    echo 'preflight_failed: wrong source or existing log'
+  else
+    bash scripts/recover_rein_xformers_phase16.sh 2>&1 | tee "$LOG"
+    RECOVERY_EXIT=${PIPESTATUS[0]}
+    echo "recovery_exit_code=$RECOVERY_EXIT"
+  fi
+else
+  echo 'git_fetch_or_checkout_failed'
+fi
+BASE=/root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_xformers_recovery_v1
+for SUFFIX in json stderr.log; do
+  if [ -f "$BASE.$SUFFIX" ]; then cat "$BASE.$SUFFIX"; fi
+done
+for SUFFIX in before.txt after.txt json stderr.log log; do
+  if [ -f "$BASE.$SUFFIX" ]; then sha256sum "$BASE.$SUFFIX"; fi
+done
+tail -n 50 "$LOG"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the exit code, JSON, stderr, hashes and source/disk evidence. A pass
+requires `ok: true`, xformers version 0.0.20, attention max error <=0.005,
+CUDA NMS `[0]` and both REIN registrations true. If it fails, keep all outputs
+and the installed state; do not blindly rerun installation or upgrade torch.
+Stop here; model loading, full deformable attention and training remain later
+gates. This recovery requires only 1 GiB free (11 GiB is currently available).
+
+## Previous runtime recheck (failed on missing xformers; do not repeat)
 
 Both CUDA diagnostics passed at `1badc850f35817352e943139baf94b12eee965f4`:
 the main PyTorch 2.7/cu126 and isolated PyTorch 2.0.1/cu118 environments
