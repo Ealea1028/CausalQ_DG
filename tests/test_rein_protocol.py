@@ -1,6 +1,7 @@
 import pytest
+from types import SimpleNamespace
 
-from tools.inspect_rein_protocol import protocol_fields
+from tools.inspect_rein_protocol import protocol_fields, collect_mmseg_implementations
 
 
 def test_protocol_inventory_preserves_effective_optimizer_and_loaders():
@@ -21,3 +22,11 @@ def test_protocol_inventory_preserves_effective_optimizer_and_loaders():
 def test_protocol_inventory_rejects_partial_config():
     with pytest.raises(ValueError, match="Incomplete"):
         protocol_fields({"model": {}})
+
+
+def test_dataset_inventory_uses_mmseg_without_rein_dataset_package(monkeypatch):
+    datasets = SimpleNamespace(CityscapesDataset="city", BaseSegDataset="base")
+    transforms = SimpleNamespace(LoadAnnotations="annotations", RandomCrop="crop")
+    monkeypatch.setattr("tools.inspect_rein_protocol.implementation_record", lambda cls: cls)
+    assert collect_mmseg_implementations(datasets, transforms) == [
+        "city", "base", "annotations", "crop"]

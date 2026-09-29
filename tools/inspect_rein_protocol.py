@@ -4,6 +4,7 @@ import argparse
 import contextlib
 import hashlib
 import importlib
+import inspect
 import json
 from pathlib import Path
 import sys
@@ -13,6 +14,23 @@ from tools.check_rein_runtime import git_output
 
 
 CONFIG = "configs/dinov2/rein_dinov2_mask2former_512x512_bs1x4.py"
+
+
+def implementation_record(implementation):
+    """Read a resolved implementation, without constructing a dataset/transform."""
+    path = Path(inspect.getsourcefile(implementation)).resolve()
+    return dict(qualified_name=f"{implementation.__module__}.{implementation.__name__}",
+                path=str(path), sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+                source=inspect.getsource(implementation))
+
+
+def collect_mmseg_implementations(datasets_module, transforms_module):
+    """REIN's config uses MMSeg classes; no rein.datasets package is required."""
+    return [implementation_record(getattr(module, name)) for module, name in (
+        (datasets_module, "CityscapesDataset"),
+        (datasets_module, "BaseSegDataset"),
+        (transforms_module, "LoadAnnotations"),
+        (transforms_module, "RandomCrop"))]
 
 
 def protocol_fields(config):
@@ -52,19 +70,18 @@ def main():
 
             config = Config.fromfile(root / CONFIG)
             report["effective_protocol"] = protocol_fields(config.to_dict())
-            # Dataset implementations reveal train-ID remapping conventions. Read
-            # pinned source only: never instantiate a dataset or execute a pipeline.
-            dataset_package = importlib.import_module("rein.datasets")
-            dataset_dir = Path(dataset_package.__file__).resolve().parent
-            if not dataset_dir.is_relative_to(root):
-                raise ValueError("Dataset package is outside pinned upstream checkout")
-            report["dataset_implementations"] = []
-            for path in sorted(dataset_dir.rglob("*.py")):
-                source = path.read_text(encoding="utf-8")
-                if "gta" in source.lower() or "cityscapes" in source.lower():
-                    report["dataset_implementations"].append(dict(
-                        path=path.relative_to(root).as_posix(),
-                        sha256=hashlib.sha256(path.read_bytes()).hexdigest(), source=source))
+            report["stage"] = "dataset_implementation_inventory"
+            # The effective config uses upstream MMSeg CityscapesDataset for GTA5.
+            # Read the installed implementation and its parent/annotation loader;
+            # never instantiate a dataset or execute a pipeline.
+            mmseg = importlib.import_module("mmseg")
+            report["mmseg_version"] = str(mmseg.__version__)
+            if report["mmseg_version"] != "1.2.2":
+                raise ValueError("Expected the accepted MMSegmentation 1.2.2 installation")
+            report["dataset_implementation_provider"] = "installed_mmseg_not_rein.datasets"
+            report["dataset_implementations"] = collect_mmseg_implementations(
+                importlib.import_module("mmseg.datasets"),
+                importlib.import_module("mmseg.datasets.transforms"))
         # Hash every config source, including inherited dataset/optimizer bases.
         report["config_inventory"] = [dict(path=path.relative_to(root).as_posix(),
             sha256=hashlib.sha256(path.read_bytes()).hexdigest())

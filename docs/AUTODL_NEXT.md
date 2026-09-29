@@ -1,5 +1,25 @@
 # AutoDL next step: Phase 16 pinned REIN formal-protocol inventory
 
+## Recovery of the inventory tool (current action)
+
+The first inventory at `4e6a373` parsed the full effective configuration but
+failed with `ModuleNotFoundError: No module named 'rein.datasets'`. This was
+our inspector's incorrect package assumption, NOT a missing training dependency.
+The effective dataset is installed MMSegmentation `CityscapesDataset`, even for
+GTA5. The repaired inspector reads CityscapesDataset, BaseSegDataset,
+LoadAnnotations and RandomCrop from the accepted MMSeg 1.2.2 installation,
+including implementation source and file hashes. No new packages are needed.
+Preserve the failed JSON/stderr; rerunning on the new commit creates new names.
+Use the commands below with the new exact handoff SHA, not `4e6a373`.
+
+Partial protocol evidence: GTA5 requires `_labelTrainIds.png` upstream, whereas
+local converted GTA5 labels use `.png`; explicit suffix adaptation is required.
+Inherited validation includes three targets and DGIoUMetric: both dataset and
+evaluator must be narrowed to Cityscapes, not just one of them. Upstream target
+input resize is 1024x512 with full original labels, slide crops 512x512/stride
+341, batch 4 and 40k PolyLR. None of this authorizes running the unadapted
+config. The following step is still read-only source inspection, not training.
+
 The complete real-data report passed audit at
 `b85f105384d07c88f23f89bec1723aa6a6c92c7e`: 20 optimizer steps, five target
 predictions, maximum objective reconstruction error `1.7642974853515625e-05`,

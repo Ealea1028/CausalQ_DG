@@ -5,6 +5,19 @@ no local GPU results are claimed.
 
 ## Accepted real-data smoke audit
 
+The subsequent protocol inventory at `4e6a373f803a547a7044e67b45e87c5b4b2ad4b2`
+failed only after effective config parsing: our tool assumed a nonexistent
+`rein.datasets` package. No installation or training failure is inferred.
+JSON/stderr hashes `e0cf9c211494fe91750c18491fbdf8c6fbf38a244362935b4c3fc0ff4d62fad2` /
+`df377c839408bd0115d8ec0bc1708542b1ac7b3ff7f59be67e800ebbcab302c6`.
+The repair reads the actual MMSeg 1.2.2 dataset/base/annotation/crop classes
+without constructing them. Preserve failed reports; refreshed inventory remains
+the next AutoDL boundary. Effective GTA5 suffix differs from local `.png`, and
+both upstream multi-target dataloader and DG evaluator need explicit narrowing.
+Recovery verification: 153 CPU tests pass, including a regression that supplies
+MMSeg exports without any `rein.datasets` package. Installed class inspection
+is pending AutoDL; no local OpenMMLab environment was built or modified.
+
 Saved-report audit source `b85f105384d07c88f23f89bec1723aa6a6c92c7e` returns
 true and exit 0 for producer `17883de0c87abe3ed9bd051b260ba20bc259999e`.
 Twenty optimizer steps and five target predictions; maximum objective error
