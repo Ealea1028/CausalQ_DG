@@ -1,7 +1,36 @@
 import pytest
 import torch
+import copy
+import sys
+from types import ModuleType, SimpleNamespace
 
-from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr
+from tools.rein_schedule_smoke import accepted_protocol, compact_state, scheduled_lr, restore_protocol_config
+
+
+def test_json_config_restoration_routes_through_recursive_config(monkeypatch):
+    # OpenMMLab is intentionally absent locally; real integration is remote.
+    calls = []
+    def recursive(value):
+        if isinstance(value, dict):
+            return SimpleNamespace(**{key: recursive(item) for key, item in value.items()})
+        return value
+    module = ModuleType("mmengine.config")
+    def factory(value):
+        calls.append(copy.deepcopy(value))
+        return recursive(value)
+    module.Config = factory
+    monkeypatch.setitem(sys.modules, "mmengine.config", module)
+    raw = {"model": {"decode_head": {"transformer_decoder": {
+        "layer_cfg": {"cross_attn_cfg": {"num_heads": 8}}}}}}
+    report = dict(ok=True, stage="complete", exact_project_pairing=True, source_pairs=24966,
+                  target_pairs=500, samples=[{}]*10, target_labels_optimized=False, adapted_protocol=raw)
+    original = copy.deepcopy(report)
+    result = restore_protocol_config(report)
+    assert result.model.decode_head.transformer_decoder.layer_cfg.cross_attn_cfg.num_heads == 8
+    assert calls == [raw] and report == original
+    module.Config = lambda value: value
+    with pytest.raises(AttributeError):
+        restore_protocol_config(report)
 
 
 def test_update_schedule_units():

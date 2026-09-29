@@ -18,3 +18,14 @@ and scheduler states; frozen backbone stays external and hash-pinned. The GPU
 gate tests parameter restoration and output roundtrip. Exact resumability and
 accuracy are deliberately not claimed. Runtime memory and checkpoint size are
 unknown until AutoDL executes. No formal run is authorized by this handoff.
+
+## Failed first attempt and repair
+
+At `d5558e1`, the runner failed to construct Mask2Former because JSON lost
+recursive ConfigDict containers (`dict` has no `layer_cfg` attribute). Zero
+optimizer updates occurred. Report SHA
+`0984148e8dd906eb37d6517d61ee2f039a25f07940438888a38ad52f6493c164`;
+stderr SHA `effe107293daf24abbf0caec31531b86488b4cb7689470ece011b3295af9c6fe`.
+Restoring the accepted configuration through mmengine.Config fixes the caller
+contract without changing model values or experiment protocol. CPU tests cover
+the restoration boundary; no GPU success is inferred from them.

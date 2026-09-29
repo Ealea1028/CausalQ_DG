@@ -44,6 +44,16 @@ def scheduled_lr(updates):
     return 1e-4 * (1 - updates / 40000) ** 0.9
 
 
+def restore_protocol_config(report):
+    """Restore recursive ConfigDict semantics lost during JSON serialization."""
+    from mmengine.config import Config
+
+    config = Config(accepted_protocol(report))
+    if config.model.decode_head.transformer_decoder.layer_cfg.cross_attn_cfg.num_heads <= 0:
+        raise ValueError("Invalid transformer decoder head count")
+    return config
+
+
 def compact_state(model):
     # Do not depend on REIN's customized state_dict filtering.
     buffers = dict(model.named_buffers())
@@ -71,7 +81,8 @@ def main():
             raise ValueError("Use isolated Python 3.10")
         if digest(args.data_report) != DATA_SHA or digest(args.weights) != WEIGHT_SHA:
             raise ValueError("Accepted report/weights hash mismatch")
-        config = accepted_protocol(json.loads(args.data_report.read_text()))
+        data_report = json.loads(args.data_report.read_text())
+        accepted_protocol(data_report)
         if git_output(args.rein_root, "rev-parse", "HEAD") != REIN_SHA or git_output(args.rein_root, "status", "--porcelain"):
             raise ValueError("REIN source must be pinned and clean")
         if shutil.disk_usage(args.run_dir.parent).free < 2 * 2**30:
@@ -97,6 +108,10 @@ def main():
             from tools.rein_protocol_adapter import register_data_transforms
             init_default_scope("mmseg")
             register_data_transforms()
+            report["stage"] = "config_restore"
+            config = restore_protocol_config(data_report)
+            report["config_container"] = "mmengine.Config_recursive_ConfigDict"
+            report["stage"] = "model_build"
             model = MODELS.build(config["model"])
             model.decode_head.init_weights()
             state = torch.load(args.weights, map_location="cpu", weights_only=True)

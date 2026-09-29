@@ -1,5 +1,26 @@
 # AutoDL next step: Phase 16 scheduled source-only GPU smoke
 
+## Recovery: JSON configuration containers (current action)
+
+The attempt at `d5558e19809ebb0b0f51957c8d21276a72cbce18` FAILED before
+optimization (`optimizer_updates=0`, exit 1): Mask2Former accesses
+`transformer_decoder.layer_cfg` but the saved JSON was passed as ordinary
+nested dictionaries. This is our runner integration defect, not an environment
+or dataset failure. The runner now reconstructs the accepted full configuration
+with `mmengine.Config`, restoring recursive ConfigDict attribute access before
+model construction. It checks the exact nested decoder attribute contract.
+No architecture, optimizer, data, packages or schedule settings change.
+
+Preserve failed JSON SHA
+`0984148e8dd906eb37d6517d61ee2f039a25f07940438888a38ad52f6493c164`
+and stderr SHA
+`effe107293daf24abbf0caec31531b86488b4cb7689470ece011b3295af9c6fe`.
+The child script uses the new producer SHA in every output path, so no failed
+artifact is overwritten. Retry the same bounded gate on the handoff commit;
+do not advance to formal training. Local regression tests mock the Config
+boundary because OpenMMLab is intentionally absent locally; real integration
+acceptance still requires AutoDL.
+
 The operator accepts the adapted data gate at
 `b645793ff8fcdd12b0cdd8078b64dc929f107a70`, exit 0. Accepted JSON SHA:
 `b893b991c4bc85eb6105e8d8ae1f39df670b256ce12a10aaca8c1a7c89d71c69`;
