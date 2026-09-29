@@ -45,12 +45,12 @@ def confusion(prediction, label):
     return np.bincount(19 * label[valid].astype(np.int64) + prediction[valid], minlength=361).reshape(19, 19)
 
 
-def evaluate_target(model, dataset, metric, count):
+def evaluate_target(model, dataset, metric, count, *, formal_full=False):
     """Shared bounded metric path; never optimizes target labels."""
     import torch
     import numpy as np
 
-    if count not in (5, 50) or len(dataset) != 500:
+    if (count not in ((500,) if formal_full else (5, 50)) or len(dataset) != 500):
         raise ValueError("Expected bounded sample count and full Cityscapes dataset")
     metric.dataset_meta = dataset.metainfo
     matrix = np.zeros((19, 19), dtype=np.int64)

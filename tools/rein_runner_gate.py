@@ -12,12 +12,19 @@ import random
 import shutil
 import sys
 import traceback
+import time
 
 from tools.rein_schedule_smoke import DATA_SHA, digest, restore_protocol_config, compact_state, scheduled_lr
 from tools.check_rein_backbone import REIN_SHA, WEIGHT_SHA, validate_load_keys
 from tools.check_rein_runtime import EXPECTED_VERSIONS, git_output, validate_versions
 
 FRESH_REPORT_SHA = '586e96ec63c481a9f9bf2b3c62754d96c98001123bc57fa34254f2361a9d01e7'
+
+
+def runner_budget(formal):
+    if type(formal) is not bool:
+        raise ValueError('Explicit boolean mode required')
+    return (40000, 1000, 500) if formal else (20, 5, 5)
 
 
 def validate_fresh_report(report):
@@ -53,16 +60,36 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     for name in ('rein-root', 'weights', 'data-report', 'fresh-report', 'run-dir'):
         parser.add_argument('--' + name, type=Path, required=True)
+    parser.add_argument('--formal-source-only', action='store_true')
+    for name in ('runner-report', 'runner-log', 'runner-run'):
+        parser.add_argument('--' + name, type=Path)
     args = parser.parse_args()
+    updates, save_interval, target_count = runner_budget(args.formal_source_only)
+    microbatches = 4 * updates
+    started = time.monotonic()
+    created_run = False
     report = dict(ok=False, stage='preflight', phase=16,
                   purpose='20update_runner_integration_not_formal_training_or_accuracy',
                   git_sha=git_output(Path(__file__).resolve().parents[1], 'rev-parse', 'HEAD'),
-                  seed=0, optimizer_updates=0, microbatches=80, accumulation=4,
+                  seed=0, optimizer_updates=0, microbatches=microbatches, accumulation=4,
                   schedule_horizon_optimizer_updates=40000, formal_training_authorized=False,
                   target_labels_optimized=False, initialization='fresh_seed0_not_pilot_resume')
     try:
         if args.run_dir.exists():
             raise FileExistsError('Preserve existing run')
+        if args.formal_source_only:
+            if any(path is None for path in (args.runner_report, args.runner_log, args.runner_run)):
+                raise ValueError('Formal source-only run requires complete saved runner evidence')
+            from tools.audit_rein_runner import audit_files, REPORT_SHA
+            report['runner_saved_audit'] = audit_files(args.runner_report, args.runner_log, args.runner_run)
+            report.update(purpose='formal_source_only_rein_baseline_not_cqe_or_exact_paper_reproduction',
+                          formal_training_authorized=True, runner_report_sha256=REPORT_SHA,
+                          final_evaluation_samples=500, checkpoint_interval_updates=save_interval,
+                          checkpoint_selection='fixed_final_update_no_target_selection', exact_resume_verified=False,
+                          source='gta5', validation_dataset='cityscapes_val', backbone='dinov2_vitl14_rein_patch16',
+                          rein_sha=REIN_SHA, decoder='Mask2Former', physical_batch_size=1, num_workers=0,
+                          train_crop=[512,512], target_input=[1024,512], target_gt=[2048,1024],
+                          slide_crop=[512,512], slide_stride=[341,341], cqe_enabled=False)
         for path, expected in ((args.weights, WEIGHT_SHA), (args.data_report, DATA_SHA),
                                (args.fresh_report, FRESH_REPORT_SHA)):
             if digest(path) != expected:
@@ -112,24 +139,29 @@ def main():
                 if parameter.requires_grad != name.startswith(('backbone.reins.', 'decode_head.')):
                     raise ValueError('Unexpected trainability: ' + name)
             model.to('cuda:0')
+            if args.formal_source_only:
+                report['trainable_parameters'] = sum(p.numel() for p in model.parameters() if p.requires_grad)
+                if report['trainable_parameters'] != 23569877:
+                    raise ValueError('Formal trainable parameter coverage changed')
             frozen = model.backbone.patch_embed.proj.weight.detach().clone()
             wrapper = build_optim_wrapper(model, config.optim_wrapper)
             if wrapper._accumulative_counts != 4:
                 raise ValueError('Expected accumulation 4')
-            wrapper.initialize_count_status(model, 0, 80)
+            wrapper.initialize_count_status(model, 0, microbatches)
             scheduler = PolyLR(wrapper, eta_min=0, power=.9, begin=0, end=40000, by_epoch=False)
             dataset = DATASETS.build(config.train_dataloader.dataset)
             if len(dataset) != 24966:
                 raise ValueError('Source coverage changed')
             sampler = SourceSampler(len(dataset), seed=0)
             args.run_dir.mkdir()
+            created_run = True
             (args.run_dir / 'metadata.json').write_text(json.dumps(report, indent=2))
             (args.run_dir / 'config.json').write_text(json.dumps(config.to_dict(), indent=2, default=str))
             report.update(stage='source_optimization', checkpoints=[])
             torch.cuda.reset_peak_memory_stats(0)
             losses_seen = []
             with (args.run_dir / 'train.jsonl').open('x') as trace:
-                for iteration in range(1, 81):
+                for iteration in range(1, microbatches + 1):
                     index = sampler.take(1)[0]
                     item = dataset[index]
                     batch = model.data_preprocessor(dict(inputs=[item['inputs']], data_samples=[item['data_samples']]), training=True)
@@ -162,32 +194,44 @@ def main():
                     losses_seen.append(record['loss'])
                     trace.write(json.dumps(record) + '\n')
                     trace.flush()
-                    print(json.dumps(record), file=sys.stderr)
+                    if not args.formal_source_only or iteration % 40 == 0 or iteration == 1:
+                        print(json.dumps(record), file=sys.stderr)
                     del loss
-                    if update and report['optimizer_updates'] % 5 == 0:
+                    if update and report['optimizer_updates'] % save_interval == 0:
+                        if shutil.disk_usage(args.run_dir).free < 2*2**30:
+                            raise OSError('Low disk space: preserve existing checkpoints and stop')
                         payload = dict(model=compact_state(model), optimizer=cpu_tree(wrapper.state_dict()),
                                        scheduler=cpu_tree(scheduler.state_dict()), sampler=sampler.state_dict(),
                                        rng=capture_rng(include_cuda=True), metadata={k: v for k, v in report.items() if k != 'checkpoints'})
                         report['checkpoints'].append(rolling_save(args.run_dir, payload))
                         del payload
-            if report['optimizer_updates'] != 20 or not torch.equal(frozen, model.backbone.patch_embed.proj.weight):
+            if report['optimizer_updates'] != updates or not torch.equal(frozen, model.backbone.patch_embed.proj.weight):
                 raise ValueError('Update or frozen-weight mismatch')
             payload = torch.load(args.run_dir / 'last.pth', map_location='cpu', weights_only=True)
             previous = torch.load(args.run_dir / 'previous.pth', map_location='cpu', weights_only=True)
-            if previous['metadata']['optimizer_updates'] != 15 or payload['sampler']['cursor'] != 80:
+            if (previous['metadata']['optimizer_updates'] != updates-save_interval
+                    or payload['metadata']['optimizer_updates'] != updates
+                    or payload['sampler']['cursor'] != sampler.cursor
+                    or payload['sampler']['epoch'] != sampler.epoch):
                 raise ValueError('Rolling retention/cursor mismatch')
             del previous
             restore_compact(model, payload['model'])
             del payload
             report.update(stage='target_diagnostic', first_20_loss_mean=sum(losses_seen[:20])/20,
-                          last_20_loss_mean=sum(losses_seen[-20:])/20, training_record_count=80,
-                          retained_checkpoint_count=2, sampler_cursor=sampler.cursor)
-            report['validation'] = evaluate_target(model, DATASETS.build(config.val_dataloader.dataset), METRICS.build(config.val_evaluator), 5)
-            report.update(ok=True, stage='complete', peak_reserved_gib=round(torch.cuda.max_memory_reserved()/2**30, 3))
+                          last_20_loss_mean=sum(losses_seen[-20:])/20, training_record_count=microbatches,
+                          retained_checkpoint_count=2, sampler_cursor=sampler.cursor, sampler_epoch=sampler.epoch)
+            report['validation'] = evaluate_target(model, DATASETS.build(config.val_dataloader.dataset), METRICS.build(config.val_evaluator), target_count,
+                                                   formal_full=args.formal_source_only)
+            if args.formal_source_only:
+                report['validation']['miou'] = report['validation']['diagnostic_miou']
+                report['validation']['iteration'] = updates
+                report['stage'] = 'final_evaluation'
+            report.update(ok=True, stage='complete', elapsed_seconds=round(time.monotonic()-started, 2),
+                          peak_reserved_gib=round(torch.cuda.max_memory_reserved()/2**30, 3))
     except Exception as error:
         report['error'] = f'{type(error).__name__}: {error}'
         traceback.print_exc(file=sys.stderr)
-    if args.run_dir.is_dir():
+    if created_run:
         (args.run_dir / 'summary.json').write_text(json.dumps(report, indent=2))
     print(json.dumps(report, indent=2))
     return 0 if report['ok'] else 1

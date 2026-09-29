@@ -107,6 +107,17 @@ original-resolution Cityscapes images. Prior artifacts remain untouched.
 This is the long-run integration gate, not another accuracy experiment; formal
 40k and full 500-image final evaluation remain pending its acceptance.
 
+The runner operator returns exit 0 at `7a3a1c6` and two 283,336,151-byte files.
+Full saved evidence still needs read-only hash/trace/metric audit. Only after it
+passes is one fresh source-only REIN seed-0 baseline permitted: 40k optimizer
+updates, 160k microbatches, accumulation4, unchanged typed source protocol and
+FP32. Latest/previous rolling checkpoints are saved every 1k updates; source
+sampler spans epochs. Final checkpoint alone receives full 500-image original-GT
+Cityscapes evaluation; no target-based checkpoint selection or CQE. Compared
+with DINOv3, backbone/head/augmentation/evaluation and training exposure differ,
+so a metric gap cannot isolate an adapter or CQE effect. Formal results and
+arbitrary interruption equivalence remain unverified until real evidence returns.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

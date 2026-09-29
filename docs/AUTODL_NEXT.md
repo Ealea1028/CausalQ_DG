@@ -1,4 +1,91 @@
-# AutoDL next step: Phase 16 source-only runner integration
+# AutoDL next step: Phase 16 saved-runner audit then source-only 40k baseline
+
+## Current action — only this section is active
+
+Operator reports exit 0 for runner `7a3a1c699f5b00ed4b6cc76055457beec374e05d`,
+with last/previous each 283,336,151 bytes. Only the metric tail was returned;
+do NOT accept full runner evidence from this alone. Report SHA
+`b584a6504f75351864922b5f43119950bee9621b2cf30cf75bbb09be6d833a97`,
+stderr SHA `22af8fbb574b10d70714716ad83dff186ec8c59708dcfeb0950abe79aa3bb5d5`.
+The new read-only audit verifies those hashes, complete saved report/metadata,
+80 finite contiguous source records, accumulation/LR, save history, retained
+checkpoint hashes/size, original target geometry and independent/official metrics.
+No GPU, checkpoint deserialization or image inspection is needed for that audit.
+If it fails, STOP; return the audit JSON. Do not train or remove any evidence.
+
+If the audit passes, the same Phase 16 proceeds to ONE fresh seed-0 source-only
+REIN baseline: 40,000 OPTIMIZER UPDATES = 160,000 microbatches, physical batch 1,
+accumulation 4, FP32, max-norm 1, workers 0, fixed 40k PolyLR. No CQE/query/null
+addition, other target datasets or target-label optimization. It does not resume
+the 20-update gate or 500-update pilot. Retain rolling last/previous every 1,000
+updates (final 40k/39k), full trace, config, metadata and checkpoint hash history.
+Only evaluate all 500 Cityscapes-val images after training, using final checkpoint,
+original GT 1024x2048, slide 512/stride341 after input resize1024x512. No validation
+checkpoint selection. This is an adapted REIN baseline, NOT exact paper reproduction.
+
+7.7 GiB free covers ~540 MiB retained checkpoint data and a ~270 MiB transient
+pending save plus logs. Stop if free space drops below 2 GiB at saving. No cleanup.
+Only superseded rolling states in this NEW run are intentionally replaced;
+all historical run finals and reports remain untouched. No resume CLI is offered;
+arbitrary interruption/uninterrupted equivalence is NOT verified. Report failures
+and preserve files before deciding recovery. Do not update the checkout mid-run.
+
+Compared with DINOv3, backbone, head, training augmentation, evaluation and source
+exposure differ (160k source microbatches here). Do not attribute a metric difference
+solely to REIN or CQE or copy paper numbers. Later comparisons must label protocols.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo dirty_worktree; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+"$PY" -m tools.audit_rein_runner \
+  --report "$BASE/analysis/rein_phase16_runner_7a3a1c6_v1.json" \
+  --stderr-log "$BASE/analysis/rein_phase16_runner_7a3a1c6_v1.stderr.log" \
+  --run-dir "$BASE/REIN_RUNNER_GATE_20UPDATES_SEED0_7a3a1c6" || exit 1
+SHORT_SHA=$(git rev-parse --short HEAD)
+LAUNCH_LOG="$BASE/analysis/rein_source40k_${SHORT_SHA}_launch.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launch_log; exit 1; }
+nohup bash scripts/train_rein_source_phase16.sh > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "launcher_pid=$!"
+echo "launch_log=$LAUNCH_LOG"
+)
+```
+
+Background launch is not completion. To check without changing source:
+
+```bash
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+SHORT_SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short HEAD)
+RUN="$BASE/REIN_SOURCE_ONLY_SEED0_40000_$SHORT_SHA"
+LOG="$BASE/analysis/rein_phase16_source40k_${SHORT_SHA}_v1.stderr.log"
+EXIT_FILE="$BASE/analysis/rein_phase16_source40k_${SHORT_SHA}_v1.exit.txt"
+tail -n 15 "$BASE/analysis/rein_source40k_${SHORT_SHA}_launch.log"
+test ! -f "$LOG" || tail -n 15 "$LOG"
+test ! -f "$RUN/train.jsonl" || wc -l "$RUN/train.jsonl"
+if [ -f "$EXIT_FILE" ]; then
+  echo '===== exit ====='
+  cat "$EXIT_FILE"
+  cat "$RUN/summary.json"
+  sha256sum "$RUN/last.pth" "$RUN/previous.pth"
+else
+  echo 'not_confirmed_complete; inspect launch/progress logs'
+fi
+df -h /root/autodl-tmp
+```
+
+Return audit JSON and initial training progress first; on completion return full
+summary, exit code, 160k record count, checkpoint hashes, git SHA/status and disk.
+Exit 0 + ok true + 40k updates + complete 500-image final evaluation is required,
+but no accuracy superiority is predeclared. Do not start another seed or CQE run.
+
+## Archived integration handoff — do not execute
 
 ## Current handoff — execute only this section
 

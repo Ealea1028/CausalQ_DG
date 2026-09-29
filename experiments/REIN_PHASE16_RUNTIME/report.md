@@ -1,5 +1,35 @@
 # Phase 16 feasibility and runtime acceptance
 
+## Latest boundary: saved-runner audit before first formal baseline
+
+Runner `7a3a1c699f5b00ed4b6cc76055457beec374e05d` returns exit 0, with
+last/previous checkpoints each 283,336,151 bytes. Only a metric tail was supplied;
+full integration acceptance remains CONDITIONAL on the new read-only audit.
+JSON SHA `b584a6504f75351864922b5f43119950bee9621b2cf30cf75bbb09be6d833a97`;
+stderr SHA `22af8fbb574b10d70714716ad83dff186ec8c59708dcfeb0950abe79aa3bb5d5`.
+Low five-image IoUs after 20 updates are not accuracy evidence. Missing-class
+IoUs may be undefined, distinct from nonfinite logits/losses; saved metrics
+must agree with confusion counts, with absent classes represented as null.
+
+Next: audit existing report/metadata/80 records/two retained checkpoint hashes,
+then, only if it passes, launch one fresh seed-0 adapted REIN source baseline.
+40k optimizer updates = 160k physical-batch1 microbatches, accumulation4,
+FP32, fixed 40k PolyLR, rolling saves every1k, final500 Cityscapes evaluation.
+No CQE, new targets, target selection, pilot resume or exact-paper claim.
+Data disk free7.7 GiB; do not clean historical evidence. Only newly generated
+rolling states are replaced, keeping latest/previous. Completion and accuracy
+remain pending; DINOv3 comparisons have backbone/head/exposure confounds.
+
+Local CPU verification: 203 tests pass (Python3.10.20/PyTorch2.10.0+cu128,
+pytest from base Anaconda site-packages). Existing short-evaluation API still
+rejects full500 coverage unless explicitly opted in by the formal runner.
+Tests reject incomplete/nonfinite/incorrect-producer integration evidence,
+bad metric counts, and preserve an existing run on preflight rejection.
+The 160k sampler-budget test spans six full 24,966-image source permutations
+and ends at epoch6/cursor10,204 without exhaustion.
+No local GPU, dataset or pretrained checkpoint was used; real long training
+and full-target evaluation remain AutoDL work.
+
 ## Latest: fresh-process replay accepted; runner integration pending
 
 Operator evidence at `1671f1a07441868e464776cfbf9305308187c289` passes:
