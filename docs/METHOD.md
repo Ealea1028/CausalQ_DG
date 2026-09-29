@@ -33,13 +33,22 @@ after input resize, unlike the earlier cropped inference smoke. Adapted data
 pipelines require AutoDL acceptance before any scheduled GPU run. This is not
 an exact paper reproduction or evidence of successful CQE transfer.
 
-The adapted data gate is accepted at `b645793`. The scheduled accumulation
-gate has not passed: attempts `d5558e1` and `9ac1f80` failed on configuration
+The adapted data gate is accepted at `b645793`. Initial scheduled accumulation
+attempts `d5558e1` and `9ac1f80` failed on configuration
 types lost in JSON, before source optimization. Runtime configuration must be
 rebuilt from the pinned typed upstream source through the unchanged adapter,
 then checked for complete JSON-value equality with the accepted report before
 model/dataset construction. Saved JSON remains provenance evidence, not a
-lossless executable configuration. Formal REIN training is still deferred.
+lossless executable configuration.
+
+The corrected scheduled gate passes at `3ca6731`: 80 source microbatches and
+20 accumulated optimizer updates, PolyLR checked per update, one 283,250,458-byte
+compact checkpoint and exact prediction roundtrip. Peak reserved memory is
+3.920 GiB. This is engineering acceptance only. Next verify standard sliding
+inference/postprocessing against original Cityscapes GT and independent versus
+official IoUMetric counts on five images. No target optimization or accuracy
+acceptance is permitted by that short evaluation. Formal REIN training remains
+deferred.
 
 ## Objective
 

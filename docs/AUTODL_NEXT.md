@@ -1,4 +1,55 @@
-# AutoDL next step: Phase 16 scheduled source-only GPU smoke
+# AutoDL next step: Phase 16 five-image original-resolution slide evaluation
+
+The scheduled source gate PASSES at
+`3ca67315bc4f1dc91f1891de3f305e3162a0a53a`: 80 microbatches, 20 updates,
+float32, 23,569,877 trainable parameters; reload prediction difference zero;
+checkpoint 283,250,458 bytes, peak reserved GPU memory 3.920 GiB, exit 0.
+Accepted report SHA `ea528c623bd071a7aeb8214e2b1434073fe4ef00055478fc073fd482c3abbfad`;
+stderr SHA `8a94f49175dfefd9b611a9cbd8914470b74f2df0549355132c7f652ce89809db`;
+compact checkpoint SHA `d0cf1dd59fd7eb2ee9e2aa280b47e03819b8d26d814f12ab9f6162f7bcd410af`.
+Preserve this checkpoint and frozen pretrained weights. Do NOT rerun training.
+
+Next load the accepted frozen backbone plus exact compact checkpoint in a fresh
+process. Verify complete trainable tensor/buffer coverage and the same typed
+adapted protocol. Run ONLY the first five Cityscapes-val samples (dataset still
+contains all 500). Input resize stays 1024x512, model policy stays slide crop
+512x512/stride341. Use the standard model.test_step and postprocessing to
+restore predictions to ORIGINAL 1024x2048 GT geometry. Check finite logits,
+unchanged target GT, ignore-255 handling, and official IoUMetric counts against
+an independent 19x19 confusion matrix. Five-image mIoU is diagnostic only:
+no score threshold, no model selection, no accuracy or transfer claim.
+
+No optimization, installation, copied datasets, prediction images or new
+checkpoints. Only small JSON/stderr reports; current 9.6 GiB free is sufficient.
+GPU/memory verification remains pending. Formal 40k training remains deferred.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+if [ -n "$(git status --porcelain)" ]; then
+  echo 'preflight_failed: Git worktree is not clean'
+  exit 1
+fi
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+bash scripts/check_rein_slide_eval_phase16.sh
+RESULT=$?
+echo "slide_eval_gate_exit_code=$RESULT"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+Return complete JSON/stderr tail, hashes, exit and disk. Acceptance: ok true,
+stage complete, sample_count 5, matching original-resolution prediction/GT,
+official and independent metric agreement, finite memory/metrics, exit 0.
+Only then prepare the next bounded training/validation integration stage.
+
+## Archived scheduled-smoke instructions (do not rerun)
 
 ## Recovery: restore tuple types from pinned source (current action)
 

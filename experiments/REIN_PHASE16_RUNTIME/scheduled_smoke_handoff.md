@@ -38,3 +38,16 @@ The current repair reconstructs the full typed pinned-source configuration via
 the same adapter and rejects any JSON-normalized value difference from the
 accepted report. Both recursive attribute semantics and all original tuples
 are preserved, while ordinary lists remain lists. GPU integration is pending.
+
+## Accepted corrected run
+
+Producer `3ca67315bc4f1dc91f1891de3f305e3162a0a53a` passes with exit 0,
+80 microbatches, 20 updates and 23,569,877 trainable parameters. Exact prediction
+roundtrip error 0, checkpoint size 283,250,458 bytes, allocated/reserved GPU
+memory 3.633/3.920 GiB. Report SHA
+`ea528c623bd071a7aeb8214e2b1434073fe4ef00055478fc073fd482c3abbfad`;
+stderr SHA `8a94f49175dfefd9b611a9cbd8914470b74f2df0549355132c7f652ce89809db`;
+checkpoint SHA `d0cf1dd59fd7eb2ee9e2aa280b47e03819b8d26d814f12ab9f6162f7bcd410af`.
+This supersedes the integration failures without removing their evidence.
+Next is a five-image original-resolution sliding evaluation plumbing gate, not
+another training run. Its mIoU is diagnostic and does not select checkpoints.
