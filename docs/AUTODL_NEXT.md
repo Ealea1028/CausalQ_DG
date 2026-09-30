@@ -1,24 +1,20 @@
-# AutoDL next step: Phase 16 frozen-REIN query-residual smoke
+# AutoDL next step: audit Phase 16 query-residual smoke evidence
 
 ## Current action — only this section is active
 
-The formal source-only REIN seed-0 baseline is accepted by the read-only audit
-at `1da98b5`: 40,000 optimizer updates, 160,000 microbatches and fixed-final
-Cityscapes mIoU `0.6560509975`. Its final checkpoint SHA256 is
-`84231e98dda68ac4b1fd4f59cc97881887a614de01b01e2697323c1eac80daf2`.
+The 80-microbatch / 20-update no-CQE producer smoke at
+`14d3e5aa90571362eabb368c6216bb230a4421fa` returned `ok: true` and both
+exit codes zero. The frozen source-only REIN seed-0 reference remains fixed at
+500-image Cityscapes mIoU `0.6560509975`. The producer reported finite branch
+optimization, nonzero scale/query/projection gradients, unchanged base
+parameters, exact outside-class isolation, and a 17,887-byte branch checkpoint.
+These are engineering observations, not target accuracy or CQE evidence.
 
-The next gate adds exactly one mechanism: an explicit class-specific query
-residual over the frozen baseline's 19 semantic logits. The upstream 100
-Mask2Former queries are not relabelled. Run only 80 GTA5 microbatches / 20
-branch optimizer updates with accumulation 4. CQE remains disabled; no target
-images or labels are used; no accuracy claim or formal branch training is
-authorized. The gate must show finite branch optimization, gradient flow after
-the zero-initialized scale opens, exact single-class intervention isolation,
-unchanged REIN base weights, and a branch-only checkpoint roundtrip.
-
-The gate needs little new disk space and does not copy the 283 MB baseline
-checkpoint. Preserve every existing run and report. Do not clean up, resume,
-start a long run, or enable CQE. Run on the exact handoff commit only:
+Next, audit only the *saved* report, trace, stderr and checkpoint. This command
+does not load datasets, model weights or CUDA. It creates one new JSON audit
+artifact, retains all existing files and requires the clean exact Git commit
+provided with this handoff. Do not rerun the smoke, start formal training,
+enable CQE, or delete anything. Use a fresh terminal and run:
 
 ```bash
 (
@@ -31,28 +27,49 @@ git checkout --detach "$EXPECTED_SHA" || exit 1
 test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
 
 BASE=/root/autodl-tmp/outputs/CausalQ_DG
-test -f "$BASE/analysis/rein_phase16_source40k_d6fc52c_saved_audit.json" || exit 1
-test -f "$BASE/REIN_SOURCE_ONLY_SEED0_40000_d6fc52c/last.pth" || exit 1
-test -f /root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth || exit 1
-test -d /root/autodl-tmp/external/rein-phase16-dc063429 || exit 1
+RUN="$BASE/REIN_QUERY_RESIDUAL_NO_CQE_SMOKE_20UPDATES_14d3e5a"
+REPORT="$BASE/analysis/rein_phase16_query_residual_14d3e5a_v1.json"
+STDERR_LOG="$BASE/analysis/rein_phase16_query_residual_14d3e5a_v1.stderr.log"
+AUDIT="$BASE/analysis/rein_phase16_query_residual_14d3e5a_saved_audit.json"
+PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
+test -f "$RUN/train.jsonl" || exit 1
+test -f "$RUN/query_residual_20updates.pth" || exit 1
+test -f "$REPORT" || exit 1
+test -f "$STDERR_LOG" || exit 1
+test ! -e "$AUDIT" || { echo "existing_audit=$AUDIT"; exit 1; }
+test -x "$PY" || exit 1
 
 set -o pipefail
-bash scripts/check_rein_query_residual_phase16.sh
-GATE_EXIT=$?
-echo "outer_query_residual_gate_exit_code=$GATE_EXIT"
+"$PY" -m tools.audit_rein_query_residual \
+  --report "$REPORT" \
+  --stderr-log "$STDERR_LOG" \
+  --run-dir "$RUN" | tee "$AUDIT"
+AUDIT_EXIT=${PIPESTATUS[0]}
+echo "saved_audit_exit_code=$AUDIT_EXIT"
+sha256sum "$AUDIT" "$REPORT" "$STDERR_LOG" "$RUN/query_residual_20updates.pth"
 git rev-parse HEAD
 git status --short
 df -h /root/autodl-tmp
-exit "$GATE_EXIT"
+exit "$AUDIT_EXIT"
 )
 ```
 
-Return the complete JSON, both exit-code lines, report/log/checkpoint hashes,
-Git SHA/status and disk output. Acceptance requires `ok: true`, 80 records,
-20 updates, finite loss, nonzero gradients for `alpha`, `query_bank`, and
-`pixel_projection.weight`, `base_parameters_unchanged: true`, and both class
-effect errors within the recorded thresholds. Stop after returning this
-evidence. A smoke mIoU is intentionally absent.
+Replace `EXPECTED_SHA` with the full commit SHA supplied in the response. Return
+the complete audit JSON, audit exit code, four hashes, Git SHA/status, and disk
+output. Acceptance requires `query_residual_saved_audit_ok: true`; stop there.
+If the audit fails, preserve the inputs and failed audit artifact and report the
+error. The producer hashes expected by the versioned auditor are report
+`5b566bd4d764109e71a26b4da7abd10f267ad627377de0340ce3c616e1266510`,
+stderr `ebec21c1e0c8bd257fa9353337304a3c96e6d7361e7520ba6d43b3711bf040b2`,
+and branch checkpoint
+`fade8f3893ca1b8e2559ec154450ad3cb6ff9efee84b17354e6f70149c68d852`.
+
+## Completed branch smoke — do not repeat
+
+Producer `14d3e5a` ran at seed `20260930` with accumulation 4, 80 distinct GTA5
+microbatches and 20 optimizer updates. It used the frozen accepted REIN source
+baseline and no CQE. Peak reserved GPU memory was 2.055 GiB. Its saved-evidence
+audit is pending, and it has no target mIoU.
 
 ## Completed source-only audit — do not repeat
 

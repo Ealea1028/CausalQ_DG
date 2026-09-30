@@ -37,10 +37,12 @@ attempt was correctly excluded after a project-side PolyLR guard error; the
 guard now matches MMEngine's 39,999-step internal horizon. The corrected
 `d6fc52c` seed-0 run and its saved-evidence audit at `1da98b5` are accepted:
 40,000 optimizer updates, 160,000 microbatches and fixed-final Cityscapes mIoU
-`0.656051`. This is the REIN source-only reference, not a CQE result. The next
-bounded gate trains only a new class-specific residual branch over frozen REIN
-semantic logits; native Mask2Former queries are not relabelled and CQE remains
-disabled.
+`0.656051`. This is the REIN source-only reference, not a CQE result. The
+class-specific residual branch over frozen REIN semantic logits passes its
+80-microbatch / 20-update no-CQE smoke at `14d3e5a`: finite optimization,
+nonzero branch gradients, exact class isolation and unchanged base parameters.
+Native Mask2Former queries are not relabelled. Its saved files now require an
+independent read-only audit before any longer or CQE-enabled experiment.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

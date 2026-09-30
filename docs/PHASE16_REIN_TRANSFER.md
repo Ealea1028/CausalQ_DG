@@ -182,9 +182,12 @@ fixed logits and residual logits remain separately exposed. Removing class
 the factual output. This preserves the project's intervention contract without
 pretending the upstream 100 Mask2Former queries are class-indexed.
 
-The next GPU action is only an 80-microbatch / 20-update source smoke with the
-accepted REIN checkpoint frozen. It saves a small branch-only checkpoint and
-must verify finite losses/gradients, scale opening, query/projection gradient
-flow, exact class isolation, base-parameter invariance, and serialization
-roundtrip. CQE, target training, target evaluation, accuracy acceptance, and
-formal branch training remain unauthorized until this gate passes.
+The 80-microbatch / 20-update smoke at `14d3e5a` passes its producer gate:
+all losses are finite; the scale reaches `0.00196597`; branch scale, query-bank
+and projection gradients are nonzero; base parameters remain unchanged; the
+outside-class effect error is zero and the selected-class error is `5.96e-8`.
+The branch-only checkpoint is 17,887 bytes. Its report, stderr and checkpoint
+SHA256 values are recorded in `docs/AUTODL_NEXT.md`. This is neither target
+accuracy nor CQE evidence. The next step is a read-only saved-evidence audit;
+formal branch training remains unauthorized pending that audit and a separately
+specified matched training protocol.

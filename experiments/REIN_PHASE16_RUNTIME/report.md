@@ -249,3 +249,24 @@ must round-trip through upstream preprocessing within 1e-5; target labels
 never enter optimization. No checkpoints/mIoU/CQE. Formal source-only schedule
 and full-target evaluation remain pending. Local CPU tests: 145 pass; actual
 isolated-runtime dataset imports and optimizer GPU memory await AutoDL.
+
+## Frozen-REIN class-query residual smoke (Phase 16)
+
+The accepted source-only REIN seed-0 reference at `d6fc52c` has fixed-final
+500-image Cityscapes mIoU `0.6560509975`. A separate, explicitly class-indexed
+logit-residual branch was then tested at producer `14d3e5a` with the REIN
+segmentor frozen. The upstream 100 Mask2Former queries were not relabelled.
+The no-CQE source smoke completed 80 GTA5 microbatches / 20 optimizer updates
+with accumulation four. The producer reports finite losses, branch gradients
+for `alpha`, `query_bank` and `pixel_projection.weight`, final scale
+`0.0019659693`, unchanged base parameters, zero effect on nonselected classes,
+and selected-class effect error `5.96e-8`. Peak reserved memory was 2.055 GiB.
+The branch-only checkpoint is 17,887 bytes.
+
+Report/stderr/checkpoint SHA256 are respectively
+`5b566bd4d764109e71a26b4da7abd10f267ad627377de0340ce3c616e1266510`,
+`ebec21c1e0c8bd257fa9353337304a3c96e6d7361e7520ba6d43b3711bf040b2`,
+and `fade8f3893ca1b8e2559ec154450ad3cb6ff9efee84b17354e6f70149c68d852`.
+An independent saved-evidence audit is the next gate. This smoke contains no
+target mIoU, CQE mechanism or accuracy claim; it does not authorize a formal
+branch run or a causal conclusion.

@@ -132,7 +132,7 @@ epochs plus 10,204 samples, 40 checkpoint-history records, fixed-final
 Cityscapes mIoU `0.656051`, and no target-label optimization. This establishes
 the adapted REIN source-only reference; it does not establish CQE transfer.
 
-The next single-mechanism step adds an explicit class-specific residual branch
+The single-mechanism step adds an explicit class-specific residual branch
 over the fixed REIN segmentor's 19 semantic logits. It uses a
 `[class, query, channel]` bank with two queries per class, normalized similarity,
 log-sum-exp aggregation, and a scalar residual scale initialized to zero. Native
@@ -141,7 +141,14 @@ class identities. The intervention `do(Q_c=0)` restores only output channel
 `c` to its fixed base logit. A bounded 20-update source smoke must demonstrate
 finite optimization, delayed gradient flow through the zero-initialized scale,
 class isolation, compact branch-only checkpoint roundtrip, and unchanged base
-parameters before any matched long run or CQE loss is considered.
+parameters before any matched long run or CQE loss is considered. The bounded
+no-CQE smoke at `14d3e5a` reports `ok: true`, 80 source microbatches / 20
+updates, finite losses, nonzero gradients for its scale, query bank and pixel
+projection, unchanged frozen base parameters, zero outside-class intervention
+error, and selected-class effect error `5.96e-8`. The 17,887-byte branch-only
+checkpoint is hash-recorded. These are engineering observations only: there is
+no target mIoU and no CQE in this run. Audit the saved report, trace, log and
+checkpoint independently before considering a longer matched pair.
 
 ## Objective
 
