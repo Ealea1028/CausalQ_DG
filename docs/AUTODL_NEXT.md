@@ -1,6 +1,70 @@
-# AutoDL next step: Phase 16 PolyLR boundary fix then source-only 40k rerun
+# AutoDL next step: Phase 16 completed source-only 40k saved-evidence audit
 
 ## Current action — only this section is active
+
+The operator reports that the corrected seed-0 source-only REIN run completed,
+but no final saved report has yet been audited. Completion is not accepted from
+a console statement or mIoU tail alone. The new audit is read-only and CPU-only:
+it checks the exact producer SHA, protocol/runtime metadata, 160,000 contiguous
+microbatch records, accumulation boundaries, the corrected MMEngine PolyLR,
+six complete source permutations plus the 10,204-sample partial epoch, finite
+losses/norms, 40 checkpoint-history entries, the retained 39k/40k checkpoint
+hashes, and the full 500-image original-resolution confusion matrix/mIoU. It also
+requires exit code zero and rejects fatal markers in stderr. It does not load
+checkpoint pickle data, rerun inference, select a target checkpoint or make a
+CQE claim.
+
+Run only this audit using the exact handoff SHA. Preserve the successful run and
+the earlier failed `ef91451` attempt. Do not launch another seed, CQE experiment,
+resume, cleanup, or GPU job. If any path differs from the expected `d6fc52c`
+suffix, stop and return a directory listing rather than guessing.
+
+```bash
+(
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=<FULL_SHA_FROM_CODEX_HANDOFF>
+test -z "$(git status --porcelain)" || { echo dirty_worktree; exit 1; }
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+RUN="$BASE/REIN_SOURCE_ONLY_SEED0_40000_d6fc52c"
+REPORT="$BASE/analysis/rein_phase16_source40k_d6fc52c_v1.json"
+LOG="$BASE/analysis/rein_phase16_source40k_d6fc52c_v1.stderr.log"
+EXIT_FILE="$BASE/analysis/rein_phase16_source40k_d6fc52c_v1.exit.txt"
+AUDIT="$BASE/analysis/rein_phase16_source40k_d6fc52c_saved_audit.json"
+
+test -d "$RUN" || { echo "missing_run=$RUN"; exit 1; }
+test -f "$REPORT" || { echo "missing_report=$REPORT"; exit 1; }
+test -f "$LOG" || { echo "missing_log=$LOG"; exit 1; }
+test -f "$EXIT_FILE" || { echo "missing_exit=$EXIT_FILE"; exit 1; }
+test ! -e "$AUDIT" || { echo "existing_audit=$AUDIT"; exit 1; }
+
+PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
+set -o pipefail
+"$PY" -m tools.audit_rein_source40k \
+  --report "$REPORT" \
+  --stderr-log "$LOG" \
+  --exit-file "$EXIT_FILE" \
+  --run-dir "$RUN" | tee "$AUDIT"
+AUDIT_EXIT=${PIPESTATUS[0]}
+echo "source40k_audit_exit_code=$AUDIT_EXIT"
+sha256sum "$AUDIT" "$REPORT" "$LOG" "$RUN/last.pth" "$RUN/previous.pth"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+)
+```
+
+Return the complete audit JSON, exit code, five hashes, Git SHA/status and disk.
+Acceptance requires `source40k_saved_audit_ok: true`, 40,000 optimizer updates,
+160,000 microbatches, 500 targets, and no fatal marker. Stop after returning it.
+Only then will the baseline be recorded and the next Phase 16 mechanism boundary
+be defined.
+
+## Archived failed-run recovery handoff — do not execute
 
 The source-only formal attempt at `ef91451c42a7eb591aff3ee98864d7f1304dd8e0`
 FAILED at the `LR mismatch` guard after logging update 1,760 LR

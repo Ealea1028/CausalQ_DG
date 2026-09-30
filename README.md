@@ -32,10 +32,13 @@ The a10c1f6 continuation attempt failed optimizer-state comparison; checkpoint
 loading now preserves its input dictionaries and checks full restoration before replay.
 The corrected same-process gate passes at 5fee730 (parameter error 1.28e-7).
 Independent-process restore replay passes at 1671f1a (parameter error 1.79e-7).
-The source runner integration returns exit 0 at 7a3a1c6, but only its tail
-has been supplied. Next audit saved evidence before launching one fresh
-source-only 40k optimizer-update / 160k microbatch baseline with final 500-image
-evaluation. CQE transfer and formal accuracy results remain pending.
+The source runner integration and saved-evidence audit pass. The first formal
+attempt was correctly excluded after a project-side PolyLR guard error; the
+guard now matches MMEngine's 39,999-step internal horizon. The operator reports
+the fresh corrected seed-0 source-only 40k-update / 160k-microbatch baseline
+complete. Its saved trace, rolling checkpoints and full 500-image evaluation
+must now pass the versioned read-only audit before any result or CQE transfer
+claim is accepted.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

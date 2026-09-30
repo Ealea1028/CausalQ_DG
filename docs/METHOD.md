@@ -126,6 +126,12 @@ instability or accuracy. Preserve that partial run as failed evidence and
 rerun from fresh seed-0 initialization only after the corrected schedule gate
 is committed and deployed. No resume is authorized.
 
+The operator reports the corrected `d6fc52c` seed-0 run complete. Formal
+acceptance remains pending a read-only saved-evidence audit of its 160,000-record
+trace, full source permutations, final 500-image confusion matrix, and retained
+39k/40k rolling checkpoint hashes. No reported accuracy value is accepted and no
+CQE branch is authorized until that audit passes.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.
