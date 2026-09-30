@@ -34,6 +34,8 @@
 - Phase 16 read-only audit for the frozen-REIN class-query residual smoke.
 - Matched no-CQE/CQE 20-update REIN smoke using identical GTA5 examples and
   aligned original/photometric views, plus loss reconstruction tests.
+- Correct REIN trainability-hook ordering before compact baseline restoration
+  in the paired CQE smoke.
 
 ### Changed
 

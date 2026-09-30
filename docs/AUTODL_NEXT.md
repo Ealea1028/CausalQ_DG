@@ -2,6 +2,14 @@
 
 ## Current action — only this section is active
 
+The first attempt at this gate stopped during preflight with
+`Compact checkpoint coverage mismatch` before any training updates. Preserve
+its report and log under the `90f2495` suffix; do not rerun or overwrite them.
+The cause was that REIN's trainability hook had not been activated before
+checking compact-checkpoint key coverage. The corrected producer calls
+`model.train(True)` and validates the exact REIN adapter/decode-head trainable
+set before restoring the accepted baseline. The retry uses a new commit suffix.
+
 The no-CQE smoke at `14d3e5a` passed its producer and saved-evidence audits.
 The next gate compares fresh branches with and without the existing CQE loss.
 Each arm uses the same 80 GTA5 samples, identical initialization and the same

@@ -200,3 +200,8 @@ per-microbatch fingerprint must prove both arms used identical images, labels
 and style views. The fixed REIN model stays frozen; no Cityscapes data or
 labels enter this smoke. It is an engineering check, not accuracy acceptance
 or authorization for a 40k run. See `docs/AUTODL_NEXT.md` for the fixed command.
+The initial execution did not reach optimization: compact-state coverage was
+checked before `model.train(True)` enabled REIN adapters and the decode head.
+The retry corrects this order and explicitly audits the trainable parameter
+names; its run/report/log paths use the new commit SHA and leave the failed
+attempt intact.

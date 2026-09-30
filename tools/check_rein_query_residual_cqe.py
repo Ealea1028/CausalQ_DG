@@ -153,6 +153,12 @@ def main() -> int:
                 json.loads(args.data_report.read_text()), args.rein_root)
             model = MODELS.build(config.model)
             model.decode_head.init_weights()
+            # REIN enables the compactly saved adapters/head via its train hook.
+            model.train(True)
+            for name, parameter in model.named_parameters():
+                if parameter.requires_grad != name.startswith(
+                        ("backbone.reins.", "decode_head.")):
+                    raise ValueError("Unexpected REIN trainability: " + name)
             pretrained = torch.load(args.weights, map_location="cpu", weights_only=True)
             keys = (set(dict(model.backbone.named_parameters()))
                     | set(dict(model.backbone.named_buffers())))

@@ -283,3 +283,6 @@ identical branch initialization, the same 80 GTA5 records and per-step hashed
 original/photometric inputs. Each optimizes mean two-view segmentation loss;
 the candidate alone adds the existing normalized CQE objective at weight 1.0.
 This is not Cityscapes evaluation, a metric comparison, or formal training.
+The first attempt stopped before updates on compact-checkpoint coverage. The
+producer now invokes and validates REIN's `train(True)` trainability hook
+before restoring the frozen source baseline; failed artifacts are retained.

@@ -156,6 +156,10 @@ photometric views. The CQE arm adds only the existing normalized effect loss
 at weight 1.0. This is a bounded 20-update engineering smoke with no target
 evaluation or accuracy claim.
 
+The first execution stopped before optimization because REIN's trainability
+hook had not been activated before compact-checkpoint coverage validation. The
+retry activates the hook first and checks the exact expected trainable set.
+
 ## Objective
 
 CausalQ-DG measures and distils the prediction contribution of class-specific semantic queries across appearance-only counterfactual views.

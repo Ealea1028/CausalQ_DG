@@ -44,6 +44,8 @@ nonzero branch gradients, exact class isolation and unchanged base parameters.
 Native Mask2Former queries are not relabelled. The smoke's saved files pass an
 independent read-only audit at `161f077`. Next is a matched 20-update smoke
 that compares the same branch and photometric views with and without CQE.
+Its first attempt stopped before updates on compact-checkpoint coverage; the
+retry activates and verifies REIN's trainability hook before restoration.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 
