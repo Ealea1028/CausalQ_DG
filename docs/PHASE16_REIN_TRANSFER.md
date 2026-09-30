@@ -187,7 +187,16 @@ all losses are finite; the scale reaches `0.00196597`; branch scale, query-bank
 and projection gradients are nonzero; base parameters remain unchanged; the
 outside-class effect error is zero and the selected-class error is `5.96e-8`.
 The branch-only checkpoint is 17,887 bytes. Its report, stderr and checkpoint
-SHA256 values are recorded in `docs/AUTODL_NEXT.md`. This is neither target
-accuracy nor CQE evidence. The next step is a read-only saved-evidence audit;
-formal branch training remains unauthorized pending that audit and a separately
-specified matched training protocol.
+SHA256 values are recorded in `docs/AUTODL_NEXT.md`. Its read-only saved-file
+audit passes at `161f077`: the 80 trace indices are unique, all 20 update
+boundaries and loss summaries agree, and intervention/checkpoint evidence
+matches. This is neither target accuracy nor CQE evidence.
+
+The next gate runs two fresh, identically initialized 20-update branches over
+the same 80 GTA5 examples. Each arm trains on the same original and aligned
+photometric views using their mean segmentation loss. The candidate adds only
+the existing CQE loss with coefficient 1.0; the control excludes it. A
+per-microbatch fingerprint must prove both arms used identical images, labels
+and style views. The fixed REIN model stays frozen; no Cityscapes data or
+labels enter this smoke. It is an engineering check, not accuracy acceptance
+or authorization for a 40k run. See `docs/AUTODL_NEXT.md` for the fixed command.

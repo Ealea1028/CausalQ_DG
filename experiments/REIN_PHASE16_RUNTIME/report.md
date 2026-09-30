@@ -270,3 +270,16 @@ and `fade8f3893ca1b8e2559ec154450ad3cb6ff9efee84b17354e6f70149c68d852`.
 An independent saved-evidence audit is the next gate. This smoke contains no
 target mIoU, CQE mechanism or accuracy claim; it does not authorize a formal
 branch run or a causal conclusion.
+
+The smoke's independent saved-evidence audit passes at Git `161f077`. It
+checked 80 unique source indices, the 20 optimizer-update boundaries, all
+finite trace values, report/metadata agreement, loss summaries, class-isolated
+intervention, unchanged base parameters and branch checkpoint SHA256. The
+audit artifact SHA256 is
+`517ea9e74a1d2ad999182e957b1d20c8588d8d08fec1b70ac4eb14043fd1011b`.
+
+Next is a matched, bounded no-CQE/CQE engineering smoke. Both arms use fresh
+identical branch initialization, the same 80 GTA5 records and per-step hashed
+original/photometric inputs. Each optimizes mean two-view segmentation loss;
+the candidate alone adds the existing normalized CQE objective at weight 1.0.
+This is not Cityscapes evaluation, a metric comparison, or formal training.

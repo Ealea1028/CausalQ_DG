@@ -147,8 +147,14 @@ updates, finite losses, nonzero gradients for its scale, query bank and pixel
 projection, unchanged frozen base parameters, zero outside-class intervention
 error, and selected-class effect error `5.96e-8`. The 17,887-byte branch-only
 checkpoint is hash-recorded. These are engineering observations only: there is
-no target mIoU and no CQE in this run. Audit the saved report, trace, log and
-checkpoint independently before considering a longer matched pair.
+no target mIoU and no CQE in this run. Its saved report, trace, log and
+checkpoint pass an independent audit at `161f077`: 80 unique source indices,
+20 correct optimizer-update boundaries, finite trace values, and matching
+report/metadata/checkpoint evidence. Next compare two fresh, identically
+initialized branches on the same source examples and aligned original/
+photometric views. The CQE arm adds only the existing normalized effect loss
+at weight 1.0. This is a bounded 20-update engineering smoke with no target
+evaluation or accuracy claim.
 
 ## Objective
 

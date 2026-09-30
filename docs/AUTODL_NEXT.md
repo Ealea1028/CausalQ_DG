@@ -1,20 +1,20 @@
-# AutoDL next step: audit Phase 16 query-residual smoke evidence
+# AutoDL next step: matched Phase 16 query-residual CQE smoke
 
 ## Current action — only this section is active
 
-The 80-microbatch / 20-update no-CQE producer smoke at
-`14d3e5aa90571362eabb368c6216bb230a4421fa` returned `ok: true` and both
-exit codes zero. The frozen source-only REIN seed-0 reference remains fixed at
-500-image Cityscapes mIoU `0.6560509975`. The producer reported finite branch
-optimization, nonzero scale/query/projection gradients, unchanged base
-parameters, exact outside-class isolation, and a 17,887-byte branch checkpoint.
-These are engineering observations, not target accuracy or CQE evidence.
+The no-CQE smoke at `14d3e5a` passed its producer and saved-evidence audits.
+The next gate compares fresh branches with and without the existing CQE loss.
+Each arm uses the same 80 GTA5 samples, identical initialization and the same
+geometry-aligned original/photometric inputs; each runs 20 optimizer updates
+with accumulation four. Both use mean two-view segmentation loss. Only the
+candidate adds normalized CQE at weight 1.0. The frozen REIN model stays fixed.
+This smoke performs no Cityscapes evaluation and gives no accuracy result.
 
-Next, audit only the *saved* report, trace, stderr and checkpoint. This command
-does not load datasets, model weights or CUDA. It creates one new JSON audit
-artifact, retains all existing files and requires the clean exact Git commit
-provided with this handoff. Do not rerun the smoke, start formal training,
-enable CQE, or delete anything. Use a fresh terminal and run:
+The script creates a new run directory, two trace files, two branch-only
+checkpoints, a report and stderr log. It checks the disk/input hashes, captures
+a fingerprint for every paired example, and writes final hashes to the
+terminal. It needs the isolated CUDA 11.8 environment. Preserve existing runs
+and stop if any expected output path already exists. Use a fresh terminal:
 
 ```bash
 (
@@ -27,49 +27,42 @@ git checkout --detach "$EXPECTED_SHA" || exit 1
 test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
 
 BASE=/root/autodl-tmp/outputs/CausalQ_DG
-RUN="$BASE/REIN_QUERY_RESIDUAL_NO_CQE_SMOKE_20UPDATES_14d3e5a"
-REPORT="$BASE/analysis/rein_phase16_query_residual_14d3e5a_v1.json"
-STDERR_LOG="$BASE/analysis/rein_phase16_query_residual_14d3e5a_v1.stderr.log"
-AUDIT="$BASE/analysis/rein_phase16_query_residual_14d3e5a_saved_audit.json"
-PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
-test -f "$RUN/train.jsonl" || exit 1
-test -f "$RUN/query_residual_20updates.pth" || exit 1
-test -f "$REPORT" || exit 1
-test -f "$STDERR_LOG" || exit 1
-test ! -e "$AUDIT" || { echo "existing_audit=$AUDIT"; exit 1; }
-test -x "$PY" || exit 1
+RUN="$BASE/REIN_QUERY_RESIDUAL_CQE_PAIRED_SMOKE_20UPDATES_${EXPECTED_SHA:0:7}"
+REPORT="$BASE/analysis/rein_phase16_query_residual_cqe_${EXPECTED_SHA:0:7}_v1.json"
+LOG="$BASE/analysis/rein_phase16_query_residual_cqe_${EXPECTED_SHA:0:7}_v1.stderr.log"
+test -f /root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth || exit 1
+test -f "$BASE/analysis/rein_phase16_data_protocol_b645793_v1.json" || exit 1
+test -f "$BASE/analysis/rein_phase16_source40k_d6fc52c_saved_audit.json" || exit 1
+test -f "$BASE/REIN_SOURCE_ONLY_SEED0_40000_d6fc52c/last.pth" || exit 1
+test ! -e "$RUN" || { echo "existing_run=$RUN"; exit 1; }
+test ! -e "$REPORT" || { echo "existing_report=$REPORT"; exit 1; }
+test ! -e "$LOG" || { echo "existing_log=$LOG"; exit 1; }
 
-set -o pipefail
-"$PY" -m tools.audit_rein_query_residual \
-  --report "$REPORT" \
-  --stderr-log "$STDERR_LOG" \
-  --run-dir "$RUN" | tee "$AUDIT"
-AUDIT_EXIT=${PIPESTATUS[0]}
-echo "saved_audit_exit_code=$AUDIT_EXIT"
-sha256sum "$AUDIT" "$REPORT" "$STDERR_LOG" "$RUN/query_residual_20updates.pth"
+bash scripts/check_rein_query_residual_cqe_phase16.sh
 git rev-parse HEAD
 git status --short
 df -h /root/autodl-tmp
-exit "$AUDIT_EXIT"
 )
 ```
 
 Replace `EXPECTED_SHA` with the full commit SHA supplied in the response. Return
-the complete audit JSON, audit exit code, four hashes, Git SHA/status, and disk
-output. Acceptance requires `query_residual_saved_audit_ok: true`; stop there.
-If the audit fails, preserve the inputs and failed audit artifact and report the
-error. The producer hashes expected by the versioned auditor are report
-`5b566bd4d764109e71a26b4da7abd10f267ad627377de0340ce3c616e1266510`,
-stderr `ebec21c1e0c8bd257fa9353337304a3c96e6d7361e7520ba6d43b3711bf040b2`,
-and branch checkpoint
-`fade8f3893ca1b8e2559ec154450ad3cb6ff9efee84b17354e6f70149c68d852`.
+the complete report, per-arm update/loss summaries, `matched_inputs_identical`,
+both checkpoint hashes, report/log hashes, exit code, Git SHA/status and disk
+output. Acceptance requires exit 0, `ok: true`, 80 matched fingerprints,
+20 distinct source indices and 20 updates per arm, finite values, matching
+initial branch fingerprints, objective reconstruction error at most `1e-7`,
+all required branch gradients, unchanged frozen base parameters and successful
+checkpoint roundtrips. Stop after returning this evidence; a short smoke does
+not authorize a 40k run.
 
 ## Completed branch smoke — do not repeat
 
 Producer `14d3e5a` ran at seed `20260930` with accumulation 4, 80 distinct GTA5
 microbatches and 20 optimizer updates. It used the frozen accepted REIN source
 baseline and no CQE. Peak reserved GPU memory was 2.055 GiB. Its saved-evidence
-audit is pending, and it has no target mIoU.
+audit passed at `161f077`; its audit JSON SHA256 is
+`517ea9e74a1d2ad999182e957b1d20c8588d8d08fec1b70ac4eb14043fd1011b`.
+It has no target mIoU.
 
 ## Completed source-only audit — do not repeat
 

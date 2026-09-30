@@ -31,6 +31,9 @@
   the Phase 14 final checkpoint.
 - Phase 14 learned-null negative-result archive and decision to stop expanding
   causal objectives on the degraded intervention baseline.
+- Phase 16 read-only audit for the frozen-REIN class-query residual smoke.
+- Matched no-CQE/CQE 20-update REIN smoke using identical GTA5 examples and
+  aligned original/photometric views, plus loss reconstruction tests.
 
 ### Changed
 

@@ -41,8 +41,9 @@ guard now matches MMEngine's 39,999-step internal horizon. The corrected
 class-specific residual branch over frozen REIN semantic logits passes its
 80-microbatch / 20-update no-CQE smoke at `14d3e5a`: finite optimization,
 nonzero branch gradients, exact class isolation and unchanged base parameters.
-Native Mask2Former queries are not relabelled. Its saved files now require an
-independent read-only audit before any longer or CQE-enabled experiment.
+Native Mask2Former queries are not relabelled. The smoke's saved files pass an
+independent read-only audit at `161f077`. Next is a matched 20-update smoke
+that compares the same branch and photometric views with and without CQE.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 
