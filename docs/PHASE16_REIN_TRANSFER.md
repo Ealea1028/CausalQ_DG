@@ -213,5 +213,11 @@ remain preserved; use a new commit suffix for the next attempt.
 The corrected paired smoke completes at `3644785`: both arms have 20 optimizer
 updates over 80 identical GTA5 examples, matching initialization fingerprints,
 finite losses/gradients, unchanged frozen base parameters and verified
-checkpoint roundtrips. Its report, traces and checkpoints now require a
-read-only evidence audit. There is no target evaluation or accuracy conclusion.
+checkpoint roundtrips. The first saved audit exposed a verifier-only mismatch
+between Python float64 addition and the producer's float32 tensor addition; the
+audit was corrected and the v2 read-only evidence audit passes at
+`f18c2c2`. Audit JSON SHA256 is
+`083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
+There is no target evaluation or accuracy conclusion. A full 40k-update-per-arm
+CQE/control comparison is a separate costly experiment and is not authorized
+by the smoke report itself; see `docs/AUTODL_NEXT.md`.

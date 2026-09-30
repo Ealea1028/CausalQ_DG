@@ -49,9 +49,9 @@ retry activates and verifies REIN's trainability hook before restoration.
 The matched no-CQE/CQE 20-update smoke completed at `3644785`; its saved-file
 first audit at `fa9c492` rejected objective reconstruction because its Python
 float64 sum did not reproduce the producer's float32 tensor addition. The
-audit now models float32 rounding and has a focused regression test; rerun only
-the read-only audit under a new `_saved_audit_v2.json` output name. The smoke
-provides no target accuracy result.
+audit now models float32 rounding and has a focused regression test. The v2
+audit passes at `f18c2c2`; it verifies evidence integrity but provides no
+target accuracy result. A full matched comparison remains a separate decision.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

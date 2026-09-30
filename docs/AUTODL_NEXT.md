@@ -1,38 +1,40 @@
-# AutoDL next step: audit matched Phase 16 query-residual CQE smoke
+# AutoDL next step: authorize/design the Phase 16 matched full comparison
 
 ## Current action — only this section is active
 
-The paired smoke at `3644785a22a4c9391bb9076b4cdad606c63be615` completed with
-`ok: true` and exit code 0. Both arms ran 20 optimizer updates over the same 80
-GTA5 examples; saved input fingerprints match. Losses and gradients are finite,
-the expected residual parameters received gradients, both branches changed
-from identical initialization, the frozen base stayed unchanged, and both
-checkpoint roundtrips passed. Peak reserved memory was 2.430 GiB. There is no
-Cityscapes result; differing training losses are not an accuracy comparison.
-This smoke does not authorize long training.
+The paired smoke at `3644785a22a4c9391bb9076b4cdad606c63be615` and its saved
+evidence audit at `f18c2c2d132eeb1411e3eaa00aff05f052c66f75` both completed
+successfully. The v2 audit JSON SHA256 is
+`083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
 
-The first audit ran at `fa9c492` and failed with `Objective reconstruction
-mismatch`. The report, stderr, trace and checkpoint hashes matched their
-producer-pinned values; the mismatch came from reconstructing a float32 tensor
-sum with Python float64 arithmetic. The local verifier now reproduces float32
-rounding and includes a regression case. Preserve the original failed audit
-JSON and write the corrected result to the separate v2 path.
+Both arms ran 20 optimizer updates over the same 80 GTA5 examples; saved input
+fingerprints match. Losses and gradients are finite, required residual
+parameters received gradients, both branches changed from identical
+initialization, the frozen base stayed unchanged, and checkpoint roundtrips
+passed. Peak reserved memory was 2.430 GiB. There is no Cityscapes result;
+loss traces are not an accuracy comparison. This engineering smoke report
+still declares `formal_training_authorized: false`.
 
-Next independently audit the saved report, stderr, traces and branch
-checkpoints. This is read-only and does not load datasets, weights or CUDA.
-In a fresh AutoDL terminal run:
+The first audit at `fa9c492` failed with `Objective reconstruction mismatch`
+because it reconstructed a float32 tensor sum with Python float64 arithmetic.
+The source correction reproduces float32 rounding; the original failed audit
+JSON remains preserved, and the v2 audit now passes.
 
-```bash
-cd /root/autodl-tmp/CausalQ_DG || exit 1
-export OMP_NUM_THREADS=1
-git rev-parse HEAD
-git status --short
-bash scripts/audit_rein_query_residual_cqe_phase16.sh
-```
+## Decision gate
 
-Return the full v2 audit JSON, artifact hashes, exit code, Git status and disk
-output. Acceptance requires `query_residual_cqe_saved_audit_ok: true`; stop
-after the audit. No longer run is authorized by this engineering smoke alone.
+The next scientific question requires a matched full comparison: train the
+same frozen-REIN residual branch without CQE and with CQE, then evaluate both
+fixed-final checkpoints on all 500 Cityscapes validation images. That entails
+40,000 optimizer updates per arm (160,000 source microbatches per arm at
+accumulation four), followed by two full target evaluations. The paired smoke
+is not accuracy evidence and does not itself authorize that costly run. Obtain
+explicit confirmation before implementing/launching this full comparison.
+
+Current reported AutoDL free disk is 6.9 GiB. Before any full run, inventory
+disk and verify the intended compact checkpoint/log policy; do not remove
+existing data, environments, accepted checkpoints or evidence.
+No AutoDL command is pending until the full-comparison scope is confirmed and
+its dedicated runner/audit are implemented and committed.
 
 ## Previous producer instructions — completed; do not rerun
 
@@ -113,7 +115,7 @@ audit passed at `161f077`; its audit JSON SHA256 is
 `517ea9e74a1d2ad999182e957b1d20c8588d8d08fec1b70ac4eb14043fd1011b`.
 It has no target mIoU.
 
-## Completed paired CQE smoke — saved audit pending
+## Completed paired CQE smoke — audit passed
 
 Producer `3644785a22a4c9391bb9076b4cdad606c63be615` completed both arms with
 seed `20260931`. Report/stderr hashes:

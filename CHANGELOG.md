@@ -39,6 +39,8 @@
 - Make CQE present-class reduction compatible with PyTorch 2.0 and cover
   per-sample class masks with ignored pixels.
 - Add a read-only saved-artifact audit for the matched Phase 16 CQE smoke.
+- Correct float32 objective reconstruction in the paired CQE saved-evidence
+  audit and record its accepted v2 result.
 
 ### Changed
 

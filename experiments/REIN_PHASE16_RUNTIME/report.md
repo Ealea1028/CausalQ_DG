@@ -293,5 +293,10 @@ occurred in the failed attempt.
 The corrected paired smoke completes at `3644785` with 20 updates per arm,
 80 identical matched inputs, finite objectives/gradients, unchanged base
 parameters and successful checkpoint roundtrips (2.430 GiB peak reserved).
-Its saved artifacts await independent audit; there is no target metric or
-accuracy conclusion.
+The first saved audit failed only on float64-versus-float32 scalar
+reconstruction; all producer-pinned evidence hashes matched. The verifier fix
+at `f18c2c2` now passes the read-only saved-evidence audit; v2 audit JSON SHA256
+is `083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
+There is no target metric or accuracy conclusion. A full 40k-update-per-arm
+comparison requires a separate decision; the smoke artifact explicitly does
+not authorize formal training.

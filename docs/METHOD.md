@@ -531,5 +531,13 @@ This engineering check is not evidence of CQE accuracy benefit. The first
 saved-artifact audit at `fa9c492` failed only because Python float64 addition
 did not reproduce the producer's float32 tensor objective; the underlying
 saved evidence hashes matched. The verifier now rounds reconstructed objectives
-to float32 and tests that precision boundary. Next rerun only the read-only
-saved-artifact audit to a distinct v2 report path; do not repeat training.
+to float32 and tests that precision boundary. The v2 saved-artifact audit now
+passes; do not repeat training.
+
+The corrected saved-artifact audit passes at project revision
+`f18c2c2d132eeb1411e3eaa00aff05f052c66f75`; its v2 audit JSON SHA256 is
+`083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
+It verifies both 20-update arms, 80 identical matched source inputs, unchanged
+frozen base parameters and checkpoint roundtrips. It provides no target metric
+and retains `formal_training_authorized: false`; a full matched comparison is
+a separate compute/experiment decision, not implied by this smoke result.
