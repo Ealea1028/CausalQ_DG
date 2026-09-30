@@ -46,6 +46,8 @@ independent read-only audit at `161f077`. Next is a matched 20-update smoke
 that compares the same branch and photometric views with and without CQE.
 Its first attempt stopped before updates on compact-checkpoint coverage; the
 retry activates and verifies REIN's trainability hook before restoration.
+The matched no-CQE/CQE 20-update smoke completed at `3644785`; its saved-file
+audit is the current gate. It provides no target accuracy result.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

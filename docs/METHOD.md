@@ -521,3 +521,11 @@ segmentation score is not evidence for a better causal baseline. Learned-null
 is retained as a controlled negative ablation, zero remains a diagnostic, and
 the project does not proceed to sufficiency/specificity optimization on this
 mechanism.
+
+## Phase 16 paired CQE smoke status
+
+The matched frozen-REIN query-residual smoke completes at `3644785`, with
+20 updates per arm over 80 identical GTA5 examples and finite branch updates.
+The fixed REIN baseline is unchanged and no Cityscapes metric is computed.
+This engineering check is not evidence of CQE accuracy benefit; saved-artifact
+audit is the next gate.

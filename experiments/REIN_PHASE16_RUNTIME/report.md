@@ -290,3 +290,8 @@ The next retry stopped on the first batch because PyTorch 2.0 rejects tuple
 dimensions in `Tensor.any`. The CQE class-presence reduction is now sequential
 and covered for multiple samples and ignored pixels; no optimizer updates
 occurred in the failed attempt.
+The corrected paired smoke completes at `3644785` with 20 updates per arm,
+80 identical matched inputs, finite objectives/gradients, unchanged base
+parameters and successful checkpoint roundtrips (2.430 GiB peak reserved).
+Its saved artifacts await independent audit; there is no target metric or
+accuracy conclusion.

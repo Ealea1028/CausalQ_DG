@@ -1,6 +1,33 @@
-# AutoDL next step: matched Phase 16 query-residual CQE smoke
+# AutoDL next step: audit matched Phase 16 query-residual CQE smoke
 
 ## Current action — only this section is active
+
+The paired smoke at `3644785a22a4c9391bb9076b4cdad606c63be615` completed with
+`ok: true` and exit code 0. Both arms ran 20 optimizer updates over the same 80
+GTA5 examples; saved input fingerprints match. Losses and gradients are finite,
+the expected residual parameters received gradients, both branches changed
+from identical initialization, the frozen base stayed unchanged, and both
+checkpoint roundtrips passed. Peak reserved memory was 2.430 GiB. There is no
+Cityscapes result; differing training losses are not an accuracy comparison.
+This smoke does not authorize long training.
+
+Next independently audit the saved report, stderr, traces and branch
+checkpoints. This is read-only and does not load datasets, weights or CUDA.
+Preserve failed attempts. In a fresh AutoDL terminal run:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+git rev-parse HEAD
+git status --short
+bash scripts/audit_rein_query_residual_cqe_phase16.sh
+```
+
+Return the full audit JSON, artifact hashes, exit code, Git status and disk
+output. Acceptance requires `query_residual_cqe_saved_audit_ok: true`; stop
+after the audit. No longer run is authorized by this engineering smoke alone.
+
+## Previous producer instructions — completed; do not rerun
 
 The first attempt at this gate stopped during preflight with
 `Compact checkpoint coverage mismatch` before any training updates. Preserve
@@ -78,6 +105,20 @@ baseline and no CQE. Peak reserved GPU memory was 2.055 GiB. Its saved-evidence
 audit passed at `161f077`; its audit JSON SHA256 is
 `517ea9e74a1d2ad999182e957b1d20c8588d8d08fec1b70ac4eb14043fd1011b`.
 It has no target mIoU.
+
+## Completed paired CQE smoke — saved audit pending
+
+Producer `3644785a22a4c9391bb9076b4cdad606c63be615` completed both arms with
+seed `20260931`. Report/stderr hashes:
+`c6a7ee96f1e2c4e2defd29e2dc07e8d439c48fde74a4f1e3f7776a4b428f5ddd` /
+`15f7e575bf971c025c9cbe64b18e1051f9346458015edb8583f9965940ea591e`.
+No-CQE/CQE trace hashes:
+`1eb60f2459ea9a5a077303ea6cd8c0f7a66ad1caf3d013c3daecf74ed624e620` /
+`f5544d5fa82e81959b9806dbc315921ecfbef4296e48f8c62aa0c8800d488bef`.
+Branch checkpoint hashes:
+`632929ccce21ee68e6a1b804de900ab30b4019f8391fda7710fd1b81153f78f1` /
+`10410867c71843057798a45fb6a2ab86fe57c4e1b0e83491dea7836b79ff69a0`.
+No target evaluation or accuracy claim is present.
 
 ## Completed source-only audit — do not repeat
 

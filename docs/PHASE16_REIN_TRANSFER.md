@@ -210,3 +210,8 @@ pinned PyTorch 2.0 runtime rejects tuple dimensions in `Tensor.any`. The CQE
 class-presence calculation now uses sequential spatial reductions and has a
 multi-sample ignored-pixel regression test. The failed `ba61199` artifacts
 remain preserved; use a new commit suffix for the next attempt.
+The corrected paired smoke completes at `3644785`: both arms have 20 optimizer
+updates over 80 identical GTA5 examples, matching initialization fingerprints,
+finite losses/gradients, unchanged frozen base parameters and verified
+checkpoint roundtrips. Its report, traces and checkpoints now require a
+read-only evidence audit. There is no target evaluation or accuracy conclusion.
