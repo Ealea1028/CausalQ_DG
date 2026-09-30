@@ -159,6 +159,10 @@ evaluation or accuracy claim.
 The first execution stopped before optimization because REIN's trainability
 hook had not been activated before compact-checkpoint coverage validation. The
 retry activates the hook first and checks the exact expected trainable set.
+The next attempt stopped on the first microbatch because PyTorch 2.0 does not
+accept tuple dimensions for `Tensor.any`; no optimizer update occurred. The
+present-class mask now reduces spatial axes sequentially for runtime
+compatibility, with a multi-sample/ignore-pixel regression test.
 
 ## Objective
 

@@ -286,3 +286,7 @@ This is not Cityscapes evaluation, a metric comparison, or formal training.
 The first attempt stopped before updates on compact-checkpoint coverage. The
 producer now invokes and validates REIN's `train(True)` trainability hook
 before restoring the frozen source baseline; failed artifacts are retained.
+The next retry stopped on the first batch because PyTorch 2.0 rejects tuple
+dimensions in `Tensor.any`. The CQE class-presence reduction is now sequential
+and covered for multiple samples and ignored pixels; no optimizer updates
+occurred in the failed attempt.

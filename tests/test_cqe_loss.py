@@ -47,6 +47,25 @@ def test_absent_classes_and_ignore_pixels_do_not_contribute() -> None:
     assert second_loss == pytest.approx(0.0, abs=1e-7)
 
 
+def test_present_class_reduction_supports_multiple_samples_and_ignore_pixels() -> None:
+    reference = torch.randn(2, 3, 2, 3)
+    view = reference.clone()
+    labels = torch.tensor(
+        [
+            [[0, 0, 255], [0, 255, 255]],
+            [[2, 2, 2], [255, 2, 255]],
+        ]
+    )
+    view[0, 1] = view[0, 1] + 50.0
+    view[1, 0] = view[1, 0] - 50.0
+    view[0, :, 0, 2] = view[0, :, 0, 2] + 100.0
+
+    loss = causal_query_effect_loss(view, reference, labels)
+
+    assert torch.isfinite(loss)
+    assert loss.item() == pytest.approx(0.0, abs=1e-7)
+
+
 def test_effect_normalization_removes_positive_magnitude_scaling() -> None:
     reference = torch.randn(1, 2, 3, 3)
     labels = torch.zeros(1, 3, 3, dtype=torch.long)

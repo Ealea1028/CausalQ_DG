@@ -36,6 +36,8 @@
   aligned original/photometric views, plus loss reconstruction tests.
 - Correct REIN trainability-hook ordering before compact baseline restoration
   in the paired CQE smoke.
+- Make CQE present-class reduction compatible with PyTorch 2.0 and cover
+  per-sample class masks with ignored pixels.
 
 ### Changed
 

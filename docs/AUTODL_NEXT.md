@@ -10,6 +10,13 @@ checking compact-checkpoint key coverage. The corrected producer calls
 `model.train(True)` and validates the exact REIN adapter/decode-head trainable
 set before restoring the accepted baseline. The retry uses a new commit suffix.
 
+That retry reached the first source microbatch but stopped while computing
+CQE: the pinned PyTorch 2.0 runtime rejects tuple dimensions in `Tensor.any`.
+No optimizer updates occurred. Preserve its report/log and partial run under
+the `ba61199` suffix. The CQE present-class mask now uses sequential dimension
+reductions compatible with the pinned runtime; unit coverage includes multiple
+samples and ignored pixels. Retry only at the next new commit suffix.
+
 The no-CQE smoke at `14d3e5a` passed its producer and saved-evidence audits.
 The next gate compares fresh branches with and without the existing CQE loss.
 Each arm uses the same 80 GTA5 samples, identical initialization and the same

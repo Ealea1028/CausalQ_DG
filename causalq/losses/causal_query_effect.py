@@ -36,7 +36,9 @@ def causal_query_effect_loss(
         raise ValueError("CQE batch contains no valid pixels")
     safe_labels = labels.masked_fill(~valid, 0)
     present = F.one_hot(safe_labels, num_classes=num_classes).bool()
-    present = (present & valid.unsqueeze(-1)).any(dim=(1, 2))
+    # Sequential reductions retain compatibility with the pinned PyTorch 2.0
+    # REIN runtime, whose Tensor.any does not accept a tuple of dimensions.
+    present = (present & valid.unsqueeze(-1)).any(dim=2).any(dim=1)
     if not present.any():
         raise ValueError("CQE batch contains no present training classes")
 

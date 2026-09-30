@@ -205,3 +205,8 @@ checked before `model.train(True)` enabled REIN adapters and the decode head.
 The retry corrects this order and explicitly audits the trainable parameter
 names; its run/report/log paths use the new commit SHA and leave the failed
 attempt intact.
+That retry reached data loading but failed before optimization because the
+pinned PyTorch 2.0 runtime rejects tuple dimensions in `Tensor.any`. The CQE
+class-presence calculation now uses sequential spatial reductions and has a
+multi-sample ignored-pixel regression test. The failed `ba61199` artifacts
+remain preserved; use a new commit suffix for the next attempt.
