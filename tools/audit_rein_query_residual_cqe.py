@@ -3,6 +3,7 @@
 import argparse
 import json
 import math
+import struct
 from pathlib import Path
 
 from tools.audit_rein_pilot import digest, require
@@ -36,6 +37,11 @@ def _close(left, right, tolerance=1e-7):
     return _finite(left) and _finite(right) and abs(left - right) <= tolerance
 
 
+def _float32(value):
+    """Round a Python scalar to the float32 value used by the training tensors."""
+    return struct.unpack("!f", struct.pack("!f", value))[0]
+
+
 def audit_arm(records, summary, *, enabled):
     require(len(records) == MICROBATCHES, "Microbatch record count mismatch")
     indices = []
@@ -51,7 +57,12 @@ def audit_arm(records, summary, *, enabled):
             require(_finite(record.get(key)), "Nonfinite " + key)
         require(record["loss"] > 0 and record["gradient_norm"] > 0
                 and record["loss_cqe"] >= 0, "Invalid training scalar")
-        objective = record["loss_seg"] + (record["loss_cqe"] if enabled else 0.0)
+        # The producer adds these scalar tensors in float32 before serializing
+        # ``loss``. Reproduce that rounding rather than summing JSON floats in
+        # Python's float64 and spuriously rejecting a valid trace.
+        objective = _float32(
+            record["loss_seg"] + (record["loss_cqe"] if enabled else 0.0)
+        )
         require(_close(record["loss"], objective), "Objective reconstruction mismatch")
     require(len(set(indices)) == MICROBATCHES, "Source prefix repeats an index")
     require(summary.get("optimizer_updates") == UPDATES

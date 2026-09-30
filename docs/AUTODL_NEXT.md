@@ -11,9 +11,16 @@ checkpoint roundtrips passed. Peak reserved memory was 2.430 GiB. There is no
 Cityscapes result; differing training losses are not an accuracy comparison.
 This smoke does not authorize long training.
 
+The first audit ran at `fa9c492` and failed with `Objective reconstruction
+mismatch`. The report, stderr, trace and checkpoint hashes matched their
+producer-pinned values; the mismatch came from reconstructing a float32 tensor
+sum with Python float64 arithmetic. The local verifier now reproduces float32
+rounding and includes a regression case. Preserve the original failed audit
+JSON and write the corrected result to the separate v2 path.
+
 Next independently audit the saved report, stderr, traces and branch
 checkpoints. This is read-only and does not load datasets, weights or CUDA.
-Preserve failed attempts. In a fresh AutoDL terminal run:
+In a fresh AutoDL terminal run:
 
 ```bash
 cd /root/autodl-tmp/CausalQ_DG || exit 1
@@ -23,7 +30,7 @@ git status --short
 bash scripts/audit_rein_query_residual_cqe_phase16.sh
 ```
 
-Return the full audit JSON, artifact hashes, exit code, Git status and disk
+Return the full v2 audit JSON, artifact hashes, exit code, Git status and disk
 output. Acceptance requires `query_residual_cqe_saved_audit_ok: true`; stop
 after the audit. No longer run is authorized by this engineering smoke alone.
 

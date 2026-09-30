@@ -527,5 +527,9 @@ mechanism.
 The matched frozen-REIN query-residual smoke completes at `3644785`, with
 20 updates per arm over 80 identical GTA5 examples and finite branch updates.
 The fixed REIN baseline is unchanged and no Cityscapes metric is computed.
-This engineering check is not evidence of CQE accuracy benefit; saved-artifact
-audit is the next gate.
+This engineering check is not evidence of CQE accuracy benefit. The first
+saved-artifact audit at `fa9c492` failed only because Python float64 addition
+did not reproduce the producer's float32 tensor objective; the underlying
+saved evidence hashes matched. The verifier now rounds reconstructed objectives
+to float32 and tests that precision boundary. Next rerun only the read-only
+saved-artifact audit to a distinct v2 report path; do not repeat training.

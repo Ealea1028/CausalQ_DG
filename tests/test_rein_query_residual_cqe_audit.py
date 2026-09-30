@@ -2,7 +2,7 @@ import copy
 
 import pytest
 
-from tools.audit_rein_query_residual_cqe import audit, audit_arm
+from tools.audit_rein_query_residual_cqe import _float32, audit, audit_arm
 from tools.check_rein_backbone import WEIGHT_SHA
 from tools.check_rein_query_residual import (
     BASELINE_AUDIT_SHA,
@@ -99,3 +99,15 @@ def test_rejects_objective_mismatch():
     records[0]["loss"] += 0.1
     with pytest.raises(ValueError, match="Objective reconstruction"):
         audit_arm(records, _arm(records, True), enabled=True)
+
+
+def test_reconstructs_objective_with_float32_tensor_rounding():
+    records = _records(True)
+    records[0].update(loss_seg=1_000_000.0, loss_cqe=0.01, loss=1_000_000.0)
+    summary = _arm(records, True)
+
+    # Float64 addition differs by far more than the audit tolerance, but the
+    # original float32 tensor addition rounds back to the logged total.
+    assert records[0]["loss_seg"] + records[0]["loss_cqe"] != records[0]["loss"]
+    assert _float32(records[0]["loss_seg"] + records[0]["loss_cqe"]) == records[0]["loss"]
+    assert audit_arm(records, summary, enabled=True) == list(range(80))

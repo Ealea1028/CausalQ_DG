@@ -47,7 +47,11 @@ that compares the same branch and photometric views with and without CQE.
 Its first attempt stopped before updates on compact-checkpoint coverage; the
 retry activates and verifies REIN's trainability hook before restoration.
 The matched no-CQE/CQE 20-update smoke completed at `3644785`; its saved-file
-audit is the current gate. It provides no target accuracy result.
+first audit at `fa9c492` rejected objective reconstruction because its Python
+float64 sum did not reproduce the producer's float32 tensor addition. The
+audit now models float32 rounding and has a focused regression test; rerun only
+the read-only audit under a new `_saved_audit_v2.json` output name. The smoke
+provides no target accuracy result.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

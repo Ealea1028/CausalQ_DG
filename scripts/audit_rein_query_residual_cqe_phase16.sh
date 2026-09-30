@@ -7,7 +7,7 @@ BASE=/root/autodl-tmp/outputs/CausalQ_DG
 RUN="$BASE/REIN_QUERY_RESIDUAL_CQE_PAIRED_SMOKE_20UPDATES_$SHA"
 REPORT="$BASE/analysis/rein_phase16_query_residual_cqe_${SHA}_v1.json"
 LOG="$BASE/analysis/rein_phase16_query_residual_cqe_${SHA}_v1.stderr.log"
-AUDIT="$BASE/analysis/rein_phase16_query_residual_cqe_${SHA}_saved_audit.json"
+AUDIT="$BASE/analysis/rein_phase16_query_residual_cqe_${SHA}_saved_audit_v2.json"
 PY=/root/autodl-tmp/envs/rein-phase16-py310-cu118-tuna-retry1/bin/python
 test -f "$REPORT" && test -f "$LOG" && test -d "$RUN" && test -x "$PY"
 test ! -e "$AUDIT" || { echo "existing_audit=$AUDIT"; exit 1; }
