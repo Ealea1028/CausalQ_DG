@@ -16,6 +16,7 @@ from .query_segmentor import (
     QuerySegmentor,
     QuerySegmentorOutput,
 )
+from .rein_query_residual import ReinClassQueryResidual, ReinQueryOutput
 
 __all__ = [
     "BaselineDecoder",
@@ -31,4 +32,6 @@ __all__ = [
     "QueryResidualHead",
     "QuerySegmentor",
     "QuerySegmentorOutput",
+    "ReinClassQueryResidual",
+    "ReinQueryOutput",
 ]

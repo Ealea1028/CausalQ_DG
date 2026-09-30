@@ -158,7 +158,33 @@ the same branch **with CQE**. Native REIN remains a separate reference. The
 to them post hoc would change the meaning of the original `do(Q_c=0)` and
 cannot by itself substantiate a faithful CQE transfer. No full run is
 authorized until this branch, its class-isolation tests, and a matched short
-GPU smoke are ready.
-REIN's 100 Mask2Former prediction queries are
-not intrinsically class-specific; a faithful class-specific CQE intervention
-still needs an explicit design and isolated unit tests before any training.
+GPU smoke are ready. REIN's 100 Mask2Former prediction queries are not
+intrinsically class-specific, so the design below introduces a separate,
+testable semantic intervention rather than reinterpreting those native queries.
+
+## Accepted source-only reference and residual-branch boundary
+
+The formal source-only seed-0 REIN run produced at `d6fc52c` passes the
+versioned read-only audit at `1da98b5`. It contains 40,000 optimizer updates,
+160,000 source microbatches, 40 rolling-checkpoint history entries, a complete
+500-image original-resolution Cityscapes evaluation, and fixed-final mIoU
+`0.6560509975`. Its final checkpoint SHA256 is
+`84231e98dda68ac4b1fd4f59cc97881887a614de01b01e2697323c1eac80daf2`.
+This is an adapted source-only baseline, not an exact paper reproduction and
+not a CQE result.
+
+The explicit transfer bridge consumes the frozen model's 19 semantic logits,
+projects them into 64 channels, and compares them with a learned
+`19 x 2 x 64` class/query bank. Per-class routes are aggregated with
+temperature-0.07 log-sum-exp and scaled by a scalar initialized to zero. The
+fixed logits and residual logits remain separately exposed. Removing class
+`c` restores only class channel `c`; all other channels remain bitwise equal to
+the factual output. This preserves the project's intervention contract without
+pretending the upstream 100 Mask2Former queries are class-indexed.
+
+The next GPU action is only an 80-microbatch / 20-update source smoke with the
+accepted REIN checkpoint frozen. It saves a small branch-only checkpoint and
+must verify finite losses/gradients, scale opening, query/projection gradient
+flow, exact class isolation, base-parameter invariance, and serialization
+roundtrip. CQE, target training, target evaluation, accuracy acceptance, and
+formal branch training remain unauthorized until this gate passes.

@@ -1,6 +1,21 @@
 # Phase 16 feasibility and runtime acceptance
 
-## Latest boundary: saved-runner audit before first formal baseline
+## Accepted formal source-only baseline and current boundary
+
+The saved-evidence audit at project commit `1da98b5` accepts producer
+`d6fc52c`: 40,000 optimizer updates / 160,000 microbatches, final fixed-checkpoint
+Cityscapes mIoU `0.656051`, first/last-20 source loss means
+`122.297790/20.474319`, peak reserved memory `4.217 GiB`, and 40 checkpoint
+history records. The final checkpoint SHA256 is
+`84231e98dda68ac4b1fd4f59cc97881887a614de01b01e2697323c1eac80daf2`.
+This closes the prerequisite REIN reference; CQE is still absent.
+
+The next controlled addition is only the explicit class-specific residual
+branch described in `docs/PHASE16_REIN_TRANSFER.md`. Its first GPU execution is
+a 20-update engineering smoke over a frozen baseline. It is not an accuracy
+experiment and does not authorize CQE or a full branch run.
+
+## Archived boundary: saved-runner audit before first formal baseline
 
 Runner `7a3a1c699f5b00ed4b6cc76055457beec374e05d` returns exit 0, with
 last/previous checkpoints each 283,336,151 bytes. Only a metric tail was supplied;

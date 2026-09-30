@@ -34,11 +34,13 @@ The corrected same-process gate passes at 5fee730 (parameter error 1.28e-7).
 Independent-process restore replay passes at 1671f1a (parameter error 1.79e-7).
 The source runner integration and saved-evidence audit pass. The first formal
 attempt was correctly excluded after a project-side PolyLR guard error; the
-guard now matches MMEngine's 39,999-step internal horizon. The operator reports
-the fresh corrected seed-0 source-only 40k-update / 160k-microbatch baseline
-complete. Its saved trace, rolling checkpoints and full 500-image evaluation
-must now pass the versioned read-only audit before any result or CQE transfer
-claim is accepted.
+guard now matches MMEngine's 39,999-step internal horizon. The corrected
+`d6fc52c` seed-0 run and its saved-evidence audit at `1da98b5` are accepted:
+40,000 optimizer updates, 160,000 microbatches and fixed-final Cityscapes mIoU
+`0.656051`. This is the REIN source-only reference, not a CQE result. The next
+bounded gate trains only a new class-specific residual branch over frozen REIN
+semantic logits; native Mask2Former queries are not relabelled and CQE remains
+disabled.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

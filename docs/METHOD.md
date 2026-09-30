@@ -126,11 +126,22 @@ instability or accuracy. Preserve that partial run as failed evidence and
 rerun from fresh seed-0 initialization only after the corrected schedule gate
 is committed and deployed. No resume is authorized.
 
-The operator reports the corrected `d6fc52c` seed-0 run complete. Formal
-acceptance remains pending a read-only saved-evidence audit of its 160,000-record
-trace, full source permutations, final 500-image confusion matrix, and retained
-39k/40k rolling checkpoint hashes. No reported accuracy value is accepted and no
-CQE branch is authorized until that audit passes.
+The corrected `d6fc52c` seed-0 run passes the read-only saved-evidence audit at
+`1da98b5`: 40,000 optimizer updates / 160,000 microbatches, six complete source
+epochs plus 10,204 samples, 40 checkpoint-history records, fixed-final
+Cityscapes mIoU `0.656051`, and no target-label optimization. This establishes
+the adapted REIN source-only reference; it does not establish CQE transfer.
+
+The next single-mechanism step adds an explicit class-specific residual branch
+over the fixed REIN segmentor's 19 semantic logits. It uses a
+`[class, query, channel]` bank with two queries per class, normalized similarity,
+log-sum-exp aggregation, and a scalar residual scale initialized to zero. Native
+Mask2Former prediction queries remain unchanged and are not assigned semantic
+class identities. The intervention `do(Q_c=0)` restores only output channel
+`c` to its fixed base logit. A bounded 20-update source smoke must demonstrate
+finite optimization, delayed gradient flow through the zero-initialized scale,
+class isolation, compact branch-only checkpoint roundtrip, and unchanged base
+parameters before any matched long run or CQE loss is considered.
 
 ## Objective
 
