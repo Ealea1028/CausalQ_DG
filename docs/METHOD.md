@@ -541,3 +541,10 @@ It verifies both 20-update arms, 80 identical matched source inputs, unchanged
 frozen base parameters and checkpoint roundtrips. It provides no target metric
 and retains `formal_training_authorized: false`; a full matched comparison is
 a separate compute/experiment decision, not implied by this smoke result.
+
+The user then authorized the formal seed-0 pair. Its first AutoDL launch at
+`8c1396c` is excluded: the file-path Python entry point omitted the repository
+root from `sys.path` and failed to import `tools`. This occurred before run
+directory creation, data/model loading, CUDA work or optimizer updates. The
+empty report and error artifacts are retained. The repaired launcher uses
+module entry points and an import preflight; no scientific setting changed.

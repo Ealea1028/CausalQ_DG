@@ -2929,3 +2929,9 @@ and `tools/audit_rein_query_residual_cqe_formal.py`. The AutoDL workflow is
 maintained in `docs/AUTODL_NEXT.md`. Do not train until that page names a
 committed exact SHA, the source checkout is clean, and at least 8 GiB remain
 free on the output volume.
+
+The first launch at `8c1396c` failed before experiment initialization because
+the producer was executed as a file and could not import the repository's
+`tools` package. It produced no run directory, GPU work or optimizer updates
+and is excluded from results. The repaired launcher uses Python module entry
+points and an import preflight without altering the experiment protocol.

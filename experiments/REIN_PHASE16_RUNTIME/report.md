@@ -326,3 +326,11 @@ above zero is encouraging but not seed-general evidence. The interval is
 conditional on these two trained models; a second paired training seed is
 needed before claiming robust improvement. mIoU performance and effect
 stability are distinct endpoints.
+
+The first user-approved formal launch used project revision `8c1396c` and
+exited before experiment initialization with `ModuleNotFoundError: tools`.
+The report is empty by construction; there was no run directory, data/model
+load, CUDA work, training record or target evaluation. Preserve the report,
+stderr, exit marker and launcher log as excluded failure evidence. The launcher
+now uses repository module entry points plus an import preflight. This is an
+execution-only repair and does not change either paired arm.

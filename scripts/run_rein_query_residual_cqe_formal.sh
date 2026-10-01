@@ -17,6 +17,7 @@ TRAIN_EXIT="$BASE/analysis/rein_phase16_query_residual_cqe_formal_${SHA}.exit"
 test -x "$PY"
 test -d "$REIN"
 test -d "$BASE/analysis"
+"$PY" -c "import tools.train_rein_query_residual_cqe_formal; import tools.audit_rein_query_residual_cqe_formal"
 test -z "$(git status --porcelain)" || { echo "dirty_project_checkout"; exit 1; }
 test ! -e "$RUN" || { echo "existing_run=$RUN"; exit 1; }
 test ! -e "$REPORT" || { echo "existing_report=$REPORT"; exit 1; }
@@ -28,7 +29,7 @@ FREE_KIB=$(df -Pk "$BASE" | awk 'NR==2 {print $4}')
 test "$FREE_KIB" -ge 8388608 || { echo "need_at_least_8GiB_free_kib=$FREE_KIB"; exit 1; }
 
 set +e
-"$PY" -u tools/train_rein_query_residual_cqe_formal.py \
+"$PY" -u -m tools.train_rein_query_residual_cqe_formal \
   --rein-root "$REIN" \
   --weights /root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth \
   --data-report "$BASE/analysis/rein_phase16_data_protocol_b645793_v1.json" \
@@ -42,7 +43,7 @@ echo "formal_training_exit_code=$TRAIN_CODE"
 
 if [ "$TRAIN_CODE" -eq 0 ]; then
   set +e
-  "$PY" -u tools/audit_rein_query_residual_cqe_formal.py \
+  "$PY" -u -m tools.audit_rein_query_residual_cqe_formal \
     --report "$REPORT" --run-dir "$RUN" --output "$AUDIT" \
     --bootstrap-replicates 2000 > "$AUDIT_LOG" 2>&1
   AUDIT_CODE=$?

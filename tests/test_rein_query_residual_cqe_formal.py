@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -54,3 +56,14 @@ def test_paired_image_bootstrap_is_deterministic_and_paired():
 def test_paired_image_bootstrap_rejects_unpaired_coverage():
     with pytest.raises(ValueError, match="500 paired"):
         paired_image_bootstrap([], [])
+
+
+def test_formal_launcher_uses_repository_module_entry_points():
+    root = Path(__file__).resolve().parents[1]
+    launcher = (
+        root / "scripts" / "run_rein_query_residual_cqe_formal.sh"
+    ).read_text(encoding="utf-8")
+    assert '"$PY" -u -m tools.train_rein_query_residual_cqe_formal' in launcher
+    assert '"$PY" -u -m tools.audit_rein_query_residual_cqe_formal' in launcher
+    assert '"$PY" -u tools/' not in launcher
+    assert "import tools.train_rein_query_residual_cqe_formal" in launcher

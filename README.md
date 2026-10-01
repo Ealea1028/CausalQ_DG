@@ -51,7 +51,11 @@ first audit at `fa9c492` rejected objective reconstruction because its Python
 float64 sum did not reproduce the producer's float32 tensor addition. The
 audit now models float32 rounding and has a focused regression test. The v2
 audit passes at `f18c2c2`; it verifies evidence integrity but provides no
-target accuracy result. A full matched comparison remains a separate decision.
+target accuracy result. The user-approved formal seed-0 pair was implemented;
+its first launch at `8c1396c` failed before initialization because its file-path
+entry point could not import `tools`. No training occurred. The launcher now
+uses module entry points with an import preflight; the paired protocol is
+unchanged and awaits a fresh exact-commit AutoDL launch.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

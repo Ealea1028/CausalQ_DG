@@ -23,6 +23,14 @@ launched with `nohup` to survive normal web-terminal disconnection. It is not
 an exact-resume runner: if it fails, preserve all artifacts and ask before
 starting a fresh run ID.
 
+The first formal launch at `8c1396c4eba26757689d4e3b1771a2257deefc47`
+is excluded. Python was invoked with a file path, so the repository root was
+not on `sys.path` and `tools` could not be imported. The failure happened
+before run-directory creation, dataset/model loading, GPU work or optimizer
+updates; its empty report, stderr log, exit marker and launcher log remain
+failure evidence and must not be overwritten. The corrected launcher performs
+an import preflight and starts both producer and auditor with `python -m`.
+
 Run from an AutoDL shell. First replace `FULL_SHA_FROM_CODEX` with the exact
 40-character commit SHA provided by Codex; do not type the placeholder itself.
 
