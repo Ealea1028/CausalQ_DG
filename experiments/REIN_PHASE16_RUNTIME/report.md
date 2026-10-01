@@ -300,3 +300,29 @@ is `083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
 There is no target metric or accuracy conclusion. A full 40k-update-per-arm
 comparison requires a separate decision; the smoke artifact explicitly does
 not authorize formal training.
+
+## User-approved seed-0 CQE performance comparison (implementation ready)
+
+The user subsequently approved the formal test to answer whether CQE improves
+performance in this REIN transfer setting. The experiment is a matched pair,
+not a comparison against a different model: both arms start from the accepted
+frozen REIN source-only baseline and train the same small class-query residual
+for 40,000 optimizer updates / 160,000 GTA5 microbatches, using identical
+source order and per-step original/photometric tensors. The only objective
+difference is the candidate's existing normalized CQE term (`lambda=1.0`).
+Both fixed-final checkpoints will be evaluated on the full 500-image
+Cityscapes validation set, without target-based checkpoint selection.
+
+The producer and read-only audit are implemented locally, with paired
+image-bootstrap analysis and exact artifact/source-schedule checks. Local
+focused tests pass. Full `pytest` cannot collect on this Windows environment
+because PyTorch is not installed; this is an environment limitation, not a
+test assertion failure. GPU training and full target evaluation have not yet
+run. Stop at the AutoDL boundary and follow the exact-commit commands in
+`docs/AUTODL_NEXT.md`.
+
+Interpretation limit: a positive seed-0 delta with an image-bootstrap interval
+above zero is encouraging but not seed-general evidence. The interval is
+conditional on these two trained models; a second paired training seed is
+needed before claiming robust improvement. mIoU performance and effect
+stability are distinct endpoints.

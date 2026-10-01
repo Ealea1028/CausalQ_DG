@@ -2893,3 +2893,39 @@ GPU实验
 这一工作流贯穿整个项目。
 
 # END OF PROJECT SPECIFICATION
+
+---
+
+# 63. Phase 16: matched REIN CQE performance test (current execution addendum)
+
+The user approved a seed-0 formal matched comparison after the 20-update
+paired engineering smoke and its saved-evidence audit passed. The experiment
+must isolate the effect of the existing CQE loss, not compare unrelated
+architectures:
+
+- Fixed starting point: accepted REIN GTA5 source-only seed-0 40k checkpoint.
+- Both arms: the same frozen REIN segmentor, class-specific two-query logit
+  residual, initialization, 40,000 optimizer updates, 160,000 GTA5
+  microbatches, accumulation 4, AdamW and accepted 40k PolyLR schedule.
+- Both arms optimize mean segmentation CE on geometry-aligned original and
+  photometric source views. Only the candidate adds normalized CQE with weight
+  1.0; all other settings remain equal.
+- Fixed-final checkpoints are evaluated on all 500 Cityscapes validation
+  images. Cityscapes labels are evaluation-only; no target-based selection.
+- A read-only audit checks exact source order and per-step view fingerprints,
+  schedule/update boundaries, finite losses, artifact hashes, full validation
+  confusion matrices and a paired image bootstrap interval.
+
+This comparison can estimate the seed-0 CQE effect on Cityscapes mIoU under
+this REIN residual protocol. A single training seed cannot establish
+seed-general improvement; any positive result requires at least one more
+matched seed before a robust claim. The bootstrap quantifies image-sampling
+uncertainty conditional on these two trained models, not training-seed
+uncertainty. CQE may reduce effect variation without improving accuracy; those
+are separate outcomes.
+
+The formal runner/audit are in `tools/train_rein_query_residual_cqe_formal.py`
+and `tools/audit_rein_query_residual_cqe_formal.py`. The AutoDL workflow is
+maintained in `docs/AUTODL_NEXT.md`. Do not train until that page names a
+committed exact SHA, the source checkout is clean, and at least 8 GiB remain
+free on the output volume.

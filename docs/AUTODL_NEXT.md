@@ -1,40 +1,86 @@
-# AutoDL next step: authorize/design the Phase 16 matched full comparison
+# AutoDL next step: run the user-approved Phase 16 seed-0 CQE pair
 
 ## Current action — only this section is active
 
-The paired smoke at `3644785a22a4c9391bb9076b4cdad606c63be615` and its saved
-evidence audit at `f18c2c2d132eeb1411e3eaa00aff05f052c66f75` both completed
-successfully. The v2 audit JSON SHA256 is
-`083191fcfe702928f89d5d346e8bcd01525fca53cafc40017bd21bd2bca957da`.
+The user approved this formal comparison after the paired 20-update engineering
+smoke/audit. It asks whether adding only the existing normalized CQE objective
+improves Cityscapes mIoU for the same frozen-REIN class-query residual branch.
 
-Both arms ran 20 optimizer updates over the same 80 GTA5 examples; saved input
-fingerprints match. Losses and gradients are finite, required residual
-parameters received gradients, both branches changed from identical
-initialization, the frozen base stayed unchanged, and checkpoint roundtrips
-passed. Peak reserved memory was 2.430 GiB. There is no Cityscapes result;
-loss traces are not an accuracy comparison. This engineering smoke report
-still declares `formal_training_authorized: false`.
+The dedicated producer and read-only auditor are implemented. The seed-0 pair
+trains 40,000 optimizer updates per arm / 160,000 GTA5 microbatches per arm,
+accumulation 4. It holds the accepted frozen REIN baseline, residual branch,
+initialization, source order, original/photometric views, optimizer and accepted
+40k PolyLR schedule fixed. Only the CQE arm adds normalized CQE at weight 1.0.
+Both fixed-final branches are evaluated on all 500 Cityscapes validation
+images, without target-based checkpoint selection. The audit reports a paired
+image-bootstrap interval, which is conditional on these two models and is not
+training-seed uncertainty.
 
-The first audit at `fa9c492` failed with `Objective reconstruction mismatch`
-because it reconstructed a float32 tensor sum with Python float64 arithmetic.
-The source correction reproduces float32 rounding; the original failed audit
-JSON remains preserved, and the v2 audit now passes.
+The AutoDL data volume was expanded by 10 GB. Still inspect current free space;
+the launcher and trainer both require at least 8 GiB free. Preserve all
+existing runs, checkpoints, environments, datasets and evidence. The run is
+launched with `nohup` to survive normal web-terminal disconnection. It is not
+an exact-resume runner: if it fails, preserve all artifacts and ask before
+starting a fresh run ID.
 
-## Decision gate
+Run from an AutoDL shell. First replace `FULL_SHA_FROM_CODEX` with the exact
+40-character commit SHA provided by Codex; do not type the placeholder itself.
 
-The next scientific question requires a matched full comparison: train the
-same frozen-REIN residual branch without CQE and with CQE, then evaluate both
-fixed-final checkpoints on all 500 Cityscapes validation images. That entails
-40,000 optimizer updates per arm (160,000 source microbatches per arm at
-accumulation four), followed by two full target evaluations. The paired smoke
-is not accuracy evidence and does not itself authorize that costly run. Obtain
-explicit confirmation before implementing/launching this full comparison.
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+export OMP_NUM_THREADS=1
+EXPECTED_SHA=FULL_SHA_FROM_CODEX
+git fetch origin main || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo "dirty_checkout"; exit 1; }
 
-Current reported AutoDL free disk is 6.9 GiB. Before any full run, inventory
-disk and verify the intended compact checkpoint/log policy; do not remove
-existing data, environments, accepted checkpoints or evidence.
-No AutoDL command is pending until the full-comparison scope is confirmed and
-its dedicated runner/audit are implemented and committed.
+echo "===== GPU and disk preflight ====="
+nvidia-smi
+df -h /root/autodl-tmp
+FREE_KIB=$(df -Pk /root/autodl-tmp | awk 'NR==2 {print $4}')
+test "$FREE_KIB" -ge 8388608 || { echo "need_at_least_8GiB_free_kib=$FREE_KIB"; exit 1; }
+
+echo "===== pinned input files ====="
+test -f /root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth || exit 1
+test -f /root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_data_protocol_b645793_v1.json || exit 1
+test -f /root/autodl-tmp/outputs/CausalQ_DG/analysis/rein_phase16_source40k_d6fc52c_saved_audit.json || exit 1
+test -f /root/autodl-tmp/outputs/CausalQ_DG/REIN_SOURCE_ONLY_SEED0_40000_d6fc52c/last.pth || exit 1
+sha256sum /root/autodl-tmp/pretrained/dinov2_vitl14_rein_patch16_512.pth
+sha256sum /root/autodl-tmp/outputs/CausalQ_DG/REIN_SOURCE_ONLY_SEED0_40000_d6fc52c/last.pth
+
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+SHA=$(git rev-parse --short=7 HEAD)
+LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_${SHA}_launcher.log"
+PID_FILE="$BASE/analysis/rein_phase16_formal_${SHA}.pid"
+test ! -e "$LAUNCH_LOG" || { echo "existing_launcher_log=$LAUNCH_LOG"; exit 1; }
+test ! -e "$PID_FILE" || { echo "existing_pid_file=$PID_FILE"; exit 1; }
+nohup bash scripts/run_rein_query_residual_cqe_formal.sh \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo $! > "$PID_FILE"
+echo "formal_pid=$(cat "$PID_FILE")"
+echo "launch_log=$LAUNCH_LOG"
+```
+
+To check progress without attaching to the training process, run:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+SHA=$(git rev-parse --short=7 HEAD)
+PID_FILE="$BASE/analysis/rein_phase16_formal_${SHA}.pid"
+LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_${SHA}_launcher.log"
+LOG="$BASE/analysis/rein_phase16_query_residual_cqe_formal_${SHA}_v1.stderr.log"
+if kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then echo "formal_process=running"; else echo "formal_process=stopped"; fi
+tail -n 20 "$LOG" 2>/dev/null || true
+tail -n 30 "$LAUNCH_LOG"
+df -h /root/autodl-tmp
+```
+
+After completion, return the entire audit JSON, both exit codes, report/audit
+hashes, both mIoUs and their delta/95% paired image-bootstrap interval, Git
+SHA/status and disk output. Stop after seed 0. A favorable single-seed result
+is preliminary; only then decide whether to run another matched seed.
 
 ## Previous producer instructions — completed; do not rerun
 
