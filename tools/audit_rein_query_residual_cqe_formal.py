@@ -74,10 +74,14 @@ def _read_trace(path):
     return records, hashlib.sha256(raw).hexdigest()
 
 
+def _optimizer_update_records(records):
+    """Return only post-accumulation records used by producer summaries."""
+    return [record for record in records if record.get("optimizer_update") is True]
+
+
 def _audit_arm(name, arm, records, *, enabled):
     require(len(records) == MICROBATCHES, f"{name}: microbatch count mismatch")
     indices = []
-    first_update_losses, last_update_losses = [], []
     seg_losses, cqe_losses = [], []
     gradients = set()
     for microbatch, record in enumerate(records, 1):
@@ -106,7 +110,6 @@ def _audit_arm(name, arm, records, *, enabled):
         if update:
             require(_finite(record.get("gradient_norm")) and record["gradient_norm"] > 0,
                     f"{name}: invalid update gradient")
-            first_update_losses.append(record["loss"])
             seg_losses.append(record["loss_seg"])
             cqe_losses.append(record["loss_cqe"])
             if (record.get("gradient_parameters") is not None):
@@ -129,9 +132,11 @@ def _audit_arm(name, arm, records, *, enabled):
         arm.get("nonzero_gradient_parameters", [])), f"{name}: required branch gradient missing")
     require(arm.get("trace_record_count") == MICROBATCHES,
             f"{name}: trace summary mismatch")
+    update_records = _optimizer_update_records(records)
+    require(len(update_records) == UPDATES, f"{name}: optimizer update count mismatch")
     for field, expected in (
-            ("first_100_update_loss_mean", np.mean([r["loss"] for r in records[:400:4]])),
-            ("last_100_update_loss_mean", np.mean([r["loss"] for r in records[-400::4]])),
+            ("first_100_update_loss_mean", np.mean([r["loss"] for r in update_records[:100]])),
+            ("last_100_update_loss_mean", np.mean([r["loss"] for r in update_records[-100:]])),
             ("first_100_update_seg_loss_mean", np.mean(seg_losses[:100])),
             ("last_100_update_seg_loss_mean", np.mean(seg_losses[-100:])),
             ("first_100_update_cqe_loss_mean", np.mean(cqe_losses[:100])),

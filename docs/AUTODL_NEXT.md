@@ -1,6 +1,24 @@
-# AutoDL next step: run the user-approved Phase 16 seed-0 CQE pair
+# AutoDL next step: re-audit the completed Phase 16 seed-0 CQE pair
 
 ## Current action — only this section is active
+
+The seed-0 producer at `86402159d46d364c227baaec78565cd93e7e5921`
+completed both 40k-update arms, both 500-image fixed-final evaluations and
+wrote a complete report. CQE reached `0.6528875888991673` mIoU versus
+`0.6501274350304209` for no-CQE, a preliminary delta of
+`+0.0027601538687463956` (`+0.2760` percentage points). Per-step inputs match
+and the frozen base is unchanged.
+
+The first read-only audit is not accepted because it reconstructed the
+producer's first/last 100 update-loss means from microbatches 1, 5, 9, ...
+rather than the actual accumulation boundaries 4, 8, 12, .... This is an
+auditor indexing defect, not a training failure. Preserve the original report,
+run, failed audit and logs. Do not repeat seed-0 training. The next action is
+an audit-only rerun against those immutable artifacts using the repaired
+auditor. Do not start seed-1 until that audit passes and its bootstrap interval
+is reviewed.
+
+The older launch instructions below are retained as history and are inactive.
 
 The user approved this formal comparison after the paired 20-update engineering
 smoke/audit. It asks whether adding only the existing normalized CQE objective

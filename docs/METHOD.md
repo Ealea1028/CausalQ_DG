@@ -548,3 +548,12 @@ root from `sys.path` and failed to import `tools`. This occurred before run
 directory creation, data/model loading, CUDA work or optimizer updates. The
 empty report and error artifacts are retained. The repaired launcher uses
 module entry points and an import preflight; no scientific setting changed.
+
+The repaired launch at `8640215` completed both arms and target evaluations.
+Its report gives no-CQE/CQE mIoU `0.6501274350/0.6528875889`, hence a
+preliminary CQE delta of `+0.0027601539`. Inputs are paired and the fixed REIN
+base is unchanged. The first saved-evidence audit failed because its summary
+check selected microbatches 1, 5, 9, ... instead of the actual accumulation
+boundaries 4, 8, 12, .... This is an audit indexing bug; seed-0 must not be
+retrained. Re-audit the immutable report/trace/checkpoints before interpreting
+the bootstrap interval or authorizing another training seed.

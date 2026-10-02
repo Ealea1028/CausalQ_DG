@@ -56,6 +56,10 @@ its first launch at `8c1396c` failed before initialization because its file-path
 entry point could not import `tools`. No training occurred. The launcher now
 uses module entry points with an import preflight; the paired protocol is
 unchanged and awaits a fresh exact-commit AutoDL launch.
+That launch completed at `8640215`, with a preliminary CQE-minus-control gain
+of `+0.2760` mIoU points. Its first saved audit exposed an auditor-only
+accumulation-boundary indexing error; seed-0 training must not be repeated.
+The immediate next gate is a corrected read-only audit of the immutable run.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

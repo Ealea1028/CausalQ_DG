@@ -2935,3 +2935,11 @@ the producer was executed as a file and could not import the repository's
 `tools` package. It produced no run directory, GPU work or optimizer updates
 and is excluded from results. The repaired launcher uses Python module entry
 points and an import preflight without altering the experiment protocol.
+
+The corrected seed-0 run at `8640215` completed and reports a preliminary
+CQE-minus-control mIoU gain of `+0.0027601539`. Its initial read-only audit
+failed because the auditor summarized non-update microbatches rather than the
+four-microbatch accumulation boundaries. This does not authorize retraining or
+a second seed. Preserve the run and perform an audit-only verification after
+the boundary-selection fix; decide on seed-1 only from the passing audit and
+paired bootstrap interval.

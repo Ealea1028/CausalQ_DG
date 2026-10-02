@@ -5,6 +5,7 @@ import pytest
 
 from tools.audit_rein_query_residual_cqe_formal import (
     _miou,
+    _optimizer_update_records,
     paired_image_bootstrap,
 )
 from tools.rein_schedule_smoke import scheduled_lr
@@ -56,6 +57,20 @@ def test_paired_image_bootstrap_is_deterministic_and_paired():
 def test_paired_image_bootstrap_rejects_unpaired_coverage():
     with pytest.raises(ValueError, match="500 paired"):
         paired_image_bootstrap([], [])
+
+
+def test_formal_audit_summarizes_optimizer_boundaries_not_first_microbatches():
+    records = [
+        {
+            "microbatch": microbatch,
+            "optimizer_update": microbatch % 4 == 0,
+            "loss": float(microbatch),
+        }
+        for microbatch in range(1, 13)
+    ]
+    selected = _optimizer_update_records(records)
+    assert [record["microbatch"] for record in selected] == [4, 8, 12]
+    assert [record["loss"] for record in selected] == [4.0, 8.0, 12.0]
 
 
 def test_formal_launcher_uses_repository_module_entry_points():

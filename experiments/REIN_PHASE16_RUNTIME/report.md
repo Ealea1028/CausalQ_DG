@@ -334,3 +334,12 @@ load, CUDA work, training record or target evaluation. Preserve the report,
 stderr, exit marker and launcher log as excluded failure evidence. The launcher
 now uses repository module entry points plus an import preflight. This is an
 execution-only repair and does not change either paired arm.
+
+The corrected `8640215` run completed both 40k-update arms and both full
+Cityscapes evaluations. The report records no-CQE mIoU `0.6501274350304209`,
+CQE mIoU `0.6528875888991673`, matched inputs, unchanged frozen base and a
+CQE-minus-control delta of `+0.0027601538687463956` (`+0.2760` points).
+These numbers remain preliminary because the first read-only audit failed its
+first-100 update-loss summary. Diagnosis shows the audit selected trace rows
+1, 5, 9, ... whereas optimizer updates occur at rows 4, 8, 12, .... Preserve
+all producer evidence and the failed audit; run only the corrected auditor.
