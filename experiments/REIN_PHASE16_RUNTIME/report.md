@@ -343,3 +343,12 @@ These numbers remain preliminary because the first read-only audit failed its
 first-100 update-loss summary. Diagnosis shows the audit selected trace rows
 1, 5, 9, ... whereas optimizer updates occur at rows 4, 8, 12, .... Preserve
 all producer evidence and the failed audit; run only the corrected auditor.
+
+The corrected audit at `96b193d` passes. Audit JSON SHA256 is
+`c7c21c0e59413058a641e50a5bc695b13c95062d3dea6872f1b7aa8bdabab916`.
+Its 2000-replicate paired image-bootstrap interval is
+`[0.002118600721601699, 0.003436525542854521]`, fully above zero. Thus CQE
+improves this matched seed-0 residual branch by `0.2760` points conditional on
+the two trained models. It does not yet establish training-seed robustness and
+does not exceed the unmodified REIN reference (`0.656051`). A fresh seed-1
+matched pair at seed `20261001` is the next authorized long run.

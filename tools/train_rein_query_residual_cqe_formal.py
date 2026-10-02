@@ -170,14 +170,16 @@ def main():
     for name in ("rein-root", "weights", "data-report", "baseline-audit",
                  "baseline-checkpoint", "run-dir"):
         parser.add_argument("--" + name, type=Path, required=True)
+    parser.add_argument("--seed", type=int, default=SEED)
     args = parser.parse_args()
+    training_seed = args.seed
     repository = Path(__file__).resolve().parents[1]
     started = time.monotonic()
     run_created = False
     report = dict(ok=False, phase=16, stage="preflight",
                   purpose="matched_formal_frozen_rein_query_residual_cqe_comparison",
                   git_sha=git_output(repository, "rev-parse", "HEAD"),
-                  seed=SEED, base_segmentor=BASE_SEGMENTOR,
+                  seed=training_seed, base_segmentor=BASE_SEGMENTOR,
                   base_final_miou_reference=BASELINE_MIOU,
                   native_mask2former_queries_relabelled=False,
                   target_labels_optimized=False,
@@ -202,6 +204,7 @@ def main():
                   target_sample_count_per_arm=500,
                   checkpoint_selection="fixed_final_no_target_selection")
     try:
+        require(0 <= training_seed < 2 ** 32, "Training seed must fit uint32")
         require(not args.run_dir.exists(), "Preserve existing run directory")
         require(args.run_dir.parent.is_dir(), "Output parent directory is missing")
         require(shutil.disk_usage(args.run_dir.parent).free >= 8 * 2**30,
@@ -279,11 +282,11 @@ def main():
         stds = (model.data_preprocessor.std.detach().float().flatten().cpu() / 255.0).tolist()
         style = StyleInterventionBank(mean=tuple(means), std=tuple(stds)).cuda().eval()
         branch_module = load_branch_module(repository)
-        sampler = SourceSampler(len(train_dataset), seed=SEED)
+        sampler = SourceSampler(len(train_dataset), seed=training_seed)
         indices = sampler.take(MICROBATCHES)
         require(len(indices) == MICROBATCHES, "Source schedule length mismatch")
         report["source_schedule"] = dict(microbatches=MICROBATCHES,
-                                         sampler_seed=SEED,
+                                         sampler_seed=training_seed,
                                          complete_epochs=MICROBATCHES // len(train_dataset),
                                          partial_epoch_samples=MICROBATCHES % len(train_dataset),
                                          indices_sha256=hashlib.sha256(
@@ -298,7 +301,7 @@ def main():
             report["stage"] = "training_" + arm_name
             arm_dir = args.run_dir / arm_name
             arm_dir.mkdir()
-            seed_everything(torch, np, SEED + 100)
+            seed_everything(torch, np, (training_seed + 100) % (2 ** 32))
             branch = branch_module.ReinClassQueryResidual(
                 num_classes=CLASSES, queries_per_class=2, hidden_channels=64,
                 temperature=0.07, alpha_init=0.0).cuda().train()
@@ -325,7 +328,7 @@ def main():
             update_losses, update_seg_losses, update_cqe_losses = [], [], []
             with trace_path.open("x", encoding="utf-8") as trace:
                 for microbatch, index in enumerate(indices, 1):
-                    step_seed = (SEED * 1000003 + microbatch) % (2 ** 32)
+                    step_seed = (training_seed * 1000003 + microbatch) % (2 ** 32)
                     seed_everything(torch, np, step_seed)
                     item = train_dataset[index]
                     batch = model.data_preprocessor(
@@ -415,7 +418,7 @@ def main():
             save_checkpoint(torch, final_checkpoint, branch.state_dict(),
                             dict(arm=arm_name, optimizer_updates=UPDATES,
                                  git_sha=report["git_sha"], cqe_enabled=use_cqe,
-                                 seed=SEED, checkpoint_selection="fixed_final"))
+                                 seed=training_seed, checkpoint_selection="fixed_final"))
             restored = torch.load(final_checkpoint, map_location="cpu", weights_only=True)
             require(all(torch.equal(restored["model"][key], value.detach().cpu())
                         for key, value in branch.state_dict().items()),

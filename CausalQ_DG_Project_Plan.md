@@ -2943,3 +2943,11 @@ four-microbatch accumulation boundaries. This does not authorize retraining or
 a second seed. Preserve the run and perform an audit-only verification after
 the boundary-selection fix; decide on seed-1 only from the passing audit and
 paired bootstrap interval.
+
+The corrected audit at `96b193d` passes. The observed seed-0 CQE gain is
+`+0.0027601539`; its paired image-bootstrap 95% interval
+`[0.0021186007, 0.0034365255]` lies above zero. This validates improvement
+conditional on seed-0 and authorizes one fresh matched seed-1 pair, but it does
+not establish training-seed robustness. Seed-1 uses seed `20261001`, the same
+fixed accepted REIN base and the unchanged 40k protocol. Both arms must share
+initialization, source order and intervention views; only CQE is toggled.

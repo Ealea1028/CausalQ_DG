@@ -79,7 +79,11 @@ def _optimizer_update_records(records):
     return [record for record in records if record.get("optimizer_update") is True]
 
 
-def _audit_arm(name, arm, records, *, enabled):
+def expected_augmentation_seed(training_seed, microbatch):
+    return (training_seed * 1000003 + microbatch) % (2 ** 32)
+
+
+def _audit_arm(name, arm, records, *, enabled, training_seed):
     require(len(records) == MICROBATCHES, f"{name}: microbatch count mismatch")
     indices = []
     seg_losses, cqe_losses = [], []
@@ -90,7 +94,8 @@ def _audit_arm(name, arm, records, *, enabled):
         require(type(source_index) is int and 0 <= source_index < SOURCE_SIZE,
                 f"{name}: invalid source index")
         indices.append(source_index)
-        require(record.get("augmentation_seed") == (BASE_SEED * 1000003 + microbatch) % (2 ** 32),
+        require(record.get("augmentation_seed") == expected_augmentation_seed(
+                    training_seed, microbatch),
                 f"{name}: augmentation seed mismatch")
         fingerprint = record.get("input_sha256")
         require(isinstance(fingerprint, str) and len(fingerprint) == 64,
@@ -186,14 +191,14 @@ def _audit_validation(arm, name):
     return samples
 
 
-def audit(report_path, run_dir, *, replicates=2000):
+def audit(report_path, run_dir, *, replicates=2000, expected_seed=BASE_SEED):
     report_path, run_dir = Path(report_path), Path(run_dir)
     report = json.loads(report_path.read_text(encoding="utf-8"))
     require(report.get("ok") is True and report.get("stage") == "complete",
             "Formal run did not complete")
     require(report.get("purpose") == "matched_formal_frozen_rein_query_residual_cqe_comparison",
             "Unexpected experiment purpose")
-    require(report.get("phase") == 16 and report.get("seed") == BASE_SEED,
+    require(report.get("phase") == 16 and report.get("seed") == expected_seed,
             "Phase/seed mismatch")
     require(report.get("formal_training_authorized") is True
             and report.get("target_labels_optimized") is False,
@@ -249,7 +254,8 @@ def audit(report_path, run_dir, *, replicates=2000):
         payload = torch.load(checkpoint_path, map_location="cpu", weights_only=True)
         require(payload.get("metadata", {}).get("optimizer_updates") == UPDATES
                 and payload["metadata"].get("cqe_enabled") is (name == "cqe")
-                and payload["metadata"].get("git_sha") == report.get("git_sha"),
+                and payload["metadata"].get("git_sha") == report.get("git_sha")
+                and payload["metadata"].get("seed") == expected_seed,
                 f"{name}: final checkpoint metadata mismatch")
         require(set(payload.get("model", {})) ==
                 {"alpha", "query_bank", "pixel_projection.weight", "pixel_projection.bias"},
@@ -260,8 +266,10 @@ def audit(report_path, run_dir, *, replicates=2000):
                     - arms[name].get("final_alpha", float("nan"))) <= 1e-8
                 and checkpoint_path.stat().st_size == arms[name].get("checkpoint_bytes"),
                 f"{name}: checkpoint/report state mismatch")
-    no_indices = _audit_arm("no_cqe", arms["no_cqe"], traces["no_cqe"], enabled=False)
-    cqe_indices = _audit_arm("cqe", arms["cqe"], traces["cqe"], enabled=True)
+    no_indices = _audit_arm("no_cqe", arms["no_cqe"], traces["no_cqe"],
+                            enabled=False, training_seed=expected_seed)
+    cqe_indices = _audit_arm("cqe", arms["cqe"], traces["cqe"],
+                             enabled=True, training_seed=expected_seed)
     require(no_indices == cqe_indices, "Source indices differ across arms")
     require([row["augmentation_seed"] for row in traces["no_cqe"]]
             == [row["augmentation_seed"] for row in traces["cqe"]],
@@ -292,9 +300,9 @@ def audit(report_path, run_dir, *, replicates=2000):
     require(abs(report.get("final_miou_difference_cqe_minus_control", float("nan"))
                 - observed_delta) <= 1e-12, "Paired mIoU delta mismatch")
     bootstrap = paired_image_bootstrap(samples_no, samples_cqe,
-                                       seed=BASE_SEED, replicates=replicates)
+                                       seed=expected_seed, replicates=replicates)
     return dict(formal_paired_audit_ok=True, training_git_sha=report["git_sha"],
-                seed=BASE_SEED, updates_per_arm=UPDATES,
+                seed=expected_seed, updates_per_arm=UPDATES,
                 microbatches_per_arm=MICROBATCHES, source_indices_matched=True,
                 per_microbatch_inputs_matched=True,
                 no_cqe_miou=arms["no_cqe"]["validation"]["miou"],
@@ -316,9 +324,12 @@ def main():
     parser.add_argument("--run-dir", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--bootstrap-replicates", type=int, default=2000)
+    parser.add_argument("--expected-seed", type=int, default=BASE_SEED)
     args = parser.parse_args()
     try:
-        result = audit(args.report, args.run_dir, replicates=args.bootstrap_replicates)
+        result = audit(args.report, args.run_dir,
+                       replicates=args.bootstrap_replicates,
+                       expected_seed=args.expected_seed)
         args.output.write_text(json.dumps(result, indent=2), encoding="utf-8")
     except (ValueError, OSError, KeyError, TypeError, json.JSONDecodeError) as error:
         result = dict(formal_paired_audit_ok=False,

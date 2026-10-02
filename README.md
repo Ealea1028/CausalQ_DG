@@ -60,6 +60,10 @@ That launch completed at `8640215`, with a preliminary CQE-minus-control gain
 of `+0.2760` mIoU points. Its first saved audit exposed an auditor-only
 accumulation-boundary indexing error; seed-0 training must not be repeated.
 The immediate next gate is a corrected read-only audit of the immutable run.
+That corrected audit passes at `96b193d`: the seed-0 CQE gain is `+0.2760`
+points and its paired image-bootstrap 95% interval is `[+0.2119, +0.3437]`
+points. This is conditional on one training seed and remains below the original
+REIN reference. The next authorized gate is one fresh seed-1 matched pair.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

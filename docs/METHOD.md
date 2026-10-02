@@ -557,3 +557,12 @@ check selected microbatches 1, 5, 9, ... instead of the actual accumulation
 boundaries 4, 8, 12, .... This is an audit indexing bug; seed-0 must not be
 retrained. Re-audit the immutable report/trace/checkpoints before interpreting
 the bootstrap interval or authorizing another training seed.
+
+The corrected audit passes at `96b193d`. Its 2000-replicate paired image
+bootstrap interval for CQE minus control is `[0.0021186007, 0.0034365255]`,
+entirely above zero, around the observed gain `0.0027601539`. This accepts a
+seed-0 conditional improvement but does not measure training-seed uncertainty;
+the CQE model also remains `0.0031634086` below the fixed REIN reference. A
+second complete matched pair is authorized with training seed `20261001`.
+Both arms must share that initialization, source schedule and view sequence;
+only the CQE objective differs.

@@ -6,6 +6,7 @@ import pytest
 from tools.audit_rein_query_residual_cqe_formal import (
     _miou,
     _optimizer_update_records,
+    expected_augmentation_seed,
     paired_image_bootstrap,
 )
 from tools.rein_schedule_smoke import scheduled_lr
@@ -73,6 +74,14 @@ def test_formal_audit_summarizes_optimizer_boundaries_not_first_microbatches():
     assert [record["loss"] for record in selected] == [4.0, 8.0, 12.0]
 
 
+def test_formal_augmentation_seed_is_controlled_by_training_seed():
+    first = expected_augmentation_seed(20260931, 1)
+    second = expected_augmentation_seed(20261001, 1)
+    assert first != second
+    assert first == (20260931 * 1000003 + 1) % (2 ** 32)
+    assert second == (20261001 * 1000003 + 1) % (2 ** 32)
+
+
 def test_formal_launcher_uses_repository_module_entry_points():
     root = Path(__file__).resolve().parents[1]
     launcher = (
@@ -82,3 +91,6 @@ def test_formal_launcher_uses_repository_module_entry_points():
     assert '"$PY" -u -m tools.audit_rein_query_residual_cqe_formal' in launcher
     assert '"$PY" -u tools/' not in launcher
     assert "import tools.train_rein_query_residual_cqe_formal" in launcher
+    assert 'FORMAL_SEED=${FORMAL_SEED:-20260931}' in launcher
+    assert '--seed "$FORMAL_SEED"' in launcher
+    assert '--expected-seed "$FORMAL_SEED"' in launcher
