@@ -63,7 +63,12 @@ The immediate next gate is a corrected read-only audit of the immutable run.
 That corrected audit passes at `96b193d`: the seed-0 CQE gain is `+0.2760`
 points and its paired image-bootstrap 95% interval is `[+0.2119, +0.3437]`
 points. This is conditional on one training seed and remains below the original
-REIN reference. The next authorized gate is one fresh seed-1 matched pair.
+REIN reference. Seed-1 then passes its full audit at `682d2b7`: CQE is again
+positive versus its matched control, but only by `+0.0164` points and its
+conditional image bootstrap interval crosses zero. Across seeds 0--1 the paired gain is
+`0.1462 +/- 0.1836` points (mean +/- sample standard deviation). A fixed
+seed-2 matched pair is therefore the next and final planned training-seed
+replicate before deciding the CQE performance claim.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

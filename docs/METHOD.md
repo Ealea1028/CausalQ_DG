@@ -566,3 +566,15 @@ the CQE model also remains `0.0031634086` below the fixed REIN reference. A
 second complete matched pair is authorized with training seed `20261001`.
 Both arms must share that initialization, source schedule and view sequence;
 only the CQE objective differs.
+
+The seed-1 pair at `682d2b7` passes its complete saved-evidence audit. Its
+no-CQE/CQE mIoUs are `0.6502510456/0.6504147295`, a CQE delta of
+`+0.0001636839` (`+0.0164` percentage points). The paired image-bootstrap 95%
+interval `[-0.0001642424, 0.0007291625]` crosses zero. Both seed-level point
+estimates are positive, but their mean is only `0.0014619189` with sample
+standard deviation `0.0018359815`; this is insufficient for a robust
+training-seed claim. One prespecified seed-2 pair at seed `20261002` completes
+the three-seed protocol. No hyperparameter or checkpoint selection may change.
+The final report must give all three deltas, mean/sample standard deviation,
+direction count and a training-seed interval; image bootstrap intervals remain
+conditional diagnostics and must not be presented as training-seed inference.

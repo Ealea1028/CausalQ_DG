@@ -352,3 +352,14 @@ improves this matched seed-0 residual branch by `0.2760` points conditional on
 the two trained models. It does not yet establish training-seed robustness and
 does not exceed the unmodified REIN reference (`0.656051`). A fresh seed-1
 matched pair at seed `20261001` is the next authorized long run.
+
+The seed-1 producer/auditor at `682d2b7` exits 0 with 40,000 updates and
+160,000 matched microbatches per arm. No-CQE/CQE mIoUs are
+`0.6502510456/0.6504147295`, a CQE gain of `0.0001636839`; its 2000-replicate
+paired image-bootstrap interval `[-0.0001642424, 0.0007291625]` crosses zero.
+The audit JSON SHA256 is
+`16045175db6fd7972a91f225916800952041fa4b16a1ee49a8f56b25fa303016`.
+Both observed training-seed deltas are positive, with mean `0.0014619189` and
+sample standard deviation `0.0018359815`, but neither CQE branch exceeds the
+unmodified REIN reference. One prespecified seed-2 pair at seed `20261002` is
+the final authorized long replicate before three-seed aggregation.

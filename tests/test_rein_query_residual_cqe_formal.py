@@ -77,9 +77,11 @@ def test_formal_audit_summarizes_optimizer_boundaries_not_first_microbatches():
 def test_formal_augmentation_seed_is_controlled_by_training_seed():
     first = expected_augmentation_seed(20260931, 1)
     second = expected_augmentation_seed(20261001, 1)
-    assert first != second
+    third = expected_augmentation_seed(20261002, 1)
+    assert len({first, second, third}) == 3
     assert first == (20260931 * 1000003 + 1) % (2 ** 32)
     assert second == (20261001 * 1000003 + 1) % (2 ** 32)
+    assert third == (20261002 * 1000003 + 1) % (2 ** 32)
 
 
 def test_formal_launcher_uses_repository_module_entry_points():
@@ -92,5 +94,6 @@ def test_formal_launcher_uses_repository_module_entry_points():
     assert '"$PY" -u tools/' not in launcher
     assert "import tools.train_rein_query_residual_cqe_formal" in launcher
     assert 'FORMAL_SEED=${FORMAL_SEED:-20260931}' in launcher
+    assert '20261002) SEED_TAG=SEED2; ARTIFACT_TAG=seed2' in launcher
     assert '--seed "$FORMAL_SEED"' in launcher
     assert '--expected-seed "$FORMAL_SEED"' in launcher

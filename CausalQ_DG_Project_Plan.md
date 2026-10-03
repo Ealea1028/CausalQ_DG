@@ -2951,3 +2951,14 @@ conditional on seed-0 and authorizes one fresh matched seed-1 pair, but it does
 not establish training-seed robustness. Seed-1 uses seed `20261001`, the same
 fixed accepted REIN base and the unchanged 40k protocol. Both arms must share
 initialization, source order and intervention views; only CQE is toggled.
+
+The seed-1 pair at `682d2b7` passes audit with matched source indices and
+inputs. No-CQE/CQE mIoUs are `0.6502510456/0.6504147295`, giving a positive but
+small delta `+0.0001636839`; its paired image-bootstrap 95% interval
+`[-0.0001642424, 0.0007291625]` includes zero. Seeds 0--1 have paired-difference
+mean `0.0014619189` and sample standard deviation `0.0018359815`. Because the
+direction agrees but magnitude is unstable, authorize exactly one final
+matched seed-2 pair using seed `20261002`. Keep the fixed accepted REIN base,
+lambda, schedule, views and fixed-final evaluation unchanged. After seed-2,
+stop long training and aggregate all three training-seed deltas before making
+the CQE accuracy claim.

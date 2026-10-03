@@ -1,4 +1,4 @@
-# AutoDL next step: run the Phase 16 seed-1 matched CQE pair
+# AutoDL next step: run the final Phase 16 seed-2 matched CQE pair
 
 ## Current action — only this section is active
 
@@ -12,17 +12,26 @@ Inputs match per microbatch, the frozen base is unchanged, and both arms have
 training seed, not training-seed uncertainty. CQE remains `0.0031634086` below
 the unmodified REIN reference.
 
-One new matched training seed is now authorized. Seed-1 uses integer seed
-`20261001`; both no-CQE and CQE arms restart from the same fresh branch
+Seed-1 at `682d2b7` passes its complete audit: no-CQE/CQE mIoUs are
+`0.6502510455774392/0.6504147294870591`, a positive delta of
+`0.0001636839096199605` (`0.0164` percentage points). Its paired image
+bootstrap 95% interval `[-0.00016424239924645034,
+0.0007291624669445709]` crosses zero. Across seeds 0--1, the paired CQE gain is
+`0.001461918889183178 +/- 0.0018359815152454602` mIoU (mean +/- sample
+standard deviation). Both point estimates are positive, but the magnitude is
+not stable and neither CQE branch exceeds the unmodified REIN reference.
+
+One final matched training seed is now authorized. Seed-2 uses integer seed
+`20261002`; both no-CQE and CQE arms restart from the same fresh branch
 initialization and receive the same new source order and per-step views. The
 fixed accepted REIN seed-0 base remains identical. Every other setting remains
-unchanged. Do not repeat seed-0, resume either old branch, change lambda, or
+unchanged. Do not repeat seed-0/1, resume an old branch, change lambda, or
 select a target checkpoint. The launcher and auditor receive the same explicit
 seed and write seed-specific paths. Run only the exact commit named in the
 Codex handoff.
 
-The command block immediately below is the active seed-1 handoff. Older
-seed-0 instructions later in this document are retained as history and are
+The command block immediately below is the active seed-2 handoff. Older
+seed-0/1 instructions later in this document are retained as history and are
 inactive.
 
 The user approved this formal comparison after the paired 20-update engineering
@@ -61,7 +70,7 @@ Run from an AutoDL shell. First replace `FULL_SHA_FROM_CODEX` with the exact
 cd /root/autodl-tmp/CausalQ_DG || exit 1
 export OMP_NUM_THREADS=1
 EXPECTED_SHA=FULL_SHA_FROM_CODEX
-git fetch origin main || exit 1
+git fetch origin codex/cqe-seed2-handoff || exit 1
 git checkout --detach "$EXPECTED_SHA" || exit 1
 test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
 test -z "$(git status --porcelain)" || { echo "dirty_checkout"; exit 1; }
@@ -82,9 +91,9 @@ sha256sum /root/autodl-tmp/outputs/CausalQ_DG/REIN_SOURCE_ONLY_SEED0_40000_d6fc5
 
 BASE=/root/autodl-tmp/outputs/CausalQ_DG
 SHA=$(git rev-parse --short=7 HEAD)
-export FORMAL_SEED=20261001
-LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_seed1_${SHA}_launcher.log"
-PID_FILE="$BASE/analysis/rein_phase16_formal_seed1_${SHA}.pid"
+export FORMAL_SEED=20261002
+LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_seed2_${SHA}_launcher.log"
+PID_FILE="$BASE/analysis/rein_phase16_formal_seed2_${SHA}.pid"
 test ! -e "$LAUNCH_LOG" || { echo "existing_launcher_log=$LAUNCH_LOG"; exit 1; }
 test ! -e "$PID_FILE" || { echo "existing_pid_file=$PID_FILE"; exit 1; }
 nohup bash scripts/run_rein_query_residual_cqe_formal.sh \
@@ -100,19 +109,20 @@ To check progress without attaching to the training process, run:
 cd /root/autodl-tmp/CausalQ_DG || exit 1
 BASE=/root/autodl-tmp/outputs/CausalQ_DG
 SHA=$(git rev-parse --short=7 HEAD)
-PID_FILE="$BASE/analysis/rein_phase16_formal_seed1_${SHA}.pid"
-LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_seed1_${SHA}_launcher.log"
-LOG="$BASE/analysis/rein_phase16_query_residual_cqe_formal_seed1_${SHA}_v1.stderr.log"
+PID_FILE="$BASE/analysis/rein_phase16_formal_seed2_${SHA}.pid"
+LAUNCH_LOG="$BASE/analysis/rein_phase16_formal_seed2_${SHA}_launcher.log"
+LOG="$BASE/analysis/rein_phase16_query_residual_cqe_formal_seed2_${SHA}_v1.stderr.log"
 if kill -0 "$(cat "$PID_FILE")" 2>/dev/null; then echo "formal_process=running"; else echo "formal_process=stopped"; fi
 tail -n 20 "$LOG" 2>/dev/null || true
 tail -n 30 "$LAUNCH_LOG"
 df -h /root/autodl-tmp
 ```
 
-After completion, return the entire seed-1 audit JSON, both exit codes, report/audit
+After completion, return the entire seed-2 audit JSON, both exit codes, report/audit
 hashes, both mIoUs and their delta/95% paired image-bootstrap interval, Git
-SHA/status and disk output. Stop after seed 1. Do not start seed 2 until the
-two training-seed deltas have been reviewed together.
+SHA/status and disk output. Stop after seed 2. No further long run is authorized;
+the next step is a read-only three-seed aggregate with all seed-level deltas,
+mean/sample standard deviation, direction count and training-seed interval.
 
 ## Previous producer instructions — completed; do not rerun
 
