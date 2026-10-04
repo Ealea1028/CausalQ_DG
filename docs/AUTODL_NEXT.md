@@ -1,6 +1,21 @@
-# AutoDL next step: aggregate the three accepted Phase 16 CQE seeds
+# AutoDL status: Phase 16 complete — no remote action authorized
 
-## Current action — only this section is active
+## Current action — none
+
+The hash-pinned three-seed aggregate completed successfully at
+`2e096bdf40d00d3a03f53f9ca2171ffd8c112aa8`. Its JSON SHA256 is
+`43e30e8cbd5165b48210750d0a770f25a87d6ccc9e5755cbf06ae2a4385f3d8c`
+and its log SHA256 is
+`39a6dbc947e586281826526c937cdb6d42df94ce4d709bbe5ce920ef75d79a8e`.
+It reports `ok: true` and `no_additional_long_training_authorized: true`.
+
+Phase 16 is closed. The current project plan defines no subsequent authorized
+GPU experiment, so there is no AutoDL command to run. Preserve all accepted
+reports, traces and checkpoints. Do not rerun any seed and do not start a new
+long run unless the project plan is explicitly extended with a new isolated
+phase, hypothesis and acceptance rule.
+
+## Completed three-seed aggregate — inactive
 
 All three matched long runs and their individual audits pass. Their CQE-minus-
 control deltas are `0.0027601539`, `0.0001636839`, and `0.0000350110` mIoU.

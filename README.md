@@ -10,7 +10,7 @@ The project studies whether the prediction effect of class-specific semantic que
 
 ## Current status
 
-The A0--A5 core sequence and Phase 11--15 studies are complete. Static R=2 remains the supported model (`0.652849 ± 0.015138` final Cityscapes mIoU over three seeds). Phase 14's learned-null variant improves seed-0 segmentation but worsens effect localization, so it remains a negative ablation. The §41 GTA5 → Cityscapes figures are qualitative diagnostics only. The completed §42 backbone comparison finds ViT-L above ViT-B in mIoU (`0.652849` versus `0.563878` mean) and below it in normalized cross-style effect variance (`0.000567443` versus `0.000961160` mean) for all three paired seeds. This is a two-size association, not a scaling law or causal proof; CQE gain under scaling remains untested after the CQE acceptance failure. Other target datasets remain deferred. See `experiments/BACKBONE_SCALING_STATIC_R2_3SEED/report.md` and `docs/AUTODL_NEXT.md`.
+The A0--A5 core sequence and Phase 11--16 studies are complete. Static R=2 remains the supported DINOv3 model (`0.652849 ± 0.015138` final Cityscapes mIoU over three seeds). Phase 14's learned-null variant improves seed-0 segmentation but worsens effect localization, so it remains a negative ablation. The §41 GTA5 → Cityscapes figures are qualitative diagnostics only. The completed §42 backbone comparison finds ViT-L above ViT-B in mIoU (`0.652849` versus `0.563878` mean) and below it in normalized cross-style effect variance (`0.000567443` versus `0.000961160` mean) for all three paired seeds. Phase 16's REIN transfer gives a three-seed matched CQE gain of only `+0.0986 ± 0.1538` percentage points; its training-seed 95% interval crosses zero and mean CQE mIoU remains below the unmodified REIN reference. This is weak directional evidence, not a statistically resolved or practically meaningful CQE improvement. Other target datasets remain deferred. See `experiments/REIN_PHASE16_RUNTIME/report.md` and `docs/AUTODL_NEXT.md`.
 
 ## Working directories
 
@@ -54,8 +54,8 @@ audit passes at `f18c2c2`; it verifies evidence integrity but provides no
 target accuracy result. The user-approved formal seed-0 pair was implemented;
 its first launch at `8c1396c` failed before initialization because its file-path
 entry point could not import `tools`. No training occurred. The launcher now
-uses module entry points with an import preflight; the paired protocol is
-unchanged and awaits a fresh exact-commit AutoDL launch.
+uses module entry points with an import preflight; the paired protocol remained
+unchanged and the repaired launch described below superseded that failure.
 That launch completed at `8640215`, with a preliminary CQE-minus-control gain
 of `+0.2760` mIoU points. Its first saved audit exposed an auditor-only
 accumulation-boundary indexing error; seed-0 training must not be repeated.
@@ -67,13 +67,15 @@ REIN reference. Seed-1 then passes its full audit at `682d2b7`: CQE is again
 positive versus its matched control, but only by `+0.0164` points and its
 conditional image bootstrap interval crosses zero. Across seeds 0--1 the paired gain is
 `0.1462 +/- 0.1836` points (mean +/- sample standard deviation). A fixed
-seed-2 matched pair is therefore the next and final planned training-seed
-replicate before deciding the CQE performance claim.
+seed-2 matched pair therefore completed the final planned training-seed
+replicate used to decide the CQE performance claim.
 Seed-2 passes at `e00d5f4` with another positive but negligible `+0.0035`
 point delta and an image-bootstrap interval crossing zero. Across all three
 seeds CQE gains `+0.0986 +/- 0.1538` points, with a training-seed t interval
 that crosses zero; all CQE variants remain below the original REIN reference.
-The next gate is a hash-pinned, read-only three-seed aggregate, not training.
+The hash-pinned aggregate passes at `2e096bd`, records the bounded conclusion,
+and sets `no_additional_long_training_authorized: true`. Phase 16 is closed;
+the current plan contains no further authorized AutoDL experiment.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 

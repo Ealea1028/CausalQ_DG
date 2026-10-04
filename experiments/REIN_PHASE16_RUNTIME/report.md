@@ -374,3 +374,20 @@ The three paired deltas are all positive, with mean/sample standard deviation
 p-value is `0.125`. Mean CQE mIoU `0.6514688324` remains below the unmodified
 REIN result `0.656051`. This is weak directional evidence, not proof of robust
 performance improvement. No additional long run is authorized.
+
+## Final three-seed aggregate and Phase 16 disposition
+
+The hash-pinned read-only aggregate exits 0 at
+`2e096bdf40d00d3a03f53f9ca2171ffd8c112aa8`. It verifies the accepted seed-0,
+seed-1 and seed-2 audit hashes, exact matched-exposure fields, all three
+positive point estimates, and the statistics above. The aggregate JSON and log
+SHA256 values are respectively
+`43e30e8cbd5165b48210750d0a770f25a87d6ccc9e5755cbf06ae2a4385f3d8c`
+and `39a6dbc947e586281826526c937cdb6d42df94ce4d709bbe5ce920ef75d79a8e`.
+
+Final decision: CQE has weak directional evidence in this frozen-REIN residual
+protocol, but the training-seed interval includes zero, the sign test is not
+significant, the estimated gain is small, and every CQE result remains below
+the unmodified REIN source baseline. The project therefore does not claim that
+CQE improves performance. Phase 16 is complete and no additional long run is
+authorized by the current plan.

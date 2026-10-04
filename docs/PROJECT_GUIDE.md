@@ -4,10 +4,10 @@
 
 ## 1. 文档状态与阅读约定
 
-- 当前基准日期：2026-09-24。
-- 当前 Phase 12 机制分析提交：`07ef4ce71d04cac432259f10d05693cdcecfdca8`。
-- 当前已完成主实验：A0–A5。
-- Phase 11 风格消融和 Phase 12 Query 数量消融均已完成。
+- 当前基准日期：2026-10-04。
+- 当前 Phase 16 三种子聚合提交：`2e096bdf40d00d3a03f53f9ca2171ffd8c112aa8`。
+- 当前已完成主实验：A0–A5，以及 Phase 11–16 的预设扩展研究。
+- 当前项目计划内没有待执行的 AutoDL 实验。
 - 本文中的“已实现”“已验证”只指已进入 Git 并有实验证据的内容。
 - 本文中的“建议”“下一版”“拟议”均不是当前实现或现有实验结论。
 
@@ -22,7 +22,7 @@ CausalQ-DG 研究的是：在只用合成驾驶场景训练、直接迁移到未
 1. 类别分组、单向读取图像特征的 Query 分支有效；
 2. photometric 与 Fourier 风格视图联合训练有效。
 
-当前证据不支持“现有 CQE 定义能够提高目标域精度”：它显著压低了效应方差，却同时降低了分割性能。因此，现阶段最强方法是 A2（Query + Style），而不是 A4/A5。
+当前证据仍不足以支持“现有 CQE 定义能够稳定提高目标域精度”。DINOv3 主线中，CQE 显著压低效应方差却降低分割性能；REIN 迁移实验中，三个配对种子的 CQE 点估计均为正，但平均仅 `+0.0986` 个百分点、训练种子置信区间跨零，并且 CQE 平均 mIoU 仍低于未修改的 REIN 基线。因此，这是一项弱方向性证据，而不是已验证的稳定性能增益。
 
 ## 3. 研究问题与实验边界
 
@@ -82,7 +82,7 @@ D -> S -> X <- C -> Y
 - Query 分支对 logits 的增量可显式分离与消融；
 - 风格变换保持空间对齐，可比较不同视图下的预测或 Query 贡献；
 - CQE 明显降低了归一化 Query 效应图的跨风格方差；
-- 当前 CQE 同时降低了 Cityscapes mIoU，说明“稳定”本身不足以保证“有用”。
+- DINOv3 主线中的 CQE 降低了 Cityscapes mIoU；REIN 迁移中的三种子小幅正增益尚未达到训练种子统计分辨率，说明“稳定”本身不足以保证可复现且有实际意义的性能提升。
 
 不可以声称：
 
@@ -547,6 +547,7 @@ seed 2 中 combined 为 62.95%，photometric-only 为 61.88%。三 seed 汇总�
 | 扩展评估 | BDD100K、Mapillary、规模扩展 | 按用户要求暂缓；不能计为已验证 |
 | Phase 14 | Learned-null 干预基线 | 已完成；分割提升但效应定位退化，作为负消融保留 |
 | Phase 15 / 原方案 §42 | DINOv3-B 缩放对照 | 三 seed 配对分析完成：ViT-L mIoU 均值 0.652849 对 ViT-B 0.563878；归一化效应方差均值 0.000567443 对 0.000961160；仅支持当前协议下的两规模关联 |
+| Phase 16 / 原方案 §43 | DINOv2/REIN 迁移与配对 CQE | 完成；三 seed CQE 配对增益 `+0.0986 ± 0.1538 pp`，95% 训练种子区间跨零，未验证稳定性能提升 |
 | 后续理论升级 | effect invariance + sufficiency + specificity | 仅为拟议路线，未实现 |
 
 ## 12. 代码与文档地图
@@ -789,9 +790,13 @@ for view_name, view_images in named_views:
 
 原始数据、权重、完整 checkpoints 和完整运行目录不进入 Git。Git 只保存精简后的 `summary.json`、必要日志摘录、运行清单和 `experiments/registry.csv`。
 
-## 18. 当前下一步：原方案 §43 DINOv2/REIN 可行性核对
+## 18. 当前状态：Phase 16 已关闭
 
-Phase 12 已固定 `R=2`，Phase 13 最终选择 Static，其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 的效应定位退化，因此仅作负消融。应用户要求，BDD100K、Mapillary 等外部目标域暂缓。原方案 §41 的图像仅供定性诊断。§42 ViT-B/ViT-L 对照已完成三 seed 配对：ViT-L 的 mIoU 每次更高、归一化效应方差每次更低，但这不是严格的缩放律或因果证明。下一单阶段按原方案 §43 核对 DINOv2/REIN 所需的资源与协议；鉴于 CQE 在 DINOv3-L 上未通过分割验收，不能预设其迁移后会改善性能，也不能把资源清点当作模型验证。
+Phase 12 已固定 `R=2`，Phase 13 最终选择 Static，其三 seed 为 `0.652849 ± 0.015138`。Phase 14 learned-null 的效应定位退化，因此仅作负消融。应用户要求，BDD100K、Mapillary 等外部目标域暂缓。原方案 §41 的图像仅供定性诊断。§42 ViT-B/ViT-L 对照已完成三 seed 配对：ViT-L 的 mIoU 每次更高、归一化效应方差每次更低，但这不是严格的缩放律或因果证明。
+
+原方案 §43 的 DINOv2/REIN 可行性、source-only 基线、Query residual 工程门禁及正式 CQE 三种子配对均已完成。三种子的 CQE-minus-control 分别为 `+0.2760`、`+0.0164`、`+0.0035` 个百分点；均值/样本标准差为 `+0.0986 ± 0.1538 pp`，Student-t 95% 区间为 `[-0.2833, +0.4806] pp`，单侧精确符号检验 `p=0.125`。CQE 平均 mIoU `0.651469` 也低于 REIN source-only 基线 `0.656051`。因此 Phase 16 以“弱方向性证据、未证明稳定或实际显著的性能提升”关闭。
+
+当前方案没有获批的下一轮长训练。只有在新增独立 Phase、明确假设、固定对照和验收阈值后，才应再次更新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 并进入 AutoDL。
 
 执行前必须使用最新 [`AUTODL_NEXT.md`](AUTODL_NEXT.md) 中的精确提交、清理保护和命令，不能从本指导书复制占位符直接运行。
 
@@ -812,7 +817,7 @@ Query 数量实验除 mIoU 外，还应在 full run 后比较 query similarity�
 ### 19.2 已实现但被当前证据否定
 
 - 普通 prediction KL consistency：A3 低于 A2；
-- 基于零消融残差的 CQE：A4 低于 A3/A2；
+- 基于零消融残差的 CQE：DINOv3 A4 低于 A3/A2；REIN 三种子配对仅有未达到训练种子统计分辨率的小幅正方向；
 - 当前 query diversity：A5 对 A4 的提升低于保留阈值。
 
 这些模块应保留为受控消融和失败证据，不应组合成“最终推荐方法”。

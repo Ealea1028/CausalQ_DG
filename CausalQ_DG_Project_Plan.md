@@ -2973,3 +2973,15 @@ is `0.6514688324`, still `0.0045821651` below the unmodified REIN reference.
 Therefore stop long training. Run one read-only aggregate that verifies all
 three accepted audit hashes and records the final conclusion: directional but
 not statistically resolved CQE improvement under this protocol.
+
+The read-only aggregate completed successfully at Git
+`2e096bdf40d00d3a03f53f9ca2171ffd8c112aa8`. It verified all three pinned
+audit hashes and reproduced mean no-CQE/CQE mIoU
+`0.6504825495/0.6514688324`, paired delta mean/sample standard deviation
+`0.0009862829/0.0015375639`, Student-t 95% interval
+`[-0.0028332376, 0.0048058034]`, and one-sided exact sign-test `p=0.125`.
+Its output JSON SHA256 is
+`43e30e8cbd5165b48210750d0a770f25a87d6ccc9e5755cbf06ae2a4385f3d8c`.
+Phase 16 is therefore closed: the evidence is directionally positive but does
+not validate a robust or practically meaningful CQE performance improvement.
+No additional long training is authorized under this plan.
