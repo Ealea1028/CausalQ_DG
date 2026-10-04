@@ -578,3 +578,16 @@ the three-seed protocol. No hyperparameter or checkpoint selection may change.
 The final report must give all three deltas, mean/sample standard deviation,
 direction count and a training-seed interval; image bootstrap intervals remain
 conditional diagnostics and must not be presented as training-seed inference.
+
+Seed-2 at `e00d5f4` also passes audit. Its no-CQE/CQE mIoUs are
+`0.6510691679/0.6511041789`, a delta of `+0.0000350110`; its conditional
+image-bootstrap interval `[-0.0002584812, 0.0002280830]` crosses zero. Across
+all three seeds, the paired delta mean/sample standard deviation is
+`0.0009862829/0.0015375639`, all three point estimates are positive, and the
+prespecified Student-t 95% interval is `[-0.0028332376, 0.0048058034]`.
+The one-sided exact sign-test p-value is `0.125`. Mean no-CQE/CQE mIoUs are
+`0.6504825495/0.6514688324`; mean CQE remains `0.0045821651` below the
+unmodified REIN baseline. These data provide weak directional evidence but do
+not establish statistically resolved or practically meaningful improvement.
+No additional long training is authorized; close Phase 16 with a read-only,
+hash-pinned aggregation of the three accepted audit artifacts.

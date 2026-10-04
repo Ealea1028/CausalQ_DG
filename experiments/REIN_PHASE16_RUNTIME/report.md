@@ -363,3 +363,14 @@ Both observed training-seed deltas are positive, with mean `0.0014619189` and
 sample standard deviation `0.0018359815`, but neither CQE branch exceeds the
 unmodified REIN reference. One prespecified seed-2 pair at seed `20261002` is
 the final authorized long replicate before three-seed aggregation.
+
+Seed-2 at `e00d5f4` passes its full audit: no-CQE/CQE mIoUs are
+`0.6510691679/0.6511041789`, delta `+0.0000350110`, with conditional image
+bootstrap interval `[-0.0002584812, 0.0002280830]`. Its audit artifact SHA256
+is `d874538a815f4be5bcf666d9f9c570ae63100ccb493a6aa6c2ca08df2312816a`.
+The three paired deltas are all positive, with mean/sample standard deviation
+`0.0009862829/0.0015375639`; the Student-t 95% interval
+`[-0.0028332376, 0.0048058034]` crosses zero and the exact one-sided sign-test
+p-value is `0.125`. Mean CQE mIoU `0.6514688324` remains below the unmodified
+REIN result `0.656051`. This is weak directional evidence, not proof of robust
+performance improvement. No additional long run is authorized.

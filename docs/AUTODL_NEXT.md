@@ -1,6 +1,66 @@
-# AutoDL next step: run the final Phase 16 seed-2 matched CQE pair
+# AutoDL next step: aggregate the three accepted Phase 16 CQE seeds
 
 ## Current action — only this section is active
+
+All three matched long runs and their individual audits pass. Their CQE-minus-
+control deltas are `0.0027601539`, `0.0001636839`, and `0.0000350110` mIoU.
+All directions are positive, but the three-seed mean/sample standard deviation
+is `0.0009862829/0.0015375639` and the Student-t 95% interval crosses zero.
+Mean CQE mIoU also remains below the unmodified REIN reference. No additional
+training is authorized.
+
+The only active action is a read-only aggregate over the three immutable audit
+JSON files. It checks their exact SHA256 values, training commits, seeds,
+exposure and paired-protocol fields, then records seed-level results, mean/
+sample standard deviation, a training-seed Student-t interval, sign-test result
+and the bounded conclusion. It does not load a model, dataset or GPU.
+
+Run only the exact commit supplied by Codex:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_SHA_FROM_CODEX
+git fetch origin codex/cqe-three-seed-aggregate || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo "dirty_checkout"; exit 1; }
+
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+SHA=$(git rev-parse --short=7 HEAD)
+A0="$BASE/analysis/rein_phase16_query_residual_cqe_formal_8640215_audit_v2_96b193d.json"
+A1="$BASE/analysis/rein_phase16_query_residual_cqe_formal_seed1_682d2b7_audit.json"
+A2="$BASE/analysis/rein_phase16_query_residual_cqe_formal_seed2_e00d5f4_audit.json"
+OUTPUT="$BASE/analysis/rein_phase16_query_residual_cqe_three_seed_${SHA}.json"
+LOG="$BASE/analysis/rein_phase16_query_residual_cqe_three_seed_${SHA}.log"
+
+test -x "$PY" || exit 1
+test -f "$A0" || exit 1
+test -f "$A1" || exit 1
+test -f "$A2" || exit 1
+test ! -e "$OUTPUT" || { echo "existing_output=$OUTPUT"; exit 1; }
+test ! -e "$LOG" || { echo "existing_log=$LOG"; exit 1; }
+
+sha256sum "$A0" "$A1" "$A2"
+set -o pipefail
+"$PY" -m tools.aggregate_rein_query_residual_cqe_seeds \
+  --audits "$A0" "$A1" "$A2" \
+  --output "$OUTPUT" 2>&1 | tee "$LOG"
+AGGREGATE_EXIT=${PIPESTATUS[0]}
+
+echo "aggregate_exit_code=$AGGREGATE_EXIT"
+cat "$OUTPUT"
+sha256sum "$OUTPUT" "$LOG"
+git rev-parse HEAD
+git status --short
+df -h /root/autodl-tmp
+```
+
+Return the complete output. Acceptance requires exit 0, `ok: true`, all three
+expected seeds and audit hashes, and `no_additional_long_training_authorized:
+true`. Stop after this read-only report.
+
+## Completed seed-2 instructions — inactive
 
 The corrected audit of the completed seed-0 producer passes at `96b193d`.
 CQE reached `0.6528875888991673` mIoU versus `0.6501274350304209` for

@@ -2962,3 +2962,14 @@ matched seed-2 pair using seed `20261002`. Keep the fixed accepted REIN base,
 lambda, schedule, views and fixed-final evaluation unchanged. After seed-2,
 stop long training and aggregate all three training-seed deltas before making
 the CQE accuracy claim.
+
+Seed-2 at `e00d5f4` passes audit with no-CQE/CQE mIoUs
+`0.6510691679/0.6511041789`, delta `+0.0000350110`, and a conditional image
+bootstrap interval crossing zero. The completed three-seed deltas have mean
+`0.0009862829`, sample standard deviation `0.0015375639`, and Student-t 95%
+interval `[-0.0028332376, 0.0048058034]`; all three point estimates are
+positive but the exact one-sided sign-test p-value is `0.125`. Mean CQE mIoU
+is `0.6514688324`, still `0.0045821651` below the unmodified REIN reference.
+Therefore stop long training. Run one read-only aggregate that verifies all
+three accepted audit hashes and records the final conclusion: directional but
+not statistically resolved CQE improvement under this protocol.

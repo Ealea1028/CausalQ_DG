@@ -69,6 +69,11 @@ conditional image bootstrap interval crosses zero. Across seeds 0--1 the paired 
 `0.1462 +/- 0.1836` points (mean +/- sample standard deviation). A fixed
 seed-2 matched pair is therefore the next and final planned training-seed
 replicate before deciding the CQE performance claim.
+Seed-2 passes at `e00d5f4` with another positive but negligible `+0.0035`
+point delta and an image-bootstrap interval crossing zero. Across all three
+seeds CQE gains `+0.0986 +/- 0.1538` points, with a training-seed t interval
+that crosses zero; all CQE variants remain below the original REIN reference.
+The next gate is a hash-pinned, read-only three-seed aggregate, not training.
 See `experiments/REIN_PHASE16_RUNTIME/report.md` for the
 feasibility assessment and `docs/AUTODL_NEXT.md` for the fixed remote boundary.
 
