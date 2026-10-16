@@ -4,9 +4,11 @@
 
 The user-approved `CausalQ_DG_1016.txt` roadmap begins with a repository audit
 and strict-DG protocol repair. See `CODEX_CURRENT_STATE.md` and
-`STRICT_DG_PROTOCOL.md`. The only next remote action is a source-only GTA5
-filesystem/metadata inventory. Source sequence/scene evidence must be reviewed
-before selecting and freezing train/holdout membership. No target access,
+`STRICT_DG_PROTOCOL.md`. The operator reports 24,966 complete flat-numeric GTA5
+pairs and zero metadata candidates. The next remote action verifies the exact
+saved inventory and exports deterministic filename-based source manifests at
+10% holdout. They remain candidates until returned and frozen in local Git.
+This fallback cannot guarantee separation of correlated frames/scenes. No target access,
 Query representation change, new loss, training or REIN extension in this gate.
 Existing model APIs and historical experiments remain unchanged. Historical
 Static R=2 mIoU is not a strict-DG M0 result. The old trainer still reads target

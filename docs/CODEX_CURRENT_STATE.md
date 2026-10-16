@@ -1,5 +1,15 @@
 # CausalQ_DG_1016 repository audit
 
+Latest Priority 0 update (2026-10-16): the operator returned an exit-0 inventory
+summary for 24,966 complete flat-numeric pairs with no metadata candidates.
+The original audit below remains a snapshot of `0549881`. Current work adds
+`causalq/protocols/source_split.py`, `tools/build_gta5_source_split.py`,
+`scripts/build_gta5_source_split_phase17.sh` and `tests/test_source_split.py`.
+The existing model, data adapter and trainer remain unchanged. The new gate
+verifies pinned inventory bytes then exports the deterministic 10% filename
+fallback as candidate manifests for return to local Git; nothing is frozen yet.
+See `STRICT_DG_PROTOCOL.md`, `EXPERIMENT_RESULTS.md` and `AUTODL_NEXT.md`.
+
 Audit date: 2026-10-16. This is Phase 17 / Priority 0 only: strict-DG protocol
 preparation. No centered Query change, new loss, training or target evaluation.
 

@@ -3,6 +3,31 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
+## Current gate: candidate source membership export
+
+The operator's inventory summary reports 24,966 complete flat-numeric pairs,
+zero missing/duplicate IDs and zero metadata candidates. See
+`../experiments/STRICT_DG_PHASE17/source_inventory_review.md` for exact hashes
+and the evidence limitations. Full original JSON bytes have not returned locally.
+Use the plan's configurable filename fallback because the inventoried subtree
+provides no usable grouping. Do not claim scene/sequence independence.
+
+The exporter first verifies the pinned inventory SHA256, producer Git, empty
+Git status, pair-record digest, counts, IDs, paths and reviewed metadata fields.
+Let H(i)=SHA256(ASCII("causalq-gta5-source-split-v1" + LF + exact_ID_i)).
+Order by (H(i), exact_ID_i), select the first ceil(N*f) for validation and put
+all remaining IDs in training. Default f=0.1; no training seed participates.
+For N=24966 this gives 2497 val and 22469 train. The fraction is configurable
+before freezing; it is not a parameter to tune using target results. Exact
+rational arithmetic avoids ambient decimal precision affecting the rounding.
+
+Manifests preserve exact ID spelling/leading zeros, sorted lexically with LF
+line endings; require unique IDs, nonempty sets, zero overlap and full coverage.
+The metadata-only `source_split_export.zip` contains both manifests, a report
+and SHA256SUMS. Return these bytes for local verification and Git freeze before
+data/loader checks or training. This command opens only the saved inventory,
+not dataset images/labels. No pixel-level data acceptance is implied.
+
 ## Historical versus new experiments
 
 A0–A5, Static R=2's 65.2849% three-seed result and REIN runs are historical
@@ -30,8 +55,9 @@ Their results are all pending. No long training is authorized by this inventory.
    split rule and hashes. Require nonempty/disjoint/complete membership and no
    group overlap. All seeds use these same memberships.
 
-This gate does not create provisional manifests: real GTA5 metadata is remote,
-so selecting a split now would bypass the plan's required evidence.
+The initial inventory gate did not create provisional manifests. After reviewing
+its returned summary, the current gate exports candidates from the actual remote
+ID list; no assumed consecutive numeric range is used.
 The inventory hashes filenames/pair metadata, not image/label content. It does
 not certify decoding, label IDs, grouping quality or pixel-level duplicates.
 Source label/geometry inspection follows in a separate bounded AutoDL gate.

@@ -1,4 +1,115 @@
-# AutoDL next: Phase 17 / Priority 0 — GTA5 source structure inventory
+# AutoDL next: Phase 17 / Priority 0 — verify inventory and export source split
+
+Updated 2026-10-16. This is the only active action. All inventory and Phase 16
+commands below the archive heading are inactive. Continue to keep Phase 16 closed.
+
+## Returned result and decision
+
+The operator reports exit 0, clean `f41dbee`, 24,966 complete flat-numeric pairs
+and no metadata candidates. No model/effect metric was measured. See
+`../experiments/STRICT_DG_PHASE17/source_inventory_review.md` for the read-only
+review and exact input hashes. The full ID list is still remote, so source
+membership has not been frozen in Git. Do not infer IDs from the count.
+
+The next command verifies the original inventory SHA256 and pair digest,
+producer SHA/status and expected structural fields, then exports the plan's
+configurable deterministic 10% filename fallback. H(i)=SHA256(fixed salt + LF
++ exact ID); first ceil(N*0.1) ranked IDs are holdout. Expected train/val counts
+are 22469/2497, independent of all training seeds. This does not establish
+sequence/scene independence; correlated frames may cross the filename split.
+
+## Exact command
+
+Use the full SHA provided in Codex's final response (the copyable final block
+contains the literal value). No packages, weights or GPU are required. Python
+3.10+ standard library only; default python3 is the previously working 3.12.3.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+PY=python3 bash scripts/build_gta5_source_split_phase17.sh "$EXPECTED_SHA"
+```
+
+Pinned input (preserve exactly):
+
+```text
+/root/autodl-tmp/outputs/CausalQ_DG/phase17/GTA5_SOURCE_STRUCTURE_f41dbee_20261016T135221_54521/inventory.json
+SHA256: 7224adc8aaafbcaac412aa5ee3904c11ba10d3c81aac7dffea231259e21e0d25
+```
+
+The launcher locates this file under CAUSALQ_OUTPUT_ROOT if explicitly set.
+Do not regenerate inventory, modify its JSON, alter the fraction, edit source
+code, inspect Cityscapes or start training. On any failure preserve the new
+failure report/log and return the error. Output directories are exclusive and
+timestamped; previous artifacts are not overwritten.
+
+## Outputs and acceptance
+
+Under `/root/autodl-tmp/outputs/CausalQ_DG/phase17/`:
+
+```text
+GTA5_SOURCE_SPLIT_<sha7>_<UTCstamp>_<pid>/
+  gta5_source_train.txt
+  gta5_source_val.txt
+  split_report.json
+  SHA256SUMS
+  source_split_export.zip
+GTA5_SOURCE_SPLIT_<sha7>_<UTCstamp>_<pid>.log
+```
+
+The ZIP contains only the two ID manifests, report and checksums, not the raw
+inventory, datasets, checkpoints or code. Return the **ZIP and complete console
+output**, including its SHA256, plus the log on error. Download the ZIP from
+the printed path in AutoDL's file panel and attach it here; the actual ID bytes
+are required for local Git freeze. A console summary alone cannot supply them.
+
+Acceptance: `split_exit_code=0`, `ok: true`, source count 24966, train22469,
+val2497, `overlap_count=0`, `exact_partition: true`, all three file checksum
+checks OK, original inventory and pair digests match, clean current Git SHA.
+Report must retain `candidate_pending_local_git_freeze`, `frozen_in_git: false`,
+`training_authorized: false`, `dataset_files_opened: false`,
+`target_data_accessed: false`. Stop even on success. This is a deterministic
+membership engineering gate, not a dataset-decoding or accuracy gate.
+
+Scientific question: can the reviewed full source ID inventory be partitioned
+reproducibly with exact coverage and no membership overlap, independently of
+training seed? Scene independence is outside what these data can establish.
+
+Next local action after the ZIP returns: read-only hash/membership verification,
+recompute the rule, commit the actual manifests and frozen metadata, then
+continue strict source-only loader/trainer preparation in Priority 0. Query
+decomposition is still later, and no historical experiment is changed.
+
+## Local verification for this change
+
+Full CPU suite: **296 passed, 1 skipped**, 9.33s; 28 new tests cover membership,
+seed/order independence, exact fractional rounding, golden membership,
+malformed IDs, overlapping/incomplete splits, pinned evidence verification,
+metadata/target flag rejection, ZIP/checksum roundtrip, failure preservation,
+exclusive outputs and CLI operation without third-party packages. Skip is the
+previous Windows unprivileged-symlink test; simulated link rejection still passes.
+Shell syntax and `git diff --check` pass.
+
+Environment: existing `E:/Anaconda/envs/pytorch/python.exe`, Python 3.10.20,
+torch 2.10.0+cu128, pytest 8.4.2 from ignored `.test-deps-strict-dg/`;
+CUDA hidden, OMP threads=1. This differs from the pinned DINOv3 GPU runtime;
+only CPU checks are claimed. The default Python 3.12 lacks torch, as recorded
+in the archived initial gate below.
+
+```powershell
+$env:PYTHONPATH = (Join-Path (Get-Location) '.test-deps-strict-dg')
+$env:CUDA_VISIBLE_DEVICES = ''
+$env:OMP_NUM_THREADS = '1'
+& E:/Anaconda/envs/pytorch/python.exe -m pytest -p no:cacheprovider --basetemp=.test-tmp-strict-dg-split-full
+```
+
+---
+
+# Archive: completed source structure inventory instructions — INACTIVE
 
 Updated 2026-10-16 under `CausalQ_DG_1016.txt`. Phase 16 remains closed.
 Only the following source inventory is active. Every Phase 16 command below

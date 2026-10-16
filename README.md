@@ -6,8 +6,10 @@ The new [`CausalQ_DG_1016.txt`](CausalQ_DG_1016.txt) roadmap starts Phase 17,
 Priority 0: repository audit and strict-DG protocol preparation. See
 [`docs/CODEX_CURRENT_STATE.md`](docs/CODEX_CURRENT_STATE.md) and
 [`docs/STRICT_DG_PROTOCOL.md`](docs/STRICT_DG_PROTOCOL.md).
-The next AutoDL action is a GTA5-only filesystem/metadata inventory, before
-freezing source holdout membership. No model modification or training is
+The GTA5 inventory reports 24,966 complete pairs and no usable sequence/scene
+metadata. The next AutoDL action verifies that saved inventory and exports a
+deterministic 10% source holdout candidate; membership is not frozen until the
+full manifests return to local Git. No model modification or training is
 authorized by this gate. Old launchers read Cityscapes during development and
 must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains a
 historical reference, not a new strict-DG result. Phase 16 remains closed.
