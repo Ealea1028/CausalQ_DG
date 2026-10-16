@@ -26,6 +26,12 @@ See `source_split_freeze_review.md` in the same experiment directory. No source 
 weights or GPU were used by the filesystem inventory. It provides no evidence
 for anchor/residual stability or segmentation performance.
 
-Current next gate is CPU-only actual source pixel/geometry/preprocessing
-acceptance. Strict source data routing is implemented and synthetically tested;
-new M0 training remains blocked and no target metric has been produced.
+The returned full `cb52071` source-data report now passes its pinned local
+audit: source22469/holdout2497 complete scans, zero invalid/unreadable/all-ignore
+or incompatible geometry,62 allowed scale-equivalent differences,2497 holdout
+and32 source-photo preprocessing checks. Saved report and review are in the
+same evidence directory. No mIoU or effect metric was measured.
+
+Current next gate is an isolated20-update source-only GPU optimizer/checkpoint
+smoke, not formal M0 training. Its real optimization, checkpoint/memory and
+frozen-backbone results remain pending AutoDL. No target access is authorized.

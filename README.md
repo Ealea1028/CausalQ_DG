@@ -9,9 +9,11 @@ Priority 0: repository audit and strict-DG protocol preparation. See
 The GTA5 inventory reports 24,966 complete pairs and no usable sequence/scene
 metadata. The deterministic 10% source holdout export reports success with
 22469 train / 2497 validation IDs. The real extracted manifests were verified
-locally and frozen at `4314d61`. The next AutoDL action is a CPU-only GTA5
-pixel/geometry/preprocessing gate using the frozen source-only data route.
-No model modification or training is authorized by this gate. Old launchers read Cityscapes during development and
+locally and frozen at `4314d61`. The complete source pixel/preprocessing report
+at `cb52071` passes its pinned local audit. Next is an isolated AutoDL GPU
+smoke: 20 source-only updates, eight holdout compatibility inputs, one final
+compact checkpoint and unchanged-backbone/memory checks. No formal long run,
+target access or model mechanism change is authorized. Old launchers read Cityscapes during development and
 must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains a
 historical reference, not a new strict-DG result. Phase 16 remains closed.
 The historical status and working-directory narrative below is retained for

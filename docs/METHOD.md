@@ -8,12 +8,15 @@ and strict-DG protocol repair. See `CODEX_CURRENT_STATE.md` and
 pairs and zero metadata candidates. The source split export now reports exit 0
 at `57a7244`, 22469 train / 2497 holdout IDs and matching pinned hashes. The
 real extracted manifests have now passed independent local hash/membership
-verification and entered Git at `4314d61`. The next action is a CPU-only
-AutoDL source pixel/geometry/preprocessing gate. `tools/train.py` now has
-explicit strict source dataset routing; the M0 gate config rejects training
-before CUDA/data access. It is not yet a usable M0 optimizer runner.
+verification and entered Git at `4314d61`. The full source-data report at
+`cb52071` now passes a pinned local audit: all24966 pairs and2497 holdout
+transforms valid, with62 declared scale-equivalent mismatches and no invalid
+labels, unreadable/all-ignore pairs or incompatible geometry. Next is a
+dedicated fixed20-update source-only GPU smoke. The ordinary `tools/train.py`
+M0 gate config continues to reject training before CUDA/data access; only the
+separate bounded smoke entry point is authorized, not a formal optimizer run.
 This fallback cannot guarantee separation of correlated frames/scenes. No target access,
-Query representation change, new loss, training or REIN extension in this gate.
+Query representation change, new loss, long training or REIN extension in this gate.
 Existing model APIs and historical experiments remain unchanged. Historical
 Static R=2 mIoU is not a strict-DG M0 result. The old trainer still reads target
 data and is not a valid entry point for new strict-DG experiments.

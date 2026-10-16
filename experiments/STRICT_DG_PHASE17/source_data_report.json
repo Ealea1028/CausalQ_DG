@@ -1,0 +1,592 @@
+{
+  "schema_version": 1,
+  "phase": 17,
+  "scope": "gta5_strict_source_data_only",
+  "environment": {
+    "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+    "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+    "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+    "torch": "2.7.0+cu126",
+    "numpy": "2.3.2"
+  },
+  "training_authorized": false,
+  "optimizer_updates": 0,
+  "target_data_accessed": false,
+  "manifest_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "train_count": 22469,
+  "val_count": 2497,
+  "source_validation": "gta5_holdout",
+  "git_sha": "cb5207101915c97b23da82792608b2e2c24c123e",
+  "git_status": "",
+  "config": {
+    "experiment": {
+      "id": "M0_STRICT_DG",
+      "phase": 17,
+      "status": "awaiting_source_data_gate"
+    },
+    "data": {
+      "source": "gta5",
+      "targets": [],
+      "validation": "gta5_holdout",
+      "num_classes": 19,
+      "num_workers": 4,
+      "random_scale": [
+        0.5,
+        2.0
+      ],
+      "horizontal_flip_probability": 0.5,
+      "min_valid_fraction": 0.01,
+      "crop_attempts": 10
+    },
+    "model": {
+      "backbone": "dinov3_vitl16",
+      "weights_dir": "dinov3_vitl16",
+      "weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+      "freeze_backbone": true,
+      "intermediate_indices": [
+        6,
+        12,
+        18,
+        24
+      ],
+      "decoder_channels": 256,
+      "dropout": 0.1,
+      "query": true
+    },
+    "query": {
+      "queries_per_class": 2,
+      "interaction": "static",
+      "alpha_init": 0.0,
+      "cross_attention_layers": 0,
+      "num_heads": 8,
+      "temperature": 0.07,
+      "aggregation": "logsumexp"
+    },
+    "style": {
+      "views": [
+        "original",
+        "photometric"
+      ],
+      "sequential_forward": true,
+      "preserve_geometry": true,
+      "lambda_cf": 1.0,
+      "photometric": {
+        "brightness": [
+          0.7,
+          1.3
+        ],
+        "contrast": [
+          0.7,
+          1.3
+        ],
+        "saturation": [
+          0.7,
+          1.3
+        ],
+        "gamma": [
+          0.8,
+          1.2
+        ],
+        "temperature": [
+          0.9,
+          1.1
+        ],
+        "grayscale_probability": 0.1
+      },
+      "fourier": {
+        "mix_strength": [
+          0.1,
+          0.35
+        ]
+      }
+    },
+    "train": {
+      "crop_size": [
+        512,
+        512
+      ],
+      "amp": true,
+      "batch_size": 1,
+      "gradient_accumulation": 1,
+      "max_iterations": 40000,
+      "seed": 0,
+      "style": true,
+      "log_interval": 10
+    },
+    "optimizer": {
+      "type": "AdamW",
+      "lr": 0.0001,
+      "weight_decay": 0.01,
+      "scheduler": "poly",
+      "poly_power": 0.9
+    },
+    "validation": {
+      "interval": 500,
+      "long_edge": 1024,
+      "patch_size": 16,
+      "geometry": "aspect_resize_pad",
+      "scope": "full_source_holdout"
+    },
+    "protocol": {
+      "name": "strict_dg",
+      "target_access": "forbidden_during_training",
+      "source_validation": "gta5_holdout",
+      "target_evaluation": "final_only",
+      "checkpoint_selection": "fixed_final",
+      "training_authorized": false
+    }
+  },
+  "ok": true,
+  "pair_manifest_sha256": "92a67a0e32a297d2f41618c6919a0573cfde6ec23890b5dd9a6ae7353842662f",
+  "train_scan": {
+    "scanned_label_count": 22469,
+    "scan_scope": "all",
+    "unique_label_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      255
+    ],
+    "invalid_train_ids": [],
+    "shape_mismatches": [
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/15188.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/15188.png",
+        "image_size": [
+          957,
+          526
+        ],
+        "label_size": [
+          1914,
+          1052
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/17705.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/17705.png",
+        "image_size": [
+          957,
+          526
+        ],
+        "label_size": [
+          1914,
+          1052
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20801.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20801.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20802.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20802.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20803.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20803.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20804.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20804.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20805.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20805.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20807.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20807.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20808.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20808.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20809.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20809.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20810.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20810.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20811.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20811.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20812.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20812.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20813.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20813.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20814.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20814.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20815.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20815.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20816.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20816.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20817.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20817.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20818.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20818.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20819.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20819.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      }
+    ],
+    "shape_mismatch_count": 57,
+    "scale_equivalent_mismatch_count": 57,
+    "geometry_mismatch_count": 0,
+    "unreadable": [],
+    "unreadable_count": 0,
+    "all_ignore_label_count": 0,
+    "all_ignore_label_examples": [],
+    "valid_fraction_min": 0.13433237581002103,
+    "valid_fraction_mean": 0.8881501108109101,
+    "visualizations": [],
+    "ok": true
+  },
+  "val_scan": {
+    "scanned_label_count": 2497,
+    "scan_scope": "all",
+    "unique_label_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      255
+    ],
+    "invalid_train_ids": [],
+    "shape_mismatches": [
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20806.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20806.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20822.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20822.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20824.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20824.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20825.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20825.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      },
+      {
+        "image": "/root/autodl-tmp/datasets/gta5/images/images/20829.png",
+        "label": "/root/autodl-tmp/datasets/gta5/labels_trainIds/20829.png",
+        "image_size": [
+          1914,
+          1046
+        ],
+        "label_size": [
+          1276,
+          697
+        ],
+        "classification": "scale_equivalent",
+        "aspect_ratio_relative_error": 0.0004780114722754114
+      }
+    ],
+    "shape_mismatch_count": 5,
+    "scale_equivalent_mismatch_count": 5,
+    "geometry_mismatch_count": 0,
+    "unreadable": [],
+    "unreadable_count": 0,
+    "all_ignore_label_count": 0,
+    "all_ignore_label_examples": [],
+    "valid_fraction_min": 0.26732680151455557,
+    "valid_fraction_mean": 0.8879511771551346,
+    "visualizations": [],
+    "ok": true
+  },
+  "preprocessing": {
+    "ok": true,
+    "holdout_checked": 2497,
+    "holdout_shapes": [
+      [
+        560,
+        1024
+      ],
+      [
+        576,
+        1024
+      ]
+    ],
+    "holdout_valid_fraction_min": 0.2613152265548706,
+    "train_crop_photo_checked": 32,
+    "photo_mean_absolute_change": 0.3270370289683342,
+    "holdout_torch_rng_unchanged": true
+  }
+}

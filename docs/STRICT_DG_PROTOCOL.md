@@ -3,7 +3,38 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: source pixels, geometry and preprocessing
+## Current gate: bounded source-only GPU optimizer/checkpoint smoke
+
+The saved complete `cb52071` source-data report passes the pinned local audit
+in `tools/audit_strict_source_data.py`; see Phase17 `source_data_review.md`.
+All24966 pairs and2497 fixed holdout transforms are accepted. The62 scale-only
+differences obey the declared alignment. This does not establish scene independence.
+
+Only the dedicated smoke entry point may now optimize:20 fresh seed0 updates,
+one source image per update, original+photometric CE, Static R=2 unchanged.
+L=CE(Z_original,Y)+lambda_cf*CE(Z_photo,Y), lambda_cf=1. Keep AdamW1e-4/wd0.01,
+clip1, BF16 AMP and the40k poly0.9 horizon. As in the legacy loop, update1
+uses the initial LR; after update t, LR_next=LR0*(1-t/40000)^0.9. The smoke
+uses workers0 and an explicit seed0 source permutation (engineering scope,
+not an exact worker4 long-run replay). No epoch, resume or source-selection
+equivalence is claimed.
+
+The smoke verifies alpha0 gives the base path, finite forward/backward/updates,
+nonzero gradients in decoder/query/scale, unchanged frozen-backbone state,
+one fixed-final compact checkpoint and exact trainable/optimizer restoration.
+Eight fixed source-holdout samples receive compatibility forwards; no mIoU,
+accuracy threshold, intermediate checkpoint or selection. Checkpoint prediction
+roundtrip must be <=1e-5. Report memory including construction/restore overhead.
+The helper reuses the same frozen backbone for the restored model; it does
+not reload pretrained weights or prove independent-process continuation.
+
+`protocol.training_authorized: false` in the old data-gate config continues
+to block its general training entry point. The separate smoke tool hardcodes
+its own authorization at20 updates and8 holdout samples and accepts no budget
+override. Its report retains `formal_training_authorized: false`. No40k run,
+target evaluator, centered Query, CQE/diversity or learned-null is enabled.
+
+## Completed source data gate
 
 The real extracted files have been independently verified and frozen at
 `4314d61`; see `source_split_freeze_review.md` in the Phase17 evidence directory.

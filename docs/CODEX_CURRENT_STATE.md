@@ -1,5 +1,15 @@
 # CausalQ_DG_1016 repository audit
 
+Latest evidence: full source-data report `cb52071` is byte/hash-pinned and
+accepted locally (`cf01d813...ad8fab3`), with all24966 pairs valid,62 allowed
+scale-only differences and all2497 holdout transforms passing. See the saved
+report and `source_data_review.md`. New work prepares `tools/strict_source_smoke.py`
+and `tools/check_strict_source_smoke.py`: exactly20 updates, eight source-only
+holdout compatibility checks, fixed40k schedule, one final compact checkpoint,
+model/optimizer/prediction restoration and unchanged backbone verification.
+No M0 mIoU, target access or long-run authorization. Earlier states below are
+historical snapshots; the ordinary M0 training entry point stays blocked.
+
 Current state: real extracted manifests arrived in `source_split_export/`.
 Individual file hashes, report, exact canonical IDs and independent split
 recomputation pass; membership entered Git at `4314d61`. ZIP bytes were not

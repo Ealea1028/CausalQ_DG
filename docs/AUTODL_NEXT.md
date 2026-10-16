@@ -1,4 +1,124 @@
-# AutoDL next: Phase 17 — full source pixel and preprocessing gate
+# AutoDL next: Phase 17 — bounded M0 source-only GPU smoke
+
+Only this section is active. All older data/export/Phase16 instructions below
+the archive marker are inactive. Do not repeat the accepted data scan.
+
+## Returned evidence accepted
+
+The supplied source-data report matches SHA256
+`cf01d813f6125c42a8e6712e449bfdba72ce5f287222357c975780d7cad8fab3`.
+Its exact producer is clean `cb5207101915c97b23da82792608b2e2c24c123e`.
+Pinned local audit accepts complete train22469/val2497 scans, legal train IDs,
+zero unreadable/all-ignore/incompatible geometry, 62 declared scale-equivalent
+differences, all2497 holdout transforms and32 train-photo inputs. The report
+and read-only review are versioned under `experiments/STRICT_DG_PHASE17/`.
+No source/target mIoU or effect statistic was measured. This accepts source
+data compatibility, not scene independence or any model-performance hypothesis.
+
+## Current bounded authorization
+
+Use only the dedicated source smoke: fresh seed0 Static R=2, 20 optimizer
+updates, batch1/accum1, workers0, original+photometric CE sum, unchanged frozen
+DINOv3-L and BF16 AMP. AdamW1e-4/wd0.01, clip1 and the SAME 40k poly0.9
+horizon; the schedule is not compressed to20. Source permutation is fixed for
+this smoke. This is not worker4 long-run replay or exact resume evidence.
+
+The tool checks alpha0 identity, finite losses/gradients/parameters and nonzero
+head/query/scale gradients, unchanged backbone state, and a single final
+compact checkpoint. Eight GTA5 holdout inputs check only finite compatibility.
+No mIoU, target data, checkpoint selection, CQE, centered Query, diversity,
+learned-null or REIN. Restore uses newly initialized head/query parameters
+over the same frozen backbone, verifies exact model/optimizer state and
+prediction error <=1e-5. GPU memory measurements include model construction
+and restoration. The old general M0 training entry point stays blocked.
+
+## AutoDL exact checkout and launch
+
+Use the full literal SHA from Codex's final response. Existing environment:
+`/root/autodl-tmp/envs/causalq-dg/bin/python`, torch2.7.0+cu126 and
+transformers4.56.1. The tool checks those versions, disk free>=1GiB and the
+fixed DINOv3-L safetensors digest before loading weights. No installation,
+network download or source edits are permitted; return any preflight error.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+BASE="$CAUSALQ_OUTPUT_ROOT"
+mkdir -p "$BASE/phase17"
+LAUNCH_LOG="$BASE/phase17/M0_STRICT_SOURCE_SMOKE_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/check_strict_source_smoke_phase17.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "source_smoke_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+The process continues after terminal disconnect. It prints one record per
+update; backbone hashing/checkpoint restore can take additional time. Do not
+launch twice or overwrite any previous evidence. From a new terminal:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+SHA=$(git rev-parse --short=7 HEAD)
+tail -n 40 "/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_STRICT_SOURCE_SMOKE_${SHA}_launcher.log"
+```
+
+## Outputs, return and acceptance
+
+Under `/root/autodl-tmp/outputs/CausalQ_DG/phase17/`:
+
+```text
+M0_STRICT_SOURCE_SMOKE_<sha7>/smoke_report.json
+M0_STRICT_SOURCE_SMOKE_<sha7>/train.jsonl
+M0_STRICT_SOURCE_SMOKE_<sha7>/SHA256SUMS
+M0_STRICT_SOURCE_SMOKE_<sha7>/final.pth
+M0_STRICT_SOURCE_SMOKE_<sha7>.log
+M0_STRICT_SOURCE_SMOKE_<sha7>_launcher.log
+```
+
+Return the full JSON report, train.jsonl, SHA256SUMS and final launcher output;
+on failure include its complete log. Keep final.pth on AutoDL; it does not
+enter Git. The report/trace are small experiment metadata, not raw datasets.
+
+Acceptance requires `source_smoke_exit_code=0`, ok true, exact clean SHA and
+environment, matching source-data audit/manifests/weight identity, exactly20
+updates on20 unique train IDs, eight disjoint holdout compatibility records,
+finite optimization, nonzero required gradients, alpha-zero error0, unchanged
+backbone, exact model/optimizer roundtrips, prediction error<=1e-5, one compact
+checkpoint and valid checksums, plus measured peak GPU memory. Retain
+formal_training_authorized=false, target_data_accessed=false, source_miou=null,
+target_miou=null and exact_resume_verified=false. There is no accuracy threshold
+and no interpretation of low short-run source scores as a model result.
+
+Stop even on success. Next local work starts with read-only saved-evidence
+audit, then completes source-runner/checkpoint/selection and final-only target
+evaluation preparation as justified. No40k training or new mechanism is implied.
+
+Scientific question: can the frozen-split source-only Static R=2 optimizer,
+holdout and compact-checkpoint paths run with finite CUDA optimization while
+preserving the backbone and avoiding all target data?
+
+## Local verification
+
+The full CPU suite is **333 passed, 1 skipped**, 11.50s, in Python3.10.20 / torch2.10.0+cu128 /
+pytest8.4.2 environment (CUDA hidden, OMP threads1). New tests use synthetic
+features, exercise the same20-update engine and checkpoint roundtrip, verify
+data-audit rejection cases and ensure the real launcher refuses CPU before
+weight loading. No local DINO weights or GPU work. One existing test skips
+because Windows denies unprivileged symlink creation. Shell syntax, Python
+compilation and diff whitespace checks also pass; this is not AutoDL runtime acceptance.
+
+---
+
+# Archive: completed full source pixel/preprocessing gate — INACTIVE
 
 Only this section is active. All transfer/export and Phase16 commands below
 the archive marker are inactive. Do not repeat the successful exports.
