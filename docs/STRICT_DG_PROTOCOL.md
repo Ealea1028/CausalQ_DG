@@ -3,7 +3,17 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: candidate source membership export
+## Current gate: transfer, independently verify and freeze source membership
+
+The operator reports successful export at `57a7244`: 22469 train / 2497 val,
+zero overlap, matching file checksums. See
+`../experiments/STRICT_DG_PHASE17/source_split_export_review.md` for hashes.
+The actual ZIP has not returned locally, so membership is not yet frozen.
+Do not repeat export. Transfer the existing ZIP and run the local importer,
+which checks its pinned SHA256, manifest SHA256s, report contract and canonical
+membership and independently recomputes the split before writing. Only then
+commit the exact `manifests/gta5_source_{train,val}.txt` and provenance JSON.
+Source loader/training changes remain dependent on this required evidence.
 
 The operator's inventory summary reports 24,966 complete flat-numeric pairs,
 zero missing/duplicate IDs and zero metadata candidates. See

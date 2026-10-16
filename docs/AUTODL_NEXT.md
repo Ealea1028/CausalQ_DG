@@ -1,4 +1,82 @@
-# AutoDL next: Phase 17 / Priority 0 — verify inventory and export source split
+# Next action: transfer the existing Phase-17 export ZIP to local Codex
+
+Only this section is active. The successful inventory/export commands below
+the archive marker must not be rerun. No training or target access is needed.
+
+## Accepted operator return; local bytes still missing
+
+The `57a724428b60d0f6636db056071bc620d45f45e0` producer reports exit 0,
+22469 train / 2497 val out of 24966, overlap0, exact partition and valid
+train/val/report checksums. The read-only result review is in
+`../experiments/STRICT_DG_PHASE17/source_split_export_review.md`.
+No source/target mIoU or effect diagnostic was measured. This result supports
+the membership-export engineering gate only, not model hypotheses or scene
+independence. Full membership has not been independently verified locally.
+
+The user supplied the console output but no real metadata ZIP attachment.
+Repository search found only synthetic test fixtures, which must not be used.
+The missing ZIP is the exact evidence required to complete local Git freeze;
+hash strings and sample counts cannot reconstruct the actual filenames.
+
+## AutoDL operation: obtain the existing file, no checkout or rerun
+
+Keep the producer checkout `57a7244`; the new importer runs locally after
+transfer, not on AutoDL. To locate and confirm the file, run:
+
+```bash
+BUNDLE=/root/autodl-tmp/outputs/CausalQ_DG/phase17/GTA5_SOURCE_SPLIT_57a7244_20261016T140258_54816/source_split_export.zip
+ls -lh "$BUNDLE"
+sha256sum "$BUNDLE"
+```
+
+Expected SHA256:
+
+```text
+a555c740546a992ec72199f314a750699acf3782ceda1c98e9cf8908206b96db
+```
+
+Download this exact ZIP through AutoDL's file panel, then attach it to this
+chat or put it at a named path within the local project and tell Codex that
+path. The ZIP contains only two ID manifests, report and checksums. It does
+not contain raw data or model weights. Preserve the existing output and log.
+No new output file, environment setup or GPU action is required.
+
+## Local completion prepared
+
+`tools/import_gta5_source_split.py` is ready. After receiving the actual ZIP,
+Codex will run (locally):
+
+```powershell
+python -m tools.import_gta5_source_split --bundle <ACTUAL_LOCAL_ZIP_PATH>
+```
+
+It verifies the pinned ZIP/manifest hashes, archive contents, all checksums,
+producer/report identity, canonical IDs, counts, disjoint membership, and
+independently recomputes H(i)=SHA256(fixed salt + LF + exact ID) with the
+first ceil(N*0.1) ranked IDs as holdout. It validates before creating a
+destination and refuses to overwrite an existing manifest directory.
+It then writes `manifests/gta5_source_train.txt`, `gta5_source_val.txt` and
+`gta5_source_split.json` for local Git commit. Training remains unauthorized
+until the subsequent source-only protocol/data/runner gates are prepared.
+
+This turn changes only the importer, focused tests, result review and status
+documentation. Existing model, losses, trainer, mathematical definitions and
+historical experiments are unchanged. It does not manufacture or freeze any
+real manifests while the actual returned bytes are missing.
+
+Scientific/engineering question: do the returned manifest bytes match the
+operator's evidence and the exact versioned split rule? Its answer awaits the
+real ZIP. Scene independence and segmentation accuracy remain untested.
+
+Local verification: 10 new importer tests pass; full CPU suite **306 passed,
+1 skipped** in 9.80s, using the existing Python 3.10.20 / torch2.10.0 /
+pytest8.4.2 environment, CUDA hidden and OMP threads=1. The skip is the existing
+Windows unprivileged symlink test. This is not the pinned AutoDL DINOv3 runtime.
+`git diff --check` and Python compilation also pass.
+
+---
+
+# Archive: completed source split export instructions — INACTIVE
 
 Updated 2026-10-16. This is the only active action. All inventory and Phase 16
 commands below the archive heading are inactive. Continue to keep Phase 16 closed.

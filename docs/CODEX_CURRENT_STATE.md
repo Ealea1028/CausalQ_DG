@@ -1,5 +1,13 @@
 # CausalQ_DG_1016 repository audit
 
+Latest return review: the operator reports successful source export at
+`57a7244`, with 22469 train / 2497 val and pinned manifest/ZIP hashes. No real
+ZIP was attached or found locally; synthetic test archives are excluded.
+`tools/import_gta5_source_split.py` and its tests prepare exact byte/hash and
+membership verification. Await transfer of the already-created ZIP, then
+verify and commit real manifests. Do not rerun export or advance to model
+changes. See `../experiments/STRICT_DG_PHASE17/source_split_export_review.md`.
+
 Latest Priority 0 update (2026-10-16): the operator returned an exit-0 inventory
 summary for 24,966 complete flat-numeric pairs with no metadata candidates.
 The original audit below remains a snapshot of `0549881`. Current work adds

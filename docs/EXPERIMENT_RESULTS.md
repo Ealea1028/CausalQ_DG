@@ -16,7 +16,10 @@ exact hashes and limitations. Raw JSON is remote; next exporter verifies it.
 
 Engineering decision: use the plan's deterministic configurable 10% filename
 fallback, with no claim of sequence/scene independence. Expected 22,469 train
-and 2,497 holdout IDs. Candidate hashes and actual membership remain pending
-AutoDL export and local Git freeze. No source pixels, target data, models,
+and 2,497 holdout IDs. The operator's `57a7244` export reports these exact
+counts with zero overlap and valid checksums; candidate hashes are recorded in
+`../experiments/STRICT_DG_PHASE17/source_split_export_review.md`.
+Real manifest/ZIP bytes, independent local verification and Git freeze remain
+pending transfer. No export rerun is needed. No source pixels, target data, models,
 weights or GPU were used by the filesystem inventory. It provides no evidence
 for anchor/residual stability or segmentation performance.
