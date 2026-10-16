@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Current update (2026-10-17): initial `b16236c` smoke attachment snapshot reports
+20 finite updates, exact model/optimizer/prediction restoration, unchanged
+backbone and1.182GiB peak reserved. The original D:/ attachment files became
+inaccessible after their initial read; complete raw-byte/trace and checkpoint
+audit is now an obligatory first step of the new AutoDL read-only source
+evaluator. No rerun of training. `tools/audit_strict_source_smoke.py`,
+`tools/strict_source_evaluation.py` and `tools/evaluate_strict_source.py` prepare
+full2497 source holdout inference, independent NumPy versus PyTorch confusion/
+IoU, eight CE reference replays and unchanged model/RNG checks. Actual GPU
+results remain pending. Model/loss, old experiments and target access unchanged.
+
 Latest evidence: full source-data report `cb52071` is byte/hash-pinned and
 accepted locally (`cf01d813...ad8fab3`), with all24966 pairs valid,62 allowed
 scale-only differences and all2497 holdout transforms passing. See the saved

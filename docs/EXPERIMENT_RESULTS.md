@@ -32,6 +32,14 @@ or incompatible geometry,62 allowed scale-equivalent differences,2497 holdout
 and32 source-photo preprocessing checks. Saved report and review are in the
 same evidence directory. No mIoU or effect metric was measured.
 
-Current next gate is an isolated20-update source-only GPU optimizer/checkpoint
-smoke, not formal M0 training. Its real optimization, checkpoint/memory and
-frozen-backbone results remain pending AutoDL. No target access is authorized.
+The initial `b16236c` smoke snapshot reports20 finite updates, nonzero branch
+gradients, unchanged backbone, exact model/optimizer and zero-error prediction
+roundtrip. Peak reserved is1.181641GiB. Source/target mIoU and effect metrics
+were not measured; this is not a formal M0 result. Original local attachment
+paths became unavailable after initial read, so the complete immutable trace
+and checkpoint still require the new AutoDL raw-byte audit; do not overstate
+the initial snapshot as that audit. See `gpu_smoke_return_review.md`.
+
+Next is read-only full2497 GTA5 holdout inference from the SAME checkpoint,
+preceded by that complete audit. Zero new optimizer updates and no target
+access. Full-source diagnostics and independent metric checks remain pending.

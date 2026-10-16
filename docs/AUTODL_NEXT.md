@@ -1,7 +1,138 @@
-# AutoDL next: Phase 17 — bounded M0 source-only GPU smoke
+# AutoDL next: Phase 17 — audit saved smoke and evaluate full source holdout
 
-Only this section is active. All older data/export/Phase16 instructions below
-the archive marker are inactive. Do not repeat the accepted data scan.
+Updated 2026-10-17. Only this section is active; all older commands below the
+archive marker are inactive. Do not retrain the successful20-update smoke.
+
+## Evidence review and current scope
+
+The initial `b16236c` attachment snapshot reports20 finite source updates,
+unchanged backbone, exact model/optimizer restoration, zero prediction restore
+error and1.181641GiB peak reserved memory. See Phase17
+`gpu_smoke_return_review.md` for full reported digests and interpretation.
+The original D:/ attachment paths became unavailable after their first read,
+before a complete local raw-byte trace audit. No fabricated copy is saved.
+
+The next AutoDL tool audits the ORIGINAL saved report and all20 trace records
+against pinned SHA256 values before GPU/model/data access, then verifies the
+ORIGINAL final.pth hash, provenance and restored trainable-state digest.
+Only after that audit passes does it evaluate all2497 frozen GTA5 holdout IDs.
+It does not construct an optimizer, update weights, select checkpoints, use
+Cityscapes or change model/loss/config. Formal M0 training remains blocked.
+
+## Inputs that must remain unchanged
+
+```text
+/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_STRICT_SOURCE_SMOKE_b16236c/
+  smoke_report.json  82dbbccd90e13720103a47a265f8b60afff4b27e72f72a9b78934bb510e7c54b
+  train.jsonl        42a4319b2ea02d47984faff4ad890722fc75cdb0952f62fdae0230612e118c34
+  final.pth          701e0ce24d6c517baacd39d42d762b5cb1f9d2d1df5dd3465cf746642e62b383
+```
+
+Do not regenerate, rename or modify these files. The existing DINOv3-L weight
+hash and runtime pins (torch2.7.0+cu126 / transformers4.56.1) remain fixed.
+The tool loads local weights offline, hides no target permission behind a
+generic evaluator, and has no sample-count or training-budget override.
+
+## Exact checkout and launch
+
+Use the literal full SHA in Codex's final response:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+BASE="$CAUSALQ_OUTPUT_ROOT"
+mkdir -p "$BASE/phase17"
+LAUNCH_LOG="$BASE/phase17/M0_SOURCE_HOLDOUT_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/evaluate_strict_source_phase17.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "source_evaluation_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+It runs in the existing `/root/autodl-tmp/envs/causalq-dg/bin/python` runtime
+and survives terminal disconnect. Progress prints every250 source images.
+It may take time to evaluate the entire source holdout. From a new terminal:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+SHA=$(git rev-parse --short=7 HEAD)
+tail -n 40 "/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_HOLDOUT_${SHA}_launcher.log"
+```
+
+## Return files and acceptance
+
+```text
+/root/autodl-tmp/outputs/CausalQ_DG/phase17/
+  M0_SOURCE_HOLDOUT_<sha7>/source_evaluation.json
+  M0_SOURCE_HOLDOUT_<sha7>/source_eval.jsonl
+  M0_SOURCE_HOLDOUT_<sha7>/SHA256SUMS
+  M0_SOURCE_HOLDOUT_<sha7>.log
+  M0_SOURCE_HOLDOUT_<sha7>_launcher.log
+```
+
+Return **source_evaluation.json, SHA256SUMS and final launcher output**; on
+failure include the full error log. Preserve source_eval.jsonl and the original
+smoke files on AutoDL; do not upload raw datasets or final.pth into Git.
+
+Acceptance: `source_evaluation_exit_code=0`, ok true, clean exact commit and
+recorded runtime; original artifact audit passes; restored iteration20 and
+head/backbone digests match; exactly2497 source IDs with the frozen val hash;
+finite logits/CE; eight original source CE references replay within1e-5;
+PyTorch and independent NumPy int64 confusion counts agree exactly and sum
+to all valid pixels; per-class/mIoU differences <=1e-12; model/RNG/original
+files unchanged; valid output checksums and recorded peak GPU memory.
+
+Metrics use the already fixed full-frame aspect resize (longest edge1024),
+nearest-label resize and ignore padding to16. They refer to resized source GT.
+IoU_c=TP_c/(GT_c+Pred_c-TP_c); mIoU averages classes with positive union,
+absent classes are null. Also report mean-image CE and valid-pixel-weighted CE.
+There is NO accuracy threshold or model-selection feedback in this gate.
+The checkpoint has only20 updates: these are source diagnostics, not formal M0
+or a target result. Report must retain optimizer_updates_this_run=0,
+target_data_accessed=false, formal_training_authorized=false, target_miou=null,
+diagnostic_only=true and exact_resume_verified=false.
+
+Stop on completion or failure. Do not rerun optimization, alter thresholds,
+repair files on AutoDL or launch40k training. Next local step is read-only
+analysis of the full evaluation evidence, followed by the remaining source
+runner/checkpoint/selection and final-only target-evaluation preparation.
+Centered Query and new losses remain outside this Priority0 change.
+
+## Local change and verification
+
+New files: saved-smoke auditor, full-source metric engine/launcher, shell
+wrapper, focused tests and smoke return review. Status docs updated; duplicate
+LF attribute removed. Old model, losses, training entry points and experiment
+results remain unchanged. Read-only evaluation replaces the previous next
+action of training: the successful smoke is never repeated.
+
+Synthetic CPU tests cover pinned byte audits, trace/protocol rejection,
+known confusion/absent-class IoU, full membership/order, CE replay, invalid/
+nonfinite labels/logits, restore hash/provenance/state and pre-CUDA audit order.
+The full local CPU suite passes: 349 passed, 1 skipped in 14.06s. The skip is
+the existing Windows unprivileged-symlink test. The exact commit is in Codex's
+handoff. Environment is Python3.10.20 / torch2.10.0+cu128 / pytest8.4.2 with
+CUDA hidden and OMP threads1, not GPU/runtime acceptance. No local real weights.
+
+Scientific/engineering question: can the SAME smoke checkpoint be restored
+independently and evaluated on the ENTIRE frozen source holdout with correct
+streaming metrics, unchanged state and zero target access/new optimization?
+
+---
+
+# Archive: completed bounded source GPU smoke instructions — INACTIVE
+
+This archived section is inactive. Do not repeat the accepted data scan or
+the completed bounded GPU smoke.
 
 ## Returned evidence accepted
 

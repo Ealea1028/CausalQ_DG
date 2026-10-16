@@ -3,7 +3,32 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: bounded source-only GPU optimizer/checkpoint smoke
+## Current gate: saved-artifact audit and full source-only holdout evaluation
+
+The initial `b16236c` report/trace snapshot indicates successful20-update
+optimization/freeze/serialization. See Phase17 `gpu_smoke_return_review.md` for
+the reported observations and explicit limits on local file availability.
+Next AutoDL operation first pins the ORIGINAL report/trace hashes and validates
+all20 source IDs, finite objectives/gradients, exact40k LR sequence, alpha-zero
+gradient behavior, eight source references and report summaries. It verifies
+the ORIGINAL final.pth hash, metadata and trainable-state digest before inference.
+No retraining or new checkpoint selection.
+
+Evaluate all2497 frozen GTA5 holdout IDs using the already fixed resized GT
+and padding. Verify full ID digest, valid-pixel counts and identical PyTorch/
+NumPy int64 confusion matrices. Class IoU=TP/(GT+Pred-TP); source mIoU is the
+unweighted mean over positive-union classes, with absent classes marked null.
+Also report image-mean CE and valid-pixel-weighted CE. These are descriptive
+diagnostics of20-update weights, not formal M0 accuracy or model-selection
+thresholds. Existing eight CE references must replay within1e-5 in the new
+process, and model/CPU-CUDA RNG/original smoke files must remain unchanged.
+No optimizer or target dataset is constructed by this evaluator.
+
+The ordinary M0 runner remains blocked. After evidence returns, audit it
+read-only before completing long-run/source-checkpoint and final-only target
+evaluation preparation. No centered Query, new loss or40k authorization now.
+
+## Completed bounded source smoke protocol
 
 The saved complete `cb52071` source-data report passes the pinned local audit
 in `tools/audit_strict_source_data.py`; see Phase17 `source_data_review.md`.

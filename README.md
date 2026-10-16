@@ -1,6 +1,6 @@
 # CausalQ-DG
 
-## Active phase — 2026-10-16
+## Active phase — 2026-10-17
 
 The new [`CausalQ_DG_1016.txt`](CausalQ_DG_1016.txt) roadmap starts Phase 17,
 Priority 0: repository audit and strict-DG protocol preparation. See
@@ -10,9 +10,12 @@ The GTA5 inventory reports 24,966 complete pairs and no usable sequence/scene
 metadata. The deterministic 10% source holdout export reports success with
 22469 train / 2497 validation IDs. The real extracted manifests were verified
 locally and frozen at `4314d61`. The complete source pixel/preprocessing report
-at `cb52071` passes its pinned local audit. Next is an isolated AutoDL GPU
-smoke: 20 source-only updates, eight holdout compatibility inputs, one final
-compact checkpoint and unchanged-backbone/memory checks. No formal long run,
+at `cb52071` passes its pinned local audit. The `b16236c` GPU smoke reports
+20 finite updates, unchanged backbone, exact checkpoint restoration and
+1.182GiB peak reserved memory. Next is a read-only saved-artifact audit and
+full 2497-image GTA5 holdout evaluation of that same checkpoint; no retraining.
+Original attachment paths became unavailable after their initial read, so the
+next tool verifies the full original report/trace/weights on AutoDL first. No formal long run,
 target access or model mechanism change is authorized. Old launchers read Cityscapes during development and
 must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains a
 historical reference, not a new strict-DG result. Phase 16 remains closed.

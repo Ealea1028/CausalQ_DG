@@ -1,6 +1,6 @@
 # Method contract
 
-## Active boundary — Phase 17 / Priority 0 (2026-10-16)
+## Active boundary — Phase 17 / Priority 0 (2026-10-17)
 
 The user-approved `CausalQ_DG_1016.txt` roadmap begins with a repository audit
 and strict-DG protocol repair. See `CODEX_CURRENT_STATE.md` and
@@ -11,10 +11,15 @@ real extracted manifests have now passed independent local hash/membership
 verification and entered Git at `4314d61`. The full source-data report at
 `cb52071` now passes a pinned local audit: all24966 pairs and2497 holdout
 transforms valid, with62 declared scale-equivalent mismatches and no invalid
-labels, unreadable/all-ignore pairs or incompatible geometry. Next is a
-dedicated fixed20-update source-only GPU smoke. The ordinary `tools/train.py`
+labels, unreadable/all-ignore pairs or incompatible geometry. The `b16236c`
+GPU smoke now reports20 finite updates, unchanged backbone, exact state and
+prediction restoration and1.182GiB peak reserved memory. Next is an original
+saved-report/trace/checkpoint audit and full source-holdout metric gate, using
+that exact checkpoint with zero new updates. Local original attachment paths
+became unavailable after initial read, so raw-byte acceptance is required on
+AutoDL before any model access. This is diagnostic only. The ordinary `tools/train.py`
 M0 gate config continues to reject training before CUDA/data access; only the
-separate bounded smoke entry point is authorized, not a formal optimizer run.
+read-only source evaluator is active, not a formal optimizer run or a smoke rerun.
 This fallback cannot guarantee separation of correlated frames/scenes. No target access,
 Query representation change, new loss, long training or REIN extension in this gate.
 Existing model APIs and historical experiments remain unchanged. Historical
