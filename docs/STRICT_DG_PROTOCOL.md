@@ -3,17 +3,48 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: transfer, independently verify and freeze source membership
+## Current gate: source pixels, geometry and preprocessing
+
+The real extracted files have been independently verified and frozen at
+`4314d61`; see `source_split_freeze_review.md` in the Phase17 evidence directory.
+Pinned train/val counts are 22469/2497 and exact manifest hashes are unchanged.
+ZIP bytes were not locally verified; the individual member files were.
+
+`causalq/datasets/strict_source.py` reads the frozen hashes, independently
+rechecks the split and requires exact filename membership in the accepted GTA5
+payload roots. It builds separate train and holdout datasets. Training retains
+the legacy random scale/crop/flip. Source evaluation uses the complete frame:
+resize longest side to 1024 preserving aspect (round each dimension), then
+pad bottom/right to a multiple of16; bilinear image, nearest-label interpolation,
+RGB padding (124,116,104), ignore255 label padding. No crop/flip/RNG/photo on
+holdout. Metrics, when later enabled, refer to resized source GT, not original
+GT. These choices are fixed before seeing any new source/target performance.
+
+`tools/train.py` now dispatches explicit strict-DG configuration to these
+source datasets; configurations without protocol retain historical behavior.
+The prepared M0 config has `training_authorized: false` and is rejected at main
+before CUDA checks or data reads. The optimizer loop, checkpoint/selection
+evidence and future final-only target evaluator still need integration after
+this data gate; current code does not claim a runnable strict-DG training system.
+
+AutoDL must verify the accepted full pair/path/size digest against actual data,
+decode ALL train/holdout pairs, check train IDs in0..18/255, reject unreadable,
+all-ignore or incompatible geometry, exercise every holdout transform and
+32 fixed training crop/photo samples. No weights, models, optimization, GPU,
+target image/label or mIoU. Source-only engineering acceptance does not prove
+anchor effects, segmentation quality or scene independence.
+
+## Historical transfer and export gates — completed
 
 The operator reports successful export at `57a7244`: 22469 train / 2497 val,
 zero overlap, matching file checksums. See
 `../experiments/STRICT_DG_PHASE17/source_split_export_review.md` for hashes.
-The actual ZIP has not returned locally, so membership is not yet frozen.
-Do not repeat export. Transfer the existing ZIP and run the local importer,
+At that point the actual ZIP had not returned locally, so membership was not frozen.
+The local importer was prepared to verify returned ZIP or extracted files,
 which checks its pinned SHA256, manifest SHA256s, report contract and canonical
 membership and independently recomputes the split before writing. Only then
 commit the exact `manifests/gta5_source_{train,val}.txt` and provenance JSON.
-Source loader/training changes remain dependent on this required evidence.
+The later extracted-file receipt completed that evidence prerequisite.
 
 The operator's inventory summary reports 24,966 complete flat-numeric pairs,
 zero missing/duplicate IDs and zero metadata candidates. See

@@ -7,9 +7,11 @@ and strict-DG protocol repair. See `CODEX_CURRENT_STATE.md` and
 `STRICT_DG_PROTOCOL.md`. The operator reports 24,966 complete flat-numeric GTA5
 pairs and zero metadata candidates. The source split export now reports exit 0
 at `57a7244`, 22469 train / 2497 holdout IDs and matching pinned hashes. The
-next action is transfer of its existing ZIP, then independent local import
-verification and Git freeze. No export rerun or training is needed. The actual
-manifest bytes have not arrived locally and remain candidates.
+real extracted manifests have now passed independent local hash/membership
+verification and entered Git at `4314d61`. The next action is a CPU-only
+AutoDL source pixel/geometry/preprocessing gate. `tools/train.py` now has
+explicit strict source dataset routing; the M0 gate config rejects training
+before CUDA/data access. It is not yet a usable M0 optimizer runner.
 This fallback cannot guarantee separation of correlated frames/scenes. No target access,
 Query representation change, new loss, training or REIN extension in this gate.
 Existing model APIs and historical experiments remain unchanged. Historical

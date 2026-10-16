@@ -1,5 +1,14 @@
 # CausalQ_DG_1016 repository audit
 
+Current state: real extracted manifests arrived in `source_split_export/`.
+Individual file hashes, report, exact canonical IDs and independent split
+recomputation pass; membership entered Git at `4314d61`. ZIP bytes were not
+received, and provenance correctly marks that distinction. New strict source
+dataset routing, deterministic aspect-preserving holdout resizing/padding,
+M0 data-gate config and CPU-only full-source preflight are implemented.
+Training stays blocked before CUDA/data access pending real source acceptance.
+No model/loss/REIN changes. The previous return reviews below are historical.
+
 Latest return review: the operator reports successful source export at
 `57a7244`, with 22469 train / 2497 val and pinned manifest/ZIP hashes. No real
 ZIP was attached or found locally; synthetic test archives are excluded.

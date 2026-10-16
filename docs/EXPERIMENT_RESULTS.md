@@ -19,7 +19,13 @@ fallback, with no claim of sequence/scene independence. Expected 22,469 train
 and 2,497 holdout IDs. The operator's `57a7244` export reports these exact
 counts with zero overlap and valid checksums; candidate hashes are recorded in
 `../experiments/STRICT_DG_PHASE17/source_split_export_review.md`.
-Real manifest/ZIP bytes, independent local verification and Git freeze remain
-pending transfer. No export rerun is needed. No source pixels, target data, models,
+Real extracted manifests then arrived locally. Individual hashes, checksums,
+report contract, canonical membership and recomputed split all pass. The
+exact manifests entered Git at `4314d61`; original ZIP bytes were not verified.
+See `source_split_freeze_review.md` in the same experiment directory. No source pixels, target data, models,
 weights or GPU were used by the filesystem inventory. It provides no evidence
 for anchor/residual stability or segmentation performance.
+
+Current next gate is CPU-only actual source pixel/geometry/preprocessing
+acceptance. Strict source data routing is implemented and synthetically tested;
+new M0 training remains blocked and no target metric has been produced.

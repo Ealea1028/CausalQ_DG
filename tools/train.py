@@ -23,7 +23,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from causalq.datasets import TrainTransform, cityscapes_dataset, gta5_dataset
+from causalq.datasets import TrainTransform, gta5_dataset
+from causalq.protocols.strict_dg import validate_strict_config
 from causalq.interventions import StyleInterventionBank
 from causalq.losses import (
     causal_query_effect_loss,
@@ -90,6 +91,9 @@ def resolve_query_count(config: dict[str, Any], override: int | None) -> int:
 def load_config(path: Path) -> dict[str, Any]:
     with path.open(encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
+    if "protocol" in config:
+        validate_strict_config(config)
+        return config
     phase = int(config["experiment"]["phase"])
     if phase not in SUPPORTED_PHASES:
         raise ValueError("tools/train.py accepts only Phase 5--15 configs")
@@ -309,9 +313,34 @@ def validate(
     return result
 
 
+def build_training_datasets(config: dict[str, Any], data_root: Path):
+    transform = TrainTransform(
+        config["train"]["crop_size"], scale_range=config["data"]["random_scale"],
+        horizontal_flip_probability=config["data"]["horizontal_flip_probability"],
+        min_valid_fraction=config["data"]["min_valid_fraction"],
+        crop_attempts=config["data"]["crop_attempts"],
+    )
+    if "protocol" in config:
+        validate_strict_config(config)
+        from causalq.datasets.strict_source import SourceEvalTransform, build_source_datasets
+        return build_source_datasets(data_root / "gta5", transform, SourceEvalTransform(
+            config["validation"]["long_edge"], config["validation"]["patch_size"]))
+    # Target adapter is used only by the historical route. Strict-DG never
+    # constructs a target dataset or traverses a target root here.
+    from causalq.datasets import cityscapes_dataset
+    if config["data"]["source"] != "gta5":
+        raise NotImplementedError("The Phase 5--15 trainer supports GTA5 source only")
+    train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
+    if config["data"]["validation"] != "cityscapes_val":
+        raise NotImplementedError("Phase 5--15 validates on Cityscapes val")
+    return train_dataset, cityscapes_dataset(data_root / "cityscapes", split="val")
+
+
 def main() -> int:
     args = parse_args()
     config = load_config(args.config)
+    if "protocol" in config and not config["protocol"]["training_authorized"]:
+        raise RuntimeError("Strict-DG source data gate has not been accepted; no training authorized")
     if not torch.cuda.is_available():
         raise RuntimeError("Phase 5--15 training requires CUDA")
 
@@ -334,19 +363,7 @@ def main() -> int:
     run_id = args.run_id or config["experiment"]["id"]
     run_dir = output_root / run_id
 
-    transform = TrainTransform(
-        config["train"]["crop_size"],
-        scale_range=config["data"]["random_scale"],
-        horizontal_flip_probability=config["data"]["horizontal_flip_probability"],
-        min_valid_fraction=config["data"]["min_valid_fraction"],
-        crop_attempts=config["data"]["crop_attempts"],
-    )
-    if config["data"]["source"] != "gta5":
-        raise NotImplementedError("The Phase 5--15 trainer supports GTA5 source only")
-    train_dataset = gta5_dataset(data_root / "gta5", transform=transform)
-    if config["data"]["validation"] != "cityscapes_val":
-        raise NotImplementedError("Phase 5--15 validates on Cityscapes val")
-    val_dataset = cityscapes_dataset(data_root / "cityscapes", split="val")
+    train_dataset, val_dataset = build_training_datasets(config, data_root)
     train_loader = make_loader(train_dataset, config, training=True)
     val_loader = make_loader(val_dataset, config, training=False)
 

@@ -1,4 +1,115 @@
-# Next action: transfer the existing Phase-17 export ZIP to local Codex
+# AutoDL next: Phase 17 — full source pixel and preprocessing gate
+
+Only this section is active. All transfer/export and Phase16 commands below
+the archive marker are inactive. Do not repeat the successful exports.
+
+## Local completion and remaining evidence
+
+Real extracted files arrived in `source_split_export/`. All individual hashes,
+checksums, producer/report fields, canonical IDs and deterministic membership
+recomputation pass. The actual train22469/val2497 manifests and provenance are
+frozen in Git at `4314d61`. `.gitattributes` preserves LF on all checkouts.
+ZIP bytes were not received and are not claimed locally verified.
+
+New source-only data routing and M0 data-gate config are implemented. The
+config blocks training before CUDA/data access. Legacy configs preserve their
+previous behavior. Query representation, model/loss mathematics, old results,
+and REIN remain unchanged. No new mIoU/effect measurement exists.
+
+Next verification requires the actual remote GTA5 payload: full image/label
+decoding, train-ID and geometry checks, every fixed source-holdout transform,
+32 fixed training crop/photo samples. No GPU, DINO weights, model forward,
+optimizer updates or target access. This is not M0 training or a final test.
+
+## Launch on exact commit
+
+Use the literal full SHA from Codex's final response. The script requires the
+existing DINOv3 environment at `/root/autodl-tmp/envs/causalq-dg/bin/python`;
+it uses that environment's CPU packages with CUDA hidden. Do not install or
+modify environments if the preflight fails; return the error.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+BASE=/root/autodl-tmp/outputs/CausalQ_DG
+mkdir -p "$BASE/phase17"
+LAUNCH_LOG="$BASE/phase17/STRICT_SOURCE_DATA_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/check_strict_source_data_phase17.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "source_data_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+This decodes all 24,966 pairs sequentially, then all 2,497 holdout inputs;
+it may take time and continues if the terminal disconnects. No source or
+dataset file is written. Evidence output is exclusively outside both trees.
+Source membership/path/size digest must still match the accepted inventory.
+
+Inspect progress from any new terminal (same checkout):
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+SHA=$(git rev-parse --short=7 HEAD)
+tail -n 40 "/root/autodl-tmp/outputs/CausalQ_DG/phase17/STRICT_SOURCE_DATA_${SHA}_launcher.log"
+```
+
+The gate prints split start/end and holdout progress, then the full report and
+`source_data_exit_code`. If any check fails, preserve evidence and return it.
+Do not modify source/dataset files, retry under a new run ID, or start training.
+
+## Return outputs and acceptance
+
+```text
+/root/autodl-tmp/outputs/CausalQ_DG/phase17/
+  STRICT_SOURCE_DATA_<sha7>/source_data_report.json
+  STRICT_SOURCE_DATA_<sha7>/SHA256SUMS
+  STRICT_SOURCE_DATA_<sha7>.log
+  STRICT_SOURCE_DATA_<sha7>_launcher.log
+```
+
+Return the complete JSON, SHA256SUMS and final launcher output (and the error
+log if any). Small files may be copied into the chat; no source images,
+weights or complete run directories should enter Git.
+
+Acceptance requires exit0, ok true, clean exact SHA, recorded environment,
+unchanged pair/manifest digests, complete train/val scans 22469/2497, zero
+invalid label IDs/unreadable/all-ignore/incompatible geometry counts,
+successful 2497 holdout and32 train-photo checks, finite tensors and unchanged
+holdout torch RNG. Scale-equivalent label alignment is explicitly allowed and
+counted. Holdout uses full-image aspect resize to longest edge1024, nearest GT
+and bottom/right ignore padding to16; it is not original-resolution GT.
+Report retains target_data_accessed=false, training_authorized=false and
+optimizer_updates=0. Stop even on success. Pixel/content checks do not prove
+scene independence, anchor effect hypotheses or target generalization.
+
+Next local work after evidence: read-only audit; complete the strict optimizer,
+checkpoint/source-selection evidence and bounded GPU smoke preparation. A new
+final-only target evaluator and model/hyperparameter freeze still precede any
+Cityscapes access. No long training or Query decomposition is authorized now.
+
+## Change verification
+
+Full CPU suite: **322 passed, 1 skipped**, 12.28s. Includes actual frozen hash
+checks, synthetic strict versus legacy routing, forbidden target/config drift,
+pre-CUDA training block, deterministic holdout geometry/RNG, invalid train IDs,
+full synthetic pixel/preprocessing gate and inventory drift rejection. The
+skip is the existing Windows unprivileged symlink test. The extracted-file
+import test also passes. Shell syntax and diff whitespace checks pass.
+Local environment is Python3.10.20 / torch2.10.0+cu128 / pytest8.4.2, CUDA
+hidden and OMP threads1; no GPU/runtime acceptance is claimed.
+
+Scientific question: do frozen source memberships match actual complete GTA5
+payloads, and do train/holdout preprocessing satisfy label/geometry constraints
+without using target data? This is Priority0 protocol acceptance only.
+
+---
+
+# Archive: completed local transfer and freeze instructions — INACTIVE
 
 Only this section is active. The successful inventory/export commands below
 the archive marker must not be rerun. No training or target access is needed.
