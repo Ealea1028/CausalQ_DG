@@ -1,6 +1,7 @@
 """Verify the returned Phase-17 metadata bundle before creating Git manifests.
 
-Only the exact operator-reported ZIP is accepted. No datasets or GPU needed.
+Accept the exact ZIP or its extracted files with pinned manifest hashes.
+No datasets or GPU needed; extracted input does not claim ZIP-byte verification.
 """
 
 from __future__ import annotations
@@ -34,6 +35,24 @@ def verify_bundle(path: Path) -> tuple[dict[str, bytes], dict]:
         if any(item.file_size > 1024 * 1024 for item in archive.infolist()):
             raise ValueError("Unexpectedly large manifest metadata")
         contents = {name: archive.read(name) for name in names}
+    return verify_contents(contents)
+
+
+def verify_directory(path: Path) -> tuple[dict[str, bytes], dict]:
+    names = {*MANIFEST_SHA256, "split_report.json", "SHA256SUMS"}
+    if path.is_symlink() or {p.name for p in path.iterdir()} != names:
+        raise ValueError("Unexpected extracted directory members")
+    contents = {}
+    for name in names:
+        member = path / name
+        if member.is_symlink() or not member.is_file() or member.stat().st_size > 1024 * 1024:
+            raise ValueError("Invalid extracted metadata file")
+        contents[name] = member.read_bytes()
+    return verify_contents(contents)
+
+
+def verify_contents(contents: dict[str, bytes]) -> tuple[dict[str, bytes], dict]:
+    names = {*MANIFEST_SHA256, "split_report.json", "SHA256SUMS"}
     checksums = {}
     for line in contents["SHA256SUMS"].decode("ascii").splitlines():
         digest, name = line.split()
@@ -80,12 +99,15 @@ def verify_bundle(path: Path) -> tuple[dict[str, bytes], dict]:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--bundle", type=Path, required=True)
+    inputs = parser.add_mutually_exclusive_group(required=True)
+    inputs.add_argument("--bundle", type=Path)
+    inputs.add_argument("--input-dir", type=Path)
     parser.add_argument("--output-dir", type=Path,
                         default=Path(__file__).resolve().parents[1] / "manifests")
     args = parser.parse_args(argv)
     try:
-        manifests, source_report = verify_bundle(args.bundle)
+        manifests, source_report = (verify_bundle(args.bundle) if args.bundle
+                                    else verify_directory(args.input_dir))
         # Validate everything before making any destination; never overwrite a
         # previous candidate/frozen directory. Git commit is a later local step.
         args.output_dir.mkdir(parents=True, exist_ok=False)
@@ -93,6 +115,8 @@ def main(argv: list[str] | None = None) -> int:
             (args.output_dir / name).write_bytes(payload)
         provenance = {
             "schema_version": 1, "export_zip_sha256": BUNDLE_SHA256,
+            "input_format": "zip" if args.bundle else "extracted_directory",
+            "zip_bytes_verified": args.bundle is not None,
             "manifest_sha256": MANIFEST_SHA256,
             "membership_policy": "fixed_for_all_training_seeds",
             "next_action": "commit_verified_manifests_to_git_before_training",

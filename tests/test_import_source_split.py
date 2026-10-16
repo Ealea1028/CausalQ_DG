@@ -121,3 +121,19 @@ def test_cli_imports_without_site_packages():
                             capture_output=True, text=True)
     assert result.returncode == 0, result.stderr
     assert "--bundle" in result.stdout
+
+
+def test_extracted_input_uses_same_pinned_member_verification(bundle, tmp_path):
+    _, contents = bundle
+    source = tmp_path / "extracted"
+    source.mkdir()
+    for name, data in contents.items():
+        (source / name).write_bytes(data)
+    output = tmp_path / "frozen"
+    assert importer.main(["--input-dir", str(source), "--output-dir", str(output)]) == 0
+    provenance = json.loads((output / "gta5_source_split.json").read_bytes())
+    assert not provenance["zip_bytes_verified"]
+    assert provenance["input_format"] == "extracted_directory"
+    (source / "gta5_source_train.txt").write_bytes(b"001\n")
+    with pytest.raises(ValueError, match="Checksum mismatch"):
+        importer.verify_directory(source)

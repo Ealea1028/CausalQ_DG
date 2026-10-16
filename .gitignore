@@ -10,6 +10,7 @@ venv/
 .env
 .test-deps-strict-dg/
 .test-tmp-strict-dg*/
+/source_split_export/
 .idea/
 .vscode/
 

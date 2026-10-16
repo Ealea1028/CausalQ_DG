@@ -1,0 +1,48 @@
+{
+  "schema_version": 1,
+  "export_zip_sha256": "a555c740546a992ec72199f314a750699acf3782ceda1c98e9cf8908206b96db",
+  "input_format": "extracted_directory",
+  "zip_bytes_verified": false,
+  "manifest_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "membership_policy": "fixed_for_all_training_seeds",
+  "next_action": "commit_verified_manifests_to_git_before_training",
+  "training_authorized": false,
+  "source_report": {
+    "schema_version": 1,
+    "phase": 17,
+    "ok": true,
+    "created_utc": "2026-10-16T14:02:58.953074+00:00",
+    "inventory_sha256": "7224adc8aaafbcaac412aa5ee3904c11ba10d3c81aac7dffea231259e21e0d25",
+    "inventory_producer_git_sha": "f41dbeea92d67bffc571e2c3ef103de7b3693e00",
+    "pair_manifest_sha256": "92a67a0e32a297d2f41618c6919a0573cfde6ec23890b5dd9a6ae7353842662f",
+    "environment": {
+      "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+      "executable": "/root/miniconda3/bin/python3",
+      "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35"
+    },
+    "target_data_accessed": false,
+    "dataset_files_opened": false,
+    "frozen_in_git": false,
+    "training_authorized": false,
+    "git_sha": "57a724428b60d0f6636db056071bc620d45f45e0",
+    "git_status": "",
+    "split_status": "candidate_pending_local_git_freeze",
+    "method": "sha256_ranked_exact_filename_fallback_v1",
+    "salt": "causalq-gta5-source-split-v1",
+    "source_val_fraction": "0.1",
+    "validation_count_rule": "ceil(N * source_val_fraction)",
+    "total_count": 24966,
+    "train_count": 22469,
+    "val_count": 2497,
+    "overlap_count": 0,
+    "exact_partition": true,
+    "manifest_sha256": {
+      "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+      "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+    },
+    "limitation": "No sequence/scene metadata: correlated frames/scenes may cross this filename split."
+  }
+}
