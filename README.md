@@ -1,5 +1,19 @@
 # CausalQ-DG
 
+## Active phase — 2026-10-16
+
+The new [`CausalQ_DG_1016.txt`](CausalQ_DG_1016.txt) roadmap starts Phase 17,
+Priority 0: repository audit and strict-DG protocol preparation. See
+[`docs/CODEX_CURRENT_STATE.md`](docs/CODEX_CURRENT_STATE.md) and
+[`docs/STRICT_DG_PROTOCOL.md`](docs/STRICT_DG_PROTOCOL.md).
+The next AutoDL action is a GTA5-only filesystem/metadata inventory, before
+freezing source holdout membership. No model modification or training is
+authorized by this gate. Old launchers read Cityscapes during development and
+must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains a
+historical reference, not a new strict-DG result. Phase 16 remains closed.
+The historical status and working-directory narrative below is retained for
+provenance; the active action is exclusively [`docs/AUTODL_NEXT.md`](docs/AUTODL_NEXT.md).
+
 New contributors should begin with the standalone Chinese project guide:
 [`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md). It separates the implemented
 method and verified results from the proposed next-generation theory roadmap.

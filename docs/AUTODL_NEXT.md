@@ -1,4 +1,98 @@
-# AutoDL status: Phase 16 complete — no remote action authorized
+# AutoDL next: Phase 17 / Priority 0 — GTA5 source structure inventory
+
+Updated 2026-10-16 under `CausalQ_DG_1016.txt`. Phase 16 remains closed.
+Only the following source inventory is active. Every Phase 16 command below
+the archive marker is INACTIVE and must not be executed.
+
+## Current action
+
+Scientific question: does the available GTA5 structure preserve sequence or
+scene grouping suitable for an independent source holdout?
+
+Local work: repository audit, new standard-library-only inventory command,
+focused tests, strict-DG boundary documentation. Query/loss/training behavior
+is unchanged. No M0–M4/P1 metrics exist yet. Do not start training, load weights,
+or inspect Cityscapes. Even a successful inventory leaves split review pending.
+
+## Exact checkout and command
+
+Use the full 40-character SHA in Codex's handoff message for EXPECTED_SHA.
+Do not substitute a floating branch tip. The final response contains the
+complete copyable block with the literal SHA filled in.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-audit || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; exit 1; }
+PY=python3 bash scripts/inspect_gta5_source_phase17.sh "$EXPECTED_SHA"
+```
+
+No package installation or GPU allocation is needed. `python3` needs only its
+standard library (Python 3.10+). The report records exact Git SHA, Git status,
+Python executable/version and platform; CUDA is hidden by the launcher.
+Default source root is `/root/autodl-tmp/datasets/gta5`. If GTA5 moved, set only
+GTA5_ROOT to its actual source subtree before the launcher. Do not point it to
+the common multi-domain dataset root. Source links/junctions are rejected to
+avoid traversing into another dataset; report the error rather than moving or
+deleting data. No source files are changed on AutoDL.
+
+## Outputs and return checklist
+
+Under `/root/autodl-tmp/outputs/CausalQ_DG/phase17/`:
+
+- `GTA5_SOURCE_STRUCTURE_<sha7>_<UTCstamp>_<pid>/inventory.json`: complete pair
+  IDs and paths, file sizes, directory counts, filename patterns, source-side
+  metadata candidates and bounded text previews, provenance and pending status.
+- The same directory's `SHA256SUMS`: SHA256 of inventory.json.
+- Adjacent `<directory>.log`: console summary. Earlier files are not overwritten.
+
+Return all three files (or the full inventory JSON plus hashes and complete
+console output). The inventory itself is metadata, not raw images or labels.
+Do not commit the full AutoDL output directory. Subsequent local review will
+extract and commit only the necessary split evidence and manifests.
+
+Acceptance: `inventory_exit_code=0`, `ok: true`, positive paired count, empty
+missing/duplicate lists, successful `sha256sum -c`, exact clean Git SHA,
+`target_data_accessed: false`, `images_decoded: false`,
+`training_authorized: false`, `split_status: pending_metadata_review`.
+`ok: true` certifies filesystem pairing only; pixel decoding, label values,
+grouping independence and source split remain unverified.
+On failure preserve files and return the error; do not repair source code or
+dataset layout on AutoDL. Stop here even on success.
+
+Next local step after returned evidence: read-only audit; decide defensible
+grouping; implement and freeze deterministic source train/val manifests; then
+repair the new training route to use source-only selection. Centered Query
+decomposition follows only after the protocol gate.
+
+## Local verification
+
+- Default `python -m pytest` (Python 3.12.4, pytest 7.4.4) was attempted and
+  stopped with 33 collection errors because that interpreter lacks torch.
+- Reused existing `E:/Anaconda/envs/pytorch/python.exe`, Python 3.10.20,
+  torch 2.10.0+cu128, numpy/Pillow/PyYAML; pytest 8.4.2 installed into ignored
+  `.test-deps-strict-dg/`. CUDA hidden; OMP threads=1.
+- Final full CPU suite: **268 passed, 1 skipped**, 9.64s. Skip: Windows host
+  does not permit creating an unprivileged symlink for the traversal test;
+  a separate simulated-link rejection test passes on this host.
+- This local environment differs from the Python 3.12 / torch 2.7 pinned
+  DINOv3 runtime. No GPU/model/runtime compatibility claim is made.
+
+Reproduce local CPU checks in PowerShell:
+
+```powershell
+$env:PYTHONPATH = (Join-Path (Get-Location) '.test-deps-strict-dg')
+$env:CUDA_VISIBLE_DEVICES = ''
+$env:OMP_NUM_THREADS = '1'
+& E:/Anaconda/envs/pytorch/python.exe -m pytest -p no:cacheprovider --basetemp=.test-tmp-strict-dg-full
+```
+
+---
+
+# Archive: Phase 16 completed handoffs — ALL INACTIVE
 
 ## Current action — none
 

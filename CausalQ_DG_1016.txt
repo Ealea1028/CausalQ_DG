@@ -1,0 +1,3218 @@
+# CausalQ-DG 下一阶段研究与工程实施指导书
+
+版本：2026-10-16
+
+项目：
+CausalQ-DG
+Counterfactual / Interventional Query Effect Learning for Domain-Generalized Semantic Segmentation
+
+GitHub：
+Ealea1028/CausalQ_DG
+
+==================================================
+一、项目最终目标
+==================================================
+
+本阶段不是简单继续堆叠模块，而是围绕当前 CausalQ 已有实验结果，
+重新组织研究问题，使项目最终能够形成一条具有论文价值的实验逻辑：
+
+    Multi-Query Representation
+            ↓
+    Class-shared / Within-class Decomposition
+            ↓
+    Query Effect Decomposition
+            ↓
+    不同 Query Component 的 Effect Heterogeneity
+            ↓
+    Selective Effect Stabilization
+            ↓
+    GTA5 → Cityscapes Domain Generalization
+
+核心工作假设：
+
+    一个类别并非只有一个语义模式；
+    因此 class-specific Query Bank 可以表示：
+
+        class-shared semantic component
+                     +
+        within-class variation
+
+    但是这些 component 的预测作用不一定都应该跨 domain 保持完全不变。
+
+因此：
+
+    不应该：
+        对所有 Query Effect 强制一致
+
+    而应该：
+        对 class-shared Anchor Effect 强一致
+        对 within-class Residual Effect 保留自由度
+
+暂定研究名称：
+
+    Causal Query Decomposition
+
+或者：
+
+    Causal Query Decomposition +
+    Component-wise Effect Distillation
+
+注意：
+
+这个名称只是工作名称。
+不要在代码中大规模重命名现有 CausalQ 组件。
+
+
+==================================================
+二、当前项目状态必须首先理解
+==================================================
+
+当前已有工作不能推倒重来。
+
+必须保留：
+
+1. DINOv3-L backbone
+2. Static interaction
+3. R=2 class-specific Query
+4. Query Residual Head
+5. Photometric Style Intervention
+6. Query Effect / CQE
+7. Query diversity
+8. 现有 A0-A5 历史实验
+9. 当前 REIN Phase 16 探索结果
+10. 已有 checkpoint / experiment evidence
+
+当前最重要的已知结果：
+
+    DINOv3-L
+    Static
+    R=2
+    Photometric Style
+
+三种 seed 平均：
+
+    mIoU = 65.285%
+
+另外：
+
+    naive CQE
+    effect variance ↓ 99.47%
+
+但是：
+
+    mIoU ↓ 2.95 percentage points
+
+因此当前真正的问题不是：
+
+    “Query 是否有效？”
+
+Query 已经有正面证据。
+
+真正的问题是：
+
+    “为什么强制 Query Effect Invariance 会降低性能？”
+
+本项目下一阶段必须围绕这个矛盾展开。
+
+
+==================================================
+三、旧实验结果不得修改
+==================================================
+
+旧 A0-A5 实验标签必须原样保留。
+
+历史结果：
+
+    A0 = 60.17
+    A1 = 61.95
+    A2 = 63.96
+    A3 = 62.12
+    A4 = 59.18
+    A5 = 59.21
+
+不得：
+
+- 改名
+- 重新编号
+- 用新实验覆盖
+- 将新实验结果填入旧 A0-A5
+
+新实验必须使用新的实验 ID。
+
+建议：
+
+    M0
+    M1
+    M2
+    M3
+    M4
+    ...
+
+旧 A0-A5 作为：
+
+    Historical Ablation
+
+新 M0-M4 作为：
+
+    Strict-DG Research Ablation
+
+
+==================================================
+四、一个非常重要的协议修正：
+严格 Domain Generalization
+==================================================
+
+这是后续论文可信度的基础。
+
+当前历史结果 65.285% 不直接作为新的 strict-DG 主结果。
+
+原因：
+
+历史 CausalQ 实验曾经使用 Cityscapes validation 参与开发、
+模型选择或结构选择。
+
+因此：
+
+    65.285%
+
+必须保留，但标记为：
+
+    Historical Reference
+
+不能直接作为：
+
+    Strict-DG Main Result
+
+新实验必须重新建立：
+
+    GTA5 train
+        ↓
+    GTA5 source holdout
+        ↓
+    模型/超参数选择
+        ↓
+    checkpoint 冻结
+        ↓
+    Cityscapes final evaluation
+
+严格禁止：
+
+    Cityscapes image
+    Cityscapes label
+    Cityscapes mIoU
+    Cityscapes statistics
+    Cityscapes checkpoint selection
+
+参与：
+
+    training
+    hyperparameter tuning
+    architecture selection
+    early stopping
+    checkpoint selection
+
+
+==================================================
+五、Target Access Policy
+==================================================
+
+Cityscapes 只能作为最终测试集。
+
+正式开发阶段：
+
+    不加载 Cityscapes
+
+不要再进行：
+
+    5-image Cityscapes smoke
+    50-image Cityscapes diagnostic
+    Cityscapes validation every N iterations
+
+即使“不使用 label”也不要作为正式实验开发流程。
+
+如果必须测试代码：
+
+    使用 GTA5 source holdout
+
+不要使用 target。
+
+最终所有结构和超参数冻结以后：
+
+    才允许读取固定的 Cityscapes 500 images
+
+然后一次性完成：
+
+    final target evaluation
+
+
+==================================================
+六、Source Holdout
+==================================================
+
+需要在 GTA5 内建立独立 source validation split。
+
+具体比例目前没有被项目历史结果确定。
+
+Codex 必须首先扫描 GTA5 当前数据结构：
+
+    sequence
+    scene
+    folder
+    filename
+    video/group information
+
+优先级：
+
+    sequence-level split
+        >
+    scene-level split
+        >
+    deterministic filename/group split
+
+禁止简单随机打散相邻视频帧，
+如果当前数据结构允许 sequence-level split。
+
+如果当前数据结构无法提供 sequence：
+
+    source_val_fraction
+
+设置为 configurable。
+
+如果当前数据结构无法提供合理分组，
+才采用 deterministic 10% 默认值。
+
+最终生成：
+
+    manifests/gta5_source_train.txt
+    manifests/gta5_source_val.txt
+
+两个文件永久冻结。
+
+所有 seed 使用完全相同的 source split。
+
+不同 seed 只改变：
+
+    initialization
+    sampler randomness
+
+不改变：
+
+    train/val membership
+
+
+==================================================
+七、Local 与 AutoDL 的绝对边界
+==================================================
+
+这是项目必须长期遵守的工程规则。
+
+----------------------------------------
+A. LOCAL / CODEX
+----------------------------------------
+
+本机负责：
+
+1. 扫描 repository
+2. 阅读代码
+3. 修改 Python
+4. 修改 YAML/config
+5. 修改测试
+6. 修改分析脚本
+7. 修改 README / docs
+8. Git commit
+9. Git push
+
+本机不负责：
+
+- DINOv3-L 正式训练
+- 40k iteration GPU training
+- 大型 checkpoint 保存
+- AutoDL 数据管理
+
+
+----------------------------------------
+B. AutoDL
+----------------------------------------
+
+AutoDL 实例负责：
+
+1. 拉取 GitHub commit
+2. 环境检查
+3. 数据检查
+4. GPU smoke
+5. 长训练
+6. checkpoint
+7. target final evaluation
+8. 结果导出
+
+AutoDL 不允许：
+
+    直接修改 source code
+
+如果发现 bug：
+
+    AutoDL 停止
+        ↓
+    记录错误
+        ↓
+    回到本机 Codex
+        ↓
+    修改代码
+        ↓
+    Git commit
+        ↓
+    Git push
+        ↓
+    AutoDL checkout 新 commit
+
+禁止：
+
+    AutoDL 临时改 Python
+    然后继续正式训练
+
+否则 GitHub commit 与实验结果无法对应。
+
+
+==================================================
+八、Codex 第一步：只扫描，不急于修改
+==================================================
+
+Codex 开始工作后，第一步必须是 repository audit。
+
+执行：
+
+    git status --short
+    git rev-parse HEAD
+    git log --oneline -20
+    git branch -a
+    git ls-files
+
+然后搜索：
+
+    GroupedCausalQueryBank
+    QueryResidualHead
+    causal_query_effect
+    StyleInterventionBank
+    prediction_consistency
+    query_diversity
+    learned_null
+    DINOv3Backbone
+    Static
+    queries_per_class
+    alpha_init
+
+同时搜索：
+
+    current best
+    65.285
+    A0
+    A1
+    A2
+    A3
+    A4
+    A5
+    Phase 16
+    REIN
+
+必须阅读：
+
+    README.md
+    CausalQ_DG_Project_Plan.md
+    docs/PROJECT_GUIDE.md
+    docs/METHOD.md
+    docs/AUTODL_NEXT.md
+
+以及实际 source code。
+
+注意：
+
+文档可能落后于代码。
+
+因此：
+
+    实际代码 HEAD
+        >
+    文档描述
+
+如果发现文档与代码冲突：
+
+    不要自行猜测
+
+记录：
+
+    CODE/DOC CONFLICT
+
+然后根据实际代码确定修改方式。
+
+
+==================================================
+九、扫描完成后生成 Audit Report
+==================================================
+
+扫描完成后生成：
+
+    docs/CODEX_CURRENT_STATE.md
+
+内容必须包含：
+
+1. 当前 HEAD
+2. 当前 branch
+3. Git status
+4. DINOv3 model
+5. Query Bank
+6. Query count
+7. Interaction
+8. Residual Head
+9. alpha
+10. Style Intervention
+11. CQE
+12. Diversity
+13. 当前 experiment configs
+14. 当前 training entrypoint
+15. 当前 analysis scripts
+16. 当前 tests
+17. 当前 checkpoint/evidence organization
+18. Phase 16 状态
+19. 旧 A0-A5
+20. 65.285 historical result
+
+最后增加：
+
+    “Next Modification Impact Map”
+
+说明：
+
+    哪些文件必须修改
+    哪些文件不应该修改
+    哪些模块可以复用
+
+
+==================================================
+十、核心科学问题
+==================================================
+
+新版本 CausalQ 不再试图证明：
+
+    Query = causal factor
+
+也不声称：
+
+    Anchor = true causal variable
+
+正确表述：
+
+    Anchor / Residual
+    是 model-internal semantic decomposition。
+
+Query intervention：
+
+    do(Qc = 0)
+
+是：
+
+    model-internal intervention
+
+而不是：
+
+    real-world causal intervention。
+
+Style intervention：
+
+    original
+        ↓
+    photometric style
+
+只是：
+
+    appearance/domain nuisance 的 proxy intervention
+
+不能声称：
+
+    Fourier / Photometric = true causal intervention
+
+
+==================================================
+十一、建议的新因果框架
+==================================================
+
+真实世界 causal graph：
+
+                 C
+              /     \
+             ↓       ↓
+            X         Y
+             ↑
+             |
+             S
+
+其中：
+
+    C = stable semantic/content factor
+    S = style/domain factor
+    X = observed image
+    Y = ground-truth segmentation
+
+即：
+
+    C → X ← S
+    C → Y
+
+不要画：
+
+    Ŷ → Y
+
+因为预测结果不是 ground-truth 的原因。
+
+
+模型计算图：
+
+                 X
+                 ↓
+             DINOv3 F
+              /     \
+             ↓       ↓
+        Base Path   Query Path
+                       ↑
+                  Query Bank
+                       |
+               Anchor + Residual
+                       |
+                       ↓
+                 Query logits
+                       |
+                       ↓
+                    Ŷq
+              ↙              ↘
+          Base Ŷb           Query Ŷq
+                \           /
+                 \         /
+                   Final Ŷ
+
+
+新的 Query decomposition：
+
+                Query qc,r
+                    |
+            ┌───────┴────────┐
+            ↓                ↓
+         Anchor           Residual
+            ↓                ↓
+     shared component   within-class
+                         variation
+
+
+研究假设：
+
+    Anchor Effect
+        ↓
+    更稳定
+
+    Residual Effect
+        ↓
+    允许存在跨-style variation
+
+
+==================================================
+十二、核心结构修改
+==================================================
+
+当前：
+
+    q(c,r) = a(c) + e(c,r)
+
+修改为：
+
+    e_bar(c) = mean_r e(c,r)
+
+    e_tilde(c,r)
+        =
+    e(c,r) - e_bar(c)
+
+    q(c,r)
+        =
+    a(c) + e_tilde(c,r)
+
+因此：
+
+    mean_r e_tilde(c,r) = 0
+
+从而：
+
+    mean_r q(c,r) = a(c)
+
+这使：
+
+    class_anchor
+
+具有明确的参数化含义：
+
+    class-shared Query component
+
+
+==================================================
+十三、具体代码修改
+==================================================
+
+优先修改：
+
+    causalq/models/query_segmentor.py
+
+不要新建完全独立的 Query Bank。
+
+直接修改：
+
+    GroupedCausalQueryBank
+
+建议：
+
+    def forward(self, batch_size):
+        residuals = self.query_residuals
+        residuals = residuals - residuals.mean(
+            dim=1,
+            keepdim=True
+        )
+
+        queries = (
+            self.class_anchors[:, None, :]
+            + residuals
+        )
+
+        return queries.unsqueeze(0).expand(
+            batch_size,
+            -1,
+            -1,
+            -1
+        )
+
+同时增加：
+
+    get_anchors()
+
+    get_centered_residuals()
+
+不要删除：
+
+    get_query_residuals()
+
+因为旧实验仍然需要。
+
+
+==================================================
+十四、必须加入 Unit Tests
+==================================================
+
+测试：
+
+1.
+
+    centered_residual.mean(dim=query_dimension)
+
+必须：
+
+    ≈ 0
+
+2.
+
+    query.mean(dim=query_dimension)
+
+必须：
+
+    ≈ anchor
+
+3.
+
+检查：
+
+    batch size = 1
+    batch size > 1
+
+4.
+
+检查：
+
+    R=1
+    R=2
+    R=3
+
+5.
+
+检查：
+
+    alpha=0
+
+时：
+
+    Query model output
+    =
+    baseline output
+
+6.
+
+检查 checkpoint roundtrip。
+
+
+==================================================
+十五、为什么主线继续使用 Static
+==================================================
+
+当前最佳结果是：
+
+    Static R=2
+
+因此新研究阶段不能同时修改：
+
+    Query decomposition
+    +
+    interaction
+    +
+    backbone
+    +
+    style
+    +
+    loss
+
+否则无法解释结果。
+
+主线：
+
+    DINOv3-L
+    +
+    Static
+    +
+    R=2
+    +
+    Photometric
+
+保持不变。
+
+Static 的优势：
+
+    Query 不读取 image-dependent contextual update
+
+因此：
+
+    q(c,r)
+
+是固定的 semantic component。
+
+这样：
+
+    Anchor
+    Residual
+
+分解更加清晰。
+
+后续才研究：
+
+    One-way
+    Bidirectional
+
+不要在第一轮同时引入。
+
+
+==================================================
+十六、Anchor-only Counterfactual
+==================================================
+
+这是新版本最重要的实现。
+
+当前 Query：
+
+    q(c,r)
+      =
+    a(c) + e_tilde(c,r)
+
+定义：
+
+    Q_full(c)
+      =
+    {q(c,1), ..., q(c,R)}
+
+Anchor-only Query：
+
+    Q_anchor(c)
+      =
+    {a(c), ..., a(c)}
+
+即：
+
+    residual = 0
+
+注意：
+
+这是一个 proposed model-internal intervention，
+不是已有 CausalQ 的原始实现。
+
+实现：
+
+    anchor_queries =
+        anchor.unsqueeze(2).expand(
+            B, C, R, D
+        )
+
+然后通过相同 Query Residual Head：
+
+    Z_full
+    Z_anchor
+    Z_zero
+
+
+==================================================
+十七、三个 Query Effect
+==================================================
+
+对于每一个 style view s：
+
+1. Full Query：
+
+    Z_full^s
+
+2. Zero Query：
+
+    Z_zero^s
+
+    do(Qc = 0)
+
+3. Anchor-only：
+
+    Z_anchor^s
+
+定义：
+
+    E_full^s
+      =
+    Z_full^s - Z_zero^s
+
+定义：
+
+    E_anchor^s
+      =
+    Z_anchor^s - Z_zero^s
+
+定义：
+
+    E_residual^s
+      =
+    E_full^s - E_anchor^s
+
+注意：
+
+E_residual 是 output-space residual contribution：
+
+    E_full
+    =
+    E_anchor
+    +
+    E_residual
+
+这是严格成立的定义。
+
+不要声称：
+
+    E_residual
+    =
+    “纯 residual 的独立 causal effect”
+
+因为 Query head 中存在 normalization / logsumexp 等非线性。
+
+正确名称：
+
+    residual contribution
+
+或者：
+
+    residual-induced effect component
+
+
+==================================================
+十八、Anchor-CQE
+==================================================
+
+主方法：
+
+    Cross-Style Anchor Effect Consistency
+
+对于：
+
+    original
+    photometric
+
+分别得到：
+
+    E_anchor^orig
+    E_anchor^photo
+
+定义：
+
+    L_anchor_CQE
+        =
+    D(
+        normalize(E_anchor^photo),
+        stopgrad(
+            normalize(E_anchor^orig)
+        )
+    )
+
+其中：
+
+    D = SmoothL1
+
+保持当前 CQE 的：
+
+    valid-pixel
+    class-present
+
+mask 逻辑。
+
+不要改变：
+
+    Style Intervention strength
+
+不要重新设计 Style Bank。
+
+
+==================================================
+十九、为什么不对 Residual 强制一致
+==================================================
+
+核心假设：
+
+    Anchor
+        =
+    class-shared component
+
+    Residual
+        =
+    within-class variation
+
+因此：
+
+    Anchor Effect
+        ↓
+    强跨-style consistency
+
+而：
+
+    Residual Effect
+        ↓
+    不进行硬一致性约束
+
+原因：
+
+当前实验已经说明：
+
+    Effect Variance ↓↓↓
+
+并不自动意味着：
+
+    DG mIoU ↑
+
+原 CQE 的问题可能就是：
+
+    把有用 variation
+    当成 nuisance variation
+
+因此：
+
+    Stable ≠ Useful
+
+新方法：
+
+    Stable shared component
+    +
+    Preserved useful variation
+
+
+==================================================
+二十、Query Responsibility Diagnostic
+==================================================
+
+不要把 Query 是否“有不同语义”直接写死。
+
+需要做实验验证。
+
+对每一个 class：
+
+    score(c,r,p)
+
+计算：
+
+    rho(c,r,p)
+      =
+    softmax_r(
+        score(c,r,p)
+    )
+
+即：
+
+    Query responsibility
+
+注意：
+
+responsibility 是：
+
+    competition / attribution signal
+
+不是：
+
+    causal effect
+
+不能混用。
+
+
+==================================================
+二十一、Responsibility 指标
+==================================================
+
+至少记录：
+
+1. Mean responsibility
+
+    R(c,r)
+
+2. Responsibility entropy
+
+    H(c)
+
+3. Query pair similarity
+
+    cosine(q(c,1), q(c,2))
+
+4. Residual norm
+
+    ||e_tilde(c,r)||
+
+5. Anchor norm
+
+    ||a(c)||
+
+6. Anchor / residual norm ratio
+
+    ||a|| / mean(||e||)
+
+7. Cross-style responsibility variance
+
+8. Query activation rate
+
+9. Query contribution
+
+这些结果用于回答：
+
+    R=2 是否真的产生了
+    类内不同模式？
+
+如果没有：
+
+    R=2 只是增加参数容量
+
+那么论文不能声称：
+
+    “two queries learn two semantic modes”。
+
+
+==================================================
+二十二、Effect Localization
+==================================================
+
+对于 class c：
+
+    Ωc = pixels whose GT == c
+
+计算：
+
+    Anchor Effect Inside
+
+        mean |E_anchor,c(p)|
+        p ∈ Ωc
+
+以及：
+
+    Anchor Effect Outside
+
+        mean |E_anchor,c(p)|
+        p ∉ Ωc
+
+定义：
+
+    Localization Ratio
+
+        Inside / (Outside + ε)
+
+同时记录：
+
+    Effect Energy
+
+        mean |E_anchor|
+
+以及：
+
+    Effect Variance
+
+        variance across style views
+
+
+==================================================
+二十三、Effect Utility / Necessity
+==================================================
+
+防止出现：
+
+    Effect → 0
+    Variance → 0
+
+但模型实际上没有利用 Query。
+
+在分析阶段必须计算：
+
+    Query Necessity
+
+即：
+
+    factual prediction
+        vs
+    do(Qc = 0)
+
+对于 GT class：
+
+    Δc(p)
+      =
+    Z_fact,c(p)
+    -
+    Z_null,c(p)
+
+重点统计：
+
+    GT region
+    non-GT region
+
+如果：
+
+    Δc ≈ 0
+
+而：
+
+    mIoU 正常
+
+说明 Query 可能不是模型真正依赖的机制。
+
+如果：
+
+    Δc 明显 > 0
+
+且：
+
+    zero intervention
+    导致 GT prediction degradation
+
+则 Query 的模型内部必要性证据更强。
+
+
+==================================================
+二十四、可选 Sufficiency Loss
+==================================================
+
+第一轮不要加入。
+
+只有在 M3 出现：
+
+    Anchor effect collapse
+
+时再加入。
+
+定义：
+
+    L_suf_anchor
+
+=
+    mean over p∈Ωc
+    max(
+        0,
+        m - E_anchor,c(p)
+    )
+
+注意：
+
+这个 loss 的目的不是：
+
+    让 Anchor 单独完成整个 segmentation
+
+而是：
+
+    保证 Anchor 对正确 class
+    有非平凡的正向作用。
+
+默认：
+
+    不直接启用
+
+先做 diagnostic。
+
+
+==================================================
+二十五、Specificity Loss
+==================================================
+
+同样先作为 diagnostic。
+
+定义：
+
+    L_spec_anchor
+
+=
+    mean over p∉Ωc
+    |E_anchor,c(p)|
+
+或者：
+
+    max(
+        0,
+        E_anchor,c(p) - m_neg
+    )
+
+目的：
+
+    Anchor effect
+    应主要落在对应 semantic region
+
+而不是：
+
+    整张图都产生巨大 effect。
+
+
+==================================================
+二十六、核心新实验梯度
+==================================================
+
+所有新实验均使用：
+
+    DINOv3-L
+    Static
+    R=2
+    Photometric
+    GTA5 source-only training
+    GTA5 source holdout selection
+    Cityscapes fixed 500 final evaluation
+
+--------------------------------------------------
+M0 — Strict Baseline
+--------------------------------------------------
+
+当前最佳：
+
+    DINOv3-L
+    Static
+    R=2
+    Photometric
+
+没有新 decomposition loss。
+
+目的：
+
+    建立严格-DG版本的 M0。
+
+注意：
+
+    不要直接把 65.285 填入 M0。
+
+必须重新训练。
+
+--------------------------------------------------
+M1 — Centered Query
+--------------------------------------------------
+
+M0
+
++
+
+    centered residual
+
+即：
+
+    q = anchor + centered residual
+
+没有 CQE。
+
+目的：
+
+验证：
+
+    decomposition
+    本身是否改变优化效果。
+
+
+--------------------------------------------------
+M2 — Centered + Full CQE
+--------------------------------------------------
+
+M1
+
++
+
+    原始 Full Query CQE
+
+即：
+
+    E_full
+
+在：
+
+    original
+    photometric
+
+之间保持一致。
+
+这是：
+
+    negative/control experiment
+
+不是最终方法。
+
+目的：
+
+回答：
+
+    “仅仅解决 anchor/residual 参数化后，
+     原 CQE 是否就能工作？”
+
+如果仍然：
+
+    variance ↓
+    mIoU ↓
+
+则说明：
+
+    问题不是单纯 parameterization
+
+
+--------------------------------------------------
+M3 — Centered + Anchor-CQE
+--------------------------------------------------
+
+M1
+
++
+
+    Anchor-only CQE
+
+即：
+
+    只约束 E_anchor
+
+而：
+
+    E_residual
+
+不做 consistency。
+
+这是：
+
+    PRIMARY MAINLINE
+
+核心假设：
+
+    shared semantic effect
+        →
+    stable
+
+    within-class variation
+        →
+    preserved
+
+
+--------------------------------------------------
+M4 — Anchor-CQE + Necessity Guard
+--------------------------------------------------
+
+只有当 M3 有正向趋势才做。
+
+M3
+
++
+
+    Anchor Effect Necessity / Utility
+
+目的：
+
+防止：
+
+    stable but useless effect
+
+最终形成：
+
+    Stable
+    +
+    Useful
+    +
+    Localized
+
+
+==================================================
+二十七、Prediction Consistency 仍然保留
+==================================================
+
+Prediction Consistency 不再作为主方法。
+
+它是：
+
+    control baseline
+
+实验：
+
+    P1 =
+    M1 + Prediction Consistency
+
+用于比较：
+
+    prediction invariance
+
+vs
+
+    effect invariance
+
+论文必须回答：
+
+    为什么不是普通 prediction consistency？
+
+如果：
+
+    Anchor-CQE
+    >
+    Prediction Consistency
+
+才支持：
+
+    “stabilizing the prediction mechanism”
+
+而不仅仅是：
+
+    “stabilizing the prediction”。
+
+
+==================================================
+二十八、新实验主表
+==================================================
+
+最终建议：
+
+    S0
+    Source-only
+
+    M0
+    Query + Style
+
+    M1
+    Centered Query + Style
+
+    P1
+    Centered + Prediction Consistency
+
+    M2
+    Centered + Full CQE
+
+    M3
+    Centered + Anchor-CQE
+
+    M4
+    Centered + Anchor-CQE + Necessity
+
+表中记录：
+
+    Cityscapes mIoU
+    Source holdout mIoU
+    Effect variance
+    Effect magnitude
+    Localization ratio
+    Query responsibility entropy
+    trainable params
+    peak VRAM
+
+
+==================================================
+二十九、最重要的目标曲线
+==================================================
+
+目标不是强行让所有实验单调。
+
+真正希望观察：
+
+    Source-only
+        ↓
+    Query + Style
+        ↓
+    Centered Query
+        ↓
+    Anchor-CQE
+        ↓
+    Anchor-CQE + Necessity
+
+即：
+
+    mIoU逐步提升
+
+同时：
+
+    Effect Variance
+        ↓
+
+但：
+
+    Effect Magnitude
+        不应塌陷
+
+并且：
+
+    Localization Ratio
+        ↑
+
+如果最终得到：
+
+    mIoU ↑
+    Effect Variance ↓
+    Effect Magnitude →
+    Localization ↑
+
+这是最理想的论文证据。
+
+--------------------------------------------------
+
+注意：
+
+绝对禁止为了得到“递增曲线”而：
+
+- 修改实验编号
+- 删除失败实验
+- 根据 Cityscapes 调参
+- 修改 checkpoint
+- 改 loss weight 后只保留最好结果
+- 重复训练直到出现理想数字
+
+如果曲线不递增：
+
+    保留真实结果
+
+然后分析：
+
+    哪一个假设失败。
+
+
+==================================================
+三十、建议的实验执行策略
+==================================================
+
+正式长训练之前：
+
+    100~500 optimizer updates
+
+只做：
+
+    engineering smoke
+
+检查：
+
+    finite loss
+    finite gradient
+    checkpoint
+    centered residual
+    anchor effect
+    full effect
+    null effect
+
+绝不根据 smoke 的 target mIoU 选择模型。
+
+
+==================================================
+三十一、正式实验预算
+==================================================
+
+每个正式候选：
+
+    完整训练 schedule
+
+原则：
+
+    所有候选使用相同 training budget
+
+不要：
+
+    A模型 40k
+    B模型 20k
+
+然后比较。
+
+
+第一轮：
+
+    M0
+    M1
+    P1
+    M2
+    M3
+
+每个：
+
+    seed 0
+    full training
+
+获得第一条完整曲线。
+
+
+第二轮：
+
+对：
+
+    M0
+    M3
+
+至少：
+
+    seed 0
+    seed 1
+    seed 2
+
+进行三 seed formal experiment。
+
+
+如果 M4 成功：
+
+    M4 也做三 seed。
+
+
+==================================================
+三十二、不要在第一阶段进行大量超参数搜索
+==================================================
+
+首先固定：
+
+    backbone
+    R
+    interaction
+    style
+    training schedule
+
+只搜索：
+
+    lambda_anchor_cqe
+
+如果必须：
+
+    在 source holdout 上进行
+
+绝不使用：
+
+    Cityscapes mIoU
+
+选择 lambda。
+
+
+推荐：
+
+    先使用当前 CQE weight 作为 reference
+
+然后小范围：
+
+    0.1 × reference
+    0.25 × reference
+    0.5 × reference
+    1.0 × reference
+
+如果结果显示：
+
+    Anchor-CQE 对 λ 不敏感
+
+这是很好的 robustness evidence。
+
+如果只有一个极窄 λ 区间有效：
+
+    记录为 limitation。
+
+
+==================================================
+三十三、训练代码修改位置
+==================================================
+
+首先修改：
+
+    causalq/models/query_segmentor.py
+
+其次：
+
+    causalq/losses/causal_query_effect.py
+
+建议扩展为：
+
+    full_query_effect
+    anchor_query_effect
+    residual_effect_component
+
+但不要破坏：
+
+    causal_query_effect_loss()
+
+旧 API。
+
+可以新增：
+
+    anchor_causal_query_effect_loss()
+
+
+然后：
+
+    tools/train.py
+
+加入：
+
+    strict_dg protocol
+
+不能破坏旧实验。
+
+推荐配置：
+
+    protocol:
+        name: strict_dg
+        target_access: forbidden_during_training
+        source_validation: gta5_holdout
+        target_evaluation: final_only
+
+旧 config：
+
+    如果没有 protocol
+
+保持旧行为。
+
+
+==================================================
+三十四、Strict-DG Trainer 修改
+==================================================
+
+当前 train.py 如果默认：
+
+    Cityscapes validation
+
+必须修改。
+
+新逻辑：
+
+    if protocol == strict_dg:
+
+        train_dataset = GTA5 train
+        val_dataset = GTA5 holdout
+
+    else:
+
+        保持 legacy behavior
+
+最终 target evaluator：
+
+    tools/evaluate_target.py
+
+独立于 training。
+
+training process：
+
+    不 import Cityscapes
+
+target evaluator：
+
+    独立读取 checkpoint
+
+
+==================================================
+三十五、Target Evaluator
+==================================================
+
+新增：
+
+    tools/evaluate_target.py
+
+输入：
+
+    checkpoint
+    target_manifest
+
+输出：
+
+    metrics.json
+
+必须固定：
+
+    Cityscapes 500 images
+
+如果 repository 中已经存在固定 manifest：
+
+    直接使用
+
+如果没有：
+
+    建立一次
+
+然后：
+
+    永久冻结
+
+不得根据结果修改。
+
+
+==================================================
+三十六、Target Evaluation 绝对不能用于 Model Selection
+==================================================
+
+所有候选模型：
+
+    M0
+    M1
+    P1
+    M2
+    M3
+    M4
+
+可以在最终冻结以后统一做：
+
+    Cityscapes 500 evaluation
+
+但是：
+
+    evaluate target
+        ≠
+    select target
+
+即：
+
+    先冻结模型
+        ↓
+    再跑 target
+        ↓
+    生成 paper table
+
+如果发现：
+
+    M3 target 不好
+
+不能回去：
+
+    修改 λ
+    修改 R
+    修改 architecture
+
+然后重新挑最优。
+
+否则会重新产生 target leakage。
+
+
+==================================================
+三十七、AutoDL 运行方式
+==================================================
+
+AutoDL：
+
+    cd /root/autodl-tmp/CausalQ_DG
+
+检查：
+
+    git status --short
+
+必须 clean。
+
+然后：
+
+    git fetch origin
+
+checkout Codex 指定 commit：
+
+    git checkout <COMMIT_SHA>
+
+不要：
+
+    git pull
+
+到一个正在变化的 branch 后直接训练。
+
+训练开始前记录：
+
+    git rev-parse HEAD
+
+保存：
+
+    run_dir/git_commit.txt
+
+
+==================================================
+三十八、AutoDL 路径
+==================================================
+
+默认保持：
+
+    Project:
+    /root/autodl-tmp/CausalQ_DG
+
+    Dataset:
+    /root/autodl-tmp/datasets
+
+    Pretrained:
+    /root/autodl-tmp/pretrained
+
+    Output:
+    /root/autodl-tmp/outputs/CausalQ_DG
+
+不要：
+
+    移动数据
+    删除旧实验
+    修改旧实验
+
+
+==================================================
+三十九、AutoDL 环境
+==================================================
+
+正式训练之前：
+
+    python tools/check_environment.py
+
+记录：
+
+    Python
+    PyTorch
+    CUDA
+    GPU
+    VRAM
+    torchvision
+    transformers
+    timm
+    DINOv3 availability
+
+正式训练不要重新发明一套环境。
+
+优先使用当前项目已经验证过的 environment。
+
+如果环境发生变化：
+
+    记录为新的 environment ID。
+
+
+==================================================
+四十、Checkpoint
+==================================================
+
+每个实验至少保存：
+
+    config.yaml
+    metadata.json
+    summary.json
+    train.jsonl
+    checkpoint
+    git_commit.txt
+
+checkpoint 必须记录：
+
+    seed
+    iteration
+    backbone hash
+    config hash
+    git SHA
+
+大型 checkpoint：
+
+    不进入 GitHub
+
+
+==================================================
+四十一、Experiment Directory
+==================================================
+
+建议：
+
+    experiments/
+        M0_STRICT_BASE/
+        M1_CENTERED/
+        P1_PRED_CONS/
+        M2_FULL_CQE/
+        M3_ANCHOR_CQE/
+        M4_ANCHOR_CQE_NEC/
+
+每个实验记录：
+
+    config
+    source split
+    seed
+    training budget
+    metrics
+    analysis
+
+
+==================================================
+四十二、实验结果不能只记录 mIoU
+==================================================
+
+每个 experiment 必须同时记录：
+
+Performance：
+
+    source holdout mIoU
+    Cityscapes final mIoU
+
+Query：
+
+    R
+    anchor norm
+    residual norm
+    query pair cosine
+    responsibility entropy
+    active query ratio
+
+Effect：
+
+    full effect variance
+    anchor effect variance
+    residual contribution variance
+
+Effect utility：
+
+    full effect magnitude
+    anchor effect magnitude
+    zero-query mIoU drop
+
+Localization：
+
+    inside effect
+    outside effect
+    inside/outside ratio
+
+Efficiency：
+
+    trainable params
+    total params
+    peak VRAM
+    iteration time
+
+
+==================================================
+四十三、必须增加一个统一 Analysis Tool
+==================================================
+
+新增：
+
+    tools/analyze_query_components.py
+
+输入：
+
+    checkpoint
+    source manifest
+    fixed intervention seed
+
+输出：
+
+    component_effect_report.json
+
+以及：
+
+    query_similarity.csv
+    responsibility.csv
+    effect_statistics.csv
+
+可选生成：
+
+    figures/query_responsibility/
+    figures/effect_maps/
+    figures/anchor_residual/
+
+
+==================================================
+四十四、Effect Analysis 必须固定随机性
+==================================================
+
+对于比较：
+
+    M0
+    M1
+    M2
+    M3
+
+必须使用：
+
+    相同 image
+    相同 crop
+    相同 style parameters
+    相同 intervention seed
+
+否则：
+
+    effect variance
+
+可能来自：
+
+    intervention randomness
+
+而不是：
+
+    model difference。
+
+
+==================================================
+四十五、Effect Map Visualization
+==================================================
+
+至少输出：
+
+    original image
+    GT
+    prediction
+    full effect
+    anchor effect
+    residual contribution
+    photometric image
+    photometric full effect
+    photometric anchor effect
+    photometric residual contribution
+
+至少选择：
+
+    road
+    building
+    vegetation
+    car
+    person
+
+不能只挑成功案例。
+
+另外随机选择：
+
+    20 samples
+
+作为 quantitative visualization。
+
+
+==================================================
+四十六、一个关键实验：
+Anchor vs Residual Effect Stability
+==================================================
+
+对所有 source holdout samples：
+
+    Var(E_anchor)
+    Var(E_residual)
+
+进行统计。
+
+核心问题：
+
+    是否：
+
+    Var(E_anchor)
+        <
+    Var(E_residual)
+
+如果成立：
+
+    支持 decomposition hypothesis。
+
+如果不成立：
+
+    Anchor 不一定是更 stable component
+
+此时：
+
+    Anchor-CQE 理论依据不足
+
+必须停止继续堆 loss。
+
+
+==================================================
+四十七、一个更重要的实验：
+Stability vs Utility
+==================================================
+
+建立二维关系：
+
+    x-axis:
+    Effect Variance
+
+    y-axis:
+    Effect Magnitude
+
+同时标记：
+
+    mIoU
+
+希望看到：
+
+    Full CQE
+
+    variance ↓
+    magnitude ↓
+    mIoU ↓
+
+而：
+
+    Anchor CQE
+
+    variance ↓
+    magnitude 保持
+    mIoU ↑
+
+如果出现这种结果：
+
+    就形成非常强的论文故事。
+
+
+==================================================
+四十八、最终论文核心图
+==================================================
+
+建议最终至少形成：
+
+Figure 1：
+
+    Domain Generalization causal graph
+
+    C → X ← S
+    C → Y
+
+    + model internal Query intervention
+
+
+Figure 2：
+
+    Causal Query Decomposition
+
+    Query
+      ↓
+    Anchor + Residual
+      ↓
+    Full Effect
+      ↓
+    Anchor Effect + Residual Contribution
+
+
+Figure 3：
+
+    Main ablation curve
+
+    M0
+    M1
+    P1
+    M2
+    M3
+    M4
+
+
+Figure 4：
+
+    Effect Variance vs mIoU
+
+
+Figure 5：
+
+    Anchor / Residual effect maps
+
+
+Figure 6：
+
+    Query responsibility
+
+
+Figure 7：
+
+    Effect magnitude / localization
+
+
+==================================================
+四十九、论文主张必须控制强度
+==================================================
+
+可以声称：
+
+    “The proposed intervention isolates a model-internal
+     query-mediated prediction effect.”
+
+可以声称：
+
+    “Anchor and residual components exhibit different
+     cross-style effect behavior.”
+
+如果实验支持，可以声称：
+
+    “Selective stabilization of the class-shared
+     component improves domain generalization.”
+
+不能直接声称：
+
+    “Anchor is the true causal factor.”
+
+不能声称：
+
+    “Residual is domain-specific factor.”
+
+不能声称：
+
+    “Photometric intervention identifies the real causal
+     domain variable.”
+
+不能声称：
+
+    “Query effect invariance proves causality.”
+
+更准确：
+
+    “causality-inspired”
+    “model-internal interventional effect”
+    “effect stability under controlled appearance interventions”
+
+
+==================================================
+五十、为什么不把 ProtoSeg Prototype Bank 加入主模型
+==================================================
+
+当前阶段禁止直接加入：
+
+    Sinkhorn prototype bank
+    EMA prototype bank
+    K-means prototype bank
+
+作为主模型。
+
+原因：
+
+1. ProtoSeg 已经系统研究 multi-prototype。
+2. QPrompt-R1 已经使用 Query + prototype bank。
+3. 近期 causal segmentation 工作也已经使用 causal prototype。
+4. 这会让 CausalQ 从：
+       causal effect
+   退化成：
+       prototype engineering
+
+因此：
+
+    Prototype
+
+最多用于：
+
+    analysis
+    initialization ablation
+    future branch
+
+不能成为第一版新方法主体。
+
+
+==================================================
+五十一、数据驱动 Anchor 也暂时不做主线
+==================================================
+
+不要第一阶段直接把：
+
+    class_anchor
+
+改成：
+
+    EMA source prototype
+
+也不要第一阶段加入：
+
+    online clustering
+    Sinkhorn
+
+因为这样会同时改变：
+
+    Query representation
+    training dynamics
+    causal effect
+    prototype construction
+
+最终无法判断：
+
+    提升来自 decomposition
+    还是 prototype learning。
+
+如果 M3 成功：
+
+    再做：
+
+    M3 + source-prototype initialization
+
+作为 secondary ablation。
+
+
+==================================================
+五十二、Phase 16 REIN 的处理
+==================================================
+
+Phase 16 REIN 保持：
+
+    exploratory branch
+
+不要因为新的 Query decomposition
+直接修改 Phase 16。
+
+先完成：
+
+    DINOv3-L Static R=2
+
+主线。
+
+只有当：
+
+    M3 Anchor-CQE
+
+在 DINOv3-L 上取得稳定正向结果之后，
+
+才把：
+
+    Anchor-CQE
+
+迁移到：
+
+    REIN
+
+目的：
+
+    验证方法是否 backbone-independent。
+
+
+==================================================
+五十三、REIN 验证只回答一个问题
+==================================================
+
+不是：
+
+    重新做一个 REIN 方法
+
+而是：
+
+    Query Effect Stabilization
+    是否能够迁移到另一种 VFM segmentation architecture？
+
+因此：
+
+    REIN
+    +
+    existing residual query branch
+    +
+    Anchor-CQE
+
+即可。
+
+不要重新设计：
+
+    Mask2Former
+    Query matching
+    REIN backbone
+
+
+==================================================
+五十四、如果 M3 成功
+==================================================
+
+进入：
+
+    Stage B
+
+研究：
+
+    为什么 Anchor 更稳定？
+
+增加：
+
+    Query responsibility
+    Query similarity
+    Anchor norm
+    Residual norm
+    Effect localization
+
+寻找：
+
+    semantic mode
+
+例如：
+
+    road:
+        anchor
+        shadow-road residual
+
+    car:
+        anchor
+        appearance/pose residual
+
+注意：
+
+只能写：
+
+    “empirically associated with”
+
+不能直接写：
+
+    “this Query represents shadow”
+
+除非有进一步验证。
+
+
+==================================================
+五十五、如果 M3 不成功
+==================================================
+
+不要立即继续堆模块。
+
+检查：
+
+1. Anchor effect 是否真的比 residual 更稳定？
+
+2. Anchor effect magnitude 是否塌陷？
+
+3. Anchor effect 是否定位到 GT？
+
+4. Query responsibility 是否发生 specialization？
+
+5. Centered decomposition 是否改变 baseline？
+
+6. CQE loss 是否过强？
+
+7. Style intervention 是否足够有效？
+
+8. Static Query 是否真的产生 semantic signal？
+
+如果：
+
+    Anchor effect
+    并不稳定
+
+则：
+
+    Anchor-CQE 的核心假设失败。
+
+不要继续加入：
+
+    diversity
+    prototype
+    Fourier
+    attention
+    more queries
+
+
+==================================================
+五十六、第二候选方向：
+Geometry-aware Selective CQE
+==================================================
+
+只有当：
+
+    Anchor-CQE
+
+已经证明有效，
+
+才允许继续研究：
+
+    geometry-aware / curvature-aware effect weighting
+
+思想：
+
+    low-variation / shared region
+        →
+    stronger consistency
+
+    high-variation / boundary region
+        →
+    weaker consistency
+
+即：
+
+    L =
+    Σ w(p)
+    D(E(p), E'(p))
+
+其中：
+
+    w(p)
+
+根据：
+
+    local feature variation
+    或
+    local geometric/semantic uncertainty
+
+决定。
+
+但：
+
+    不要第一阶段实现。
+
+否则会把：
+
+    decomposition
+    +
+    causal effect
+    +
+    geometry
+
+混在一起。
+
+
+==================================================
+五十七、Geometric Weighting 的原则
+==================================================
+
+如果后续实现 geometry-aware：
+
+不要直接声称：
+
+    feature curvature = causal curvature
+
+正确：
+
+    feature-space local variation
+    is used as a proxy for
+    where invariance should be relaxed.
+
+必须通过 ablation 验证：
+
+    uniform CQE
+        vs
+    anchor CQE
+        vs
+    adaptive CQE
+
+
+==================================================
+五十八、实验决策树
+==================================================
+
+                    M0
+                     |
+                     ↓
+                M1 Centered
+                     |
+          ┌──────────┴──────────┐
+          ↓                     ↓
+       P1 Pred Cons          M2 Full CQE
+          |                     |
+          |                     ↓
+          |                variance ↓?
+          |                     |
+          |                     ↓
+          |               mIoU ↓ ?
+          |                     |
+          └──────────┬──────────┘
+                     ↓
+              M3 Anchor-CQE
+                     |
+              ┌──────┴──────┐
+              ↓             ↓
+           Effect        mIoU
+          stable?        improves?
+              |             |
+              └──────┬──────┘
+                     ↓
+             M4 Necessity
+                     |
+                     ↓
+              Final Method
+
+
+==================================================
+五十九、正式实验的选择规则
+==================================================
+
+不得使用：
+
+    target mIoU
+
+进行中间选择。
+
+只允许使用：
+
+    GTA5 source holdout
+
+以及：
+
+    effect diagnostics
+
+进行模型选择。
+
+可以使用：
+
+    source mIoU
+    source effect variance
+    source effect magnitude
+    source localization
+
+决定：
+
+    是否进入下一阶段。
+
+
+==================================================
+六十、最终三种 Seed
+==================================================
+
+正式主模型至少：
+
+    seed 0
+    seed 1
+    seed 2
+
+报告：
+
+    mean ± std
+
+重点比较：
+
+    M0
+    M3
+
+如果 M4 最终成立：
+
+    M0
+    M3
+    M4
+
+进行三 seed。
+
+
+==================================================
+六十一、所有实验必须固定
+==================================================
+
+固定：
+
+    dataset split
+    training iterations
+    image crop
+    optimizer
+    scheduler
+    batch
+    gradient accumulation
+    AMP
+    backbone
+    backbone checkpoint
+    style strength
+    Cityscapes final 500 manifest
+    evaluation implementation
+
+每次只修改：
+
+    一个主要研究因素。
+
+
+==================================================
+六十二、Git Commit 规则
+==================================================
+
+每完成一个逻辑修改：
+
+    pytest
+
+然后：
+
+    git status
+    git diff
+    git add
+    git commit
+    git push
+
+推荐 commit：
+
+    feat(query): add centered residual decomposition
+
+    feat(cqe): add anchor-only effect computation
+
+    feat(loss): add anchor effect consistency
+
+    feat(protocol): add strict source-only validation
+
+    feat(analysis): add query component diagnostics
+
+不要一次 commit：
+
+    Query
+    CQE
+    Style
+    Protocol
+    Analysis
+
+五个模块。
+
+
+==================================================
+六十三、Codex 每次修改后的报告
+==================================================
+
+每次完成修改后必须输出：
+
+1. 修改了哪些文件
+2. 为什么修改
+3. 修改前行为
+4. 修改后行为
+5. 数学定义
+6. 是否影响旧实验
+7. 新增测试
+8. pytest 结果
+9. 是否需要 AutoDL
+10. AutoDL 应 checkout 哪个 commit
+11. AutoDL 应运行哪个 command
+12. 预期输出文件
+13. 本次实验的 scientific question
+
+
+==================================================
+六十四、AutoDL 实验返回结果后
+==================================================
+
+用户将 AutoDL 结果同步回来。
+
+Codex 不应该直接根据结果修改模型。
+
+首先：
+
+    read-only analysis
+
+输出：
+
+    experiment result summary
+
+比较：
+
+    source mIoU
+    target mIoU
+    effect variance
+    effect magnitude
+    localization
+    responsibility
+
+然后：
+
+    判断 hypothesis 是否成立。
+
+
+==================================================
+六十五、论文导向的最终判断标准
+==================================================
+
+项目最终能否成为论文，不取决于：
+
+    “最终 mIoU 是不是特别高”
+
+而取决于是否能够形成以下完整逻辑：
+
+Step 1：
+
+    Multi-query improves segmentation.
+
+Step 2：
+
+    Query Bank contains a shared component
+    and within-class variation.
+
+Step 3：
+
+    Centered parameterization makes this
+    decomposition identifiable.
+
+Step 4：
+
+    Different components have different
+    cross-style effect stability.
+
+Step 5：
+
+    Naive full-effect consistency
+    over-constrains useful variation.
+
+Step 6：
+
+    Selective stabilization of the class-shared
+    component improves domain generalization.
+
+Step 7：
+
+    This improves unseen-domain
+    GTA5 → Cityscapes performance.
+
+如果能够形成：
+
+    representation evidence
+    +
+    intervention evidence
+    +
+    effect evidence
+    +
+    ablation evidence
+    +
+    target generalization evidence
+
+那么 CausalQ 才真正从：
+
+    “一个 Query-based segmentation trick”
+
+升级成：
+
+    “关于 Query-mediated prediction mechanism
+     在 domain shift 下如何稳定的研究”。
+
+
+==================================================
+六十六、最终论文主线建议
+==================================================
+
+推荐最终方法逻辑：
+
+    DINOv3
+       ↓
+    Semantic Query Bank
+       ↓
+    Centered Query Decomposition
+       ↓
+    ┌─────────────────────┐
+    │                     │
+    ↓                     ↓
+ Anchor               Residual
+ shared                intra-class
+ semantic              variation
+ component
+    │                     │
+    ↓                     ↓
+ Anchor Effect       Residual Contribution
+    │                     │
+    ↓                     │
+ Cross-style              │
+ Effect Consistency       │
+    │                     │
+    └──────────┬──────────┘
+               ↓
+        Final Prediction
+
+
+核心公式：
+
+    q(c,r)
+      =
+    a(c)
+    +
+    [e(c,r)-mean_r e(c,r)]
+
+
+    E_full
+      =
+    Z_full-Z_zero
+
+
+    E_anchor
+      =
+    Z_anchor-Z_zero
+
+
+    E_residual
+      =
+    E_full-E_anchor
+
+
+    L_anchor-CQE
+      =
+    D(
+      norm(E_anchor^photo),
+      stopgrad(norm(E_anchor^orig))
+    )
+
+
+最终：
+
+    L_total
+      =
+    L_seg
+    +
+    λ_cf L_seg_cf
+    +
+    λ_anchor L_anchor-CQE
+
+必要时：
+
+    +
+    λ_suf L_anchor-sufficiency
+
+
+==================================================
+六十七、最终优先级
+==================================================
+
+Priority 0：
+
+    Repository scan
+    Strict-DG protocol repair
+
+Priority 1：
+
+    Centered Query decomposition
+
+Priority 2：
+
+    Anchor-only effect computation
+
+Priority 3：
+
+    Query responsibility/effect diagnostics
+
+Priority 4：
+
+    M0/M1/M2/M3 formal ablation
+
+Priority 5：
+
+    Anchor effect necessity/localization
+
+Priority 6：
+
+    M4 if justified
+
+Priority 7：
+
+    Three-seed final experiments
+
+Priority 8：
+
+    REIN transfer
+
+Priority 9：
+
+    Geometry-aware selective CQE
+
+Priority 10：
+
+    Additional target domains / scaling
+
+
+==================================================
+六十八、明确禁止事项
+==================================================
+
+在 M3 完成之前，不要：
+
+- 增加更多 Query
+- 加 Sinkhorn
+- 加 EMA Prototype Bank
+- 加 Prototype Contrastive Loss
+- 加 Fourier 新机制
+- 加新的 Backbone
+- Full Fine-tuning DINOv3
+- 改成 Bidirectional Query Attention
+- 加复杂 Geometry Module
+- 同时加入多个 consistency loss
+- 使用 Cityscapes 调参
+- 使用 target mIoU 选择 checkpoint
+
+当前阶段最重要的是：
+
+    把一个 hypothesis 做干净。
+
+
+==================================================
+六十九、最终交付物
+==================================================
+
+代码：
+
+    centered query bank
+    anchor effect
+    residual contribution
+    anchor CQE
+    strict DG trainer
+    target evaluator
+    analysis tools
+
+测试：
+
+    unit tests
+    intervention tests
+    checkpoint tests
+    strict-DG protocol tests
+
+实验：
+
+    M0
+    M1
+    P1
+    M2
+    M3
+    M4
+
+报告：
+
+    docs/CODEX_CURRENT_STATE.md
+    docs/STRICT_DG_PROTOCOL.md
+    docs/CAUSAL_QUERY_DECOMPOSITION.md
+    docs/EXPERIMENT_RESULTS.md
+
+最终 figures：
+
+    ablation curve
+    effect variance curve
+    effect magnitude curve
+    localization
+    responsibility
+    anchor/residual heatmaps
+
+最终论文 evidence：
+
+    M0 < M3
+    M3 > prediction consistency
+    M3 > full CQE
+    Anchor Effect Variance ↓
+    Anchor Effect Magnitude 不塌陷
+    Anchor Localization ↑
+
+
+==================================================
+七十、Codex 第一次实际执行任务
+==================================================
+
+现在不要直接修改 Query Bank。
+
+第一步只做：
+
+    Repository Audit
+
+执行：
+
+    git status --short
+    git rev-parse HEAD
+    git log --oneline -20
+    git ls-files
+
+然后：
+
+    搜索所有 Query/CQE/Style/Training/Config/Analysis/Test 文件
+
+阅读：
+
+    README.md
+    CausalQ_DG_Project_Plan.md
+    docs/PROJECT_GUIDE.md
+    docs/METHOD.md
+    docs/AUTODL_NEXT.md
+
+重点确认：
+
+    1. 当前 Static R=2 的真实 config
+    2. 当前 Photometric config
+    3. 当前 alpha 初始化
+    4. Query Residual Head
+    5. 当前 CQE effect 定义
+    6. 当前 style view
+    7. 当前 training schedule
+    8. 当前 target validation 调用位置
+    9. 当前 experiment output structure
+    10. 当前 tests
+
+生成：
+
+    docs/CODEX_CURRENT_STATE.md
+
+然后才进入：
+
+    Strict-DG protocol repair
+
+再进入：
+
+    Centered Query decomposition
+
+不要在完成 audit 前修改核心模型。
+
+
+==================================================
+END
+==================================================

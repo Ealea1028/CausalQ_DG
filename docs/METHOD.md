@@ -1,5 +1,18 @@
 # Method contract
 
+## Active boundary — Phase 17 / Priority 0 (2026-10-16)
+
+The user-approved `CausalQ_DG_1016.txt` roadmap begins with a repository audit
+and strict-DG protocol repair. See `CODEX_CURRENT_STATE.md` and
+`STRICT_DG_PROTOCOL.md`. The only next remote action is a source-only GTA5
+filesystem/metadata inventory. Source sequence/scene evidence must be reviewed
+before selecting and freezing train/holdout membership. No target access,
+Query representation change, new loss, training or REIN extension in this gate.
+Existing model APIs and historical experiments remain unchanged. Historical
+Static R=2 mIoU is not a strict-DG M0 result. The old trainer still reads target
+data and is not a valid entry point for new strict-DG experiments.
+All Phase 16 descriptions below are historical records, not active commands.
+
 ## Phase 16 boundary
 
 REIN transfer remains exploratory after CQE's failed accuracy acceptance.

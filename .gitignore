@@ -8,6 +8,8 @@ __pycache__/
 .venv/
 venv/
 .env
+.test-deps-strict-dg/
+.test-tmp-strict-dg*/
 .idea/
 .vscode/
 
