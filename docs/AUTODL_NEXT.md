@@ -1,7 +1,7 @@
 # Phase19 Anchor-only computation: active AutoDL handoff
 
 Updated 2026-10-17. Only this Phase19 section is active. Phase18 is accepted;
-do not repeat its training. Local verification: 443 passed, 1 skipped on
+do not repeat its training. Local verification: 446 passed, 1 skipped on
 Python3.10.20 / torch2.10.0+cu128, CUDA hidden. Bash syntax checks passed.
 
 ## Scope and acceptance
@@ -30,9 +30,15 @@ stability, utility or an independent residual causal effect.
 ## Exact checkout and launch
 
 Replace FULL_40_CHARACTER_SHA_FROM_CODEX with the literal full SHA in the
-final handoff. Preserve existing AutoDL outputs.
+final handoff. Preserve existing AutoDL outputs. Paste the ENTIRE block:
+the explicit child bash isolates exit/set options from the terminal shell.
+Earlier inline exit guards could close the interactive terminal on failure.
+The launcher now checks prerequisites and retains existing artifacts/logs;
+if a previous attempt exists, return its report/log instead of deleting it.
 
 ```bash
+bash <<'BASH'
+set -euo pipefail
 cd /root/autodl-tmp/CausalQ_DG || exit 1
 EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
 git fetch origin codex/strict-dg-source-split || exit 1
@@ -43,23 +49,20 @@ export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
 export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
 export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
 nvidia-smi
-mkdir -p "$CAUSALQ_OUTPUT_ROOT/phase19"
-LAUNCH_LOG="$CAUSALQ_OUTPUT_ROOT/phase19/ANCHOR_COMPONENT_READONLY_${EXPECTED_SHA:0:7}_launcher.log"
-test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
-nohup bash scripts/check_anchor_query_effect_phase19.sh "$EXPECTED_SHA" \
-  > "$LAUNCH_LOG" 2>&1 < /dev/null &
-echo "anchor_component_pid=$!"
-echo "launcher_log=$LAUNCH_LOG"
+bash scripts/launch_anchor_query_effect_phase19.sh "$EXPECTED_SHA"
+BASH
+echo "Launch check finished; terminal remains open."
 ```
 
 Runtime remains /root/autodl-tmp/envs/causalq-dg/bin/python,
 torch2.7.0+cu126 / transformers4.56.1, offline DINOv3-L, strict deterministic
 algorithms, TF32 true, cuDNN benchmark false, CUBLAS workspace :4096:8.
 
-Progress (in the same terminal):
+Progress (also works in a newly opened terminal):
 
 ```bash
-tail -n 60 "$LAUNCH_LOG"
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_${SHA}_launcher.log"
 ```
 
 ## Return complete evidence
@@ -69,6 +72,8 @@ compressed report/checksum bytes. components.jsonl stays on AutoDL; the
 report contains every component row. Do not upload or edit the checkpoint.
 
 ```bash
+bash <<'BASH'
+set -euo pipefail
 SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
 export ANCHOR_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_${SHA}"
 (cd "$ANCHOR_OUT" && sha256sum -c SHA256SUMS) || exit 1
@@ -81,7 +86,20 @@ for name, marker in [('anchor_report.json','ANCHOR_REPORT'),('SHA256SUMS','SHA25
     print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
     print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw,mtime=0)).decode('ascii'))
 PY
+BASH
 ```
+
+If the terminal previously closed, first inspect the old attempt without
+rerunning it:
+
+```bash
+tail -n 80 /root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_4347352_launcher.log
+ls -ld /root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_4347352*
+```
+
+Missing old logs are diagnostic, not a reason to close the terminal. If an
+old report exists, return it before launching the new revision. The fix
+changes launch handling only, not the GPU gate or experimental mechanism.
 
 If the gate fails, return anchor_report.json and the launcher log. Stop here:
 no training, new loss or target access is authorized by this handoff.

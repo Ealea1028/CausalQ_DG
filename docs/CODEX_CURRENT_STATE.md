@@ -1,5 +1,12 @@
 # CausalQ_DG_1016 repository audit
 
+Phase19 launch handling fix (2026-10-17): earlier pasted exit guards could
+terminate the interactive shell if a precheck failed. The handoff now uses
+an explicit child bash, and a dedicated launcher checks prerequisites,
+preserves existing outputs and reports immediate background failures. No
+model, data, loss or GPU acceptance changes. Inspect any old 4347352 run
+before retrying; terminal closure alone does not prove inference failed.
+
 Phase19 / Priority2 active (2026-10-17): Phase18 accepted separately at
 b3a017b. Existing segmentor has opt-in include_anchor components, repeated
 anchor states through the same head/cached image tokens, class-specific
