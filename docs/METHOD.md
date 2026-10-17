@@ -1,5 +1,15 @@
 # Method contract
 
+Phase20 current full-source boundary (2026-10-17): gate20 is accepted at
+8500976. Same component metrics/checkpoint, now all2497 frozen source IDs
+and systematic20-image visual audit.4994 forwards, no optimizer, new loss,
+mIoU, target access or selection. Byte-audit/replay the accepted gate20,
+keep original artifacts and model/style/RNG immutable; return full CSV/index/
+figures outside Git for local review. Raw variance hypothesis is not replaced
+by RMS-normalized ordering; this early engineering checkpoint cannot establish
+semantic modes, DG utility or final-method validity. Earlier pending20-image
+descriptions below are historical. See QUERY_COMPONENT_DIAGNOSTICS.md.
+
 ## Active boundary — Phase20 / Priority3 diagnostics (2026-10-17)
 
 Phase19 accepted separately at 01f59e9; complete pinned report and all16

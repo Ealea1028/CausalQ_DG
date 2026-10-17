@@ -1,5 +1,12 @@
 # Strict-DG research results
 
+Phase20 gate20 accepted at8500976: original/photo responsibility pixel entropy
+0.558807/0.559010 nats; raw anchor/residual variance8.08893e-10/4.47922e-11
+(ratio18.06), RMS-normalized MSE0.00219225/0.00289978. These orderings differ;
+do not claim anchor stability or semantic specialization. Same20-step
+checkpoint only. Full2497 census/systematic figures are next; no new result
+from that run yet. No losses or formal training are added.
+
 Phase20 / Priority3 status (2026-10-17): Phase19 complete evidence is accepted
 at 01f59e9: 16 source views, CE error0, component identity max error5.82e-11,
 peak reserved1.517578125GiB. No accuracy or scientific stability result.

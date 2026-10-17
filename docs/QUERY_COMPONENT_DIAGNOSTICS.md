@@ -1,5 +1,39 @@
 # Phase20 / Priority3 diagnostic contract
 
+## Current scope: full-source completion after gate20 acceptance
+
+Gate20 accepted at8500976. The same CLI keeps its default20-sample behavior;
+explicit --full-source with --diagnostic-dir enables exactly2497 source IDs
+in frozen manifest order. No arbitrary budget/checkpoint extension. Original
+gate20 report/checksum/3 CSVs are byte-audited before CUDA and after analysis.
+The20 overlap members reproduce seeds/input hashes and effect summaries;
+parameter CSV must reproduce the original bytes. Metric comparison tolerance
+is rel1e-6/abs1e-12, not a change to the <=1e-6 decomposition criterion.
+
+All2497 per-image summaries/hashes go into sample_index.jsonl. Main report
+includes the20 replay members, global and per-class effects, per-class/per-slot
+responsibility, raw-variance difference/win counts, full file hashes and
+environment. Empty images/regions have explicit missing-value denominators.
+This is a source census for one engineering checkpoint, not a training-seed
+or scene-independent statistical claim; only one photo draw per image.
+Magnitude and both raw/normalized variance remain separate. Do not add an
+Anchor-CQE loss merely because a normalized diagnostic looks favorable.
+
+Use cached outputs to generate overview/effect/responsibility PNGs for each
+of the same20 hash-selected images; no extra backbone pass. Fixed5 classes
+road0/building2/vegetation8/car13/person11 include absent/unsuccessful cases.
+Effect rows share signed scales across full/anchor/residual and both views;
+responsibility remains native-grid attribution on[0,1]. Matplotlib Agg output
+contains scale metadata/class GT counts; input normalization is the fixed
+source ImageNet normalization. Source-GT/prediction use shared19-class palette.
+Rendering is isolated from all RNG, including failure paths. CPU synthetic
+figures were rendered and visually checked; actual-source figures need AutoDL
+and subsequent local result review.60 PNGs plus CSVs/index are packaged in
+analysis_export.zip outside Git. Main report and SHA256SUMS are exported
+separately. No raw weights/checkpoint or full dataset enters that archive.
+
+## Original accepted gate contract
+
 This phase adds analysis only, after accepted Phase19 at 01f59e9. Existing
 model, parameters, APIs, checkpoint, objective and intervention ranges are
 unchanged. No optimizer, training, target access, mIoU selection or new loss.

@@ -1,4 +1,103 @@
-# Phase20 gate20 accepted — next local scope is full source analysis
+# Phase20 active — full source census and systematic figures
+
+Gate20 accepted separately at8500976. Current action completes Priority3
+analysis on the same20-step engineering M1 checkpoint: all2497 source holdout
+images, one original and one seeded photo view each,4994 forwards, zero
+updates. No new model, loss, checkpoint selection, mIoU or target access.
+
+Local verification:493 passed/1 skipped, Python3.10.20/torch2.10.0+cu128,
+CUDA hidden, OMP1/MKL1/sequential MKL. Existing Windows symlink test is skipped.
+Synthetic overview/effect/responsibility figures were rendered and inspected;
+Bash syntax and Git whitespace checks pass. Actual-source figures/full
+metrics remain pending AutoDL.
+The old gate20 is not rerun separately; its20 members are checked during the
+full census for exact seed/input replay and metric agreement. Parameter CSV
+must reproduce its accepted hash. Do not interpret this early checkpoint as
+a formal M1/DG result or substitute normalized variance for the raw hypothesis.
+
+Before GPU/data, audit all original files from Phase18,19 and gate20. Require
+unchanged model/style/all RNG and original files after analysis. Expected
+responsibility/effect CSV row counts189772/142329;19 parameter pairs.
+Generate60 PNGs for the same fixed20 images: overview, signed effect maps,
+native-grid responsibility. Show road/building/vegetation/car/person in every
+sample, including absent/unsuccessful cases. Same signed scale across all6
+effect maps for each class; fixed[0,1] responsibility scale.
+
+## Exact checkout and safe launch
+
+Replace FULL_40_CHARACTER_SHA_FROM_CODEX with the literal final handoff SHA.
+Paste the entire child-bash block. Preserve all previous run directories.
+Matplotlib is already a project dependency; install the pinned version only
+if missing. The script records plotting/runtime versions before inference.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+"$PY" -c 'import matplotlib' || "$PY" -m pip install matplotlib==3.10.1
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+bash scripts/analyze_query_components_full_phase20.sh "$EXPECTED_SHA"
+BASH
+echo "Launch check finished; terminal remains open."
+```
+
+Pinned main runtime unchanged: torch2.7.0+cu126/transformers4.56.1, offline
+DINOv3-L, BF16, GPU0, workers0, strict deterministic algorithms, TF32true,
+cuDNNbenchmarkfalse, CUBLAS :4096:8. MKL sequential/one thread for plotting;
+this avoids the local Windows NumPy/MKL native abort seen in initial plotting
+QA without changing effect definitions or GPU precision.
+
+## Monitor and return
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 80 "/root/autodl-tmp/outputs/CausalQ_DG/phase20/QUERY_COMPONENT_CENSUS2497_${SHA}_launcher.log"
+```
+
+Expect component_census_exit_code=0 and ok=true. Export complete report and
+checksum bytes only after completion:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export COMPONENT_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase20/QUERY_COMPONENT_CENSUS2497_${SHA}"
+cd "$COMPONENT_OUT"
+sha256sum -c SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['COMPONENT_OUT'])
+for name, marker in [('component_effect_report.json','CENSUS_REPORT'), ('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+ls -lh analysis_export.zip
+BASH
+echo "Evidence export finished; terminal remains open."
+```
+
+Return final console and four hash/base64 lines. Also download/upload
+analysis_export.zip using the AutoDL file panel: it contains full3 CSVs,
+all2497 sample summaries/input hashes and60 PNGs for local result/visual QA.
+It contains source previews and must never enter Git. Report retains compact
+per-class/per-slot summaries and the20 replay members, not2497 verbose rows.
+No new checkpoint or raw dataset bundle is produced.
+
+If failed, preserve files and return full report/log without rerunning.
+Stop here: no training, new loss or target access.
+
+---
+
+# Archive: Phase20 gate20 accepted — previous local scope
 
 Complete returned report/checksum is pinned and accepted by
 tools/audit_query_component_diagnostics.py. Do not repeat the20-image gate.

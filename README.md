@@ -2,6 +2,13 @@
 
 ## Active phase — Phase20 / Priority3 — 2026-10-17
 
+Current action after accepted gate20 at8500976: full2497 source-holdout census
+and systematic20-image/five-class visual audit,4994 forwards and zero updates.
+Same20-step engineering checkpoint; no new loss or target access. Raw and
+RMS-normalized variance remain separate; no anchor-stability/DG claim from
+the bounded gate. See docs/AUTODL_NEXT.md for exact full-census handoff.
+Earlier gate20 launch descriptions below are historical.
+
 Gate20 complete report/checksum now accepted; do not repeat it. Next remains
 Priority3 full-source census and systematic visual audit, same early M1
 checkpoint and zero updates. No raw anchor-stability claim from the sample.

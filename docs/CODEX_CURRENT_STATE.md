@@ -1,5 +1,13 @@
 # CausalQ_DG_1016 repository audit
 
+Phase20 full-source completion active: accepted gate20 at8500976, now exact
+all2497 source-holdout census and cached-output figures for same20 hash-picked
+images/classes0/2/8/13/11. No training/newloss/target. CLI --full-source keeps
+old default20 behavior, audits/replays accepted20 input/metric/parameter hashes,
+preserves model/RNG/files and exports full CSV/sample-index/60PNG archive.
+CPU synthetic render/replay/audit tests run with sequential MKL; source/GPU
+results and actual-source figure review remain pending AutoDL.
+
 Phase20 gate20 accepted (2026-10-17): complete report7a158511... and checksum
 aed313bc... audit pass, all20 seeds/40 forwards, zero updates, 19 parameter
 pairs/1520 responsibility/1140 effect rows. Raw anchor variance8.08893e-10

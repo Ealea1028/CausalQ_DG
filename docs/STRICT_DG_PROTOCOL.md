@@ -1,5 +1,14 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Current Phase20 completion: accepted diagnostic gate20 at8500976. Full2497
+source-only census/4994 forwards, same immutable engineering checkpoint,
+same metric definitions and per-ID styles. Fixed20 cached-output visual
+panels, audit all upstream artifacts before/after, replay prior20 input/
+parameter hashes and summary values. No optimization/target/accuracy-based
+selection. Source previews/CSVs remain outside Git. Full-source result is
+descriptive for the early checkpoint, not a formal M1 or scene-independent
+stability/utility result. Earlier20-image pending scopes below are archived.
+
 Active Phase20 boundary: Phase19 accepted at 01f59e9. Diagnostic analysis only,
 same immutable Phase18 M1 checkpoint, fixed20 source holdout IDs, deterministic
 per-ID original/photo views, zero optimizer updates. No target access or
