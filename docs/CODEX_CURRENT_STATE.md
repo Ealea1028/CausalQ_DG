@@ -1,5 +1,14 @@
 # CausalQ_DG_1016 repository audit
 
+Phase20 closed (2026-10-17): analysis_export supplied locally,64 hashes pass;
+independent CSV reduction reproduces142329 effect/189772 responsibility rows,
+all2497 sample and per-class/slot summaries.60 PNGs decode and all20 fixed
+samples reviewed in overview/effect/responsibility contacts, native-size21312
+effects/16752 overview spot checks. Raw hypothesis unsupported, no Anchor-CQE.
+Pinned raw/completion review certificates; original artifacts ignored by Git.
+Next separate scope: M1 schema2 fresh-process resume readiness before formal
+M0/M1 baselines. No source-analysis repeat or raw-file transfer remains.
+
 Phase20 full census report verified (2026-10-17): report88dd5291... and
 checksum53e67407... match complete bytes. All2497 IDs/4994 forwards, prior20
 replay and weighted per-class summaries pass metadata audit. Raw anchor/

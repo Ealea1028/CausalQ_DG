@@ -36,5 +36,6 @@ analysis/style_examples/
 *.7z
 
 # Keep small experiment summaries only
+/analysis_export/
 experiments/*/checkpoints/
 experiments/*/logs/

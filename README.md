@@ -2,6 +2,12 @@
 
 ## Active phase — Phase20 / Priority3 — 2026-10-17
 
+Priority3 complete: returned64 files byte-verified, raw CSVs independently
+recomputed, all20 fixed samples visually reviewed. No further transfer or
+inference. Raw anchor stability is unsupported at the20-step checkpoint;
+no new Anchor-CQE. Next local scope is M0/M1 baseline readiness. Pending
+transfer statements below are historical.
+
 Latest: full2497 census report/checksum verified;0/2497 images have lower
 raw anchor variance (per-image19-class macro). Analysis archive/actual source
 figures are not returned yet. Current action transfers the existing45MiB

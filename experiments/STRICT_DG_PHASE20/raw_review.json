@@ -1,0 +1,440 @@
+{
+  "schema_version": 1,
+  "phase": 20,
+  "source_count": 2497,
+  "files_sha256": {
+    "effect_statistics.csv": "48d501321f0e6f334ef1fc88de319eb2b6abff833c9068a40c66d5560148d7dd",
+    "query_similarity.csv": "0e7b28f1d5aa91b3b2ffa022d684da7bf67653e0cc549a56f9a1e2505c6eb496",
+    "responsibility.csv": "7a21ea31a1dacd897923f576ffa280ca746bfcc66e44c1d79f0a1b6005ff5575",
+    "sample_index.jsonl": "71da8500165a6af05be2693d585447a0ca01b090c91d511a9f2ac10e08bced1f",
+    "figures/02652/effects.png": "8876419533ea9aa4405213e44e0ac4dd11c18ad415b78cc32d600e7e1fd4a952",
+    "figures/02652/overview.png": "8806331d70f2bdcb3a9e87a80bd3d6c398e3f205e37b3a29a273a7e329ec8a51",
+    "figures/02652/responsibility.png": "0709a2d56110db77ac2303e8c175586f8507bf47625cfc962a571e62bbec852f",
+    "figures/04311/effects.png": "b12b5dea1bc423611d23de4723fb908510d2020e12aec7da39e5f833f3804d58",
+    "figures/04311/overview.png": "6fd8ebe60ae9fe4bb5d2d44111ed127d3aced2e06e615828242bc00315cad2ae",
+    "figures/04311/responsibility.png": "868aacb79beae88fae4b1beae2c20375e674e01353d62faef2b6f5633a69012c",
+    "figures/04604/effects.png": "10d7d3ee046ecd229aabf2243bebc9189bb1a54a7ed249d2229e8246e911745a",
+    "figures/04604/overview.png": "44a2a530c5b1d5b725dba2a5aebdafd97e955811851c6b0a58f5fe062d791fb0",
+    "figures/04604/responsibility.png": "1a08fca9416be0594578fc5619127c5148295d497dded7334a278878ca1464c1",
+    "figures/04806/effects.png": "66e92403fb4f76247b9ae93b4d243dd48d618b2ddb921dc52fc4f0662477bec9",
+    "figures/04806/overview.png": "05813b27b58536ea77bd7fd922e2b95a545e40ae7e133da471a41c2f03a736de",
+    "figures/04806/responsibility.png": "aa28348466362bfc475049f18b8ee5d2b8541110993428258cb133138bbbd7cf",
+    "figures/05375/effects.png": "5c6af5b8ab12a8d22c1b8add0b3aa9d76159c138e93beec8a3832b60350768c1",
+    "figures/05375/overview.png": "f38b35e5b0f931df68a765c61e7569c4110e57b63fc712654d84e8cad842719c",
+    "figures/05375/responsibility.png": "a5780302ccd2774ab2e70f3a36156ce69d6ea64c5e6c4ea2edb288a00c363432",
+    "figures/06458/effects.png": "dc5631b0c989b98be771e3cc324bd760376a443a30607a5801ba681b8de5d5db",
+    "figures/06458/overview.png": "de7cafffff4e3e9feb67cad62d827fb7908b3d4120b22e6ad3fafc9cb0521753",
+    "figures/06458/responsibility.png": "df928cacf4d34ef65d1825ef562c051f5969724a53286bdf251c51d0af40fd6b",
+    "figures/06990/effects.png": "d4546fe4d14e4d290d3d4c7394881ccf5549d1b3a4b50e0c8ad68056137a5fb3",
+    "figures/06990/overview.png": "6fef765f86acdace8468f8193ab432c53890d8dce3c6f0a599aa74970b501dc2",
+    "figures/06990/responsibility.png": "078f9b12b758d8495fcc06491c4c61ead085de482ad392d9bd7ccd3124740b71",
+    "figures/07045/effects.png": "9f952f9cf08a25fe2b98cb7b1591edabd508c6f2a7a084914c59bc02c3b9232a",
+    "figures/07045/overview.png": "7a9c0f08accb623a96a2561d171fee5dd7dde386f1083a160bdf81f0e65aca85",
+    "figures/07045/responsibility.png": "88c693ce57d254ab8603e8420ad70b7548e290640b929e16b32fe812386d18ab",
+    "figures/07551/effects.png": "8676dab173fcccfeeb1c6454e421149921e5c8b0870046fb153187f254699389",
+    "figures/07551/overview.png": "5b5edf5434e572c95d80a552227d7d3ebbece26c488f36dc2160aed908717702",
+    "figures/07551/responsibility.png": "e57075ae4343fa4e3b39433afdbd6ee5a4a9558d5297e31358bfcb8778288642",
+    "figures/11114/effects.png": "2ff5682756a8f0eb4ace21707dfbb9c2420c95b116c1a5e87a0927a46fbca454",
+    "figures/11114/overview.png": "4e953f9349f7483afdd341608a0f9856a8857ac7d4c0ebb8a53f4666ec804a2d",
+    "figures/11114/responsibility.png": "7ba229fe2e59546f98bf7c6511ae3ed19b594b4f008f13e0ff38b58517f1a99b",
+    "figures/13564/effects.png": "c401d3c14efe9c0150bcd36ed9e0726b31a5a34d7fd66cd354a0960495e969b2",
+    "figures/13564/overview.png": "ea7a6a9c71365ce1c79dce79230a625dcea3be36a4923b893e23288324f8e9ca",
+    "figures/13564/responsibility.png": "6313486b607759b1ec28182a2cf7b6b22b71fce5ad227297ae33582a5d8df26b",
+    "figures/14630/effects.png": "f03dd0e73734157e74e9aaa8a6865e1ebcf721a6b9e885b8a7f554ad65c60f6e",
+    "figures/14630/overview.png": "e95ff508a8fc15dddfcd930220b6924dfeee6a59a020e1d1d483f7e53c1b53f2",
+    "figures/14630/responsibility.png": "c19410aed5549301e46616a3c02f337ac7b95c92ba81143c33092bae6812edde",
+    "figures/16752/effects.png": "abe528a29f2e75a3bf97214afc3dc222101e960ed8945ce52c81da9c0fae154f",
+    "figures/16752/overview.png": "7bca0ddec38ab6879c2281f3062420de84c6488c8199b1c30ceb1152bc0f2f3c",
+    "figures/16752/responsibility.png": "a1c2c4a3c8c9cc8eb80d89ef307fda68786a789efa81575c704721cf05ae8db4",
+    "figures/18358/effects.png": "be466439a549897bac14e29d78e245a026d4f2f04e12a64851306193f268395b",
+    "figures/18358/overview.png": "d4adc866ee2ad3abf6400a26047f87a4c959b0c2771eea76c0e9129beb440612",
+    "figures/18358/responsibility.png": "1098cd4c913b4139400a3f97ab29402ae3f17a458256855d8f48bfda21122ced",
+    "figures/19786/effects.png": "612eace8990d101b5cfbc731fa91b4bd7f4941b2fb49e7042467278a7199a862",
+    "figures/19786/overview.png": "22334a631ed3fd4d7cfe18b3e009fa32cd91f444d048c94056fee36081b1a7dc",
+    "figures/19786/responsibility.png": "85589379471498ce2e5c24d770ec9898d138fb014ea0fd7bad7cf3afda63f76e",
+    "figures/20332/effects.png": "e4062aea0a60dc71aa8c8eeceb22064232fbbbebb3414eb2c57dcd9e5741fb62",
+    "figures/20332/overview.png": "fcb726c6839f14ddc6550a2908308f893f507db166ba17531c645772c799d854",
+    "figures/20332/responsibility.png": "87a517d5e791dd6e3da15de2dd9abf8b3d555851c60c8261ef49fdd6b3455af5",
+    "figures/20991/effects.png": "7fd8cae6ce05093c302d0c2f422f2995f45b47e1ff3d37ebd8bd81e2fc72bd3e",
+    "figures/20991/overview.png": "25efd638c5354a2c8b09764a3766d7726b4cfef5049e0c6243819db5c81a6f33",
+    "figures/20991/responsibility.png": "29458199988ab7c5b8d9b60c59c7e84b4fd924006f66b7511281911546238775",
+    "figures/21312/effects.png": "f6c064dbd52737f32f4b8aa766a29810c4106721733281f58c07b13cc221d13a",
+    "figures/21312/overview.png": "0326ad1d8d9b92c16ac900a21bcc187f2fa2ddeba1a2e804c5c4c266bb3c72c8",
+    "figures/21312/responsibility.png": "7e429688266e8a24e6b0a09bd83274b727b43b73e147d90379fd90354bf32dbf",
+    "figures/22066/effects.png": "8452243f8a5ec7f20381dfcd9cce8832ffe858a22afc615dee6133fddcd44bea",
+    "figures/22066/overview.png": "916b2a58e94807b6acae77b565c0f352f77c6a4d41a3fd71fb95b86d6c30f895",
+    "figures/22066/responsibility.png": "92ed5a1fc2248afded7e48f54774d8e635a95cb887ca11b9ac5dccab9fd7b923",
+    "figures/24523/effects.png": "2b93299fac20a9da3a7e51546703af328a0b488d4399f02fdb127a66539435a2",
+    "figures/24523/overview.png": "24e84a224fe161eec50af3381472e91dd52c037f9e6c3d7d04e1ab344782cba5",
+    "figures/24523/responsibility.png": "c480780bb27cb87579e9942c80facd57fe821667014745109563764693a24d2d"
+  },
+  "effect_row_count": 142329,
+  "responsibility_row_count": 189772,
+  "file_bytes_verified": true,
+  "raw_csv_independently_reviewed": true,
+  "all_image_class_and_slot_summaries_reconstructed": true,
+  "sample_index_coverage_exact": true,
+  "raw_anchor_variance_lower_image_count": 0,
+  "png_decode_count": 60,
+  "figures": [
+    {
+      "path": "figures/02652/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/02652/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/02652/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/04311/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/04311/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/04311/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/04604/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/04604/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/04604/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/04806/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/04806/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/04806/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/05375/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/05375/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/05375/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/06458/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/06458/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/06458/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/06990/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/06990/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/06990/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/07045/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/07045/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/07045/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/07551/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/07551/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/07551/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/11114/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/11114/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/11114/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/13564/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/13564/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/13564/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/14630/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/14630/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/14630/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/16752/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/16752/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/16752/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/18358/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/18358/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/18358/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/19786/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/19786/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/19786/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/20332/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/20332/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/20332/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/20991/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/20991/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/20991/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/21312/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/21312/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/21312/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/22066/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/22066/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/22066/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    },
+    {
+      "path": "figures/24523/effects.png",
+      "width": 1920,
+      "height": 1200
+    },
+    {
+      "path": "figures/24523/overview.png",
+      "width": 1920,
+      "height": 384
+    },
+    {
+      "path": "figures/24523/responsibility.png",
+      "width": 1440,
+      "height": 1200
+    }
+  ],
+  "actual_figures_visually_reviewed": false,
+  "effect_summary": {
+    "full": {
+      "original_mean_abs": {
+        "mean": 0.0015151057511803923,
+        "defined_count": 47443
+      },
+      "photometric_mean_abs": {
+        "mean": 0.0015117277222738798,
+        "defined_count": 47443
+      },
+      "cross_view_population_variance": {
+        "mean": 6.343051331643083e-10,
+        "defined_count": 47443
+      },
+      "rms_normalized_pair_mse": {
+        "mean": 0.002807425324985012,
+        "defined_count": 47443
+      }
+    },
+    "anchor": {
+      "original_mean_abs": {
+        "mean": 0.0017685067624951653,
+        "defined_count": 47443
+      },
+      "photometric_mean_abs": {
+        "mean": 0.0017644335503285247,
+        "defined_count": 47443
+      },
+      "cross_view_population_variance": {
+        "mean": 8.426709553694269e-10,
+        "defined_count": 47443
+      },
+      "rms_normalized_pair_mse": {
+        "mean": 0.002530159978883396,
+        "defined_count": 47443
+      }
+    },
+    "residual": {
+      "original_mean_abs": {
+        "mean": 0.00029886662751934,
+        "defined_count": 47443
+      },
+      "photometric_mean_abs": {
+        "mean": 0.0002983295077573139,
+        "defined_count": 47443
+      },
+      "cross_view_population_variance": {
+        "mean": 4.512755527328977e-11,
+        "defined_count": 47443
+      },
+      "rms_normalized_pair_mse": {
+        "mean": 0.00303172432260234,
+        "defined_count": 47443
+      }
+    }
+  },
+  "target_data_accessed": false,
+  "formal_training_authorized": false
+}

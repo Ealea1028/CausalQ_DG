@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "phase": 20,
+  "producer_git_sha": "79e440b5e78b34e39ef1792e67807ba164d6752e",
+  "raw_review_sha256": "801cf67d879bb995c793b9f9e6d1beaf080e415731c8cd80e444ac15c94f5558",
+  "raw_csv_independently_reviewed": true,
+  "actual_figures_visually_reviewed": true,
+  "visual_review_scope": "All20 fixed samples in overview/effect/responsibility contact sheets; native-size first/last spot checks",
+  "native_size_spotchecks": [
+    "figures/21312/effects.png",
+    "figures/16752/overview.png"
+  ],
+  "source_geometry_alignment_accepted": true,
+  "shared_effect_scales_accepted": true,
+  "ignore255_regions_consistent": true,
+  "reviewed_source_preview_count": 20,
+  "reviewed_png_count": 60,
+  "priority3_engineering_complete": true,
+  "raw_anchor_stability_hypothesis_supported_at_this_checkpoint": false,
+  "new_anchor_cqe_loss_authorized": false,
+  "formal_training_authorized": false,
+  "target_data_accessed": false,
+  "limitation": "20-step engineering checkpoint only; responsibility attribution is not semantic specialization or causal utility"
+}

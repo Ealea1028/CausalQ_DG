@@ -1,4 +1,22 @@
-# Phase20 active — transfer existing analysis archive only
+# Phase20 complete — no further transfer or GPU analysis
+
+The extracted directory was supplied locally at analysis_export/ (ignored
+by Git). All64 file hashes pass; independent CPU/math.fsum CSV recomputation
+reproduces all image/class/slot/global aggregates, masks, denominators and
+variance comparisons. All60 PNGs decode; all20 fixed samples were visually
+reviewed in three contact sheets, with native-size first/last spot checks.
+Pinned local records: raw_review.json and completion_review.json, audited by
+tools/audit_query_census_completion.py. No transfer or inference repeat.
+
+Priority3 diagnostic engineering is complete. Raw anchor stability remains
+unsupported at this20-step checkpoint; no new Anchor-CQE loss. Next sequential
+local scope is M0/M1 formal-comparison readiness, including independent M1
+continuation using the schema2 source runner. Formal runs/target access remain
+blocked until that dedicated handoff. Earlier transfer requests are archived.
+
+---
+
+# Archive: Phase20 transfer existing analysis archive — INACTIVE
 
 Full census finished at79e440b. Complete report/checksum bytes are locally
 verified by tools/audit_query_component_census.py; see

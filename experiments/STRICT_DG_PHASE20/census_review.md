@@ -1,4 +1,21 @@
-# Full-source census report verified; raw/visual review pending — 2026-10-17
+# Full-source census complete — 2026-10-17
+
+Completion update: extracted artifacts supplied locally at project
+analysis_export/. All64 SHA256 hashes match; independent CPU/math.fsum
+reconstruction reproduces all142329 effect/189772 responsibility rows and
+all2497 image/class/slot/global summaries, GT masks/denominators/ratios and
+raw-variance comparison.60 PNGs decode. All20 fixed cases reviewed in
+overview/effect/responsibility contact sheets; native-size first21312 effects
+and last16752 overview inspected for scales, ignore regions and alignment.
+No mismatched geometry or scale substitution observed. Coarse predictions,
+broad car/person effects and asymmetric slot usage are expected diagnostics
+of this early state, not proof of semantic modes or causal usefulness.
+
+raw_review.json pins independent recomputation; completion_review.json pins
+the manual visual scope separately (the automated record does not claim
+visual judgment). Priority3 engineering is complete. No further file transfer
+or source-analysis run is required. Original artifacts are ignored by Git.
+The earlier pending-file narrative below is retained for provenance.
 
 Complete return report SHA88dd5291bc163165f7f174c9820f5b2f8924fffb82c230de76d8b9e1dbcd4de5
 and checksum SHA53e6740705c8b3ad88e66cfd98d70a3c2514b9eed00f4e64af77c3a302e2b4b1
