@@ -1,4 +1,16 @@
-# AutoDL next: Phase 17 — read-only complete pilot report return
+# Phase17 source-development engineering accepted
+
+Complete pilot report and original checksum manifest recovered byte-exactly.
+See experiments/STRICT_DG_PHASE17/pilot500_complete_review.md and the pinned
+auditor. No further Phase17 GPU run is needed. Do not rerun the 500-step pilot.
+Formal training and target access remain blocked. Final target manifest and
+evaluator execution are deferred to final architecture/weights freeze. The
+next sequential local implementation scope is Priority1 Centered Query, with
+a new bounded engineering gate prepared separately. No new loss/CQE now.
+
+---
+
+# Archive: completed full pilot return — INACTIVE
 
 Updated 2026-10-17. Only this top section is active. The operator reports
 source_runner_pilot_exit_code=0 at clean 482ef26. Do not rerun the 500 updates

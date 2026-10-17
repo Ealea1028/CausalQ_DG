@@ -1,5 +1,12 @@
 # Strict-DG research results
 
+Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
+recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
+runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a
+500-step diagnostic, not formal M0. Earlier missing-byte descriptions below
+are historical. See Phase17 pilot500_complete_review.md. No further source
+pilot repeat; formal training and final target execution remain blocked.
+
 Pilot500 partial return (2026-10-17): 482ef26 reports exit 0, source mIoU
 0.35724184600067665 (independent local recomputation 0.3572418460006766),
 2,497 holdout IDs, 1,276,971,688 valid pixels, peak reserved 1.330078125 GiB.

@@ -1,5 +1,12 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
+recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
+runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a
+500-step diagnostic, not formal M0. Earlier missing-byte descriptions below
+are historical. See Phase17 pilot500_complete_review.md. No further source
+pilot repeat; formal training and final target execution remain blocked.
+
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 

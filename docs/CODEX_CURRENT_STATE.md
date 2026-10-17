@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Phase17 source-development acceptance (2026-10-17): complete pilot JSON and
+SHA256SUMS were recovered from gzip/Base64 with exact hashes d5b4747b...8ffd1b
+and 8ea73a53...3eb615. Full root, nested worker bytes, original checksum
+provenance, 500/250 update budget, fixed-final checkpoint and source confusion/
+IoU/state-isolation contracts pass. Source mIoU 35.7242% is pilot-only.
+The remaining statements about missing report bytes below are historical.
+Source-only engineering is accepted; formal training remains blocked. Final
+Cityscapes manifest/evaluator execution is deferred until architecture/weights
+are frozen, with no target access authorized. Next local scope is Priority1
+Centered Query only; no CQE/effect/loss changes.
+
 Latest return (2026-10-17): operator reports 482ef26 pilot exit 0. Complete
 visible workers show 250+250 updates and unchanged model/optimizer/RNG during
 full source validation. Local independent matrix/IoU recomputation passes:

@@ -1,5 +1,12 @@
 # Method contract
 
+Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
+recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
+runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a
+500-step diagnostic, not formal M0. Earlier missing-byte descriptions below
+are historical. See Phase17 pilot500_complete_review.md. No further source
+pilot repeat; formal training and final target execution remain blocked.
+
 ## Active boundary — Phase 17 / Priority 0 (2026-10-17)
 
 The user-approved `CausalQ_DG_1016.txt` roadmap begins with a repository audit

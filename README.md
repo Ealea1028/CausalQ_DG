@@ -17,14 +17,13 @@ not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
 The corrected `5dc6caa` 8 versus 4+4 continuation gate is accepted: exact
 trace/model/optimizer/sampler/RNG and matching final checkpoint hashes across
 independent processes; CUDA CE reference loss error 0, gradient error 6.98e-10.
-The operator reports the 482ef26 500-update source runner pilot succeeded:
-250 + 250 across processes, full source mIoU 35.7242% and unchanged training
-state during validation. The supplied text starts midway through the report;
-visible worker/metric checks pass locally, but complete report/checksum bytes
-must be returned read-only before final acceptance. Do not rerun the pilot.
-No formal 40k run, target access or new model/loss mechanism is authorized.
-The runner imports neither the old trainer nor the
-Cityscapes module; shared label helpers retain backward-compatible exports.
+The complete 482ef26 source runner pilot is accepted: exact report/checksum
+bytes recovered and audited, 500 updates with restart at 250, fixed-final
+checkpoint, full source mIoU 35.7242% and unchanged validation training state.
+This is engineering evidence, not formal M0. Next local scope is Priority1
+Centered Query only. No formal 40k run, target access or new loss/CQE now.
+Final target manifest/evaluator execution remains deferred until final
+architecture and weights freeze. Shared label APIs preserve legacy behavior.
 Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.
