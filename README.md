@@ -2,6 +2,10 @@
 
 ## Active phase — Phase20 / Priority3 — 2026-10-17
 
+Gate20 complete report/checksum now accepted; do not repeat it. Next remains
+Priority3 full-source census and systematic visual audit, same early M1
+checkpoint and zero updates. No raw anchor-stability claim from the sample.
+
 Phase19 component engineering is accepted at 01f59e9 from complete pinned
 report/checksum evidence. Current work is read-only responsibility/effect
 diagnostics: fixed20 source holdout IDs x original/photo views, same accepted

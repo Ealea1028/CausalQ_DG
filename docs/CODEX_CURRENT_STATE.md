@@ -1,5 +1,11 @@
 # CausalQ_DG_1016 repository audit
 
+Phase20 gate20 accepted (2026-10-17): complete report7a158511... and checksum
+aed313bc... audit pass, all20 seeds/40 forwards, zero updates, 19 parameter
+pairs/1520 responsibility/1140 effect rows. Raw anchor variance8.08893e-10
+exceeds residual4.47922e-11; normalized MSE ordering differs. No stability
+or utility claim. Continue Priority3 full-source analysis/visualization next.
+
 Phase20 / Priority3 active (2026-10-17): Phase19 accepted at 01f59e9. New
 read-only query_components metrics and analyze_query_components CLI implement
 fixed20 source IDs, deterministic per-ID photometric seeds, two forwards per

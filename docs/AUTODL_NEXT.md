@@ -1,4 +1,16 @@
-# Phase20 active — source responsibility/effect diagnostic gate
+# Phase20 gate20 accepted — next local scope is full source analysis
+
+Complete returned report/checksum is pinned and accepted by
+tools/audit_query_component_diagnostics.py. Do not repeat the20-image gate.
+See experiments/STRICT_DG_PHASE20/gate20_review.md: raw anchor variance is
+higher than residual variance on this early sample; no stability/utility
+conclusion or permission to add a loss. Next local scope is the same
+Priority3 full2497 census and systematic20-image visualization. No training
+or target access. Launch instructions below are historical.
+
+---
+
+# Archive: Phase20 engineering gate20 — INACTIVE
 
 Updated 2026-10-17. Phase19 accepted at 01f59e9; do not repeat its gate or
 exports. Read QUERY_COMPONENT_DIAGNOSTICS.md. Current change is analysis only:
