@@ -5,6 +5,14 @@ development protocol before changing Query representation. Phase 16 stays closed
 
 ## Current gate: exact source checkpoint continuation
 
+The first 08c91d1 attempt stopped at native CUDA NLL forward; no optimizer
+step completed and the continuation gate is not accepted. Retry with the
+same valid-pixel mean CE expressed via FP32 log-softmax/gather/masked sum,
+isolated to this gate and pinned in checkpoint metadata. Synthetic CUDA
+loss/gradient equivalence and exact replay are checked before dataset/weights.
+Native historical CE, model/objective/budget stay unchanged. Strict deterministic
+algorithms remain required. Preserve the failed run and use a new output path.
+
 The original smoke saved-artifact audit and full c7822fd source evaluation are
 accepted. The exact report is saved/pinned, its 19 by 19 matrix independently
 recomputed, all 2,497 IDs match, and eight CE replays have zero error. Source

@@ -9,6 +9,7 @@ import torch
 
 from causalq.utils.checkpoint import trainable_state_dict
 from tools.strict_source_smoke import optimizer_update, restore_compact, tree_digest
+from tools.deterministic_source_ce import deterministic_source_ce
 
 TOTAL = 8
 BOUNDARY = 4
@@ -92,7 +93,7 @@ def run_segment(model, optimizer, train, style, config, output: Path, *, metadat
         photo = style.photometric_view(image)
         fingerprint = tree_digest((image, photo, label))
         row = optimizer_update(model, optimizer, image, photo, label, cursor + 1,
-                               config, device=device, amp=amp)
+                               config, device=device, amp=amp, loss_fn=deterministic_source_ce)
         row.update(source_id=sample["id"], input_sha256=fingerprint)
         records.append(row)
         print(f"source_resume_update={cursor + 1}/{stop}", flush=True)

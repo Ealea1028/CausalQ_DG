@@ -1,5 +1,11 @@
 # Strict-DG research results
 
+Latest engineering return (2026-10-17): 08c91d1 continuous worker exited 1 at
+native CUDA NLL forward under strict determinism, before any optimizer.step().
+No source/target/effect metric or exact continuation acceptance from this run.
+The equivalent deterministic CE retry is pending AutoDL; prior evaluation
+acceptance remains valid. See Phase 17 `resume_failure_08c91d1_review.md`.
+
 As of 2026-10-17, there are no formal M0/M1/P1/M2/M3/M4 or target/effect
 results. The accepted 20-update source-only engineering checkpoint has full
 holdout mIoU 0.12971660656076558; this is a diagnostic, not formal M0 accuracy.

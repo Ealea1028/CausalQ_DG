@@ -1,5 +1,24 @@
 # AutoDL next: Phase 17 — exact source checkpoint continuation
 
+Active retry correction: 08c91d1 stopped in `nll_loss2d_forward_out_cuda_template`
+before the first optimizer step because native CUDA NLL is unsupported under
+strict determinism. The missing resume_report/SHA256SUMS are consequences of
+the first worker failure, not missing successful results. Preserve the old
+M0_SOURCE_RESUME_08c91d1 directory. Review is in
+`experiments/STRICT_DG_PHASE17/resume_failure_08c91d1_review.md`.
+
+The new exact commit uses FP32 log-softmax/gather/masked-sum CE only in the
+continuation gate: L = -sum(valid log p_y)/count(valid). This is the unchanged
+unweighted CE objective with a new reduction implementation, pinned in
+checkpoint metadata. The native CE default used by old smoke/evaluation/training
+is unchanged. Before loading any dataset or foundation weights, each worker
+checks synthetic GPU loss/gradient against native CPU CE (1e-5 loss, 1e-6 grad)
+and two exact GPU replays. Continuation state/trace equality remains exact.
+Strict determinism stays on; never set warn_only or ignore deterministic errors.
+Failure reports now include traceback and worker-failure checksums. Run the
+same commands below with the NEW literal commit from Codex's latest handoff;
+output is automatically a new SHA-named directory. No old output is overwritten.
+
 Updated 2026-10-17. Only this top section is active. Complete source holdout
 and original smoke audits are accepted; do not rerun them. No formal training
 or target data access is authorized.
@@ -112,8 +131,9 @@ Added full-source report auditor, continuation engine, AutoDL worker/comparator,
 shell wrapper, focused tests, saved report/transcript and evidence review.
 Updated status/protocol/result/registry docs and LF pin for the saved report.
 No model, loss, existing smoke/evaluation APIs or historical results changed.
-The full CPU suite passes: 366 passed, 1 skipped in 35.41s; the existing
-Windows unprivileged-symlink skip is unchanged. There are 17 new focused tests.
+The corrected full CPU suite passes: 380 passed, 1 skipped in 30.09s; the
+existing Windows unprivileged-symlink skip is unchanged. The CE correction adds
+14 focused tests; the 17 earlier continuation tests also pass with the new backend.
 Local environment: Python 3.10.20 / torch 2.10.0+cu128 / pytest
 8.4.2, CUDA hidden, OMP threads 1. This is not DINOv3/GPU acceptance.
 

@@ -17,7 +17,12 @@ not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
 Next is a separate source checkpoint continuation gate: continuous 8 versus
 4+4 updates in independent processes, 16 total optimizer calls, workers 0,
 strict deterministic state equality. No formal long run, target access or
-model/loss change is authorized. Old launchers read Cityscapes during development
+model/objective change is authorized. The first continuation attempt at
+`08c91d1` stopped before its first update because native CUDA NLL is not
+deterministic. The retry uses an equivalent FP32 log-softmax/gather valid-pixel
+CE backend only in the continuation gate, with a synthetic CUDA loss/gradient
+preflight. Strict determinism remains enabled; actual GPU acceptance is pending.
+Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.
 The historical status and working-directory narrative below is retained for

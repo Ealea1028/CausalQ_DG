@@ -46,7 +46,8 @@ def precision(device, amp):
     return torch.autocast("cuda", dtype=torch.bfloat16) if amp else nullcontext()
 
 
-def optimizer_update(model, optimizer, image, photo, label, step, config, *, device, amp):
+def optimizer_update(model, optimizer, image, photo, label, step, config, *, device, amp,
+                     loss_fn=segmentation_cross_entropy):
     if not 1 <= step <= UPDATES:
         raise ValueError("Only 20 bounded optimizer updates are authorized")
     trainable = [p for p in model.parameters() if p.requires_grad]
@@ -58,7 +59,7 @@ def optimizer_update(model, optimizer, image, photo, label, step, config, *, dev
             logits = model(view)
             if not torch.isfinite(logits).all():
                 raise FloatingPointError(f"Non-finite {name} logits")
-            loss = segmentation_cross_entropy(logits, label)
+            loss = loss_fn(logits, label)
         if not torch.isfinite(loss):
             raise FloatingPointError(f"Non-finite {name} loss")
         weight = 1.0 if name == "original" else float(config["style"]["lambda_cf"])

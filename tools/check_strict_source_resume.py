@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 import platform
 import sys
+import traceback
 
 import torch
 
@@ -20,6 +21,7 @@ from tools.audit_strict_source_smoke import BACKBONE_STATE_SHA
 from tools.inspect_gta5_source_structure import _git
 from tools.strict_source_resume import run_segment, compare_states
 from tools.strict_source_smoke import tree_digest
+from tools.deterministic_source_ce import BACKEND, cuda_preflight
 from tools.train import PROJECT_ROOT, build_training_datasets, load_config, sha256
 
 
@@ -91,6 +93,7 @@ def main(argv=None):
             torch.use_deterministic_algorithms(True)
             torch.backends.cudnn.benchmark = False
             torch.backends.cuda.matmul.allow_tf32 = True
+            report["loss_preflight"] = cuda_preflight()
             weights = args.pretrained_root / config["model"]["weights_dir"]
             if sha256(weights / "model.safetensors") != config["model"]["weights_sha256"]:
                 raise ValueError("Pinned backbone weight SHA256 mismatch")
@@ -116,8 +119,10 @@ def main(argv=None):
                         "manifest_sha256": report["manifest_sha256"], "target_data_accessed": False,
                         "environment": report["environment"], "schedule_horizon": 40000,
                         "sample_workers": 0, "amp": "bfloat16", "deterministic_algorithms": True,
+                        "loss_backend": BACKEND,
                         "cublas_workspace_config": ":4096:8"}
             start, stop = {"continuous": (0, 8), "prefix": (0, 4), "resume": (4, 8)}[args.mode]
+            report["metadata"] = metadata
             resume = root / "prefix/state.pth" if start else None
             if resume is not None:
                 prefix_report = json.loads((root / "prefix/worker_report.json").read_bytes())
@@ -133,7 +138,7 @@ def main(argv=None):
                           peak_reserved_gib=torch.cuda.max_memory_reserved() / 1024**3)
         report["ok"] = True
     except Exception as exc:
-        report.update(ok=False, error=f"{type(exc).__name__}: {exc}")
+        report.update(ok=False, error=f"{type(exc).__name__}: {exc}", traceback=traceback.format_exc())
     report_path.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(json.dumps(report, indent=2), flush=True)
     if args.mode == "compare":

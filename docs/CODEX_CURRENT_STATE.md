@@ -1,5 +1,14 @@
 # CausalQ_DG_1016 repository audit
 
+Latest correction (2026-10-17): the 08c91d1 continuous worker failed before its
+first optimizer update because torch 2.7.0 CUDA NLL forward lacks deterministic
+support. No exact continuation acceptance. The retry adds an equivalent
+FP32 log-softmax/gather valid-pixel CE backend only to the continuation gate,
+records backend identity, tests CUDA loss/gradient before real inputs and
+keeps strict determinism/exact comparison enabled. Native historical loss is
+unchanged. Failure checksums/tracebacks are now retained. See
+`experiments/STRICT_DG_PHASE17/resume_failure_08c91d1_review.md` and AUTODL_NEXT.
+
 Current update (2026-10-17): the c7822fd full-source report was recovered
 from the pasted console with exact SHA256 a70ddf23...ea0f29c and accepted by
 `tools/audit_strict_source_evaluation.py`. Original smoke byte/checkpoint audit

@@ -25,6 +25,11 @@ model/AdamW/iteration/LR/sampler and Python/NumPy/CPU-CUDA RNG state, plus pinne
 config/backbone/split/Git/runtime metadata. Compare continuous eight updates
 against four plus four across independent processes (16 total calls). Require
 exact trace and final state equality, workers 0 and deterministic CUDA settings.
+The 08c91d1 attempt failed in native CUDA NLL forward before the first update.
+The retry isolates an equivalent FP32 log-softmax/gather valid-pixel CE backend
+to this continuation gate; native historical CE stays unchanged. A synthetic
+CUDA loss/gradient preflight runs before dataset/weight access. Strict
+determinism stays enabled and exact continuation equality is not relaxed.
 The same Static R=2 two-view CE, BF16 and 40k LR horizon are unchanged; no
 holdout/target inference is needed. This is an engineering gate, not the
 ordinary workers-4 trainer or formal training authorization. The old smoke

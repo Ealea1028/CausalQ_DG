@@ -21,6 +21,7 @@ for MODE in continuous prefix resume compare; do
   EXITS=("${PIPESTATUS[@]}")
   set -e
   if [[ "${EXITS[0]}" != 0 || "${EXITS[1]}" != 0 ]]; then
+    (cd "$OUT" && find . -type f ! -name SHA256SUMS -print0 | sort -z | xargs -0 sha256sum > SHA256SUMS)
     echo "source_resume_exit_code=1 failed_mode=$MODE"
     echo "Return worker_report.json/resume_report.json and logs from $OUT; STOP."
     exit 1
