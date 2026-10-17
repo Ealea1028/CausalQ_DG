@@ -1,4 +1,109 @@
-# Phase21 active — bounded M1 schema2 continuation readiness
+# Phase22 active — direct formal M0/M1 seed0 training
+
+The user authorizes assuming current readiness passed and removing repeated
+engineering gates. Phase21 is not claimed as a newly measured CUDA pass.
+Skip the old Phase21 launch below. No data transfers or new smoke/pilot runs
+are required. This release trains the first formal pair from fresh seed0:
+M0 Static R2 and M1 centered Static R2,40000 updates EACH, sequential GPU0.
+Only residual centering differs. No pilot checkpoint is promoted.
+
+Local verification:521 passed/1 skipped (existing Windows symlink permission),
+Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP1/MKL1/sequential MKL.
+Tests cover interrupted M0/M1 recovery with stochastic transforms/dropout and
+epoch rollover, committed artifact tampering, recipe drift, source-only
+imports, and launcher terminal survival. These are CPU tests, not GPU results.
+
+Both use frozen DINOv3-L,512crop,batch1,original+photometric CE,AdamW1e-4,
+wd.01,clip1,40000-step PolyLR.9,BF16,workers0,deterministic gather-based CE.
+Pinned torch2.7.0+cu126/transformers4.56.1 runtime is unchanged. No new loss,
+hyperparameter sweep, target data or target evaluation. Select fixed40000;
+only then run one full2497-image source validation per model. The early
+raw-anchor hypothesis remains unsupported, so Anchor-CQE is not released.
+
+## Start both formal runs
+
+Use the full40-character SHA in the final handoff. Paste the complete child
+bash block; it cannot exit your interactive terminal. The launcher uses
+nohup and an exclusive run lock, then starts M0 followed automatically by M1.
+Do not run the old readiness launcher concurrently on the same GPU.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+bash scripts/train_formal_source_phase22.sh "$EXPECTED_SHA"
+BASH
+echo "启动检查结束；终端保持打开。"
+```
+
+Data/weights defaults are the accepted /root/autodl-tmp/datasets and
+/root/autodl-tmp/pretrained. Python defaults to
+/root/autodl-tmp/envs/causalq-dg/bin/python. No installation is needed.
+Outputs stay outside Git:
+/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_<shortSHA>/.
+
+## Progress and interruption recovery
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_${SHA}_launcher.log"
+```
+
+Progress prints every10 updates, and formal_checkpoint_committed every1000.
+All40 segments per model are one uninterrupted training schedule, not40
+separate experiments. Each checkpoint contains trainable weights, optimizer,
+absolute step, sampler and all RNG state. There are no per-segment GPU
+verification gates or holdout sweeps. A segment is complete only after its
+checkpoint+trace hashes are atomically committed. Partial attempt directories
+are preserved; retries use new directories and restore the last committed
+state. At most1000 uncommitted updates may need replay after interruption.
+Final evaluation can also be retried without retraining completed models.
+All checkpoints remain on AutoDL; ensure sufficient output disk capacity.
+
+If the worker actually stopped, rerun the SAME start block and SAME SHA.
+It recovers automatically; do not delete outputs, manually edit files, or
+switch commits during the run. A duplicate live launch exits due to the lock.
+If a check rejects changed runtime/weights/config, return the last80 log
+lines. Do not force a mismatched checkpoint into the run.
+
+## Return results when both finish
+
+Success prints formal_pair_exit_code=0. Send pair_report.json and
+REPORT_SHA256SUMS; full training traces and checkpoints remain on AutoDL.
+The pair report includes both final source metrics, confusion matrices,
+checkpoint hashes, exact recipe/commit/environment and the assumed-readiness
+annotation. Source mIoU is not target-domain mIoU. Convenient text export:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export FORMAL_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_${SHA}"
+cd "$FORMAL_OUT"
+sha256sum -c REPORT_SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['FORMAL_OUT'])
+for name, marker in [('pair_report.json','FORMAL_PAIR_REPORT'), ('REPORT_SHA256SUMS','REPORT_SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+BASH
+echo "导出结束；终端保持打开。"
+```
+
+Stop after this formal pair and return results. Further experiments and
+eventual frozen target evaluation are subsequent phases.
+
+---
+
+# Archive: Phase21 readiness superseded by user instruction
 
 Phase20/ Priority3 is closed: raw CSVs and actual figures independently
 reviewed; local records are canonical Git LF bytes at9de5b1e. No more source

@@ -1,6 +1,34 @@
 # Method contract
 
-## Active boundary — Phase21 / M0-M1 baseline readiness
+## Active boundary — Phase22 / formal M0-M1 seed0
+
+The user explicitly assumes the pending verification passed and requests
+formal training now. Phase21 CUDA replay is assumed, not newly measured;
+historical evidence stays unchanged. New Phase22 contracts authorize only
+M0/M1 no-CQE seed0,40000 optimizer updates each, fresh identical task-head
+initialization and the same frozen DINOv3-L weights. The only experimental
+difference is M1 centered residuals. Existing deterministic CE, original/photo
+views, AdamW1e-4/wd.01/clip1,40000-step PolyLR,512crop,BF16,R2/static and
+source membership are retained. Workers0 matches the accepted source runner.
+
+No repeated smoke/pilot/independent resume or analysis run is required.
+Necessary guards execute within the actual training launch: exact clean Git
+commit, recipe/weight/split identity, frozen backbone and resumable state.
+Each1000-step segment commits immutable checkpoint+trace hashes; incomplete
+attempts are preserved and ignored, losing at most999 uncommitted updates
+(or1000 if interrupted before the commit marker). Recovery restores the
+sampler, optimizer and all RNG states using the existing schema2 runner.
+Recovery work does not count as extra committed training budget.
+
+Select iteration40000, never best-on-target. Evaluate all2497 source holdout
+images once per completed variant (long edge1024,aspect resize+pad16);
+validation interval changes from500 to40000 to avoid repeated full sweeps.
+Source metrics are source-only and do not establish DG performance. Target
+evaluation and P1/M2/M3 remain subsequent phases; no Anchor-CQE is added while
+the early raw-anchor stability hypothesis is unsupported. Old gate YAMLs
+remain unauthorized and unchanged. Formal configs are under strict_dg/formal.
+
+## Archive — Phase21 readiness, superseded by explicit user authorization
 
 Phase20 raw/visual engineering complete at9de5b1e. The early checkpoint does
 not support raw anchor stability; no Anchor-CQE/new loss. Priority4 readiness

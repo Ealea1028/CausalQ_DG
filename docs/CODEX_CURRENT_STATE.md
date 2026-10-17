@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Phase22 active (2026-10-17): explicit user instruction assumes current
+verification passed and removes repeated readiness gates. This supersedes
+Phase21 pending instructions below without manufacturing a measured CUDA
+pass. Release fresh seed0 M0/M1 no-CQE formal pair,40000 updates each,
+fixed-final selection, source-only final evaluation,1000-update resumable
+segments. Same launcher starts or recovers the pair; no manual chunk handoff.
+Metadata distinguishes user-assumed readiness from measured evidence.
+Training remains pending AutoDL. No target metrics or new loss authorized.
+
+Historical entries below describe earlier boundaries.
+
 Phase21 active (2026-10-17): Phase20 completed with byte-pinned local raw and
 visual certificates, canonical Git bytes verified at9de5b1e. Prepare M0/M1
 no-CQE formal readiness only: M1 schema2 source-runner exact8 vs4+4 across

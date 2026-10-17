@@ -17,3 +17,5 @@ experiments/STRICT_DG_PHASE20/census_SHA256SUMS text eol=lf
 experiments/STRICT_DG_PHASE20/raw_review.json text eol=lf
 experiments/STRICT_DG_PHASE20/completion_review.json text eol=lf
 scripts/check_centered_source_resume_phase21.sh text eol=lf
+scripts/train_formal_source_phase22.sh text eol=lf
+configs/strict_dg/formal/*.yaml text eol=lf

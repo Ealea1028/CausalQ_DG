@@ -1,6 +1,16 @@
 # CausalQ-DG
 
-## Active phase — Phase21 / Priority4 readiness — 2026-10-17
+## Active phase — Phase22 / Priority4 formal M0-M1 — 2026-10-17
+
+User authorizes proceeding on assumed M1 continuation readiness; this is not
+recorded as a measured CUDA pass. No more standalone readiness/pilot/census
+gates. Launch fresh seed0 M0 and centered M1 sequentially,40000 updates each,
+identical original+photometric CE recipe, fixed-final selection, final-only
+full GTA5 source validation. Immutable1000-update recovery checkpoints;
+same command resumes interrupted runs. No new CQE loss or target access.
+See docs/AUTODL_NEXT.md for the single formal launch and result handoff.
+
+## Archive — Phase21 readiness superseded by user authorization
 
 Priority3 is closed with independent raw CSV/actual-source figure review.
 Raw anchor stability is unsupported at the20-step engineering state; no new

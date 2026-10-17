@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "phase": 22,
+  "status": "formal_training_authorized_pending_autodl",
+  "authorization": "User requested assuming current verification passed and proceeding to formal training without repeated low-value gates.",
+  "m1_resume_readiness": "user_assumed_passed",
+  "m1_cuda_exact_resume_measured_this_release": false,
+  "variants": ["M0", "M1"],
+  "seed": 0,
+  "optimizer_updates_per_variant": 40000,
+  "only_experimental_difference": "M1 centered residual parameterization",
+  "initialization": "fresh seed0 head and frozen pinned DINOv3 weights; never promote pilot checkpoints",
+  "objective": "CE(original) + CE(photometric)",
+  "checkpoint_selection": "fixed_final",
+  "checkpoint_interval": 1000,
+  "validation": "complete 2497-image GTA5 source holdout once per final model",
+  "target_data_accessed": false,
+  "new_loss_enabled": false,
+  "gpu_training_completed": false,
+  "local_verification": {
+    "pytest_passed": 521,
+    "pytest_skipped": 1,
+    "skip_reason": "existing Windows unprivileged symlink restriction",
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "cuda_visible_devices": "",
+    "omp_num_threads": 1,
+    "mkl_num_threads": 1,
+    "mkl_threading_layer": "SEQUENTIAL"
+  }
+}
