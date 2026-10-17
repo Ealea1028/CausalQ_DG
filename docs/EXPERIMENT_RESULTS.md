@@ -1,5 +1,11 @@
 # Strict-DG research results
 
+Phase18 status (2026-10-17): Centered Query CPU implementation/tests are
+prepared; no M1 GPU or formal result exists. The next bounded engineering
+gate does not measure mIoU or anchor-effect metrics. Phase17 source pilot is
+accepted with complete pinned report/manifest; older incomplete-return notes
+below are historical. No target/effect evidence is newly claimed.
+
 Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
 recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
 runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a

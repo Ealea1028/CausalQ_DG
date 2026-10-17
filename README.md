@@ -1,29 +1,20 @@
 # CausalQ-DG
 
-## Active phase — 2026-10-17
+## Active phase — Phase 18 / Priority 1 — 2026-10-17
 
-The new [`CausalQ_DG_1016.txt`](CausalQ_DG_1016.txt) roadmap starts Phase 17,
-Priority 0: repository audit and strict-DG protocol preparation. See
-[`docs/CODEX_CURRENT_STATE.md`](docs/CODEX_CURRENT_STATE.md) and
-[`docs/STRICT_DG_PROTOCOL.md`](docs/STRICT_DG_PROTOCOL.md).
-The GTA5 inventory reports 24,966 complete pairs and no usable sequence/scene
-metadata. The deterministic 10% source holdout export reports success with
-22469 train / 2497 validation IDs. The real extracted manifests were verified
-locally and frozen at `4314d61`. The complete source pixel/preprocessing report
-at `cb52071` passes its pinned local audit. The `b16236c` original smoke
-artifact/checkpoint audit and `c7822fd` full 2,497-image source evaluation are
-now accepted. Source mIoU 12.9717% is a diagnostic of the 20-update checkpoint,
-not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
-The corrected `5dc6caa` 8 versus 4+4 continuation gate is accepted: exact
-trace/model/optimizer/sampler/RNG and matching final checkpoint hashes across
-independent processes; CUDA CE reference loss error 0, gradient error 6.98e-10.
-The complete 482ef26 source runner pilot is accepted: exact report/checksum
-bytes recovered and audited, 500 updates with restart at 250, fixed-final
-checkpoint, full source mIoU 35.7242% and unchanged validation training state.
-This is engineering evidence, not formal M0. Next local scope is Priority1
-Centered Query only. No formal 40k run, target access or new loss/CQE now.
-Final target manifest/evaluator execution remains deferred until final
-architecture and weights freeze. Shared label APIs preserve legacy behavior.
+The `CausalQ_DG_1016.txt` Priority0 source-development engineering is accepted.
+The complete 500-update pilot report/checksum is pinned and audited; source
+mIoU 35.7242% remains a diagnostic, not formal M0. No repeats of that pilot.
+
+Priority1 now implements Centered Query as a separate opt-in parameterization:
+e_tilde = e - mean_R(e), q = anchor + e_tilde. Legacy default behavior and
+parameter names remain unchanged. See docs/CAUSAL_QUERY_DECOMPOSITION.md.
+The new M1 config changes only this parameterization; Static R=2, loss,
+style, schedule and frozen DINOv3 remain fixed. Next is a bounded AutoDL
+20-update centered source gate with eight compatibility inputs, algebra/
+gradient/alpha-zero/checkpoint/memory checks. No mIoU, full training, new CQE
+loss or target access. Final target manifest/evaluator execution remains
+blocked until final architecture and weights freeze.
 Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.

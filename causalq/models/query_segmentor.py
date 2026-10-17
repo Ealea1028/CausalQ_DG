@@ -21,6 +21,7 @@ class GroupedCausalQueryBank(nn.Module):
         *,
         num_classes: int = 19,
         queries_per_class: int = 3,
+        centered_residuals: bool = False,
     ) -> None:
         super().__init__()
         if hidden_size < 1 or num_classes < 1 or queries_per_class < 1:
@@ -28,6 +29,7 @@ class GroupedCausalQueryBank(nn.Module):
         self.hidden_size = int(hidden_size)
         self.num_classes = int(num_classes)
         self.queries_per_class = int(queries_per_class)
+        self.centered_residuals = bool(centered_residuals)
         self.class_anchors = nn.Parameter(
             torch.empty(self.num_classes, self.hidden_size)
         )
@@ -44,8 +46,19 @@ class GroupedCausalQueryBank(nn.Module):
     def forward(self, batch_size: int) -> Tensor:
         if batch_size < 1:
             raise ValueError("batch_size must be positive")
-        queries = self.class_anchors[:, None, :] + self.query_residuals
+        residuals = self.get_centered_residuals() if self.centered_residuals else self.query_residuals
+        queries = self.class_anchors[:, None, :] + residuals
         return queries.unsqueeze(0).expand(batch_size, -1, -1, -1)
+
+    def get_anchors(self) -> Tensor:
+        return self.class_anchors
+
+    def get_query_residuals(self) -> Tensor:
+        """Raw learnable residuals; retained independently of parameterization."""
+        return self.query_residuals
+
+    def get_centered_residuals(self) -> Tensor:
+        return self.query_residuals - self.query_residuals.mean(dim=1, keepdim=True)
 
 
 class NullQueryBank(nn.Module):
@@ -330,6 +343,7 @@ class QuerySegmentor(nn.Module):
         alpha_init: float = 0.0,
         interaction: str = "one_way",
         learned_null: bool = False,
+        centered_residuals: bool = False,
     ) -> None:
         super().__init__()
         if not backbone.freeze:
@@ -359,6 +373,7 @@ class QuerySegmentor(nn.Module):
             backbone.hidden_size,
             num_classes=num_classes,
             queries_per_class=queries_per_class,
+            centered_residuals=centered_residuals,
         )
         if interaction == "one_way":
             self.query_attention = QueryCrossAttention(
@@ -518,6 +533,12 @@ class QuerySegmentor(nn.Module):
     def get_query_residuals(self) -> Tensor:
         """Return the learnable within-class residual queries for regularization."""
         return self.query_bank.query_residuals
+
+    def get_anchors(self) -> Tensor:
+        return self.query_bank.get_anchors()
+
+    def get_centered_residuals(self) -> Tensor:
+        return self.query_bank.get_centered_residuals()
 
     def get_query_score_maps(
         self,

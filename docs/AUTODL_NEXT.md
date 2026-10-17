@@ -1,4 +1,122 @@
-# Phase17 source-development engineering accepted
+# AutoDL next: Phase18 / Priority1 — Centered Query gate20
+
+Updated 2026-10-17. Only this top section is active. Phase17 source-development
+engineering is accepted with byte-pinned full pilot evidence at a9c0b39. Do
+not repeat its smoke, continuation, pilot500 or full-source evaluation. Final
+target manifest/evaluator execution remains deferred until architecture and
+weights freeze; no target access or formal training is authorized now.
+
+## Current single mechanism
+
+Explicit opt-in centered_residuals=True in the existing bank/segmentor:
+e_tilde=e-mean_R(e), q=a+e_tilde. Legacy default remains False; parameter
+keys/shapes, initialization RNG consumption and raw get_query_residuals()
+are preserved. New getters expose anchors and centered residuals. See
+CAUSAL_QUERY_DECOMPOSITION.md for algebra and limits. No new loss, anchor-only
+effect, CQE, style/attention change or extra queries. Static R=2, alpha0,
+original+photometric CE, deterministic CE backend, AdamW1e-4/wd.01, clip1,
+BF16 and absolute 40k PolyLR horizon are unchanged.
+
+M1 config changes only experiment identity and centered flag from strict M0.
+The ordinary strict config stays training-blocked. Dedicated CLI has no
+budget override: exactly 20 fresh seed0 source updates, eight fixed source
+holdout compatibility inputs, one compact checkpoint. No mIoU or accuracy
+threshold. Checkpoint metadata pins the semantic centered flag; old M0 states
+are not silently converted or reused. A fresh head shares the frozen backbone
+for roundtrip checks; this is not independent-process M1 continuation evidence.
+
+Before GPU/data: audit the exact accepted pilot report and original checksum
+manifest. Runtime remains /root/autodl-tmp/envs/causalq-dg/bin/python,
+torch2.7.0+cu126 / transformers4.56.1 / offline local DINOv3-L. Workers0,
+strict deterministic algorithms, TF32 true, cuDNN benchmark false, CUBLAS
+workspace :4096:8. Synthetic CUDA CE preflight precedes real source/weights.
+
+## Exact checkout and launch
+
+Use the literal full SHA from Codex's final handoff:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+mkdir -p "$CAUSALQ_OUTPUT_ROOT/phase18"
+LAUNCH_LOG="$CAUSALQ_OUTPUT_ROOT/phase18/M1_CENTERED_GATE20_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/check_centered_query_phase18.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "centered_query_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+Progress:
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase18/M1_CENTERED_GATE20_${SHA}_launcher.log"
+```
+
+## Return files and acceptance
+
+/root/autodl-tmp/outputs/CausalQ_DG/phase18/M1_CENTERED_GATE20_<sha7>/ contains
+centered_report.json, train.jsonl, state.pth and SHA256SUMS, with an adjacent
+.log and launcher.log. Keep checkpoint and full train trace on AutoDL.
+Return centered_report.json, SHA256SUMS and final console output. To preserve
+complete report bytes in a short paste, use this read-only export:
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export CENTERED_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase18/M1_CENTERED_GATE20_${SHA}"
+(cd "$CENTERED_OUT" && sha256sum -c SHA256SUMS) || exit 1
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['CENTERED_OUT'])
+for name, marker in [('centered_report.json','CENTERED_REPORT'),('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw,mtime=0)).decode('ascii'))
+PY
+```
+
+Acceptance: centered_query_exit_code=0, ok true, clean exact commit and pinned
+runtime; optimizer_updates=20; initial/final centered residual mean and query
+mean-anchor max errors <=1e-6; alpha_zero_error=0; finite losses, branch
+gradients nonzero by end, raw residual gradient sum <=1e-6; frozen backbone;
+model/optimizer roundtrip exact, eight source prediction replays <=1e-5,
+valid checksums and recorded GPU peaks. source_miou/target_miou null,
+formal_training_authorized=false, target_data_accessed=false,
+exact_resume_verified=false and roundtrip scope=new_head_same_frozen_backbone.
+On failure return the full traceback/log and original report; do not weaken
+thresholds, disable determinism, delete outputs or edit source on AutoDL.
+
+## Local verification and research boundary
+
+Phase17 acceptance was committed separately after 399 passed/1 skipped.
+Phase18 adds 19 focused tests; full CPU suite 418 passed, 1 skipped in 35.40s.
+The skip is the existing Windows unprivileged-symlink test. Local Python
+3.10.20 / torch2.10.0+cu128 / pytest8.4.2, CUDA hidden, OMP threads1. These
+checks are not real DINOv3/GPU acceptance. Shell syntax/diff checks pass.
+
+Question: does the sole centered parameterization remain numerically valid,
+trainable and checkpoint-compatible with the frozen DINOv3 Static-R2 source
+pipeline? Algebra does not establish causal identifiability, performance gain
+or anchor-only effect stability. No such hypothesis is accepted by this gate.
+
+Stop after this bounded gate. Next local work after read-only GPU review is
+the remaining Centered Query validation and, only afterward, separately scoped
+anchor-only effect computation. Do not add CQE/new losses or launch formal
+M1/M0 40k runs yet. Final target evaluation remains blocked.
+
+---
+
+# Archive: Phase17 source-development accepted — INACTIVE
 
 Complete pilot report and original checksum manifest recovered byte-exactly.
 See experiments/STRICT_DG_PHASE17/pilot500_complete_review.md and the pinned

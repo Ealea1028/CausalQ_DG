@@ -1,5 +1,31 @@
 # Method contract
 
+## Active boundary — Phase18 / Priority1 Centered Query (2026-10-17)
+
+Phase17 source-development engineering is accepted with complete byte-pinned
+pilot evidence. Formal training/target execution remain blocked; final target
+manifest/evaluator is deferred until architecture and weights freeze. The
+Phase17 descriptions below are archived, not current pending-file requests.
+
+Current single research factor is centered residual parameterization in the
+existing GroupedCausalQueryBank: e_tilde=e-mean_R(e), q=a+e_tilde. It is an
+explicit opt-in defaulting false; no added parameters or changes to legacy
+checkpoint keys/forward behavior. Raw residual getter stays raw; new getters
+expose anchors and centered residuals. The M1 config changes only the flag and
+experiment identity from strict M0. Checkpoint metadata must pin this semantic
+mode because a state_dict alone does not encode it. No auto-conversion of
+legacy checkpoints. See CAUSAL_QUERY_DECOMPOSITION.md for precise scope.
+
+CPU algebra/gradient/R=1,2,3/batch/alpha-zero/roundtrip tests precede a fixed
+20-update source-only AutoDL gate plus eight source compatibility samples.
+Static R=2, original+photometric CE, BF16, AdamW, clip and 40k LR horizon stay
+unchanged; deterministic runtime/CE uses accepted workers-0 conditions. No
+new CQE/effect computation/loss, architecture selection or target access.
+The checkpoint roundtrip reloads a new head with the same frozen backbone;
+it is not independent-process M1 continuation or formal accuracy evidence.
+
+## Archived Phase17 source-development contract
+
 Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
 recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
 runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a

@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Phase18 / Priority1 active (2026-10-17): Phase17 full source pilot accepted
+at a9c0b39. Centered Query is now implemented as an explicit opt-in in the
+existing bank/segmentor, with unchanged default/state keys/raw getter and new
+anchor/centered getters. M1 config differs only by experiment identity and
+centered flag; formal training remains blocked. CPU tests cover R=1/2/3,
+batch 1/>1, zero mean, mean query=anchor, projected gradients/shared-shift
+invariance, alpha-zero, raw/state compatibility and semantic-mode checkpoint
+roundtrip. Next is tools/check_centered_query.py: 20 source updates and eight
+source compatibility inputs, no mIoU or target access. Actual GPU result is
+pending. Old statements below are historical snapshots.
+
 Phase17 source-development acceptance (2026-10-17): complete pilot JSON and
 SHA256SUMS were recovered from gzip/Base64 with exact hashes d5b4747b...8ffd1b
 and 8ea73a53...3eb615. Full root, nested worker bytes, original checksum

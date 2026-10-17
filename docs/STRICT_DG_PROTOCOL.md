@@ -1,5 +1,14 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Current Phase18 boundary: Priority0 source runner engineering is accepted;
+only opt-in Centered Query is active. M1 retains the same source split,
+Static R=2, loss/style/schedule and deterministic workers-0 runtime. A separate
+20-update/eight-source-input engineering gate is prepared, with formal training
+false and no target data access/mIoU. Legacy mode defaults false. Checkpoint
+metadata must pin centered_residuals=true; state keys alone cannot identify
+parameterization. Final target manifest/evaluation remains blocked until
+architecture/weights freeze. Phase17 gate descriptions below are historical.
+
 Latest acceptance (2026-10-17): complete pilot report/checksum bytes are now
 recovered and pinned. Full contract/worker/checksum/matrix audits pass; source
 runner engineering is accepted at 482ef26. Source mIoU 35.7242% remains a
