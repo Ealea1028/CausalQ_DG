@@ -12,7 +12,7 @@ from PIL import Image, ImageOps
 from torch import Tensor
 from torch.utils.data import Dataset
 
-from .cityscapes import IGNORE_INDEX, read_index_mask
+from .label_space import IGNORE_INDEX, read_index_mask
 from .gta5 import pair_by_relative_path, resolve_flat_payload_root
 
 

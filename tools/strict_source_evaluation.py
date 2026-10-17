@@ -15,7 +15,8 @@ import hashlib
 
 
 def evaluate_holdout(model, dataset, expected_ids, output: Path, *, compatibility=None,
-                     num_classes=19, device="cuda:0", amp=True):
+                     num_classes=19, device="cuda:0", amp=True,
+                     loss_fn=segmentation_cross_entropy):
     if len(dataset) != len(expected_ids) or not expected_ids or len(set(expected_ids)) != len(expected_ids):
         raise ValueError("Full source holdout membership/coverage required")
     references = {row["source_id"]: row for row in (compatibility or [])}
@@ -41,7 +42,7 @@ def evaluate_holdout(model, dataset, expected_ids, output: Path, *, compatibilit
                 logits = model(image)
                 if logits.shape != (1, num_classes, *label.shape[-2:]) or not torch.isfinite(logits).all():
                     raise ValueError("Invalid source evaluation logits")
-                loss = segmentation_cross_entropy(logits, label)
+                loss = loss_fn(logits, label)
             if not torch.isfinite(loss):
                 raise ValueError("Non-finite source evaluation loss")
             predictions = logits.argmax(1).cpu().numpy().astype(np.int64).reshape(-1)

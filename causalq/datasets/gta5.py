@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from .cityscapes import label_ids_to_train_ids, read_index_mask
+from .label_space import label_ids_to_train_ids, read_index_mask
 
 
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg"}

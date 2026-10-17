@@ -1,0 +1,292 @@
+{
+  "schema_version": 1,
+  "phase": 17,
+  "scope": "source_resume_8_vs_4_plus_4",
+  "created_utc": "2026-10-17T01:04:50.299727+00:00",
+  "mode": "compare",
+  "process_id": 71228,
+  "seed": 0,
+  "formal_training_authorized": false,
+  "target_data_accessed": false,
+  "exact_resume_verified": true,
+  "source_miou": null,
+  "target_miou": null,
+  "manifest_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "train_count": 22469,
+  "val_count": 2497,
+  "source_validation": "gta5_holdout",
+  "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+  "git_status": "",
+  "source_evaluation_audit": {
+    "source_evaluation_accepted": true,
+    "report_sha256": "a70ddf23e11075b35c94e839c1cee69e2d2311d582a42992652008353ea0f29c",
+    "sample_count": 2497,
+    "source_miou": 0.12971660656076556,
+    "target_data_accessed": false,
+    "formal_training_authorized": false
+  },
+  "trace_exact": true,
+  "model_exact": true,
+  "optimizer_exact": true,
+  "rng_exact": true,
+  "sampler_exact": true,
+  "final_iteration": 8,
+  "split_iteration": 4,
+  "total_optimizer_updates_across_processes": 16,
+  "workers": {
+    "continuous": {
+      "schema_version": 1,
+      "phase": 17,
+      "scope": "source_resume_8_vs_4_plus_4",
+      "created_utc": "2026-10-17T01:04:00.030108+00:00",
+      "mode": "continuous",
+      "process_id": 71127,
+      "seed": 0,
+      "formal_training_authorized": false,
+      "target_data_accessed": false,
+      "exact_resume_verified": false,
+      "source_miou": null,
+      "target_miou": null,
+      "manifest_sha256": {
+        "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+        "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+      },
+      "train_count": 22469,
+      "val_count": 2497,
+      "source_validation": "gta5_holdout",
+      "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+      "git_status": "",
+      "source_evaluation_audit": {
+        "source_evaluation_accepted": true,
+        "report_sha256": "a70ddf23e11075b35c94e839c1cee69e2d2311d582a42992652008353ea0f29c",
+        "sample_count": 2497,
+        "source_miou": 0.12971660656076556,
+        "target_data_accessed": false,
+        "formal_training_authorized": false
+      },
+      "environment": {
+        "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+        "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+        "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+        "torch": "2.7.0+cu126",
+        "cuda": "12.6",
+        "transformers": "4.56.1",
+        "gpu": "NVIDIA GeForce RTX 4090 D"
+      },
+      "loss_preflight": {
+        "backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cpu_reference_loss_max_error": 0.0,
+        "cpu_reference_gradient_max_error": 6.984919309616089e-10,
+        "gpu_replay_exact": true,
+        "strict_determinism_enabled": true
+      },
+      "metadata": {
+        "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+        "seed": 0,
+        "config_sha256": "2e69c3d1377222645ff9daed0e68f98a9b28d1f300300dbca0c871b494006458",
+        "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+        "manifest_sha256": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "target_data_accessed": false,
+        "environment": {
+          "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+          "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+          "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu126",
+          "cuda": "12.6",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA GeForce RTX 4090 D"
+        },
+        "schedule_horizon": 40000,
+        "sample_workers": 0,
+        "amp": "bfloat16",
+        "deterministic_algorithms": true,
+        "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cublas_workspace_config": ":4096:8"
+      },
+      "initial_iteration": 0,
+      "final_iteration": 8,
+      "optimizer_updates_this_process": 8,
+      "files_sha256": {
+        "train.jsonl": "2d10ee52c221ae05b99cb79c7d6708d2320f98f8bf7a06b8af38970ae6137df6",
+        "state.pth": "9f2d720070412cc3a3dbeeec520834113f1b11a9d013d8ae70716e52c7b1e375"
+      },
+      "peak_allocated_gib": 0.9051742553710938,
+      "peak_reserved_gib": 0.951171875,
+      "ok": true
+    },
+    "prefix": {
+      "schema_version": 1,
+      "phase": 17,
+      "scope": "source_resume_8_vs_4_plus_4",
+      "created_utc": "2026-10-17T01:04:16.661487+00:00",
+      "mode": "prefix",
+      "process_id": 71164,
+      "seed": 0,
+      "formal_training_authorized": false,
+      "target_data_accessed": false,
+      "exact_resume_verified": false,
+      "source_miou": null,
+      "target_miou": null,
+      "manifest_sha256": {
+        "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+        "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+      },
+      "train_count": 22469,
+      "val_count": 2497,
+      "source_validation": "gta5_holdout",
+      "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+      "git_status": "",
+      "source_evaluation_audit": {
+        "source_evaluation_accepted": true,
+        "report_sha256": "a70ddf23e11075b35c94e839c1cee69e2d2311d582a42992652008353ea0f29c",
+        "sample_count": 2497,
+        "source_miou": 0.12971660656076556,
+        "target_data_accessed": false,
+        "formal_training_authorized": false
+      },
+      "environment": {
+        "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+        "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+        "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+        "torch": "2.7.0+cu126",
+        "cuda": "12.6",
+        "transformers": "4.56.1",
+        "gpu": "NVIDIA GeForce RTX 4090 D"
+      },
+      "loss_preflight": {
+        "backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cpu_reference_loss_max_error": 0.0,
+        "cpu_reference_gradient_max_error": 6.984919309616089e-10,
+        "gpu_replay_exact": true,
+        "strict_determinism_enabled": true
+      },
+      "metadata": {
+        "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+        "seed": 0,
+        "config_sha256": "2e69c3d1377222645ff9daed0e68f98a9b28d1f300300dbca0c871b494006458",
+        "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+        "manifest_sha256": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "target_data_accessed": false,
+        "environment": {
+          "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+          "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+          "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu126",
+          "cuda": "12.6",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA GeForce RTX 4090 D"
+        },
+        "schedule_horizon": 40000,
+        "sample_workers": 0,
+        "amp": "bfloat16",
+        "deterministic_algorithms": true,
+        "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cublas_workspace_config": ":4096:8"
+      },
+      "initial_iteration": 0,
+      "final_iteration": 4,
+      "optimizer_updates_this_process": 4,
+      "files_sha256": {
+        "train.jsonl": "967a2727fc54f0e5b712d477b730cdb27af1330aeb361564ce0297a2643e3890",
+        "state.pth": "a8321de8faeaf07399a2bf60177759b1e694bbc70e26f1b980091c9330a9b61f"
+      },
+      "peak_allocated_gib": 0.9051742553710938,
+      "peak_reserved_gib": 0.951171875,
+      "ok": true
+    },
+    "resume": {
+      "schema_version": 1,
+      "phase": 17,
+      "scope": "source_resume_8_vs_4_plus_4",
+      "created_utc": "2026-10-17T01:04:34.249146+00:00",
+      "mode": "resume",
+      "process_id": 71197,
+      "seed": 0,
+      "formal_training_authorized": false,
+      "target_data_accessed": false,
+      "exact_resume_verified": false,
+      "source_miou": null,
+      "target_miou": null,
+      "manifest_sha256": {
+        "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+        "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+      },
+      "train_count": 22469,
+      "val_count": 2497,
+      "source_validation": "gta5_holdout",
+      "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+      "git_status": "",
+      "source_evaluation_audit": {
+        "source_evaluation_accepted": true,
+        "report_sha256": "a70ddf23e11075b35c94e839c1cee69e2d2311d582a42992652008353ea0f29c",
+        "sample_count": 2497,
+        "source_miou": 0.12971660656076556,
+        "target_data_accessed": false,
+        "formal_training_authorized": false
+      },
+      "environment": {
+        "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+        "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+        "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+        "torch": "2.7.0+cu126",
+        "cuda": "12.6",
+        "transformers": "4.56.1",
+        "gpu": "NVIDIA GeForce RTX 4090 D"
+      },
+      "loss_preflight": {
+        "backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cpu_reference_loss_max_error": 0.0,
+        "cpu_reference_gradient_max_error": 6.984919309616089e-10,
+        "gpu_replay_exact": true,
+        "strict_determinism_enabled": true
+      },
+      "metadata": {
+        "git_sha": "5dc6caaa58668eb84cd79410fc69a5d719f9134d",
+        "seed": 0,
+        "config_sha256": "2e69c3d1377222645ff9daed0e68f98a9b28d1f300300dbca0c871b494006458",
+        "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+        "manifest_sha256": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "target_data_accessed": false,
+        "environment": {
+          "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+          "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+          "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu126",
+          "cuda": "12.6",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA GeForce RTX 4090 D"
+        },
+        "schedule_horizon": 40000,
+        "sample_workers": 0,
+        "amp": "bfloat16",
+        "deterministic_algorithms": true,
+        "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+        "cublas_workspace_config": ":4096:8"
+      },
+      "initial_iteration": 4,
+      "final_iteration": 8,
+      "optimizer_updates_this_process": 4,
+      "files_sha256": {
+        "train.jsonl": "2273455eb881a51fa127c0ee16fd72a8d4d0438702e1cdf4ad0967b1fc2aa779",
+        "state.pth": "9f2d720070412cc3a3dbeeec520834113f1b11a9d013d8ae70716e52c7b1e375"
+      },
+      "peak_allocated_gib": 0.9045352935791016,
+      "peak_reserved_gib": 0.931640625,
+      "ok": true
+    }
+  },
+  "independent_worker_processes": 3,
+  "ok": true
+}

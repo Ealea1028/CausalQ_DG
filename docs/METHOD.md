@@ -20,23 +20,31 @@ a 20-update diagnostic, not a formal M0 result. Exact report bytes are pinned
 in Git; remote trace checksum success is in the pasted provenance, not a local
 raw trace audit. See Phase 17 `source_evaluation_review.md`.
 
-Next is a separate compact source checkpoint continuation mechanism: save
-model/AdamW/iteration/LR/sampler and Python/NumPy/CPU-CUDA RNG state, plus pinned
-config/backbone/split/Git/runtime metadata. Compare continuous eight updates
-against four plus four across independent processes (16 total calls). Require
-exact trace and final state equality, workers 0 and deterministic CUDA settings.
-The 08c91d1 attempt failed in native CUDA NLL forward before the first update.
-The retry isolates an equivalent FP32 log-softmax/gather valid-pixel CE backend
-to this continuation gate; native historical CE stays unchanged. A synthetic
-CUDA loss/gradient preflight runs before dataset/weight access. Strict
-determinism stays enabled and exact continuation equality is not relaxed.
-The same Static R=2 two-view CE, BF16 and 40k LR horizon are unchanged; no
-holdout/target inference is needed. This is an engineering gate, not the
-ordinary workers-4 trainer or formal training authorization. The old smoke
-checkpoint lacks RNG/sampler state and cannot be used for this continuation.
-The ordinary M0 entry point remains blocked; no new Query/loss mechanism.
-Filename fallback still cannot guarantee frame/scene independence. Historical
-results remain unchanged. All Phase 16 descriptions below are historical.
+The corrected 5dc6caa deterministic CUDA continuation report is now byte-pinned
+and accepted. All three independent workers pass native-CPU CE reference and
+exact CUDA replay; continuous 8 equals 4+4 in trace/model/AdamW/sampler/RNG,
+and final checkpoint hashes match. This is single-GPU workers-0 engineering
+evidence, not formal M0 or arbitrary-worker/environment reproducibility.
+
+Next is the independent source-only runner pilot: 250 updates, checkpoint,
+new process restores and continues to 500, then evaluates all 2,497 frozen
+source holdout IDs. Selected checkpoint is always fixed final at 500; no
+accuracy threshold or best-checkpoint feedback. Absolute 40k PolyLR horizon,
+Static R=2, original+photometric valid-pixel CE, AdamW, clipping and BF16 remain
+unchanged. The validated deterministic CE backend is used for both training
+and source CE reporting. Validation must not alter model, optimizer or any
+RNG and must restore training mode. Metadata/config/Git/trace/checkpoints are
+explicit. Checkpoint sampler supports epoch boundaries, tested synthetically.
+Runtime stays deterministic single GPU and workers 0; config workers 4 is an
+explicit pending formal-run decision. CLI has only a fixed 500-update pilot,
+not a formal 40k authorization. Old tools/train.py stays blocked for strict M0.
+
+To prevent target imports, shared label-space utilities move to label_space.py;
+Cityscapes re-exports its public helpers unchanged. The new runner does not
+import Cityscapes or the old trainer; source data construction uses only gta5.
+Historical experiments remain unchanged. Filename fallback still cannot prove
+scene independence. No centered Query, new research loss or target evaluation
+in this Priority-0 integration gate. All Phase 16 descriptions below are historical.
 
 ## Phase 16 boundary
 

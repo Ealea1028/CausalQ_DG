@@ -1,5 +1,24 @@
 # CausalQ_DG_1016 repository audit
 
+Current update (2026-10-17): the 5dc6caa GPU continuation report is accepted,
+with exact recovered SHA256 8bd86446...65fde9. All stochastic traces and final
+states match across independent processes, including final checkpoint file
+hashes. CUDA CE loss reference error 0, gradient error 6.98e-10, peak reserved
+0.951172 GiB. Raw checkpoints/traces remain remote; returned hashes and the
+operator's successful remote checksum output are preserved, not a local raw
+checkpoint audit. See Phase 17 resume_review.md.
+
+Next is tools/train_strict_source.py, a fixed 500-update source-only runner
+pilot split 250 + 250 across processes, full 2,497 holdout evaluation and
+fixed-final selection. Generic step keeps the 40k horizon and old 20-update
+smoke bound; state tracks epochs/cursor/RNG. Shared neutral label helpers
+remove Cityscapes imports without changing legacy exports. CPU tests include
+epoch crossings, >20 absolute steps, poison target imports and eval state
+isolation. GPU integration remains pending; ordinary strict-M0 formal entry
+stays blocked. No target evaluator or centered Query is active.
+
+## Previous correction and audit snapshots — historical
+
 Latest correction (2026-10-17): the 08c91d1 continuous worker failed before its
 first optimizer update because torch 2.7.0 CUDA NLL forward lacks deterministic
 support. No exact continuation acceptance. The retry adds an equivalent

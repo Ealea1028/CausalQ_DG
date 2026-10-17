@@ -1,4 +1,149 @@
-# AutoDL next: Phase 17 — exact source checkpoint continuation
+# AutoDL next: Phase 17 — source-only runner pilot500
+
+Updated 2026-10-17. Only this top section is active. Prior inventory/data,
+20-update smoke, full-source evaluation and corrected exact continuation are
+accepted. Do not repeat them. Formal 40k training and target access stay blocked.
+
+## Accepted return and limits
+
+The recovered 5dc6caa resume_report.json exactly matches SHA256
+`8bd864462f8119447619bbafaa947596409ac76003900183b4dfdcfed065fde9`.
+Three independent workers show exact trace/model/AdamW/sampler/RNG equality
+for continuous 8 versus 4+4; final checkpoint hashes also match. CUDA CE loss
+reference error 0, gradient max error 6.98e-10; peak reserved 0.951172 GiB.
+Raw traces/checkpoints remain remote; the operator returned all successful
+remote checksum checks, not raw checkpoint bytes for local inspection. The
+pinned report, pasted return and resume_review.md preserve these limits.
+No source/target/effect result was measured by the continuation gate.
+
+## Current single change
+
+New independent tools/train_strict_source.py integrates the existing optimizer,
+validated deterministic CE, source-only datasets, epoch/cursor/RNG checkpoint,
+streamed training trace, immutable run metadata and state-isolated full source
+validation. Shared label utilities move to label_space.py; Cityscapes public
+helper exports remain compatible. The source-only runner imports neither the
+Cityscapes module nor tools/train.py; a fresh poison-import CPU test enforces it.
+
+Only the fixed 500-update engineering pilot is exposed by this CLI:
+
+- prefix process: pretrained initialization, source updates 1 through 250;
+- finish process: independently load backbone, restore prefix model/AdamW/
+  sampler/all RNG, source updates 251 through 500;
+- finish process: fixed-final checkpoint at 500, then full 2,497-ID source
+  holdout evaluation; no best-mIoU selection or accuracy threshold;
+- summary process: verify both worker reports/files/traces, fixed source order,
+  40k LR sequence, complete source coverage and final selected head identity.
+
+Total 500 new optimizer updates; no continuous-500 duplicate. No prior 8/20-step
+checkpoint is reused. The checkpoint schema is now 2 to record sampler epoch,
+permutation and next cursor and support epoch-boundary continuation. This
+integration is not a new exact-500 comparison: exact CUDA continuation is the
+accepted 8-versus-4+4 evidence, and generic multi-epoch continuation is CPU-tested.
+
+Model/loss objective unchanged: Static R=2, alpha initially 0,
+L=CE_original+CE_photometric, lambda_cf=1, AdamW 1e-4/wd .01, clip 1,
+BF16, crop 512, seed 0. Absolute LR_next(t)=1e-4*(1-t/40000)^.9;
+500 is the execution cap, not a shortened scheduler horizon. Single GPU,
+workers 0, strict deterministic algorithms, cuDNN benchmark false, TF32 true,
+CUBLAS workspace :4096:8. Workers-4 formal equivalence is not claimed. The
+ordinary strict config/training entry remains blocked; no budget override.
+
+Validation uses fixed full-frame aspect resize long edge 1024 and ignore-255
+padding to 16, on resized GT. IoU=TP/(GT+Pred-TP), mIoU averages positive-union
+classes; no target metric. PyTorch and NumPy integer confusion must match,
+all 2,497 IDs and valid pixels must be covered, class/mIoU error <=1e-12.
+CE uses the accepted deterministic backend. Model/optimizer/Python/NumPy/CPU-
+CUDA RNG must remain unchanged and training mode restored after validation.
+The selected finish/state.pth head must equal the evaluated head. Scores are
+pilot diagnostics, not formal M0 or a basis for architecture tuning.
+
+## Exact checkout and launch
+
+Use Codex's latest literal full SHA:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+mkdir -p "$CAUSALQ_OUTPUT_ROOT/phase17"
+LAUNCH_LOG="$CAUSALQ_OUTPUT_ROOT/phase17/M0_SOURCE_RUNNER_PILOT500_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/run_strict_source_pilot_phase17.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "source_runner_pilot_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+Existing runtime /root/autodl-tmp/envs/causalq-dg/bin/python; pinned torch
+2.7.0+cu126 / transformers 4.56.1; offline local backbone. Synthetic CUDA CE
+preflight still runs before real datasets/weights in each training process.
+Progress prints every 10 updates and every 250 evaluation images. Keep the
+GPU instance running until completion; terminal disconnect is safe via nohup.
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_RUNNER_PILOT500_${SHA}_launcher.log"
+```
+
+## Return and acceptance
+
+Output root: /root/autodl-tmp/outputs/CausalQ_DG/phase17/
+M0_SOURCE_RUNNER_PILOT500_<sha7>/
+
+- pilot_report.json with both worker summaries and full source diagnostics;
+- SHA256SUMS covering all saved metadata/traces/checkpoints/logs;
+- config.yaml, metadata.json and git_commit.txt;
+- prefix/worker_report.json, train.jsonl, state.pth;
+- finish/worker_report.json, train.jsonl, state.pth, source_eval.jsonl;
+- prefix.log, finish.log, summary.log; adjacent launcher log.
+
+Return **pilot_report.json, SHA256SUMS and final launcher output**. Preserve
+all checkpoints and per-image/train traces on AutoDL; no raw datasets or
+foundation weights enter Git. On failure return the failing worker report
+with traceback and the full launcher log. Never modify source remotely,
+remove failed outputs or continue into another budget.
+
+Acceptance: source_runner_pilot_exit_code=0, ok true, clean exact commit,
+500 total contiguous updates, resumed_at 250 in independent processes,
+finite losses/gradients/parameters and fixed 40k LR/source permutation;
+backbone unchanged, selected finish/state.pth identity matches evaluated head,
+full source validation and exact training-state isolation, valid checksums,
+recorded runtime/memory; target_data_accessed=false,
+formal_training_authorized=false and pilot_is_formal_m0=false.
+There is no source accuracy acceptance threshold.
+
+## Local verification and question
+
+New runner/auditor/launcher/pinned return tests; shared label helper extraction,
+backward-compatible generic optimizer step and optional evaluator loss hook.
+Old 20-step smoke budget/default native loss and legacy model/results remain
+unchanged. CPU tests cover pinned acceptance/rejection, >20-step schedule,
+multiple epoch boundaries with exact stochastic continuation, target-import
+poisoning, label API compatibility, validation state isolation, selected
+checkpoint tampering and no formal-budget override. Added 13 focused tests;
+full pytest: 393 passed, 1 skipped in 34.75s. Local environment is Python
+3.10.20 / torch 2.10.0+cu128 / pytest 8.4.2,
+CUDA hidden, OMP threads 1. The existing Windows symlink skip remains.
+
+Scientific/engineering question: can the independent source-only runner
+perform a bounded train -> process restart -> train -> fixed-final source
+validation cycle with complete provenance and no target access or state leakage?
+
+Stop after this pilot. Review the evidence read-only locally before closing
+remaining Priority-0 tasks or preparing centered Query. No formal 40k run,
+new research loss or target evaluator execution now.
+
+---
+
+# Archive: accepted exact source continuation — INACTIVE
 
 Active retry correction: 08c91d1 stopped in `nll_loss2d_forward_out_cuda_template`
 before the first optimizer step because native CUDA NLL is unsupported under

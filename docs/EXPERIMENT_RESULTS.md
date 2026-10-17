@@ -1,10 +1,14 @@
 # Strict-DG research results
 
-Latest engineering return (2026-10-17): 08c91d1 continuous worker exited 1 at
-native CUDA NLL forward under strict determinism, before any optimizer.step().
-No source/target/effect metric or exact continuation acceptance from this run.
-The equivalent deterministic CE retry is pending AutoDL; prior evaluation
-acceptance remains valid. See Phase 17 `resume_failure_08c91d1_review.md`.
+Latest engineering return (2026-10-17): corrected 5dc6caa continuation is
+accepted. Exact 8 versus 4+4 traces/model/optimizer/sampler/RNG, identical
+final checkpoint hashes, three independent workers, CUDA CE reference loss
+error 0 and gradient error 6.98e-10, peak reserved 0.951172 GiB. The report is
+byte-pinned; raw checkpoint/trace bytes remain remote and were checksum-checked
+there. This is reproducibility engineering evidence, not a target/effect or
+formal M0 result. Previous 08c91d1 NLL failure remains recorded. Next is a
+fixed 500-update source runner integration pilot (250 + 250, full source
+holdout, fixed-final checkpoint), not formal training.
 
 As of 2026-10-17, there are no formal M0/M1/P1/M2/M3/M4 or target/effect
 results. The accepted 20-update source-only engineering checkpoint has full
@@ -49,7 +53,6 @@ Twelve zero-IoU classes after 20 updates do not warrant a mechanism change.
 The per-image trace remains remote; successful remote checksum output, exact
 report and review are in `experiments/STRICT_DG_PHASE17/`.
 
-Next is a separate checkpoint continuation gate: continuous 8 versus 4+4
-updates across independent processes, 16 total source optimizer calls, exact
-state/trace comparison. CPU synthetic acceptance is not GPU evidence; actual
-AutoDL result remains pending. Formal training stays blocked.
+The source checkpoint continuation gate is now accepted as above. The
+next source runner integration pilot remains pending AutoDL. No pilot source
+mIoU, target metric or new mechanism conclusion exists yet.

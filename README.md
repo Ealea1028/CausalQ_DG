@@ -14,14 +14,14 @@ at `cb52071` passes its pinned local audit. The `b16236c` original smoke
 artifact/checkpoint audit and `c7822fd` full 2,497-image source evaluation are
 now accepted. Source mIoU 12.9717% is a diagnostic of the 20-update checkpoint,
 not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
-Next is a separate source checkpoint continuation gate: continuous 8 versus
-4+4 updates in independent processes, 16 total optimizer calls, workers 0,
-strict deterministic state equality. No formal long run, target access or
-model/objective change is authorized. The first continuation attempt at
-`08c91d1` stopped before its first update because native CUDA NLL is not
-deterministic. The retry uses an equivalent FP32 log-softmax/gather valid-pixel
-CE backend only in the continuation gate, with a synthetic CUDA loss/gradient
-preflight. Strict determinism remains enabled; actual GPU acceptance is pending.
+The corrected `5dc6caa` 8 versus 4+4 continuation gate is accepted: exact
+trace/model/optimizer/sampler/RNG and matching final checkpoint hashes across
+independent processes; CUDA CE reference loss error 0, gradient error 6.98e-10.
+Next is the independent source-only runner integration pilot: exactly 500
+updates in two processes (250 + 250), fixed-final checkpoint and complete
+source holdout evaluation. No formal 40k run, target access or new model/loss
+mechanism is authorized. The runner imports neither the old trainer nor the
+Cityscapes module; shared label helpers retain backward-compatible exports.
 Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.

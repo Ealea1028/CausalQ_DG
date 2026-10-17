@@ -50,6 +50,15 @@ def optimizer_update(model, optimizer, image, photo, label, step, config, *, dev
                      loss_fn=segmentation_cross_entropy):
     if not 1 <= step <= UPDATES:
         raise ValueError("Only 20 bounded optimizer updates are authorized")
+    return source_optimizer_update(model, optimizer, image, photo, label, step, config,
+                                   device=device, amp=amp, loss_fn=loss_fn)
+
+
+def source_optimizer_update(model, optimizer, image, photo, label, step, config, *, device, amp,
+                            loss_fn=segmentation_cross_entropy):
+    """Same two-view update at an absolute step in the pinned 40k schedule."""
+    if not 1 <= step <= HORIZON:
+        raise ValueError("Source optimizer step must be within the 40000-step horizon")
     trainable = [p for p in model.parameters() if p.requires_grad]
     optimizer.zero_grad(set_to_none=True)
     lr_used = optimizer.param_groups[0]["lr"]

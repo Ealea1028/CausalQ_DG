@@ -3,38 +3,37 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: exact source checkpoint continuation
+## Current gate: source-only runner integration pilot
 
-The first 08c91d1 attempt stopped at native CUDA NLL forward; no optimizer
-step completed and the continuation gate is not accepted. Retry with the
-same valid-pixel mean CE expressed via FP32 log-softmax/gather/masked sum,
-isolated to this gate and pinned in checkpoint metadata. Synthetic CUDA
-loss/gradient equivalence and exact replay are checked before dataset/weights.
-Native historical CE, model/objective/budget stay unchanged. Strict deterministic
-algorithms remain required. Preserve the failed run and use a new output path.
+The corrected 5dc6caa deterministic CUDA continuation report passes its pinned
+local metadata audit. Continuous 8 equals 4+4 in trace/model/optimizer/RNG/
+sampler with identical final checkpoint hashes; synthetic CUDA CE loss error
+0 and max gradient error 6.98e-10. Only single-GPU workers-0 determinism is
+established. Original checkpoints/traces remain on AutoDL; remote checksum
+success and exact recovered report are the evidence supplied locally.
 
-The original smoke saved-artifact audit and full c7822fd source evaluation are
-accepted. The exact report is saved/pinned, its 19 by 19 matrix independently
-recomputed, all 2,497 IDs match, and eight CE replays have zero error. Source
-mIoU 12.9717% is descriptive of 20 updates; no formal M0 or target conclusion.
-See Phase 17 `source_evaluation_review.md` for provenance and raw trace limits.
+The next gate integrates the unchanged Static R=2 optimizer and validated
+CE backend into tools/train_strict_source.py: initialize from pretrained
+weights, source updates 1–250, save compact schema-2 continuation state, fresh
+process restores all states, updates 251–500, fixed-final checkpoint followed
+by complete GTA5 holdout evaluation. No old smoke checkpoint is reused.
+The 500-update pilot has no budget override and is not formal M0. The 40k LR
+horizon, original+photometric CE sum, BF16, AdamW 1e-4/wd .01 and clip 1 stay
+fixed. Seed 0, deterministic GPU, workers 0; ordinary config workers 4 is not
+claimed equivalent. Checkpoints store sampler epoch/permutation/cursor, all
+RNG, model/optimizer and pinned split/config/backbone/Git/runtime metadata.
 
-The next single mechanism stores model/AdamW/absolute iteration/LR/sampler
-permutation/cursor and Python/NumPy/torch CPU-CUDA RNG with config, split,
-backbone and Git/runtime identity. A fresh-process gate compares continuous
-8 updates versus 4 + checkpoint + fresh-process restore + 4, requiring exact
-inputs/loss/LR/gradients and final parameters/optimizer/sampler/RNG equality.
-Three distinct worker processes, 16 optimizer calls total, workers 0, seed 0,
-BF16, deterministic algorithms and CUBLAS workspace :4096:8. No tolerance
-relaxation or nondeterminism override. The fixed 40,000-step PolyLR horizon,
-Static R=2 and original+photometric CE sum remain unchanged. No holdout/target
-inference, checkpoint selection or formal M0 training occurs in this gate.
-The old 20-step checkpoint has no RNG/sampler state and is not resumed.
+No best-mIoU checkpoint selection or accuracy acceptance threshold. Source
+validation must cover all 2,497 IDs, retain independent confusion/IoU checks,
+and leave model/optimizer/Python/NumPy/CPU-CUDA RNG unchanged. Model training
+mode must be restored. The selected final checkpoint's head hash must match
+the evaluated state. Source scores are pilot diagnostics, not formal results.
+A poison-import subprocess test rejects Cityscapes and legacy trainer imports;
+shared label helpers moved to a neutral module with preserved public exports.
 
-The ordinary training entry point stays blocked. Passing only covers this
-single-GPU deterministic workers-0 runtime. Integration into the source-only
-formal runner/checkpoint policy and final-only target evaluation remains
-pending. No centered Query, new loss or 40k run is authorized now.
+No target files, target evaluator execution, centered Query, new research
+loss or formal 40k training is authorized by this pilot. The ordinary strict
+config and old training gate remain unchanged. Stop for AutoDL evidence.
 
 ## Completed source-only evaluation
 

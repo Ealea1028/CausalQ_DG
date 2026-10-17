@@ -3,3 +3,4 @@ manifests/*.txt text eol=lf
 manifests/*.json text eol=lf
 experiments/STRICT_DG_PHASE17/source_data_report.json text eol=lf
 experiments/STRICT_DG_PHASE17/source_evaluation.json text eol=lf
+experiments/STRICT_DG_PHASE17/resume_report.json text eol=lf
