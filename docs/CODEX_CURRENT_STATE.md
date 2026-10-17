@@ -1,5 +1,15 @@
 # CausalQ_DG_1016 repository audit
 
+Latest return (2026-10-17): operator reports 482ef26 pilot exit 0. Complete
+visible workers show 250+250 updates and unchanged model/optimizer/RNG during
+full source validation. Local independent matrix/IoU recomputation passes:
+2,497 images, 1,276,971,688 pixels, source mIoU 0.3572418460006766, peak
+reserved 1.330078125 GiB. The pasted text begins mid-JSON and has only checksum
+OK lines, no full checksum values/root report. Final byte/contract acceptance
+is pending read-only compressed export of the ORIGINAL report and SHA256SUMS.
+No source code or model changes; do not repeat the pilot. AUTODL_NEXT.md is
+the sole active operation. Earlier next-step statements below are historical.
+
 Current update (2026-10-17): the 5dc6caa GPU continuation report is accepted,
 with exact recovered SHA256 8bd86446...65fde9. All stochastic traces and final
 states match across independent processes, including final checkpoint file

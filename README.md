@@ -17,10 +17,13 @@ not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
 The corrected `5dc6caa` 8 versus 4+4 continuation gate is accepted: exact
 trace/model/optimizer/sampler/RNG and matching final checkpoint hashes across
 independent processes; CUDA CE reference loss error 0, gradient error 6.98e-10.
-Next is the independent source-only runner integration pilot: exactly 500
-updates in two processes (250 + 250), fixed-final checkpoint and complete
-source holdout evaluation. No formal 40k run, target access or new model/loss
-mechanism is authorized. The runner imports neither the old trainer nor the
+The operator reports the 482ef26 500-update source runner pilot succeeded:
+250 + 250 across processes, full source mIoU 35.7242% and unchanged training
+state during validation. The supplied text starts midway through the report;
+visible worker/metric checks pass locally, but complete report/checksum bytes
+must be returned read-only before final acceptance. Do not rerun the pilot.
+No formal 40k run, target access or new model/loss mechanism is authorized.
+The runner imports neither the old trainer nor the
 Cityscapes module; shared label helpers retain backward-compatible exports.
 Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains

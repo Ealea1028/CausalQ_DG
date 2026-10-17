@@ -5,6 +5,13 @@ development protocol before changing Query representation. Phase 16 stays closed
 
 ## Current gate: source-only runner integration pilot
 
+Current return status: operator reports the 482ef26 pilot succeeded. The
+partial paste includes complete workers/finish confusion and checksum OK
+lines. Local matrix/IoU and 250+250 worker checks pass, but full root report
+and checksum digests are absent. Next operation is read-only compressed
+return of existing files as specified in AUTODL_NEXT.md; no training rerun.
+Final engineering acceptance is pending that complete metadata audit.
+
 The corrected 5dc6caa deterministic CUDA continuation report passes its pinned
 local metadata audit. Continuous 8 equals 4+4 in trace/model/optimizer/RNG/
 sampler with identical final checkpoint hashes; synthetic CUDA CE loss error

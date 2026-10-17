@@ -26,9 +26,13 @@ exact CUDA replay; continuous 8 equals 4+4 in trace/model/AdamW/sampler/RNG,
 and final checkpoint hashes match. This is single-GPU workers-0 engineering
 evidence, not formal M0 or arbitrary-worker/environment reproducibility.
 
-Next is the independent source-only runner pilot: 250 updates, checkpoint,
-new process restores and continues to 500, then evaluates all 2,497 frozen
-source holdout IDs. Selected checkpoint is always fixed final at 500; no
+The independent source-only runner pilot has now been executed: 250 updates,
+checkpoint, new process continues to 500 and all 2,497 source holdout IDs are
+evaluated. The partial pasted return reports exit 0 and source mIoU 35.7242%;
+visible matrix/worker metadata checks pass locally. Complete root report and
+checksum bytes remain pending a read-only return, not another training run.
+See Phase17 pilot500_partial_review.md for evidence limits.
+Selected checkpoint policy is fixed final at 500; no
 accuracy threshold or best-checkpoint feedback. Absolute 40k PolyLR horizon,
 Static R=2, original+photometric valid-pixel CE, AdamW, clipping and BF16 remain
 unchanged. The validated deterministic CE backend is used for both training

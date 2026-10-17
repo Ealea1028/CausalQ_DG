@@ -1,4 +1,69 @@
-# AutoDL next: Phase 17 — source-only runner pilot500
+# AutoDL next: Phase 17 — read-only complete pilot report return
+
+Updated 2026-10-17. Only this top section is active. The operator reports
+source_runner_pilot_exit_code=0 at clean 482ef26. Do not rerun the 500 updates
+or source evaluation. No formal training, target access or model change.
+
+The pasted return begins in the middle of the JSON, not at the report header,
+and contains checksum OK lines without the actual checksum digests. Both full
+worker objects and the finish confusion matrix are present. Local read-only
+analysis confirms identical worker metadata, distinct PIDs, 0–250/250–500
+coverage, 500 total reported updates, complete 2,497 source holdout, exact
+1,276,971,688 pixel sum and recomputed source mIoU 0.3572418460006766.
+State-isolation flags are true; largest peak reserved is 1.330078125 GiB.
+These are pilot diagnostics, not formal M0 or anchor/effect evidence.
+
+Full report header, root selected-checkpoint fields and exact report checksum
+are not available locally. Do not reconstruct missing fields or claim a
+complete report byte audit. See pilot500_partial_review.md and preserved
+pilot500_partial_return.txt. Local source code is unchanged.
+
+## Required read-only operation
+
+Keep the existing AutoDL checkout at producer
+482ef2663f3ecf0f2f5d5545710aefd0fd2a9520; no new checkout is required.
+Read the existing files and output two gzip/Base64 lines to keep the complete
+return compact. This does not load datasets/weights or use GPU, train, infer,
+write files, modify source or overwrite any experiment output.
+
+```bash
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_RUNNER_PILOT500_482ef26
+(cd "$OUT" && sha256sum -c SHA256SUMS) || exit 1
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import base64, gzip, hashlib, json
+root = Path('/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_RUNNER_PILOT500_482ef26')
+payload = (root / 'pilot_report.json').read_bytes()
+report = json.loads(payload)
+assert report['ok'] is True
+assert report['git_sha'] == '482ef2663f3ecf0f2f5d5545710aefd0fd2a9520'
+assert report['optimizer_updates'] == 500 and report['resumed_at'] == 250
+assert report['target_data_accessed'] is False and report['formal_training_authorized'] is False
+for name, marker in [('pilot_report.json', 'PILOT_REPORT'), ('SHA256SUMS', 'SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+```
+
+Return the complete four lines beginning PILOT_REPORT_SHA256,
+PILOT_REPORT_GZIP_BASE64, SHA256SUMS_SHA256 and SHA256SUMS_GZIP_BASE64,
+plus checksum verification output. No checkpoint or raw data upload.
+
+Next local step is decoding the exact report/checksum bytes, matching their
+hashes and manifest, auditing full root/worker/metric contracts, then continuing
+remaining Priority-0 closure work. Do not start another GPU experiment while
+this returned metadata is incomplete. Current scientific conclusion is limited
+to reported source-runner engineering success; source score does not test the
+anchor hypothesis and is not comparable to historical target mIoU.
+
+This return-review update changes only evidence/documentation/registry, not
+model or training code. Full local CPU pytest: 393 passed, 1 skipped in 53.85s;
+the skip is the existing Windows unprivileged-symlink test.
+
+---
+
+# Archive: completed operator-reported pilot500 — INACTIVE
 
 Updated 2026-10-17. Only this top section is active. Prior inventory/data,
 20-update smoke, full-source evaluation and corrected exact continuation are

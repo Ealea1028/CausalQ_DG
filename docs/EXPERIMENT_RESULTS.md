@@ -1,5 +1,13 @@
 # Strict-DG research results
 
+Pilot500 partial return (2026-10-17): 482ef26 reports exit 0, source mIoU
+0.35724184600067665 (independent local recomputation 0.3572418460006766),
+2,497 holdout IDs, 1,276,971,688 valid pixels, peak reserved 1.330078125 GiB.
+Visible worker/metric/state-isolation checks pass. Full root report/checksum
+bytes are missing from the truncated paste; complete acceptance is pending
+read-only return. Do not rerun the pilot. This is not formal M0, a target
+metric or anchor/effect evidence. See pilot500_partial_review.md.
+
 Latest engineering return (2026-10-17): corrected 5dc6caa continuation is
 accepted. Exact 8 versus 4+4 traces/model/optimizer/sampler/RNG, identical
 final checkpoint hashes, three independent workers, CUDA CE reference loss
