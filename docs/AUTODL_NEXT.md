@@ -1,7 +1,131 @@
-# AutoDL next: Phase 17 — audit saved smoke and evaluate full source holdout
+# AutoDL next: Phase 17 — exact source checkpoint continuation
 
-Updated 2026-10-17. Only this section is active; all older commands below the
-archive marker are inactive. Do not retrain the successful20-update smoke.
+Updated 2026-10-17. Only this top section is active. Complete source holdout
+and original smoke audits are accepted; do not rerun them. No formal training
+or target data access is authorized.
+
+## Accepted evidence
+
+The returned c7822fd report has exactly the supplied SHA256
+`a70ddf23e11075b35c94e839c1cee69e2d2311d582a42992652008353ea0f29c`.
+Its JSON was recovered from the complete pasted transcript, saved in Git and
+independently audited. All 2,497 holdout IDs match the frozen manifest; the
+1,276,971,688 valid pixels match the confusion sum. Recomputed class IoUs and
+mIoU agree. Source mIoU is 0.12971660656076558, image/pixel CE is
+1.3436256861/1.3548140258; all eight CE replays have error 0. Model, RNG and
+original files are unchanged; peak reserved 1.054688 GiB. These are 20-update
+diagnostics, not formal M0 accuracy. No target/effect metric exists. The
+operator's pasted output verifies the remote trace checksum; local raw trace
+bytes were not supplied. See `source_evaluation_review.md` for limits.
+
+## Single new mechanism and fixed budget
+
+The old compact checkpoint restores weights/optimizer but lacks sampler/RNG
+continuation state. The next gate adds a separate compact state with model,
+AdamW, absolute iteration/LR, fixed permutation/cursor, Python/NumPy/CPU-CUDA
+RNG, config/split/backbone hashes and Git/runtime identity. Checkpoint writes
+use a temporary file, flush/fsync and atomic replacement; existing outputs
+are refused. No foundation weights enter the checkpoint or Git.
+
+Three independent Python processes start the same source-only experiment:
+
+- continuous: initialize from pretrained weights, updates 1 through 8;
+- prefix: same initialization, updates 1 through 4, save continuation state;
+- resume: independently initialize/load backbone, restore prefix model,
+  optimizer/sampler/all RNG, updates 5 through 8.
+
+Exactly 16 optimizer calls across the three processes. This is not continuation
+of the old smoke checkpoint. Original and photometric CE sum, Static R=2,
+AdamW 1e-4/wd 0.01, clip 1, BF16 and fixed 40,000-step PolyLR remain unchanged.
+No sample-count/training-budget flag exists. Single GPU, workers 0, seed 0,
+deterministic algorithms required, cuDNN benchmark false, TF32 true and
+CUBLAS_WORKSPACE_CONFIG=:4096:8. Unsupported deterministic CUDA operators must
+fail and be reported; do not disable determinism or loosen equality remotely.
+No validation or target samples are read. Ordinary formal training stays blocked.
+
+## Exact checkout and launch
+
+Use the literal full commit from Codex's handoff:
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+BASE="$CAUSALQ_OUTPUT_ROOT"
+mkdir -p "$BASE/phase17"
+LAUNCH_LOG="$BASE/phase17/M0_SOURCE_RESUME_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/check_strict_source_resume_phase17.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "source_resume_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+Uses existing `/root/autodl-tmp/envs/causalq-dg/bin/python`, pinned torch
+2.7.0+cu126 / transformers 4.56.1 and local offline DINOv3 weights. Launch log
+survives terminal disconnect. Each process loads the backbone afresh.
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_RESUME_${SHA}_launcher.log"
+```
+
+## Outputs and acceptance
+
+`/root/autodl-tmp/outputs/CausalQ_DG/phase17/M0_SOURCE_RESUME_<sha7>/` contains:
+
+- `resume_report.json` with exact comparison and all three worker summaries;
+- `SHA256SUMS` covering reports, traces, checkpoints and per-process logs;
+- `continuous/`, `prefix/`, `resume/`: `worker_report.json`, `train.jsonl`, `state.pth`;
+- process logs including `compare.log`.
+
+Return **resume_report.json, SHA256SUMS and final launcher output**. Keep all
+checkpoints/traces on AutoDL. On failure return the failing worker report and
+complete launcher log. Do not rerun into or delete existing output directories.
+
+Acceptance requires exit 0, ok true, three distinct worker processes, exact
+input/loss/LR/gradient traces (continuous == prefix + resume), exact final model,
+optimizer, sampler and all RNG state, frozen backbone and pinned config/runtime.
+No numerical tolerance is substituted for exact equality. Final iteration 8,
+split iteration 4, total_optimizer_updates_across_processes 16,
+formal_training_authorized false, target_data_accessed false and both mIoUs null.
+Byte-identical torch.save files are not required; tensor/state equality is.
+
+Scientific/engineering question: does compact source checkpoint state preserve
+the stochastic optimization trajectory across a real process boundary? The
+mathematical criterion is S_continuous(8) = S_resume(4+4), with S containing
+parameters, AdamW moments/steps/LR, sampler cursor and every RNG state. CPU
+synthetic tests already cover stochastic augmentation and dropout; GPU results
+remain pending. Passing only covers this deterministic single-GPU workers-0
+runtime, not the ordinary config's workers-4 trainer or arbitrary environments.
+
+## Local changes and next boundary
+
+Added full-source report auditor, continuation engine, AutoDL worker/comparator,
+shell wrapper, focused tests, saved report/transcript and evidence review.
+Updated status/protocol/result/registry docs and LF pin for the saved report.
+No model, loss, existing smoke/evaluation APIs or historical results changed.
+The full CPU suite passes: 366 passed, 1 skipped in 35.41s; the existing
+Windows unprivileged-symlink skip is unchanged. There are 17 new focused tests.
+Local environment: Python 3.10.20 / torch 2.10.0+cu128 / pytest
+8.4.2, CUDA hidden, OMP threads 1. This is not DINOv3/GPU acceptance.
+
+Stop after this bounded gate. No formal M0, centered Query or new consistency
+loss. Next local work after reviewing GPU evidence is integration into the
+source-only runner/checkpoint policy and final-only target-evaluation gate.
+
+---
+
+# Archive: completed full source holdout evaluation — INACTIVE
+
+This section is historical. The c7822fd evaluation is accepted; do not rerun it.
 
 ## Evidence review and current scope
 

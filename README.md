@@ -10,15 +10,16 @@ The GTA5 inventory reports 24,966 complete pairs and no usable sequence/scene
 metadata. The deterministic 10% source holdout export reports success with
 22469 train / 2497 validation IDs. The real extracted manifests were verified
 locally and frozen at `4314d61`. The complete source pixel/preprocessing report
-at `cb52071` passes its pinned local audit. The `b16236c` GPU smoke reports
-20 finite updates, unchanged backbone, exact checkpoint restoration and
-1.182GiB peak reserved memory. Next is a read-only saved-artifact audit and
-full 2497-image GTA5 holdout evaluation of that same checkpoint; no retraining.
-Original attachment paths became unavailable after their initial read, so the
-next tool verifies the full original report/trace/weights on AutoDL first. No formal long run,
-target access or model mechanism change is authorized. Old launchers read Cityscapes during development and
-must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains a
-historical reference, not a new strict-DG result. Phase 16 remains closed.
+at `cb52071` passes its pinned local audit. The `b16236c` original smoke
+artifact/checkpoint audit and `c7822fd` full 2,497-image source evaluation are
+now accepted. Source mIoU 12.9717% is a diagnostic of the 20-update checkpoint,
+not formal M0 accuracy. Eight CE replays have zero error; model/RNG unchanged.
+Next is a separate source checkpoint continuation gate: continuous 8 versus
+4+4 updates in independent processes, 16 total optimizer calls, workers 0,
+strict deterministic state equality. No formal long run, target access or
+model/loss change is authorized. Old launchers read Cityscapes during development
+and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
+a historical reference. Phase 16 remains closed.
 The historical status and working-directory narrative below is retained for
 provenance; the active action is exclusively [`docs/AUTODL_NEXT.md`](docs/AUTODL_NEXT.md).
 

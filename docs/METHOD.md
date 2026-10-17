@@ -12,20 +12,26 @@ verification and entered Git at `4314d61`. The full source-data report at
 `cb52071` now passes a pinned local audit: all24966 pairs and2497 holdout
 transforms valid, with62 declared scale-equivalent mismatches and no invalid
 labels, unreadable/all-ignore pairs or incompatible geometry. The `b16236c`
-GPU smoke now reports20 finite updates, unchanged backbone, exact state and
-prediction restoration and1.182GiB peak reserved memory. Next is an original
-saved-report/trace/checkpoint audit and full source-holdout metric gate, using
-that exact checkpoint with zero new updates. Local original attachment paths
-became unavailable after initial read, so raw-byte acceptance is required on
-AutoDL before any model access. This is diagnostic only. The ordinary `tools/train.py`
-M0 gate config continues to reject training before CUDA/data access; only the
-read-only source evaluator is active, not a formal optimizer run or a smoke rerun.
-This fallback cannot guarantee separation of correlated frames/scenes. No target access,
-Query representation change, new loss, long training or REIN extension in this gate.
-Existing model APIs and historical experiments remain unchanged. Historical
-Static R=2 mIoU is not a strict-DG M0 result. The old trainer still reads target
-data and is not a valid entry point for new strict-DG experiments.
-All Phase 16 descriptions below are historical records, not active commands.
+GPU smoke's saved artifact audit now passes through the accepted c7822fd
+full-source evaluator. All 2,497 holdout IDs and 1,276,971,688 valid pixels are
+accounted for, independently recomputed IoUs match, eight CE replay errors are
+zero, and model/RNG/original files are unchanged. Source mIoU 12.9717% is only
+a 20-update diagnostic, not a formal M0 result. Exact report bytes are pinned
+in Git; remote trace checksum success is in the pasted provenance, not a local
+raw trace audit. See Phase 17 `source_evaluation_review.md`.
+
+Next is a separate compact source checkpoint continuation mechanism: save
+model/AdamW/iteration/LR/sampler and Python/NumPy/CPU-CUDA RNG state, plus pinned
+config/backbone/split/Git/runtime metadata. Compare continuous eight updates
+against four plus four across independent processes (16 total calls). Require
+exact trace and final state equality, workers 0 and deterministic CUDA settings.
+The same Static R=2 two-view CE, BF16 and 40k LR horizon are unchanged; no
+holdout/target inference is needed. This is an engineering gate, not the
+ordinary workers-4 trainer or formal training authorization. The old smoke
+checkpoint lacks RNG/sampler state and cannot be used for this continuation.
+The ordinary M0 entry point remains blocked; no new Query/loss mechanism.
+Filename fallback still cannot guarantee frame/scene independence. Historical
+results remain unchanged. All Phase 16 descriptions below are historical.
 
 ## Phase 16 boundary
 

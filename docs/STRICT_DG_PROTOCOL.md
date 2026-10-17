@@ -3,30 +3,38 @@
 Specification: `CausalQ_DG_1016.txt` (2026-10-16). This phase repairs the
 development protocol before changing Query representation. Phase 16 stays closed.
 
-## Current gate: saved-artifact audit and full source-only holdout evaluation
+## Current gate: exact source checkpoint continuation
 
-The initial `b16236c` report/trace snapshot indicates successful20-update
-optimization/freeze/serialization. See Phase17 `gpu_smoke_return_review.md` for
-the reported observations and explicit limits on local file availability.
-Next AutoDL operation first pins the ORIGINAL report/trace hashes and validates
-all20 source IDs, finite objectives/gradients, exact40k LR sequence, alpha-zero
-gradient behavior, eight source references and report summaries. It verifies
-the ORIGINAL final.pth hash, metadata and trainable-state digest before inference.
-No retraining or new checkpoint selection.
+The original smoke saved-artifact audit and full c7822fd source evaluation are
+accepted. The exact report is saved/pinned, its 19 by 19 matrix independently
+recomputed, all 2,497 IDs match, and eight CE replays have zero error. Source
+mIoU 12.9717% is descriptive of 20 updates; no formal M0 or target conclusion.
+See Phase 17 `source_evaluation_review.md` for provenance and raw trace limits.
 
-Evaluate all2497 frozen GTA5 holdout IDs using the already fixed resized GT
-and padding. Verify full ID digest, valid-pixel counts and identical PyTorch/
-NumPy int64 confusion matrices. Class IoU=TP/(GT+Pred-TP); source mIoU is the
-unweighted mean over positive-union classes, with absent classes marked null.
-Also report image-mean CE and valid-pixel-weighted CE. These are descriptive
-diagnostics of20-update weights, not formal M0 accuracy or model-selection
-thresholds. Existing eight CE references must replay within1e-5 in the new
-process, and model/CPU-CUDA RNG/original smoke files must remain unchanged.
-No optimizer or target dataset is constructed by this evaluator.
+The next single mechanism stores model/AdamW/absolute iteration/LR/sampler
+permutation/cursor and Python/NumPy/torch CPU-CUDA RNG with config, split,
+backbone and Git/runtime identity. A fresh-process gate compares continuous
+8 updates versus 4 + checkpoint + fresh-process restore + 4, requiring exact
+inputs/loss/LR/gradients and final parameters/optimizer/sampler/RNG equality.
+Three distinct worker processes, 16 optimizer calls total, workers 0, seed 0,
+BF16, deterministic algorithms and CUBLAS workspace :4096:8. No tolerance
+relaxation or nondeterminism override. The fixed 40,000-step PolyLR horizon,
+Static R=2 and original+photometric CE sum remain unchanged. No holdout/target
+inference, checkpoint selection or formal M0 training occurs in this gate.
+The old 20-step checkpoint has no RNG/sampler state and is not resumed.
 
-The ordinary M0 runner remains blocked. After evidence returns, audit it
-read-only before completing long-run/source-checkpoint and final-only target
-evaluation preparation. No centered Query, new loss or40k authorization now.
+The ordinary training entry point stays blocked. Passing only covers this
+single-GPU deterministic workers-0 runtime. Integration into the source-only
+formal runner/checkpoint policy and final-only target evaluation remains
+pending. No centered Query, new loss or 40k run is authorized now.
+
+## Completed source-only evaluation
+
+Fixed resized GT/padding, class IoU = TP/(GT+Pred-TP), mIoU is the mean over
+positive-union classes and absent classes are null. Report image-mean and
+valid-pixel-weighted CE. Full coverage/confusion counts and unchanged state
+were checked without checkpoint selection or new optimizer calls. Model
+accuracy is not an engineering acceptance threshold.
 
 ## Completed bounded source smoke protocol
 
@@ -35,7 +43,7 @@ in `tools/audit_strict_source_data.py`; see Phase17 `source_data_review.md`.
 All24966 pairs and2497 fixed holdout transforms are accepted. The62 scale-only
 differences obey the declared alignment. This does not establish scene independence.
 
-Only the dedicated smoke entry point may now optimize:20 fresh seed0 updates,
+The completed dedicated smoke used 20 fresh seed0 updates,
 one source image per update, original+photometric CE, Static R=2 unchanged.
 L=CE(Z_original,Y)+lambda_cf*CE(Z_photo,Y), lambda_cf=1. Keep AdamW1e-4/wd0.01,
 clip1, BF16 AMP and the40k poly0.9 horizon. As in the legacy loop, update1

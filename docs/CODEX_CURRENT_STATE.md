@@ -1,15 +1,19 @@
 # CausalQ_DG_1016 repository audit
 
-Current update (2026-10-17): initial `b16236c` smoke attachment snapshot reports
-20 finite updates, exact model/optimizer/prediction restoration, unchanged
-backbone and1.182GiB peak reserved. The original D:/ attachment files became
-inaccessible after their initial read; complete raw-byte/trace and checkpoint
-audit is now an obligatory first step of the new AutoDL read-only source
-evaluator. No rerun of training. `tools/audit_strict_source_smoke.py`,
-`tools/strict_source_evaluation.py` and `tools/evaluate_strict_source.py` prepare
-full2497 source holdout inference, independent NumPy versus PyTorch confusion/
-IoU, eight CE reference replays and unchanged model/RNG checks. Actual GPU
-results remain pending. Model/loss, old experiments and target access unchanged.
+Current update (2026-10-17): the c7822fd full-source report was recovered
+from the pasted console with exact SHA256 a70ddf23...ea0f29c and accepted by
+`tools/audit_strict_source_evaluation.py`. Original smoke byte/checkpoint audit
+passed remotely; full 2,497-ID coverage and recomputed confusion/IoUs pass.
+Source mIoU 0.1297166066 is a 20-update diagnostic; no target/effect metric.
+Eight CE replays are exact, model/RNG unchanged, peak reserved 1.054688 GiB.
+Original per-image trace is remote, with successful checksum output preserved.
+Next is `tools/strict_source_resume.py` plus AutoDL fresh-process workers:
+continuous 8 versus 4+4 updates, exact stochastic state/trace comparison,
+16 total optimizer calls. GPU acceptance pending; model/loss/formal trainer
+and historical experiments unchanged. See AUTODL_NEXT.md for the sole active
+command. No target data access or centered Query work.
+
+## Earlier engineering snapshots — historical
 
 Latest evidence: full source-data report `cb52071` is byte/hash-pinned and
 accepted locally (`cf01d813...ad8fab3`), with all24966 pairs valid,62 allowed

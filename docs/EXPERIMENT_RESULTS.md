@@ -1,9 +1,9 @@
 # Strict-DG research results
 
-As of 2026-10-16, there are no M0/M1/P1/M2/M3/M4 training, source mIoU,
-target mIoU, effect variance/magnitude, localization or responsibility results.
-Historical results remain in their existing experiment IDs and are not reused
-as new strict-DG results.
+As of 2026-10-17, there are no formal M0/M1/P1/M2/M3/M4 or target/effect
+results. The accepted 20-update source-only engineering checkpoint has full
+holdout mIoU 0.12971660656076558; this is a diagnostic, not formal M0 accuracy.
+Historical experiment IDs/results are unchanged.
 
 ## Phase 17 / Priority 0
 
@@ -32,14 +32,18 @@ or incompatible geometry,62 allowed scale-equivalent differences,2497 holdout
 and32 source-photo preprocessing checks. Saved report and review are in the
 same evidence directory. No mIoU or effect metric was measured.
 
-The initial `b16236c` smoke snapshot reports20 finite updates, nonzero branch
-gradients, unchanged backbone, exact model/optimizer and zero-error prediction
-roundtrip. Peak reserved is1.181641GiB. Source/target mIoU and effect metrics
-were not measured; this is not a formal M0 result. Original local attachment
-paths became unavailable after initial read, so the complete immutable trace
-and checkpoint still require the new AutoDL raw-byte audit; do not overstate
-the initial snapshot as that audit. See `gpu_smoke_return_review.md`.
+The b16236c smoke's saved report/full trace and checkpoint audit passed on
+AutoDL at c7822fd. Full holdout report bytes now match the supplied SHA256 and
+are pinned locally. Source coverage is all 2,497 IDs, valid pixels 1,276,971,688;
+independent confusion/IoU audit passes. Source mIoU 0.12971660656076558,
+image-mean CE 1.3436256861, pixel-weighted CE 1.3548140258. All eight CE replays
+have zero error, model/RNG/original files unchanged; peak reserved 1.054688 GiB.
+No new optimizer updates, checkpoint selection, target or effect metrics.
+Twelve zero-IoU classes after 20 updates do not warrant a mechanism change.
+The per-image trace remains remote; successful remote checksum output, exact
+report and review are in `experiments/STRICT_DG_PHASE17/`.
 
-Next is read-only full2497 GTA5 holdout inference from the SAME checkpoint,
-preceded by that complete audit. Zero new optimizer updates and no target
-access. Full-source diagnostics and independent metric checks remain pending.
+Next is a separate checkpoint continuation gate: continuous 8 versus 4+4
+updates across independent processes, 16 total source optimizer calls, exact
+state/trace comparison. CPU synthetic acceptance is not GPU evidence; actual
+AutoDL result remains pending. Formal training stays blocked.
