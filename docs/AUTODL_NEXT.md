@@ -1,4 +1,91 @@
-# Phase19 accepted — no further AutoDL action
+# Phase20 active — source responsibility/effect diagnostic gate
+
+Updated 2026-10-17. Phase19 accepted at 01f59e9; do not repeat its gate or
+exports. Read QUERY_COMPONENT_DIAGNOSTICS.md. Current change is analysis only:
+20 hash-selected source holdout images, original/photo views, same immutable
+M1 checkpoint, zero optimizer updates. No new loss, target data or mIoU.
+
+Local CPU verification: Python3.10.20 / torch2.10.0+cu128 with CUDA hidden;
+474 passed, 1 skipped. Bash syntax and Git whitespace checks pass. The skip
+is the existing Windows symlink-permission test; actual source/GPU diagnostics
+remain pending AutoDL.
+
+Before CUDA/data, verify exact Phase18 and Phase19 original files and frozen
+source manifest. The tool restores model only. Require exactly40 forwards,
+sample_count20, finite diagnostics with explicit missing regions, appearance
+replay exact, full=anchor+residual <=1e-6, exact class routing and unchanged
+model/style/RNG/original files. CSV counts: 19 parameter pairs, 1520
+responsibility rows, 1140 effect rows. No threshold on semantic specialization
+or effect stability; those are measurements, not correctness criteria.
+Full2497 statistics and systematic heatmaps remain subsequent work.
+
+## Exact commit launch
+
+Use the full literal SHA from Codex's final handoff in this complete child-bash
+block. A failed check cannot exit the parent terminal; existing results/logs
+are preserved. Do not edit source code on AutoDL.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+bash scripts/analyze_query_components_phase20.sh "$EXPECTED_SHA"
+BASH
+echo "Launch check finished; terminal remains open."
+```
+
+The script launches with nohup and logs early failures. Runtime remains
+/root/autodl-tmp/envs/causalq-dg/bin/python, torch2.7.0+cu126,
+transformers4.56.1, offline DINOv3-L, GPU0, workers0, BF16, strict deterministic
+algorithms, CUBLAS :4096:8, TF32true/cuDNNbenchmarkfalse. Original directories:
+phase18/M1_CENTERED_GATE20_9583925 and phase19/ANCHOR_COMPONENT_READONLY_f5ca5b5.
+No new checkpoint is produced.
+
+## Progress and return
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 80 "/root/autodl-tmp/outputs/CausalQ_DG/phase20/QUERY_COMPONENT_DIAGNOSTICS20_${SHA}_launcher.log"
+```
+
+On completion expect component_diagnostics_exit_code=0 and ok=true. Return
+final console output plus complete report/checksum via the block below. Keep
+CSVs on AutoDL; return them later if requested. Report contains per-image
+effect summaries, full parameter rows, metric counts and all file hashes.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export COMPONENT_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase20/QUERY_COMPONENT_DIAGNOSTICS20_${SHA}"
+cd "$COMPONENT_OUT"
+sha256sum -c SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['COMPONENT_OUT'])
+for name, marker in [('component_effect_report.json','COMPONENT_REPORT'), ('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+BASH
+echo "Evidence export finished; terminal remains open."
+```
+
+If failed, return the complete report and launcher log without removing or
+overwriting files. Stop here: no training, new loss or target access.
+
+---
+
+# Archive: Phase19 accepted — no further AutoDL action
 
 Complete report/checksum bytes are now pinned and accepted by
 tools/audit_anchor_query_effect.py. All 16 embedded component rows reconstruct

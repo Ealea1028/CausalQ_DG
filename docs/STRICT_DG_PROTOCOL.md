@@ -1,5 +1,14 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Active Phase20 boundary: Phase19 accepted at 01f59e9. Diagnostic analysis only,
+same immutable Phase18 M1 checkpoint, fixed20 source holdout IDs, deterministic
+per-ID original/photo views, zero optimizer updates. No target access or
+accuracy selection. Audits both upstream artifact sets before GPU/data and
+after analysis, requires unchanged model/style/all RNG. Responsibility is
+competition rather than causality; partial-source descriptive variance cannot
+establish the full-holdout hypothesis. See QUERY_COMPONENT_DIAGNOSTICS.md.
+Below are historical scopes.
+
 Current Phase19 boundary: Phase18 accepted; only anchor-only effect
 computation is new. Read-only eight source images/two views from the existing
 9583925 centered checkpoint, no optimizer/new loss/selection/mIoU or target

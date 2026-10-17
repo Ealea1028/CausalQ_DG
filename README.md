@@ -1,6 +1,15 @@
 # CausalQ-DG
 
-## Active phase — Phase 19 / Priority 2 — 2026-10-17
+## Active phase — Phase20 / Priority3 — 2026-10-17
+
+Phase19 component engineering is accepted at 01f59e9 from complete pinned
+report/checksum evidence. Current work is read-only responsibility/effect
+diagnostics: fixed20 source holdout IDs x original/photo views, same accepted
+M1 checkpoint, zero optimizer updates. No model/objective changes or target
+access. See docs/QUERY_COMPONENT_DIAGNOSTICS.md and docs/AUTODL_NEXT.md.
+Full-holdout scientific analysis and formal ablations remain later work.
+
+## Archive — Phase19 / Priority2
 
 Complete returned report/checksum bytes are now accepted with all16 rows,
 exact source CE replay and unchanged model/RNG/files. Priority2 is complete;

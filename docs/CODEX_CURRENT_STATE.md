@@ -1,5 +1,13 @@
 # CausalQ_DG_1016 repository audit
 
+Phase20 / Priority3 active (2026-10-17): Phase19 accepted at 01f59e9. New
+read-only query_components metrics and analyze_query_components CLI implement
+fixed20 source IDs, deterministic per-ID photometric seeds, two forwards per
+pair, native-grid responsibility, score deletion, centered parameter geometry
+and valid-pixel effect statistics. No model changes or optimizer. CPU synthetic
+metric/replay/state/audit-order tests precede AutoDL engineering validation.
+GPU results pending; full2497, heatmaps and formal ablations remain later work.
+
 Phase19 complete evidence accepted (2026-10-17): report/checksum SHA e45bd7bf.../
 902ac0da... verified from complete returned bytes, typed acceptance audit
 passes all16 rows and exact trace reconstruction; source CE error0, zero

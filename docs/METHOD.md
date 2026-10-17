@@ -1,5 +1,23 @@
 # Method contract
 
+## Active boundary — Phase20 / Priority3 diagnostics (2026-10-17)
+
+Phase19 accepted separately at 01f59e9; complete pinned report and all16
+embedded rows pass the audit. Current change is analysis only: responsibility
+softmax over native-grid scores, parameter geometry, full/anchor/residual
+effect magnitude and paired-view variance. Responsibility is attribution,
+not causal effect; slot deletion measures score aggregation only. Definitions,
+missing-value handling, denominators and limits are frozen in
+QUERY_COMPONENT_DIAGNOSTICS.md. No new objective, model API or training.
+
+Next GPU gate is exactly20 filename-hash-selected source holdout samples,
+fixed source-ID-based appearance seeds, original/photo, same20-step centered
+checkpoint, 40 forwards and zero updates. Byte-audit both accepted upstream
+runs before CUDA/data; model/RNG/original files unchanged afterward. Produce
+three CSVs plus complete report. No mIoU or target access, checkpoint/method
+selection, full2497 or stability/utility conclusion from this bounded gate.
+All phase descriptions below are historical.
+
 ## Active boundary — Phase19 / Priority2 anchor-only components (2026-10-17)
 
 Complete evidence update: Phase19 byte-pinned audit passes all16 rows and

@@ -1,5 +1,12 @@
 # Strict-DG research results
 
+Phase20 / Priority3 status (2026-10-17): Phase19 complete evidence is accepted
+at 01f59e9: 16 source views, CE error0, component identity max error5.82e-11,
+peak reserved1.517578125GiB. No accuracy or scientific stability result.
+Next is a fixed20-image read-only engineering gate for responsibility/effect
+CSVs, without new training/loss/target access. No Phase20 GPU results yet;
+earlier phase descriptions are archived below.
+
 Phase19 status (2026-10-17): Phase18 centered algebra/training/serialization
 engineering is accepted, with no mIoU or anchor hypothesis result. New anchor-
 only component API is CPU-tested; read-only GPU numerical compatibility on
