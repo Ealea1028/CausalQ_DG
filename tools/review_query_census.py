@@ -192,7 +192,7 @@ def main(argv=None):
     if args.output.exists() or args.output.resolve().is_relative_to(args.directory.resolve()):
         parser.error('Preserve original evidence; choose a fresh external review output')
     result = review(args.directory)
-    args.output.write_text(json.dumps(result, indent=2, allow_nan=False) + '\n', encoding='utf-8')
+    args.output.write_bytes((json.dumps(result, indent=2, allow_nan=False) + '\n').encode('utf-8'))
     print(json.dumps({k: v for k, v in result.items() if k not in ('files_sha256', 'figures', 'effect_summary')}, indent=2))
 
 

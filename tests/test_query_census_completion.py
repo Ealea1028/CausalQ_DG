@@ -12,6 +12,8 @@ def test_independent_csv_and_visual_review_acceptance():
     result = audit_completed_diagnostics()
     assert result['priority3_engineering_complete']
     assert not result['raw_anchor_hypothesis_supported'] and not result['new_anchor_cqe_loss_authorized']
+    for name in ('raw_review.json', 'completion_review.json'):
+        assert b'\r\n' not in (ROOT / 'experiments/STRICT_DG_PHASE20' / name).read_bytes()
 
 
 def test_review_pins_reject_modified_certificate(tmp_path):

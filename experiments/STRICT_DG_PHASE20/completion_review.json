@@ -2,7 +2,7 @@
   "schema_version": 1,
   "phase": 20,
   "producer_git_sha": "79e440b5e78b34e39ef1792e67807ba164d6752e",
-  "raw_review_sha256": "801cf67d879bb995c793b9f9e6d1beaf080e415731c8cd80e444ac15c94f5558",
+  "raw_review_sha256": "a94501521e071d4dffdfde685cc940add3a56fdd6e12f5ac434d45e66af8da79",
   "raw_csv_independently_reviewed": true,
   "actual_figures_visually_reviewed": true,
   "visual_review_scope": "All20 fixed samples in overview/effect/responsibility contact sheets; native-size first/last spot checks",

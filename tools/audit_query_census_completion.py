@@ -5,8 +5,8 @@ import json
 
 from tools.audit_query_component_census import ROOT, audit_census, census_artifact_hashes
 
-RAW_SHA = '801cf67d879bb995c793b9f9e6d1beaf080e415731c8cd80e444ac15c94f5558'
-COMPLETION_SHA = '74a01b7564fb487fd20051f728c17278415fbdc6947a7ab6cee43fd267595a41'
+RAW_SHA = 'a94501521e071d4dffdfde685cc940add3a56fdd6e12f5ac434d45e66af8da79'
+COMPLETION_SHA = 'b132365ad250eb8e5cf76b2d184601b9de57d6e9736d8310e3d04faa1a54168a'
 
 
 def audit_completed_diagnostics(directory=ROOT / 'experiments/STRICT_DG_PHASE20'):
