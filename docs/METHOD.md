@@ -1,5 +1,20 @@
 # Method contract
 
+## Active boundary — Phase21 / M0-M1 baseline readiness
+
+Phase20 raw/visual engineering complete at9de5b1e. The early checkpoint does
+not support raw anchor stability; no Anchor-CQE/new loss. Priority4 readiness
+first verifies M1 centered Static continuation using the exact schema2 source
+runner, continuous8 vs fresh-process4+4. Exactly16 optimizer updates total,
+no metrics, formal run, target access or checkpoint conversion. All common
+optimizer/loss/style/schedule settings stay unchanged. Same seed0 source
+recipe; workers0 and deterministic CE. Record semantic centered flag and
+preserve complete model/optimizer/sampler/all RNG state. Require exact traces
+and state across3 independent processes; CPU tests are not CUDA evidence.
+Only after this gate can a separate fixed-final no-CQE M0/M1 formal release
+be prepared. Do not treat engineering checkpoints as formal baselines.
+All pending-transfer/analysis descriptions below are historical.
+
 Latest Phase20 boundary: full census report verified, raw CSV/figure archive
 not locally returned. Priority3 remains open for independent raw recomputation
 and visual QA; next action is file transfer only. Raw anchor variance exceeds

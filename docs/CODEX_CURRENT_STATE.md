@@ -1,5 +1,12 @@
 # CausalQ_DG_1016 repository audit
 
+Phase21 active (2026-10-17): Phase20 completed with byte-pinned local raw and
+visual certificates, canonical Git bytes verified at9de5b1e. Prepare M0/M1
+no-CQE formal readiness only: M1 schema2 source-runner exact8 vs4+4 across
+3 processes,16 total engineering updates, no new mechanism/loss/mIoU or
+target access. CPU replay includes stochastic transforms, dropout and epoch
+rollover; actual CUDA process replay pending. No M0/source-census reruns.
+
 Phase20 closed (2026-10-17): analysis_export supplied locally,64 hashes pass;
 independent CSV reduction reproduces142329 effect/189772 responsibility rows,
 all2497 sample and per-class/slot summaries.60 PNGs decode and all20 fixed

@@ -1,4 +1,101 @@
-# Phase20 complete — no further transfer or GPU analysis
+# Phase21 active — bounded M1 schema2 continuation readiness
+
+Phase20/ Priority3 is closed: raw CSVs and actual figures independently
+reviewed; local records are canonical Git LF bytes at9de5b1e. No more source
+census or transfers. Raw anchor stability is unsupported at the20-step state;
+do not add Anchor-CQE or substitute normalized variance for the hypothesis.
+
+Next is readiness for Priority4 M0/M1 no-CQE formal baselines. Existing M0
+schema2 runner/pilot and earlier M1 head roundtrip do not establish independent
+process M1 runner continuation. This dedicated gate adds no mechanism or
+training API: unchanged centered Static M1 recipe, schema2 source runner,
+continuous8 versus prefix4 + resumed4 in3 fresh processes, seed0, exactly16
+updates across workers. No formal training, new loss, mIoU or target access.
+It starts fresh and does not continue/reclassify the20-step analysis checkpoint.
+
+Local verification:513 passed/1 skipped, Python3.10.20/torch2.10.0+cu128,
+CUDA hidden, OMP1/MKL1/sequential MKL. The existing Windows symlink test is
+skipped. Bash syntax and Git whitespace checks pass. CPU synthetic worker
+IDs only test verifier logic; independent CUDA processes remain unverified.
+
+The unchanged frozen Phase18 M1 YAML supplies the model/optimizer recipe;
+Phase21 metadata supplies the actual bounded engineering scope. Absolute
+40000-step PolyLR horizon stays fixed. Dedicated CLI has no budget override.
+Checkpoint records seed/sampler epoch+cursor/all RNG/model/optimizer and the
+explicit centered flag. Require exact input/loss/LR/gradient traces and model/
+optimizer/RNG/sampler state, schema2, unchanged backbone and3 distinct PIDs.
+Old M0/legacy/mismatched metadata must fail rather than silently convert.
+
+## Exact commit launch
+
+Use the literal full SHA from Codex's final handoff. Paste the entire child
+bash block; failed prechecks cannot close the interactive terminal. All
+outputs are fresh and outside Git. No previous outputs need uploading or
+deleting; upstream completion evidence is audited from the exact checkout.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+bash scripts/check_centered_source_resume_phase21.sh "$EXPECTED_SHA"
+BASH
+echo "Launch check finished; terminal remains open."
+```
+
+Runtime: /root/autodl-tmp/envs/causalq-dg/bin/python, torch2.7.0+cu126,
+transformers4.56.1, offline DINOv3-L, GPU0, strict deterministic algorithms,
+CUBLAS :4096:8, TF32true/cuDNNbenchmarkfalse, BF16, workers0, deterministic
+unweighted CE, AdamW1e-4/wd.01/clip1, original+photo CE. Source train22469
+only; no holdout decoding/evaluation or target access in this gate.
+
+## Monitor and return
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 80 "/root/autodl-tmp/outputs/CausalQ_DG/phase21/M1_RUNNER_RESUME8_${SHA}_launcher.log"
+```
+
+Expect m1_runner_resume_exit_code=0, ok=true, exact_resume_verified=true,
+checkpoint_schema_version=2, independent_worker_processes=3 and
+total_optimizer_updates_across_processes=16. Training/target flags remain
+false; null mIoUs. Checkpoints/full traces stay on AutoDL. Return final
+console plus complete resume_report.json and original SHA256SUMS bytes:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export M1_RESUME_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase21/M1_RUNNER_RESUME8_${SHA}"
+cd "$M1_RESUME_OUT"
+sha256sum -c SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['M1_RESUME_OUT'])
+for name, marker in [('resume_report.json','M1_RESUME_REPORT'), ('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+BASH
+echo "Evidence export finished; terminal remains open."
+```
+
+If failed, preserve files and return the failing worker_report.json (or
+resume_report.json for compare) and launcher log; do not proceed or rerun.
+Stop after this gate. Formal M0/M1 fixed-final recipe/release is a subsequent
+scope after exact M1 continuation acceptance; no M2/M3/new loss is released.
+
+---
+
+# Archive: Phase20 complete — no further transfer or GPU analysis
 
 The extracted directory was supplied locally at analysis_export/ (ignored
 by Git). All64 file hashes pass; independent CPU/math.fsum CSV recomputation

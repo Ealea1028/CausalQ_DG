@@ -1,5 +1,12 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Active Phase21: completed Priority3 raw/visual review at9de5b1e. No Anchor-CQE
+is justified by the early raw-variance result. Only M1 independent-process
+schema2 continuation8 vs4+4 is released,16 total engineering updates. Frozen
+source-only model/style/CE/40k LR horizon; zero target access, null metrics,
+formal training false. M0/M1 formal paired release is later. Source analysis
+and transfers are complete; descriptions below are historical.
+
 Latest Phase20 boundary: full2497 census metadata verified; original CSV/
 sample index/60 figures await local archive transfer and independent review.
 No additional GPU run, formal training or new loss. Raw variance inequality

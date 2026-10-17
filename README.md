@@ -1,6 +1,15 @@
 # CausalQ-DG
 
-## Active phase — Phase20 / Priority3 — 2026-10-17
+## Active phase — Phase21 / Priority4 readiness — 2026-10-17
+
+Priority3 is closed with independent raw CSV/actual-source figure review.
+Raw anchor stability is unsupported at the20-step engineering state; no new
+Anchor-CQE. Prepare the no-CQE M0/M1 formal baseline comparison by checking
+M1 schema2 source-runner continuation in3 fresh processes (8 vs4+4), exactly16
+engineering updates, no mIoU/formal training/target access. Same model/recipe,
+no new mechanism. See docs/AUTODL_NEXT.md; do not repeat M0 or source census.
+
+## Archive — Phase20 / Priority3
 
 Priority3 complete: returned64 files byte-verified, raw CSVs independently
 recomputed, all20 fixed samples visually reviewed. No further transfer or

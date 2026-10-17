@@ -1,5 +1,12 @@
 # Strict-DG research results
 
+Phase20 independent raw/visual review is complete:64 hashes,142329 effect
+and189772 responsibility rows, all2497 image/class/slot summaries reproduced;
+all20 fixed cases visually reviewed,60 PNGs decode. Raw anchor/residual
+variance ratio18.67 confirmed, no semantic-mode/DG utility claim. Phase21
+now prepares a bounded M1 schema2 continuation check, with no new loss or
+accuracy result. Actual GPU continuation is pending; no formal M0/M1 run yet.
+
 Phase20 full-census report verified: same20-step checkpoint,2497 source
 images, no updates. Anchor/residual raw variance8.42671e-10/4.51276e-11
 (18.67x); normalized pair MSE0.00253016/0.00303172.0/2497 images favor

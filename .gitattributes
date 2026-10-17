@@ -16,3 +16,4 @@ experiments/STRICT_DG_PHASE20/census_report.json text eol=lf
 experiments/STRICT_DG_PHASE20/census_SHA256SUMS text eol=lf
 experiments/STRICT_DG_PHASE20/raw_review.json text eol=lf
 experiments/STRICT_DG_PHASE20/completion_review.json text eol=lf
+scripts/check_centered_source_resume_phase21.sh text eol=lf
