@@ -1,5 +1,13 @@
 # CausalQ_DG_1016 repository audit
 
+Phase18 acceptance (2026-10-17): complete centered report/checksum bytes match
+3a09ece3...979926e / 19b8e0f1...359a26. The pinned audit passes all20 updates,
+initial/final algebra, projected gradients, alpha-zero, eight source replays,
+frozen backbone and exact head/optimizer roundtrip; peak reserved1.417969GiB.
+No mIoU, target, formal training or independent-process M1 continuation claim.
+Next sequential scope is Priority2 anchor-only effect computation, using this
+same checkpoint read-only; no new training/loss. Earlier pending notes are historical.
+
 Phase18 / Priority1 active (2026-10-17): Phase17 full source pilot accepted
 at a9c0b39. Centered Query is now implemented as an explicit opt-in in the
 existing bank/segmentor, with unchanged default/state keys/raw getter and new

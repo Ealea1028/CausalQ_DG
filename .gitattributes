@@ -6,3 +6,5 @@ experiments/STRICT_DG_PHASE17/source_evaluation.json text eol=lf
 experiments/STRICT_DG_PHASE17/resume_report.json text eol=lf
 experiments/STRICT_DG_PHASE17/pilot_report.json text eol=lf
 experiments/STRICT_DG_PHASE17/pilot_SHA256SUMS text eol=lf
+experiments/STRICT_DG_PHASE18/centered_report.json text eol=lf
+experiments/STRICT_DG_PHASE18/centered_SHA256SUMS text eol=lf

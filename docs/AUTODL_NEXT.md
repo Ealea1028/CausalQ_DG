@@ -1,4 +1,14 @@
-# AutoDL next: Phase18 / Priority1 — Centered Query gate20
+# Phase18 Centered Query engineering accepted
+
+The complete source gate report/checksum is pinned and accepted. Do not rerun
+20-step training or eight-sample compatibility. No further Phase18 GPU work
+is needed for this acceptance. Next sequential local scope is anchor-only
+effect computation, from the same immutable centered checkpoint, with zero
+optimizer updates. No new loss, formal training or target access.
+
+---
+
+# Archive: accepted Phase18 gate20 — INACTIVE
 
 Updated 2026-10-17. Only this top section is active. Phase17 source-development
 engineering is accepted with byte-pinned full pilot evidence at a9c0b39. Do

@@ -1,0 +1,309 @@
+{
+  "schema_version": 1,
+  "phase": 18,
+  "scope": "m1_centered_query_engineering20",
+  "created_utc": "2026-10-17T04:12:53.523415+00:00",
+  "seed": 0,
+  "authorized_optimizer_updates": 20,
+  "authorized_holdout_samples": 8,
+  "formal_training_authorized": false,
+  "target_data_accessed": false,
+  "source_miou": null,
+  "target_miou": null,
+  "exact_resume_verified": false,
+  "roundtrip_scope": "new_head_same_frozen_backbone",
+  "manifest_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "train_count": 22469,
+  "val_count": 2497,
+  "source_validation": "gta5_holdout",
+  "git_sha": "958392541519cdad5f80d628c18959176966c6c8",
+  "git_status": "",
+  "source_pilot_audit": {
+    "source_pilot_accepted": true,
+    "report_sha256": "d5b4747b7200d40722728cd797da9f736dedb15d9310c3a293aa8a51b98ffd1b",
+    "checksums_sha256": "8ea73a530d6e43e78b1dea19795b898070fd0259f69f3dc86956730eeb3eb615",
+    "source_miou": 0.35724184600067665,
+    "target_data_accessed": false,
+    "formal_training_authorized": false
+  },
+  "config": {
+    "experiment": {
+      "id": "M1_CENTERED",
+      "phase": 18,
+      "status": "awaiting_centered_gpu_gate"
+    },
+    "data": {
+      "source": "gta5",
+      "targets": [],
+      "validation": "gta5_holdout",
+      "num_classes": 19,
+      "num_workers": 4,
+      "random_scale": [
+        0.5,
+        2.0
+      ],
+      "horizontal_flip_probability": 0.5,
+      "min_valid_fraction": 0.01,
+      "crop_attempts": 10
+    },
+    "model": {
+      "backbone": "dinov3_vitl16",
+      "weights_dir": "dinov3_vitl16",
+      "weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+      "freeze_backbone": true,
+      "intermediate_indices": [
+        6,
+        12,
+        18,
+        24
+      ],
+      "decoder_channels": 256,
+      "dropout": 0.1,
+      "query": true
+    },
+    "query": {
+      "queries_per_class": 2,
+      "interaction": "static",
+      "alpha_init": 0.0,
+      "cross_attention_layers": 0,
+      "num_heads": 8,
+      "temperature": 0.07,
+      "aggregation": "logsumexp",
+      "centered_residuals": true
+    },
+    "style": {
+      "views": [
+        "original",
+        "photometric"
+      ],
+      "sequential_forward": true,
+      "preserve_geometry": true,
+      "lambda_cf": 1.0,
+      "photometric": {
+        "brightness": [
+          0.7,
+          1.3
+        ],
+        "contrast": [
+          0.7,
+          1.3
+        ],
+        "saturation": [
+          0.7,
+          1.3
+        ],
+        "gamma": [
+          0.8,
+          1.2
+        ],
+        "temperature": [
+          0.9,
+          1.1
+        ],
+        "grayscale_probability": 0.1
+      },
+      "fourier": {
+        "mix_strength": [
+          0.1,
+          0.35
+        ]
+      }
+    },
+    "train": {
+      "crop_size": [
+        512,
+        512
+      ],
+      "amp": true,
+      "batch_size": 1,
+      "gradient_accumulation": 1,
+      "max_iterations": 40000,
+      "seed": 0,
+      "style": true,
+      "log_interval": 10
+    },
+    "optimizer": {
+      "type": "AdamW",
+      "lr": 0.0001,
+      "weight_decay": 0.01,
+      "scheduler": "poly",
+      "poly_power": 0.9
+    },
+    "validation": {
+      "interval": 500,
+      "long_edge": 1024,
+      "patch_size": 16,
+      "geometry": "aspect_resize_pad",
+      "scope": "full_source_holdout"
+    },
+    "protocol": {
+      "name": "strict_dg",
+      "target_access": "forbidden_during_training",
+      "source_validation": "gta5_holdout",
+      "target_evaluation": "final_only",
+      "checkpoint_selection": "fixed_final",
+      "training_authorized": false
+    }
+  },
+  "environment": {
+    "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+    "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+    "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+    "torch": "2.7.0+cu126",
+    "cuda": "12.6",
+    "transformers": "4.56.1",
+    "gpu": "NVIDIA GeForce RTX 4090 D"
+  },
+  "loss_preflight": {
+    "backend": "fp32_log_softmax_gather_valid_mean_v1",
+    "cpu_reference_loss_max_error": 0.0,
+    "cpu_reference_gradient_max_error": 6.984919309616089e-10,
+    "gpu_replay_exact": true,
+    "strict_determinism_enabled": true
+  },
+  "initial_centering": {
+    "residual_mean_max_error": 1.862645149230957e-09,
+    "query_mean_anchor_max_error": 7.450580596923828e-09
+  },
+  "alpha_zero_error": 0.0,
+  "metadata": {
+    "git_sha": "958392541519cdad5f80d628c18959176966c6c8",
+    "seed": 0,
+    "centered_residuals": true,
+    "config_sha256": "967c89bd6bf01e5e4f114e2620b39eb8d267b276ae4fba9a0a3b34501c0f766e",
+    "config_tree_sha256": "465c2af733a36cd6d5e65530087b675381749d3509fe50be4fbf945f8d701f7f",
+    "manifest_sha256": {
+      "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+      "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+    },
+    "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+    "sample_workers": 0,
+    "schedule_horizon": 40000,
+    "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+    "amp": "bfloat16",
+    "deterministic_algorithms": true,
+    "cublas_workspace_config": ":4096:8",
+    "authorized_optimizer_updates": 20,
+    "variant": "M1_CENTERED",
+    "target_data_accessed": false,
+    "environment": {
+      "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+      "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+      "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+      "torch": "2.7.0+cu126",
+      "cuda": "12.6",
+      "transformers": "4.56.1",
+      "gpu": "NVIDIA GeForce RTX 4090 D"
+    }
+  },
+  "initial_iteration": 0,
+  "final_iteration": 20,
+  "optimizer_updates": 20,
+  "backbone_unchanged": true,
+  "backbone_sha256": "24e1950a1ad87645cf6f46532a80594b5102af3644ccb55062e689a5b16f71ad",
+  "head_sha256": "dd2b5d4fe9631ca4f893f2377c3ae661bd901d2fce9e538e0a70955b2bab3c45",
+  "checkpoint_selection": "fixed_final",
+  "final_centering": {
+    "residual_mean_max_error": 1.862645149230957e-09,
+    "query_mean_anchor_max_error": 3.725290298461914e-09
+  },
+  "gradient_max": {
+    "decoder.fuse.0.weight": 35.481956481933594,
+    "decoder.fuse.1.weight": 0.4865957200527191,
+    "decoder.fuse.1.bias": 0.5021153688430786,
+    "decoder.fuse.3.weight": 30.86751365661621,
+    "decoder.fuse.4.weight": 0.8078557848930359,
+    "decoder.fuse.4.bias": 0.7511372566223145,
+    "decoder.classifier.weight": 17.27022933959961,
+    "decoder.classifier.bias": 2.061746120452881,
+    "query_bank.class_anchors": 0.012994760647416115,
+    "query_bank.query_residuals": 0.004298503044992685,
+    "query_head.alpha": 4.780279159545898,
+    "query_head.feature_projection.weight": 0.014836357906460762,
+    "query_head.query_projection.weight": 0.013505959883332253
+  },
+  "residual_gradient_sum_max_error": 0.0,
+  "model_roundtrip_exact": true,
+  "optimizer_roundtrip_exact": true,
+  "prediction_roundtrip_max_error": 0.0,
+  "holdout_compatibility": [
+    {
+      "source_id": "00001",
+      "ce": 1.4324227571487427,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00005",
+      "ce": 0.8873488903045654,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00015",
+      "ce": 0.8257036805152893,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00024",
+      "ce": 1.6554920673370361,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00039",
+      "ce": 0.9690249562263489,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00041",
+      "ce": 0.7417842745780945,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00078",
+      "ce": 1.1265045404434204,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    },
+    {
+      "source_id": "00099",
+      "ce": 1.1377052068710327,
+      "shape": [
+        1,
+        576,
+        1024
+      ]
+    }
+  ],
+  "peak_allocated_gib": 1.2329139709472656,
+  "peak_reserved_gib": 1.41796875,
+  "ok": true
+}
