@@ -1,5 +1,12 @@
 # Method contract
 
+Latest Phase20 boundary: full census report verified, raw CSV/figure archive
+not locally returned. Priority3 remains open for independent raw recomputation
+and visual QA; next action is file transfer only. Raw anchor variance exceeds
+residual on all2497 per-image19-class macros at the20-step engineering state.
+Do not replace the raw hypothesis with normalized ordering or add new losses.
+No formal training/target access; earlier pending-run sections are historical.
+
 Phase20 current full-source boundary (2026-10-17): gate20 is accepted at
 8500976. Same component metrics/checkpoint, now all2497 frozen source IDs
 and systematic20-image visual audit.4994 forwards, no optimizer, new loss,

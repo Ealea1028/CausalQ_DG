@@ -1,4 +1,45 @@
-# Phase20 active — full source census and systematic figures
+# Phase20 active — transfer existing analysis archive only
+
+Full census finished at79e440b. Complete report/checksum bytes are locally
+verified by tools/audit_query_component_census.py; see
+experiments/STRICT_DG_PHASE20/census_review.md. Raw CSVs/sample index/actual
+source figures are still absent locally. Do not repeat inference, plots,
+report export or training. Current action needs no GPU or checkout/fetch.
+
+The full report states2497 source IDs/4994 forwards, zero updates and60 PNGs.
+Raw anchor/residual variance ratio18.67, with0/2497 images showing lower raw
+anchor variance (per-image macro over19 class maps). Normalized ordering
+differs; it cannot substitute for the raw hypothesis. No Anchor-CQE/new loss
+is justified by these engineering-checkpoint numbers. Priority3 remains open
+for raw CSV recomputation and visual QA; formal phases have not started.
+
+## Verify the existing file on AutoDL
+
+Paste this entire child-bash block. It only reads/checks the45MiB archive:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+ARCHIVE=/root/autodl-tmp/outputs/CausalQ_DG/phase20/QUERY_COMPONENT_CENSUS2497_79e440b/analysis_export.zip
+EXPECTED=3010b35769c33408eae2af2b57c491d4e65b70880dffb24da35108e935be8d6b
+printf '%s  %s\n' "$EXPECTED" "$ARCHIVE" | sha256sum -c -
+ls -lh "$ARCHIVE"
+BASH
+echo "Archive check finished; terminal remains open."
+```
+
+In the AutoDL file panel, open that directory, download analysis_export.zip,
+then attach the ZIP to this conversation. Returning its hash/text again does
+not transfer the CSVs/PNGs. If already downloaded, attach the local ZIP or
+provide its exact local path; do not upload pretrained weights/checkpoints.
+The archive contains source previews and stays outside Git. Local byte
+checker audit_census_archive() is ready; actual CSV recomputation and visual
+inspection await the file. If download fails, return the error and preserve
+the remote file. All launch/compute steps below are archived.
+
+---
+
+# Archive: Phase20 full-source census launch — INACTIVE
 
 Gate20 accepted separately at8500976. Current action completes Priority3
 analysis on the same20-step engineering M1 checkpoint: all2497 source holdout

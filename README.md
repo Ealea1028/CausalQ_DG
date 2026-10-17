@@ -2,6 +2,12 @@
 
 ## Active phase — Phase20 / Priority3 — 2026-10-17
 
+Latest: full2497 census report/checksum verified;0/2497 images have lower
+raw anchor variance (per-image19-class macro). Analysis archive/actual source
+figures are not returned yet. Current action transfers the existing45MiB
+ZIP for local raw/visual review, with no new GPU run or loss. Earlier launch
+descriptions below are archived. Priority3 is not closed yet.
+
 Current action after accepted gate20 at8500976: full2497 source-holdout census
 and systematic20-image/five-class visual audit,4994 forwards and zero updates.
 Same20-step engineering checkpoint; no new loss or target access. Raw and

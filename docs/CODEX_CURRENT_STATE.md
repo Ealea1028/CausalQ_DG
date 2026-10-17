@@ -1,5 +1,12 @@
 # CausalQ_DG_1016 repository audit
 
+Phase20 full census report verified (2026-10-17): report88dd5291... and
+checksum53e67407... match complete bytes. All2497 IDs/4994 forwards, prior20
+replay and weighted per-class summaries pass metadata audit. Raw anchor/
+residual variance ratio18.67;0/2497 per-image macros favor anchor. Actual
+CSVs/60 PNGs await archive3010b357... transfer; no independent raw/visual
+acceptance yet. Current step is archive download/upload only; no GPU rerun.
+
 Phase20 full-source completion active: accepted gate20 at8500976, now exact
 all2497 source-holdout census and cached-output figures for same20 hash-picked
 images/classes0/2/8/13/11. No training/newloss/target. CLI --full-source keeps

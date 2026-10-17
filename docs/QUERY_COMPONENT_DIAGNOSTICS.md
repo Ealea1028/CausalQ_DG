@@ -1,5 +1,10 @@
 # Phase20 / Priority3 diagnostic contract
 
+Latest status: full census report/checksum verified; actual archive and source
+figures not locally returned. Next action is existing-file transfer only;
+Priority3 stays open for raw recomputation and visual review. See census_review.md
+under experiments/STRICT_DG_PHASE20 and the current AUTODL_NEXT.md section.
+
 ## Current scope: full-source completion after gate20 acceptance
 
 Gate20 accepted at8500976. The same CLI keeps its default20-sample behavior;

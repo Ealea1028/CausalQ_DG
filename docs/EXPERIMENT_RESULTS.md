@@ -1,5 +1,13 @@
 # Strict-DG research results
 
+Phase20 full-census report verified: same20-step checkpoint,2497 source
+images, no updates. Anchor/residual raw variance8.42671e-10/4.51276e-11
+(18.67x); normalized pair MSE0.00253016/0.00303172.0/2497 images favor
+anchor raw variance using per-image19-class macros. This early-state result
+does not support the raw stability hypothesis; no semantic/DG utility claim.
+Archive/raw CSV recomputation and actual figure review remain pending, so
+Priority3 is open. Do not repeat inference or start new losses.
+
 Phase20 gate20 accepted at8500976: original/photo responsibility pixel entropy
 0.558807/0.559010 nats; raw anchor/residual variance8.08893e-10/4.47922e-11
 (ratio18.06), RMS-normalized MSE0.00219225/0.00289978. These orderings differ;

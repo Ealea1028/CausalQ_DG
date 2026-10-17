@@ -1,5 +1,11 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Latest Phase20 boundary: full2497 census metadata verified; original CSV/
+sample index/60 figures await local archive transfer and independent review.
+No additional GPU run, formal training or new loss. Raw variance inequality
+is unsupported at the20-step engineering checkpoint; normalized results
+cannot replace it. Earlier launch/pending-run scopes below are historical.
+
 Current Phase20 completion: accepted diagnostic gate20 at8500976. Full2497
 source-only census/4994 forwards, same immutable engineering checkpoint,
 same metric definitions and per-ID styles. Fixed20 cached-output visual

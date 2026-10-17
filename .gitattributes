@@ -12,3 +12,5 @@ experiments/STRICT_DG_PHASE19/anchor_report.json text eol=lf
 experiments/STRICT_DG_PHASE19/anchor_SHA256SUMS text eol=lf
 experiments/STRICT_DG_PHASE20/component_effect_report.json text eol=lf
 experiments/STRICT_DG_PHASE20/component_SHA256SUMS text eol=lf
+experiments/STRICT_DG_PHASE20/census_report.json text eol=lf
+experiments/STRICT_DG_PHASE20/census_SHA256SUMS text eol=lf
