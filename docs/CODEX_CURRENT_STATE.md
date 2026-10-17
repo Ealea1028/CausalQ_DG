@@ -1,5 +1,11 @@
 # CausalQ_DG_1016 repository audit
 
+Phase19 complete evidence accepted (2026-10-17): report/checksum SHA e45bd7bf.../
+902ac0da... verified from complete returned bytes, typed acceptance audit
+passes all16 rows and exact trace reconstruction; source CE error0, zero
+updates, peak reserved1.517578125GiB. Earlier missing-byte statements are
+historical. Priority2 computation is accepted; Priority3 diagnostics next.
+
 Phase19 operator completion (2026-10-17): f5ca5b5 tail reports exit0, report/
 components checksums OK, CE error0, unchanged model/RNG/files, peak reserved
 1.517578125GiB. Complete report and SHA256SUMS bytes are absent. Current

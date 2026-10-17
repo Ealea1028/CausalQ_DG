@@ -1,4 +1,14 @@
-# Phase19 active action: export existing evidence only
+# Phase19 accepted — no further AutoDL action
+
+Complete report/checksum bytes are now pinned and accepted by
+tools/audit_anchor_query_effect.py. All 16 embedded component rows reconstruct
+the trace hash; exact source CE replay and lineage pass. Do not repeat the
+gate or evidence export. Next local scope is Priority3 diagnostics, separately
+committed after this acceptance. No training, new loss or target access.
+
+---
+
+# Archive: Phase19 evidence export — INACTIVE
 
 Updated 2026-10-17 after operator completion at f5ca5b5. Terminal tails
 report exit0, checksum OK, CE error0, unchanged model/RNG/files. See

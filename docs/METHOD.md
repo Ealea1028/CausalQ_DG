@@ -2,6 +2,10 @@
 
 ## Active boundary — Phase19 / Priority2 anchor-only components (2026-10-17)
 
+Complete evidence update: Phase19 byte-pinned audit passes all16 rows and
+trace reconstruction. Priority2 computation is accepted; no stability/utility
+claim. Earlier missing-byte and launch descriptions below are historical.
+
 Operator update: f5ca5b5 reports exit0 and exact CE replay; only terminal tails
 are locally available. Full report/checksum audit remains pending. Next action
 is evidence export only, not a new GPU run or Priority3. No whole-report or

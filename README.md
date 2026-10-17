@@ -2,6 +2,10 @@
 
 ## Active phase — Phase 19 / Priority 2 — 2026-10-17
 
+Complete returned report/checksum bytes are now accepted with all16 rows,
+exact source CE replay and unchanged model/RNG/files. Priority2 is complete;
+no more inference/export is needed. Earlier pending statements are archived.
+
 Latest f5ca5b5 terminal tails report exit0, CE error0 and unchanged model/RNG/
 files. Full report/checksum acceptance remains pending. Current action in
 AUTODL_NEXT.md exports existing evidence only; do not repeat inference.
