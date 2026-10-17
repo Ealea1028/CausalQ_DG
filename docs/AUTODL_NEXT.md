@@ -1,4 +1,42 @@
-# Phase19 Anchor-only computation: active AutoDL handoff
+# Phase19 active action: export existing evidence only
+
+Updated 2026-10-17 after operator completion at f5ca5b5. Terminal tails
+report exit0, checksum OK, CE error0, unchanged model/RNG/files. See
+experiments/STRICT_DG_PHASE19/partial_return_review.md. Full report/checksum
+bytes are missing locally. No new GPU run or Priority3 work before that audit.
+
+No checkout, fetch, GPU, weights or dataset access is needed. Paste the entire
+block; failures remain inside the child bash and preserve the terminal:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+export ANCHOR_OUT=/root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_f5ca5b5
+cd "$ANCHOR_OUT"
+sha256sum -c SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib, json
+root = Path(os.environ['ANCHOR_OUT'])
+report = json.loads((root / 'anchor_report.json').read_bytes())
+assert report['git_sha'] == 'f5ca5b5ac604bdae0d233d631001e95ee4b6ac36', 'Unexpected producer'
+for name, marker in [('anchor_report.json','ANCHOR_REPORT'), ('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw, mtime=0)).decode('ascii'))
+PY
+BASH
+echo "Evidence export finished; terminal remains open."
+```
+
+Return checksum verification output and all four SHA256/base64 lines intact.
+If export fails, return the full error and preserve the run directory.
+No training, new loss or target access. All launch instructions below are
+archived. This step transfers existing evidence, not a new experiment.
+
+---
+
+# Archive: Phase19 Anchor-only computation launch — INACTIVE
 
 Updated 2026-10-17. Only this Phase19 section is active. Phase18 is accepted;
 do not repeat its training. Local verification: 446 passed, 1 skipped on

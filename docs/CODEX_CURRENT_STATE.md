@@ -1,5 +1,11 @@
 # CausalQ_DG_1016 repository audit
 
+Phase19 operator completion (2026-10-17): f5ca5b5 tail reports exit0, report/
+components checksums OK, CE error0, unchanged model/RNG/files, peak reserved
+1.517578125GiB. Complete report and SHA256SUMS bytes are absent. Current
+AutoDL action exports existing files only. Do not rerun or start Priority3
+before full audit; see experiments/STRICT_DG_PHASE19/partial_return_review.md.
+
 Phase19 launch handling fix (2026-10-17): earlier pasted exit guards could
 terminate the interactive shell if a precheck failed. The handoff now uses
 an explicit child bash, and a dedicated launcher checks prerequisites,

@@ -2,6 +2,11 @@
 
 ## Active phase — Phase 19 / Priority 2 — 2026-10-17
 
+Latest f5ca5b5 terminal tails report exit0, CE error0 and unchanged model/RNG/
+files. Full report/checksum acceptance remains pending. Current action in
+AUTODL_NEXT.md exports existing evidence only; do not repeat inference.
+The next-launch wording below is historical until that audit completes.
+
 The `CausalQ_DG_1016.txt` Priority0 source-development engineering is accepted.
 The complete 500-update pilot report/checksum is pinned and audited; source
 mIoU 35.7242% remains a diagnostic, not formal M0. No repeats of that pilot.

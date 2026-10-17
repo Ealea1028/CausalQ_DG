@@ -2,6 +2,11 @@
 
 ## Active boundary — Phase19 / Priority2 anchor-only components (2026-10-17)
 
+Operator update: f5ca5b5 reports exit0 and exact CE replay; only terminal tails
+are locally available. Full report/checksum audit remains pending. Next action
+is evidence export only, not a new GPU run or Priority3. No whole-report or
+scientific acceptance from incomplete rows.
+
 Phase18 centered-query engineering is accepted with complete pinned report
 and checksum. No source/target mIoU or causal stability evidence from that gate.
 Its earlier pending statements below are historical. Current sole mechanism:
