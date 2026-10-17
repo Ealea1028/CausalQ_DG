@@ -1,5 +1,16 @@
 # Strict-DG protocol — Phase 17 / Priority 0
 
+Current Phase19 boundary: Phase18 accepted; only anchor-only effect
+computation is new. Read-only eight source images/two views from the existing
+9583925 centered checkpoint, no optimizer/new loss/selection/mIoU or target
+access. Original report/trace/weights hashes must pass before model/data
+access. Centered Static scope only, same head and one backbone pass per view.
+FP32 residual contribution is defined as full minus anchor; it is not an
+independent causal effect. Canonical effects use the established pre-addition
+alpha*delta convention; BF16 base-addition cancellation is diagnostic only.
+Legacy APIs/parameters and final-only target gate remain unchanged. Earlier
+phase requirements below are historical.
+
 Current Phase18 boundary: Priority0 source runner engineering is accepted;
 only opt-in Centered Query is active. M1 retains the same source split,
 Static R=2, loss/style/schedule and deterministic workers-0 runtime. A separate

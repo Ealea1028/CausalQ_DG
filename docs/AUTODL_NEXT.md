@@ -1,4 +1,94 @@
-# Phase18 Centered Query engineering accepted
+# Phase19 Anchor-only computation: active AutoDL handoff
+
+Updated 2026-10-17. Only this Phase19 section is active. Phase18 is accepted;
+do not repeat its training. Local verification: 443 passed, 1 skipped on
+Python3.10.20 / torch2.10.0+cu128, CUDA hidden. Bash syntax checks passed.
+
+## Scope and acceptance
+
+Read the existing Phase18 M1 checkpoint without optimizer construction or
+updates. Eight frozen GTA5 holdout images, original and photometric views,
+16 forwards total. Full and anchor-only paths share the same image features
+and query head; repeat anchors in the same R=2 slots. No new loss, new
+checkpoint, formal training, target access or mIoU evaluation.
+
+The gate audits original report, checksum manifest, train trace and checkpoint
+before GPU/data access and again after inference. Original run directory:
+/root/autodl-tmp/outputs/CausalQ_DG/phase18/M1_CENTERED_GATE20_9583925.
+Report SHA256: 3a09ece34eeb17718a90b2d2f53141aacecdce710b6f4aa4be53c3799979926e.
+Checkpoint SHA256: 9b31426b13aaecb458866c010fdcf385774c1d085f3de48334485fa0d9996bf9.
+
+Require ok=true, anchor_component_exit_code=0, zero optimizer updates,
+sample_count=8, view_count=16 and backbone_forward_calls=16; original CE replay
+max error <=1e-5; FP32 full=anchor+residual max error <=1e-6; class routing
+exact; model/all RNG/original files unchanged; pinned runtime, weights and
+head identity. Canonical effects retain pre-addition alpha*delta semantics.
+BF16 base-addition roundoff is reported separately, without an acceptance
+threshold. This establishes computation compatibility, not scientific
+stability, utility or an independent residual causal effect.
+
+## Exact checkout and launch
+
+Replace FULL_40_CHARACTER_SHA_FROM_CODEX with the literal full SHA in the
+final handoff. Preserve existing AutoDL outputs.
+
+```bash
+cd /root/autodl-tmp/CausalQ_DG || exit 1
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split || exit 1
+git checkout --detach "$EXPECTED_SHA" || exit 1
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || exit 1
+test -z "$(git status --porcelain)" || { echo dirty_checkout; git status --short; exit 1; }
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+nvidia-smi
+mkdir -p "$CAUSALQ_OUTPUT_ROOT/phase19"
+LAUNCH_LOG="$CAUSALQ_OUTPUT_ROOT/phase19/ANCHOR_COMPONENT_READONLY_${EXPECTED_SHA:0:7}_launcher.log"
+test ! -e "$LAUNCH_LOG" || { echo existing_launcher_log; exit 1; }
+nohup bash scripts/check_anchor_query_effect_phase19.sh "$EXPECTED_SHA" \
+  > "$LAUNCH_LOG" 2>&1 < /dev/null &
+echo "anchor_component_pid=$!"
+echo "launcher_log=$LAUNCH_LOG"
+```
+
+Runtime remains /root/autodl-tmp/envs/causalq-dg/bin/python,
+torch2.7.0+cu126 / transformers4.56.1, offline DINOv3-L, strict deterministic
+algorithms, TF32 true, cuDNN benchmark false, CUBLAS workspace :4096:8.
+
+Progress (in the same terminal):
+
+```bash
+tail -n 60 "$LAUNCH_LOG"
+```
+
+## Return complete evidence
+
+When the process finishes, return the final console output and these complete
+compressed report/checksum bytes. components.jsonl stays on AutoDL; the
+report contains every component row. Do not upload or edit the checkpoint.
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+export ANCHOR_OUT="/root/autodl-tmp/outputs/CausalQ_DG/phase19/ANCHOR_COMPONENT_READONLY_${SHA}"
+(cd "$ANCHOR_OUT" && sha256sum -c SHA256SUMS) || exit 1
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import os, base64, gzip, hashlib
+root = Path(os.environ['ANCHOR_OUT'])
+for name, marker in [('anchor_report.json','ANCHOR_REPORT'),('SHA256SUMS','SHA256SUMS')]:
+    raw = (root / name).read_bytes()
+    print(marker + '_SHA256=' + hashlib.sha256(raw).hexdigest())
+    print(marker + '_GZIP_BASE64=' + base64.b64encode(gzip.compress(raw,mtime=0)).decode('ascii'))
+PY
+```
+
+If the gate fails, return anchor_report.json and the launcher log. Stop here:
+no training, new loss or target access is authorized by this handoff.
+
+---
+
+# Archive: Phase18 Centered Query engineering accepted — INACTIVE
 
 The complete source gate report/checksum is pinned and accepted. Do not rerun
 20-step training or eight-sample compatibility. No further Phase18 GPU work

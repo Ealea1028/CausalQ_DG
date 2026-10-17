@@ -1,5 +1,33 @@
 # Method contract
 
+## Active boundary — Phase19 / Priority2 anchor-only components (2026-10-17)
+
+Phase18 centered-query engineering is accepted with complete pinned report
+and checksum. No source/target mIoU or causal stability evidence from that gate.
+Its earlier pending statements below are historical. Current sole mechanism:
+repeat each anchor across R slots, process through the SAME unchanged Query
+Head on cached image tokens, and expose anchor-only class interventions.
+Only centered Static without learned-null is supported; default forwards do
+not compute anchors and legacy behavior/state keys remain unchanged.
+
+E_full is the existing alpha*delta logit map, E_anchor is the same head with
+residual=0 and R repeated anchors. E_residual=FP32(E_full)-FP32(E_anchor) is
+an output-space contribution, not independent residual causality. Zero query
+reference remains branch removal do(Q_c = 0), not feeding zero vectors through
+logsumexp (which gives log R). Class intervention modifies only that class.
+Adding/subtracting base logits in BF16 can lose low bits; preserve pre-addition
+effect APIs and record that roundoff separately. No precision change to the
+historical factual output. See ANCHOR_QUERY_EFFECT.md for definitions.
+
+Next read-only AutoDL gate verifies the original 9583925 report/trace/checkpoint
+hashes and model state before eight source original/photo views (16 total).
+Require one backbone forward per view, finite components, FP32 decomposition
+<=1e-6, exact class routing, original source CE replay <=1e-5 and unchanged
+model/RNG/original files. No optimizer, training, new loss, mIoU, localization,
+responsibility or cross-style stability conclusion. Those remain later scopes.
+
+## Archived Phase18 contract
+
 ## Active boundary — Phase18 / Priority1 Centered Query (2026-10-17)
 
 Phase17 source-development engineering is accepted with complete byte-pinned

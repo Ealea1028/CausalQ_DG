@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Phase19 / Priority2 active (2026-10-17): Phase18 accepted separately at
+b3a017b. Existing segmentor has opt-in include_anchor components, repeated
+anchor states through the same head/cached image tokens, class-specific
+anchor counterfactuals and FP32 residual contribution getter. Default full
+forward/effect/checkpoint keys remain unchanged. CPU tests cover one backbone
+pass, full=anchor+residual, R/batch cases, alpha-zero, residual independence/
+gradient exclusion, branch-removal/logR distinction, routing, scope guards,
+BF16 roundoff and model-only restoration. Next AutoDL is read-only original
+M1 checkpoint on eight original/photo source inputs; no optimization/new loss,
+mIoU or target access. Actual GPU component acceptance remains pending.
+
 Phase18 acceptance (2026-10-17): complete centered report/checksum bytes match
 3a09ece3...979926e / 19b8e0f1...359a26. The pinned audit passes all20 updates,
 initial/final algebra, projected gradients, alpha-zero, eight source replays,

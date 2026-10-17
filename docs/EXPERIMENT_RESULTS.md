@@ -1,5 +1,11 @@
 # Strict-DG research results
 
+Phase19 status (2026-10-17): Phase18 centered algebra/training/serialization
+engineering is accepted, with no mIoU or anchor hypothesis result. New anchor-
+only component API is CPU-tested; read-only GPU numerical compatibility on
+the same M1 checkpoint is pending. It adds zero training steps. No effect
+variance/magnitude/localization/responsibility research result is claimed.
+
 Phase18 status (2026-10-17): Centered Query CPU implementation/tests are
 prepared; no M1 GPU or formal result exists. The next bounded engineering
 gate does not measure mIoU or anchor-effect metrics. Phase17 source pilot is

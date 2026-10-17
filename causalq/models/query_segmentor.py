@@ -299,6 +299,19 @@ class QuerySegmentorOutput:
     null_delta_logits: Tensor | None = None
     null_scaled_delta_logits: Tensor | None = None
     null_query_states: Tensor | None = None
+    anchor_logits: Tensor | None = None
+    anchor_scaled_delta_logits: Tensor | None = None
+    anchor_query_states: Tensor | None = None
+
+    def anchor_counterfactual_logits(self, class_index: int) -> Tensor:
+        """Replace only class c with its anchor-only path; keep other logits."""
+        if not 0 <= class_index < self.logits.shape[1]:
+            raise IndexError(f"class_index out of range: {class_index}")
+        if self.anchor_logits is None:
+            raise RuntimeError("Anchor-only components were not requested")
+        result = self.logits.clone()
+        result[:, class_index] = self.anchor_logits[:, class_index]
+        return result
 
     def counterfactual_logits(self, class_index: int) -> Tensor:
         """Apply do(Q_c=0) by removing only class c's scaled residual."""
@@ -413,7 +426,9 @@ class QuerySegmentor(nn.Module):
         self.backbone.eval()
         return self
 
-    def forward_components(self, images: Tensor) -> QuerySegmentorOutput:
+    def forward_components(self, images: Tensor, *, include_anchor: bool = False) -> QuerySegmentorOutput:
+        if include_anchor:
+            self._require_anchor_mode()
         features = self.backbone(images)
         feature_maps = features.intermediate_maps or (features.patch_map,)
         base_patch_logits = self.decoder(feature_maps)
@@ -487,6 +502,15 @@ class QuerySegmentor(nn.Module):
                 align_corners=False,
             )
             null_scaled_delta_logits = self.query_head.alpha * null_delta_logits
+        anchor_logits = anchor_scaled_delta_logits = anchor_query_states = None
+        if include_anchor:
+            anchor_query_states = self.get_anchors()[None, :, None, :].expand(
+                images.shape[0], -1, self.queries_per_class, -1)
+            anchor_delta = self.query_head.delta_logits(
+                residual_image_tokens, anchor_query_states, grid_size=grid_size)
+            anchor_delta = F.interpolate(anchor_delta, size=output_size, mode="bilinear", align_corners=False)
+            anchor_scaled_delta_logits = self.query_head.alpha * anchor_delta
+            anchor_logits = base_logits + anchor_scaled_delta_logits
         return QuerySegmentorOutput(
             logits=base_logits + scaled_delta_logits,
             base_logits=base_logits,
@@ -497,6 +521,9 @@ class QuerySegmentor(nn.Module):
             null_delta_logits=null_delta_logits,
             null_scaled_delta_logits=null_scaled_delta_logits,
             null_query_states=null_query_states,
+            anchor_logits=anchor_logits,
+            anchor_scaled_delta_logits=anchor_scaled_delta_logits,
+            anchor_query_states=anchor_query_states,
         )
 
     def forward(self, images: Tensor) -> Tensor:
@@ -533,6 +560,31 @@ class QuerySegmentor(nn.Module):
     def get_query_residuals(self) -> Tensor:
         """Return the learnable within-class residual queries for regularization."""
         return self.query_bank.query_residuals
+
+    def _require_anchor_mode(self) -> None:
+        if self.interaction != "static" or not self.query_bank.centered_residuals or self.learned_null:
+            raise ValueError("Anchor-only scope requires centered Static queries without learned-null")
+
+    def _anchor_output(self, images, output):
+        self._require_anchor_mode()
+        if (images is None) == (output is None):
+            raise ValueError("Provide exactly one of images or output")
+        if output is None:
+            output = self.forward_components(images, include_anchor=True)
+        if output.anchor_scaled_delta_logits is None:
+            raise RuntimeError("Anchor-only components were not requested")
+        return output
+
+    def get_anchor_query_effect(self, images: Tensor | None = None, *,
+                               output: QuerySegmentorOutput | None = None) -> Tensor:
+        """FP32 pre-addition logit effect of repeated anchors versus branch removal."""
+        return self._anchor_output(images, output).anchor_scaled_delta_logits.float()
+
+    def get_residual_contribution(self, images: Tensor | None = None, *,
+                                  output: QuerySegmentorOutput | None = None) -> Tensor:
+        """Output-space full-minus-anchor contribution, not residual-only causality."""
+        output = self._anchor_output(images, output)
+        return output.scaled_delta_logits.float() - output.anchor_scaled_delta_logits.float()
 
     def get_anchors(self) -> Tensor:
         return self.query_bank.get_anchors()

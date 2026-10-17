@@ -1,20 +1,22 @@
 # CausalQ-DG
 
-## Active phase — Phase 18 / Priority 1 — 2026-10-17
+## Active phase — Phase 19 / Priority 2 — 2026-10-17
 
 The `CausalQ_DG_1016.txt` Priority0 source-development engineering is accepted.
 The complete 500-update pilot report/checksum is pinned and audited; source
 mIoU 35.7242% remains a diagnostic, not formal M0. No repeats of that pilot.
 
-Priority1 now implements Centered Query as a separate opt-in parameterization:
-e_tilde = e - mean_R(e), q = anchor + e_tilde. Legacy default behavior and
-parameter names remain unchanged. See docs/CAUSAL_QUERY_DECOMPOSITION.md.
-The new M1 config changes only this parameterization; Static R=2, loss,
-style, schedule and frozen DINOv3 remain fixed. Next is a bounded AutoDL
-20-update centered source gate with eight compatibility inputs, algebra/
-gradient/alpha-zero/checkpoint/memory checks. No mIoU, full training, new CQE
-loss or target access. Final target manifest/evaluator execution remains
-blocked until final architecture and weights freeze.
+Priority1 centered-query engineering is accepted from the complete 9583925
+report: algebra errors below 8e-9, zero gradient-sum/alpha-zero/prediction
+roundtrip error and peak reserved 1.417969 GiB. No M1 mIoU or formal result.
+Priority2 now adds opt-in anchor-only components to the same model/head,
+sharing one backbone pass per view. Full/anchor effects retain the pre-addition
+logit contract; residual contribution is their FP32 difference, not an
+independent residual causal effect. Default forward and legacy APIs stay fixed.
+Next AutoDL gate loads the SAME immutable M1 checkpoint and checks eight
+source images under original/photometric views, with zero optimizer updates.
+No new loss, formal training, target access or effect-stability claim. Final
+target evaluation remains blocked until architecture and weights freeze.
 Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.
