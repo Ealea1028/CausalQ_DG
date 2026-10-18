@@ -109,6 +109,21 @@ def run_variant(args):
                   'prediction_consistency_enabled': False, 'effect_definition': 'alpha_times_full_query_delta_pre_addition',
                   'causal_query_effect': config['causal_query_effect']}
         update_fn = full_cqe_source_update
+    if variant == 'M3':
+        from tools.audit_formal_source_pair import audit_pair
+        from tools.full_cqe_source_update import anchor_cqe_source_update
+        from tools.trained_anchor_stability import validate_stability
+        if args.stability_report is None:
+            raise ValueError('M3 requires trained M1 raw-stability evidence under plan section46')
+        evidence = validate_stability(args.stability_report, _git('rev-parse', 'HEAD'))
+        if evidence['decision']['m3_training_authorized'] is not True:
+            raise ValueError('M3 forbidden: trained M1 raw anchor-stability hypothesis unsupported')
+        baseline_audit = audit_pair()
+        policy = {**POLICY, 'new_loss_enabled': True, 'cqe_enabled': True, 'anchor_cqe_enabled': True,
+                  'prediction_consistency_enabled': False, 'effect_definition': 'alpha_times_anchor_only_delta_pre_addition',
+                  'causal_query_effect': config['causal_query_effect'],
+                  'stability_report_sha256': file_sha(args.stability_report), 'stability_decision': evidence['decision']}
+        update_fn = anchor_cqe_source_update
     git_sha = _git('rev-parse', 'HEAD')
     if _git('status', '--porcelain'):
         raise ValueError('Formal training requires clean exact checkout')
@@ -244,7 +259,8 @@ def summarize(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'summarize'), required=True)
+    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'M3', 'summarize'), required=True)
+    parser.add_argument('--stability-report', type=Path, help='Required positive formal M1 raw-stability evidence for M3')
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--data-root', type=Path, default=Path('/root/autodl-tmp/datasets'))
     parser.add_argument('--pretrained-root', type=Path, default=Path('/root/autodl-tmp/pretrained'))

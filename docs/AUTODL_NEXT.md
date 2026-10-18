@@ -1,4 +1,118 @@
-# Phase24 active — M2 original Full CQE formal control
+# Phase25 active — trained M1 raw stability, then conditional M3 formal training
+
+M2 completed40000 updates/all2497 source images: mIoU73.71820470%,
+delta vsM1=-0.13595782pp. Returned hashes/config/metadata and independent
+confusion reduction pass. No source improvement or target-domain conclusion.
+Do not repeat M0/M1/P1/M2 or transfer previous checkpoints locally.
+
+Local verification:567 passed/1 skipped (existing Windows symlink permission),
+Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP1/MKL1/sequential MKL.
+Tests cover raw decision/ties/collapse,failed-hypothesis CLI rejection,
+conditional job branches,read-only RNG preservation,two backbone forwards,
+anchor-only gradients,zero-weight M1 equivalence and exact stochastic resume.
+No trained-state hypothesis result or M3 GPU pass is claimed locally.
+
+The remaining prerequisite is SCIENTIFIC,not another short engineering gate:
+plan section46 explicitly requires stopping new losses if raw anchor variance
+is not below residual variance. The old20-step result failed; the now-trained
+M1 iteration40000 state has not been measured. One background job checks
+that saved final M1 over all2497 fixed source IDs,zero updates,two views,
+same photometric strength/ID seeds,eval geometry,raw image/class macro means.
+No plots,old-state replay,style search or redundant validation mIoU.
+
+If0<raw anchor variance<raw residual variance,the SAME job automatically
+starts fresh seed0 M3 with40000 updates; no intermediate operator handoff.
+Otherwise it returns hypothesis_not_supported_stop_new_losses and performs
+NO M3 updates. Ties and zero-variance ambiguity do not authorize M3.
+Normalized variance cannot replace this condition. A positive prerequisite
+is descriptive source evidence,not proof of DG usefulness or semantic modes.
+
+M3 adds only anchor CQE:CE(orig)+CE(photo)+1*CQE(anchor_photo,anchor_orig.detach()),
+same M2 normalized SmoothL1(beta1),GT-present-class and valid-pixel masks.
+No direct residual consistency,Full CQE,prediction KL or necessity penalty.
+Same original training recipe,seed0 initialization,40000 budget and source
+membership; two backbone forwards per update,extra anchor head computation.
+Every1000 updates save state; select fixed40000 and evaluate source once.
+
+## Start the single conditional job
+
+Use the full SHA from the final handoff. Paste the entire child bash block;
+nohup detaches the worker and failures do not close the interactive terminal.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+bash scripts/train_anchor_source_phase25.sh "$EXPECTED_SHA"
+BASH
+echo "启动检查结束，终端保持打开。"
+```
+
+Keep the existing accepted M1 checkpoint at:
+/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_2537653/M1/.
+The exact final checkpoint path/hash comes from the pinned Git report;
+no manual checkpoint selection. If the entire M1 directory moved,provide
+CAUSALQ_M1_ROOT pointing to that directory before launching. No download,
+new data inspection or installation is required. Runtime/input paths remain
+the accepted causal-q Python env,torch2.7.0+cu126/transformers4.56.1,GPU0,
+BF16,512 training crop,workers0,AdamW1e-4/wd.01/clip1,PolyLR.9/40000,
+/root/autodl-tmp/datasets and /root/autodl-tmp/pretrained.
+
+Outputs:/root/autodl-tmp/outputs/CausalQ_DG/phase25/M3_CONDITIONAL_SEED0_<shortSHA>/.
+stability/ contains the immutable completed hypothesis report and per-image
+19-class raw variances/RMS. M3/ is created for formal training only when the
+condition passes. M3 starts from a FRESH head,not the inspected M1 checkpoint.
+
+## Monitor or recover
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase25/M3_CONDITIONAL_SEED0_${SHA}_launcher.log"
+```
+
+Census prints trained_m1_stability every250 images. Training,if authorized,
+prints source_runner_update every10 updates and checkpoint commits every1000.
+Direct --variant M3 without positive same-commit trained evidence is rejected.
+If interrupted,rerun the SAME start block/SAME SHA: completed census is reused,
+M3 resumes from its last committed checkpoint; at most1000 uncommitted updates
+need replay. Failed partial census can be recomputed read-only. Live duplicate
+workers exit due to the lock. Never delete completed baseline outputs.
+
+## Return either scientific-stop or completed-M3 result
+
+Success prints m3_conditional_job_exit_code=0 in EITHER scientific branch.
+Check job_report.status:m3_formal_complete or
+hypothesis_not_supported_stop_new_losses. Export the same two files either
+way; keep sample traces/checkpoints on AutoDL.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+cd "/root/autodl-tmp/outputs/CausalQ_DG/phase25/M3_CONDITIONAL_SEED0_${SHA}"
+sha256sum -c REPORT_SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import base64,gzip,hashlib
+for name,marker in [('job_report.json','M3_CONDITIONAL_REPORT'),('REPORT_SHA256SUMS','REPORT_SHA256SUMS')]:
+    raw=Path(name).read_bytes()
+    print(marker+'_SHA256='+hashlib.sha256(raw).hexdigest())
+    print(marker+'_GZIP_BASE64='+base64.b64encode(gzip.compress(raw,mtime=0)).decode())
+PY
+BASH
+echo "导出结束，终端保持打开。"
+```
+
+If an execution error occurs,return the last80 launcher-log lines and keep
+all files. No target access/evaluation,hyperparameter sweep or M4 in this
+release. Stop and return the job result for the next phase.
+
+---
+
+# Archive: Phase24 M2 formal control (completed)
 
 P1 is complete at268fda1:40000 updates,source2497 mIoU73.84414155%,
 delta vsM1=-0.01002097 percentage points. Returned hashes/config/metadata

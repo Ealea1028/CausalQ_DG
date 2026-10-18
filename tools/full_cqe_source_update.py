@@ -9,6 +9,20 @@ from tools.strict_source_smoke import HORIZON, precision
 
 def full_cqe_source_update(model, optimizer, image, photo, label, step, config, *, device, amp,
                            loss_fn=deterministic_source_ce):
+    return _cqe_source_update(model, optimizer, image, photo, label, step, config,
+                              device=device, amp=amp, loss_fn=loss_fn)
+
+
+def anchor_cqe_source_update(model, optimizer, image, photo, label, step, config, *, device, amp,
+                             loss_fn=deterministic_source_ce):
+    if config['causal_query_effect'].get('component') != 'anchor_only':
+        raise ValueError('M3 requires explicit anchor_only CQE')
+    return _cqe_source_update(model, optimizer, image, photo, label, step, config,
+                              device=device, amp=amp, loss_fn=loss_fn, anchor=True)
+
+
+def _cqe_source_update(model, optimizer, image, photo, label, step, config, *, device, amp,
+                       loss_fn, anchor=False):
     if not 1 <= step <= HORIZON:
         raise ValueError('M2 source optimizer step must be within the40000-step horizon')
     recipe = config['causal_query_effect']
@@ -22,8 +36,8 @@ def full_cqe_source_update(model, optimizer, image, photo, label, step, config, 
     optimizer.zero_grad(set_to_none=True)
     lr_used = optimizer.param_groups[0]['lr']
     with precision(device, amp):
-        output = model.forward_components(image)
-        effect = model.get_query_effect(output=output)
+        output = model.forward_components(image, include_anchor=True) if anchor else model.forward_components(image)
+        effect = model.get_anchor_query_effect(output=output) if anchor else model.get_query_effect(output=output)
         if not torch.isfinite(output.logits).all() or not torch.isfinite(effect).all():
             raise FloatingPointError('Nonfinite M2 original logits/effect')
         original = loss_fn(output.logits, label)
@@ -34,8 +48,8 @@ def full_cqe_source_update(model, optimizer, image, photo, label, step, config, 
     original.backward()
     del output, effect, original
     with precision(device, amp):
-        output = model.forward_components(photo)
-        effect = model.get_query_effect(output=output)
+        output = model.forward_components(photo, include_anchor=True) if anchor else model.forward_components(photo)
+        effect = model.get_anchor_query_effect(output=output) if anchor else model.get_query_effect(output=output)
         if not torch.isfinite(output.logits).all() or not torch.isfinite(effect).all():
             raise FloatingPointError('Nonfinite M2 photometric logits/effect')
         photometric = loss_fn(output.logits, label)
@@ -57,7 +71,7 @@ def full_cqe_source_update(model, optimizer, image, photo, label, step, config, 
         group['lr'] = next_lr
     photo_value, cqe_value = float(photometric.detach()), float(consistency.detach())
     return {'update': step, 'loss_original': original_value, 'loss_photometric': photo_value,
-            'loss_full_cqe': cqe_value, 'cqe_weight': weight,
+            ('loss_anchor_cqe' if anchor else 'loss_full_cqe'): cqe_value, 'cqe_weight': weight,
             'objective': original_value + float(config['style']['lambda_cf']) * photo_value + weight * cqe_value,
             'gradient_norm_pre_clip': norm, 'lr_used': lr_used, 'next_lr': next_lr,
             'alpha': float(model.query_head.alpha.detach()), 'gradients': gradients}

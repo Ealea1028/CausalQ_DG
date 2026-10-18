@@ -1,5 +1,17 @@
 # CausalQ_DG_1016 repository audit
 
+Phase25 active (2026-10-18): M2 report355a4b5c.../checksumfcfc2263... accepted;
+config and metadata checksum reproduction plus integer source confusion
+reduction pass. Source73.71820470%,M1 delta=-0.13595782pp. No target claim.
+Next is plan section46 at the FORMAL M1 final40000 checkpoint. Old20-step
+raw-stability failure remains recorded and cannot be waived as engineering.
+One AutoDL job measures all2497 fixed source IDs,unchanged photo seeds and
+geometry,zero updates,no figures. Strict0<raw anchor macro variance<raw
+residual macro variance authorizes automatic fresh seed0 M3/40000 updates;
+otherwise the job stops new losses. M3 direct CLI cannot bypass this evidence.
+Only anchor-only normalized CQE is added conditionally; no other mechanism.
+Full baseline checkpoints and new raw sample traces stay on AutoDL.
+
 Phase24 active (2026-10-18): P1 formal report9e029d79... and original checksum
 fa22fa5a... accepted; config/embedded metadata hashes reproduce all entries.
 Independent integer confusion reduction reproduces source mIoU73.84414155%,

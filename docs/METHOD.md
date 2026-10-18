@@ -1,6 +1,51 @@
 # Method contract
 
-## Active boundary — Phase24 / original Full CQE control M2
+## Active boundary — Phase25 / trained M1 hypothesis and conditional M3
+
+M2 completed40000 updates/source2497 at72b168a. Report355a4b5c... and
+checksumfcfc2263... byte-verified; config/embedded metadata hashes reproduce
+original checksums. Integer confusion matrix independently reproduces19
+class IoUs and source mIoU0.7371820469715351,delta vsM1=-0.13595781695pp.
+No target metrics or source gain; local acceptance does not imply downloading
+or replaying remote checkpoints/full traces. Completed M0/M1/P1 remain fixed.
+
+Plan section46 says stop adding losses when raw anchor stability is not
+supported. The20-step engineering census failed that hypothesis; it cannot
+be silently relabeled as a result for the now-complete40000-step M1 model.
+Before M3,measure that final M1 checkpoint once,all2497 frozen source IDs,
+same longedge1024/aspect resize+pad16,eval mode,original and fixed-ID-seed
+photo view,unchanged appearance strengths. No optimizer or checkpoint changes.
+Use canonical FP32 anchor effect and full-minus-anchor residual contribution.
+Raw per-class population variance is mean_valid_pixels((orig-photo)^2/4).
+Average19 classes per image then all2497 images,matching the earlier raw
+diagnostic convention. Store per-image19-class variances and RMS magnitudes,
+and report image win counts. No normalized metric substitutes for the rule.
+
+Freeze the conditional criterion BEFORE this new census:0<A<R where A and R
+are those raw macro means. Strict inequality excludes ties;A>0 conservatively
+rejects zero-variance/collapsed ambiguity. This descriptive single-seed,
+single-paired-style census is a source hypothesis prerequisite,not statistical
+proof of semantic stability,DG performance,utility or necessity.
+No separate operator handoff: if supported,the same job starts M3 immediately;
+if unsupported,it returns hypothesis_not_supported_stop_new_losses with no
+M3 updates. Direct --variant M3 also requires and recomputes the positive
+same-commit evidence; no bypass flag is provided. Completed census is reused
+on interruption recovery,not repeated before each checkpoint.
+
+M3 is fresh seed0/full40000 updates,with the same M1 initialization and M2
+CQE recipe except the component is anchor_only. Objective=CE(orig)+CE(photo)
++1*CQE(E_anchor_photo,E_anchor_orig.detach()),same L2 map normalization,
+GT-present classes,valid pixels and SmoothL1(beta1). Use include_anchor=True
+and repeat each anchor across R2 query slots with the existing head; canonical
+effect is alpha*anchor_delta before base addition. Two backbone forwards per
+update,additional head computation only. No direct residual consistency or
+Full CQE/Prediction KL/necessity loss. Shared projections can still change
+residual contribution indirectly; preservation is not guaranteed by this API.
+Retain original CE,AdamW,style,geometry,source split,40000-step schedule,
+1000-step schema2 recovery and fixed-final full source evaluation. No pilot,
+new figures,census replay of old state,weight sweep or target access.
+
+## Archive — Phase24 / original Full CQE control M2 (completed)
 
 P1 completed40000 updates and all2497 source holdout images at268fda1;
 source mIoU=0.7384414154795075,delta vsM1=-0.01002096615 percentage points.

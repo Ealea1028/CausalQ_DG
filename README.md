@@ -1,6 +1,18 @@
 # CausalQ-DG
 
-## Active phase — Phase24 / Priority4 formal M2 — 2026-10-18
+## Active phase — Phase25 / conditional formal M3 — 2026-10-18
+
+M2 completed40000 updates/source2497:73.71820470% mIoU,delta vsM1=-0.13595782pp.
+No source gain or target claim. Next follows plan section46 before M3:
+check RAW anchor vs residual variance on the accepted formal M1 iteration40000
+checkpoint,all2497 source holdout IDs,fixed appearance seeds. This has not
+been measured at the formal state; the old20-step result was unsupported.
+One background job checks the trained hypothesis and automatically starts
+fresh seed0 M3/40000 updates ONLY if0<raw anchor variance<raw residual variance.
+Otherwise stop adding losses and return the negative result. No extra short
+smoke,pilot,figures,weight search or target access. See docs/AUTODL_NEXT.md.
+
+## Archive — Phase24 formal M2 release (completed)
 
 P1 completed40000 updates and2497-source validation: mIoU73.84414155%,
 delta vsM1=-0.01002097 percentage points. Returned hash-pinned report and
