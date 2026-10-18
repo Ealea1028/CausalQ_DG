@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "phase": 25,
+  "ok": true,
+  "git_sha": "148746b6e5d6a36b413a8b6d104652860cab5a36",
+  "created_utc": "2026-10-18T14:31:24.117990+00:00",
+  "environment": {
+    "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+    "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+    "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+    "torch": "2.7.0+cu126",
+    "cuda": "12.6",
+    "transformers": "4.56.1",
+    "gpu": "NVIDIA GeForce RTX 4090 D"
+  },
+  "baseline_pair_report_sha256": "49b13eed277266542f79d59ff0d7c7fa3edc4eb6d78cee53f1f8292ab79b9b64",
+  "checkpoint_sha256": "c2559a431830d6d9160f5c9e75bebe9b8676d73d983a4674a2f9659ce9c00af2",
+  "checkpoint_training_updates": 40000,
+  "optimizer_updates_this_run": 0,
+  "sample_count": 2497,
+  "backbone_forward_calls": 4994,
+  "read_only_state_unchanged": true,
+  "target_data_accessed": false,
+  "sample_index_sha256": "e5cf43fe7ec03bc9caf79f504a35eabf602c81812984f59d54e570af6583e140",
+  "decision": {
+    "raw_anchor_variance": 0.0009380707222222419,
+    "raw_residual_variance": 3.39865702574878e-05,
+    "raw_anchor_residual_ratio": 27.601217631413384,
+    "images_anchor_lower": 0,
+    "m3_training_authorized": false,
+    "rule": "strict 0 < raw_anchor_variance < raw_residual_variance; equal image/class macro; no normalized substitution"
+  },
+  "inference_limit": "Descriptive single-seed,one-paired-style source census; no independence,DG utility or semantic proof"
+}

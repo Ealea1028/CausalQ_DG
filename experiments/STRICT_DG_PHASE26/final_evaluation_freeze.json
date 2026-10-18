@@ -1,0 +1,59 @@
+{
+  "schema_version": 1,
+  "phase": 26,
+  "status": "frozen_before_final_target_access",
+  "study": "strict_dg_seed0_completed_controls_negative_anchor_hypothesis",
+  "variants": {
+    "M0": {
+      "producer_git_sha": "2537653ae9be0d84afbb86e22b5ec2200d280885",
+      "config_path": "configs/strict_dg/formal/m0_seed0.yaml",
+      "config_sha256": "22f5fb21cd7fedd80f424c3cbc1290e32e97c98d10752cb208db87545d0af74f",
+      "checkpoint_relative_to_output_root": "phase22/M0_M1_FORMAL_SEED0_2537653/M0/segments/39000_40000_366687b52bf84759822e10cad8c61834/state.pth",
+      "checkpoint_sha256": "017c1afb34986f1a1efd50cac65c2b9db667c83a828d883762141b0198857df8",
+      "head_sha256": "a10965b41dfebaa90af4d1ecc20648eaf00b8f971279d686748ff3b149d6172f",
+      "checkpoint_iteration": 40000,
+      "source_miou": 0.7388616266688862
+    },
+    "M1": {
+      "producer_git_sha": "2537653ae9be0d84afbb86e22b5ec2200d280885",
+      "config_path": "configs/strict_dg/formal/m1_seed0.yaml",
+      "config_sha256": "7d86b8a5bfce5f05fdc617761f89f62bafcf376eecd64cb751f2f502f85eba13",
+      "checkpoint_relative_to_output_root": "phase22/M0_M1_FORMAL_SEED0_2537653/M1/segments/39000_40000_4a5b0211cc664b7eb4b8d0372daa9dc7/state.pth",
+      "checkpoint_sha256": "c2559a431830d6d9160f5c9e75bebe9b8676d73d983a4674a2f9659ce9c00af2",
+      "head_sha256": "bbfa2d73a6727983b097ca047ad5d9646692917107de67a757dd4cf8b499bb70",
+      "checkpoint_iteration": 40000,
+      "source_miou": 0.7385416251410031
+    },
+    "P1": {
+      "producer_git_sha": "268fda1b340f8bd5ceded83f9d9b9c6bf0009c07",
+      "config_path": "configs/strict_dg/formal/p1_seed0.yaml",
+      "config_sha256": "5ac90347613ee04c97b94bc0d75f6970c6c7d0615bf112761b2021698d319c72",
+      "checkpoint_relative_to_output_root": "phase23/P1_FORMAL_SEED0_268fda1/P1/segments/39000_40000_11ee16a7eb0f4b9c9b7c03788e75b4e4/state.pth",
+      "checkpoint_sha256": "73d557f4220a0fbe6ab2c1b054888880e2fd28a0d6c8eb5f64e1d81e34f26281",
+      "head_sha256": "cd92c33e5362dcbe977f9f9a51a5081f73e37eebb8789c8eab23c9bdb4889987",
+      "checkpoint_iteration": 40000,
+      "source_miou": 0.7384414154795075
+    },
+    "M2": {
+      "producer_git_sha": "72b168ae2a3995a711394418354682ed97cdaafc",
+      "config_path": "configs/strict_dg/formal/m2_seed0.yaml",
+      "config_sha256": "087d8066114ead6d1f1f9c2e9ef06c96bb6642fc5d0072b3c5e4a72b5514939b",
+      "checkpoint_relative_to_output_root": "phase24/M2_FORMAL_SEED0_72b168a/M2/segments/39000_40000_64c5b56de5534d0897677eb8604a2446/state.pth",
+      "checkpoint_sha256": "fabb8c822d0efe20b7955c6c6620aa146d74f4945f5c71f6bdf5695dde4dbfed",
+      "head_sha256": "d7f90af6c06dd9dfb5bfff0661b830f5c185bdcd207df19ebb3e8ae59f07622b",
+      "checkpoint_iteration": 40000,
+      "source_miou": 0.7371820469715351
+    }
+  },
+  "selection": "fixed_final_iteration40000_for_every_completed_variant; report all; no winner selection",
+  "target_manifest_sha256": "3960bb34afdfbbc6a5a5be887626d7ab03196691de54d0c00eb047153e03ab4c",
+  "target_sample_count": 500,
+  "target_geometry": "original1024x2048; no resize,crop,flip,TTA or sliding; whole-image BF16 inference",
+  "target_label_space": "Cityscapes19 trainIds,ignore255",
+  "seed": 0,
+  "optimizer_updates_this_phase": 0,
+  "target_results_may_change_recipe": false,
+  "m3_status": "not_run_hypothesis_unsupported",
+  "m4_status": "not_authorized",
+  "additional_seeds_authorized_this_phase": false
+}

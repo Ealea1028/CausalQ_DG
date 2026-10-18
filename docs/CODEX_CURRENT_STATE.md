@@ -1,5 +1,18 @@
 # CausalQ_DG_1016 repository audit
 
+Phase26 active (2026-10-18): Phase25 job0184a3d5.../checksuma1ecb2cf...
+accepted;M1 raw anchor/residual ratio27.6012,0/2497 images favor anchor,
+zero optimizer updates,M3 not started. Local scope is returned certificate
+and ratio/provenance only;per-image raw rows remain remote. Plan46/55 closes
+new losses and conditional M3/M4/extensions. Freeze completed M0/M1/P1/M2
+at40000 plus exact recipes and target membership before final reporting.
+Add independent target evaluator,one full500-image Cityscapes pass per model,
+native1024x2048,no GT resize,optimizer,selection or target-based tuning.
+Filename manifest acquired from original PSANet authors' public file at a
+pinned revision;no target data opened locally. All four results reported.
+Next AutoDL operation is final evaluation only;no further formal training is
+scientifically authorized by the failed anchor prerequisite in this study.
+
 Phase25 active (2026-10-18): M2 report355a4b5c.../checksumfcfc2263... accepted;
 config and metadata checksum reproduction plus integer source confusion
 reduction pass. Source73.71820470%,M1 delta=-0.13595782pp. No target claim.

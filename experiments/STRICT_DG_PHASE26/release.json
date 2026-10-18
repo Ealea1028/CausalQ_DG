@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "phase": 26,
+  "status": "frozen_final_evaluation_pending_autodl",
+  "variants": ["M0", "M1", "P1", "M2"],
+  "seed": 0,
+  "checkpoint_selection": "fixed_final_iteration40000; all four reported",
+  "target": "Cityscapes fixed500 validation images",
+  "target_geometry": "original1024x2048; whole-image; no resize/crop/flip/TTA/sliding",
+  "target_manifest_sha256": "3960bb34afdfbbc6a5a5be887626d7ab03196691de54d0c00eb047153e03ab4c",
+  "optimizer_updates_this_phase": 0,
+  "m3_status": "not_run_hypothesis_unsupported",
+  "further_loss_or_module_additions_authorized": false,
+  "target_based_selection_or_tuning_authorized": false,
+  "target_images_or_labels_accessed_locally": false,
+  "autodl_final_target_evaluation_completed": false,
+  "local_verification": {
+    "pytest_passed": 579,
+    "pytest_skipped": 1,
+    "skip_reason": "existing Windows unprivileged symlink restriction",
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "cuda_visible_devices": "",
+    "omp_num_threads": 1,
+    "mkl_num_threads": 1,
+    "mkl_threading_layer": "SEQUENTIAL"
+  }
+}

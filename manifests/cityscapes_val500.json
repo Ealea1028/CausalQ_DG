@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "purpose": "fixed final Cityscapes official val membership; filename metadata only",
+  "source_url": "https://raw.githubusercontent.com/hszhao/PSANet/ff91e4fb33247bc4461d792eae139fc4cdaa5f27/evaluation/samplelist/cityscapes/cityscapes_val.txt",
+  "source_repository": "https://github.com/hszhao/PSANet",
+  "source_commit": "ff91e4fb33247bc4461d792eae139fc4cdaa5f27",
+  "source_file_sha256": "72d2b460bada919b3bc6fd90becfc22a3910f85530c1e575a2e4aa4713cca1b7",
+  "manifest_sha256": "3960bb34afdfbbc6a5a5be887626d7ab03196691de54d0c00eb047153e03ab4c",
+  "count": 500,
+  "city_counts": {
+    "frankfurt": 267,
+    "lindau": 59,
+    "munster": 174
+  },
+  "target_images_or_labels_accessed_locally": false,
+  "conversion": "sorted unique city/stem; derive both standard PNG paths; no subset selection"
+}

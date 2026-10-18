@@ -1,6 +1,17 @@
 # CausalQ-DG
 
-## Active phase — Phase25 / conditional formal M3 — 2026-10-18
+## Active phase — Phase26 / frozen final target comparison — 2026-10-18
+
+Formal M1 raw anchor/residual variance ratio=27.6012;0/2497 images favor
+anchor. Phase25 completed with zero updates;M3 was NOT started. Plan46/55
+therefore stops new losses/M4 and conditional extensions. The existing four
+formal seed0 models M0/M1/P1/M2 are complete and frozen at iteration40000.
+Next: one final Cityscapes500 evaluation for ALL four,original1024x2048,
+no tuning/model selection. Exact checkpoint hashes,recipes and target IDs
+are frozen in Git BEFORE target access. No extra GPU smoke/pilot or training.
+See docs/AUTODL_NEXT.md. Existing source metrics do not establish DG gains.
+
+## Archive — Phase25 conditional M3 (hypothesis unsupported;M3 not run)
 
 M2 completed40000 updates/source2497:73.71820470% mIoU,delta vsM1=-0.13595782pp.
 No source gain or target claim. Next follows plan section46 before M3:

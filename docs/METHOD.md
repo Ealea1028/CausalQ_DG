@@ -1,6 +1,50 @@
 # Method contract
 
-## Active boundary — Phase25 / trained M1 hypothesis and conditional M3
+## Active boundary — Phase26 / final target reporting after hypothesis stop
+
+Phase25 returned job0184a3d5.../checksuma1ecb2cf... verifies. Exact M1 final
+checkpoint c2559a43... was used,2497 source IDs/4994 forwards/zero updates,
+model/RNG unchanged per producer. Raw anchor variance0.0009380707222222419,
+residual0.0000339865702574878,ratio27.6012176314;0/2497 images favor anchor.
+M3 did not start. The original and formal-state results do not support the
+raw anchor-stability prerequisite in this setup. Following plan46/55,stop
+new consistency/necessity/diversity/prototype/geometry mechanisms. Do not
+substitute RMS-normalized ordering or fabricate an M3 result. Returned
+certificate bytes/ratio/provenance are locally accepted; full per-image rows
+remain on AutoDL and have not been independently recomputed locally.
+
+Completed formal M0/M1/P1/M2 seed0 checkpoints are now the fixed final study
+set. Freeze each iteration40000 checkpoint/hash,architecture/recipe,weights,
+and ALL evaluation choices before target access. No further training or
+hyperparameter choices are authorized in this phase. Negative scientific
+termination supersedes the optional M3/M4/three-seed-main-method branches;
+there is no validated M3 to expand. Target outcomes cannot reopen those
+branches or select a best checkpoint. Future research would be a separately
+declared study,not retroactive tuning of this strict-DG comparison.
+
+Follow plan35/36 with a separate tools/evaluate_target.py. No existing full
+Cityscapes membership manifest was found. Freeze the500 val filenames from
+the original PSANet authors' sample list at commitff91e4fb...,record source
+URL/hash and normalize to sorted city/stem IDs. Only metadata downloaded;
+no target image/label read locally. Frozen manifest SHA3960bb34... contains
+frankfurt267,lindau59,munster174. Remote val must exactly match these IDs;
+no on-the-fly subset generation or selection. This avoids a remote-manifest
+export roundtrip while fixing target membership BEFORE metrics are read.
+
+Final inference policy:full original1024x2048 image/GT,no resize,crop,flip,
+multi-scale,TTA or sliding window. Existing ImageNet normalization,BF16,
+native-patch-divisible geometry,19 trainIds/ignore255. Fail if GT resolution
+is inconsistent rather than resizing labels. Same policy for all four.
+Instantiate inference model only,load exact compact checkpoint plus frozen
+DINO weights,verify head hash,set eval/no-grad,and never create an optimizer.
+Report streaming integer19x19 confusion,per-class IoU,mIoU,500-image coverage,
+manifest/commit/runtime/checkpoint identity and unchanged model/RNG.
+No target CE or parameter updates. Independent CPU confusion reduction
+checks metric counts. Save committed per-model results;retry only incomplete
+variants on interruption. Summarize ALL four as reporting,not winner selection.
+No new smoke,pilot,source census or parameter sweep is needed.
+
+## Archive — Phase25 / trained M1 hypothesis and conditional M3 (stopped)
 
 M2 completed40000 updates/source2497 at72b168a. Report355a4b5c... and
 checksumfcfc2263... byte-verified; config/embedded metadata hashes reproduce

@@ -1,4 +1,112 @@
-# Phase25 active — trained M1 raw stability, then conditional M3 formal training
+# Phase26 active — frozen final Cityscapes500 comparison
+
+Phase25 finished with status hypothesis_not_supported_stop_new_losses.
+Formal M1 raw anchor/residual variance ratio27.6012;0/2497 images favor anchor.
+Zero updates;M3 NOT started. Plan46/55 stops further loss/module additions;
+do not force M3/M4 or repeat the old stability job. Four formal seed0 models
+M0/M1/P1/M2 have already finished40000 updates each.
+
+Next is FINAL evaluation,not more training. Recipes,all four exact final
+checkpoint hashes and native-resolution evaluation policy are frozen in
+experiments/STRICT_DG_PHASE26/final_evaluation_freeze.json BEFORE target
+access. Cityscapes500 IDs are frozen in manifests/cityscapes_val500.txt;
+source URL/pinned revision/hash are in the adjacent JSON. Only filename
+metadata was acquired locally;no target images/labels read locally.
+Remote val must match every frozen ID exactly. No GPU smoke,pilot,manifest
+export roundtrip or hyperparameter search is requested.
+
+Local verification:579 passed/1 skipped (existing Windows symlink permission),
+Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP1/MKL1/sequential MKL.
+Synthetic native-resolution tests verify GT is never resized,independent
+confusion/ignore counts,unchanged model/RNG,no optimizer construction,
+frozen manifest/contracts,cached-result rejection and terminal survival.
+No actual target image/label or DINO weights were opened locally.
+
+## Start all four final evaluations
+
+Use the full SHA in the final handoff. Paste the complete child bash block.
+It launches in the background and cannot close the interactive terminal.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+bash scripts/evaluate_target_phase26.sh "$EXPECTED_SHA"
+BASH
+echo "启动检查结束，终端保持打开。"
+```
+
+No installation. Same accepted runtime:/root/autodl-tmp/envs/causalq-dg/bin/python,
+torch2.7.0+cu126,transformers4.56.1,RTX4090D,GPU0,BF16,strict deterministic
+algorithms,TF32true. No optimizer or gradients. Full image/GT1024x2048,
+no resize,crop,flip,TTA or sliding;original19-class trainIds/ignore255.
+Target root:/root/autodl-tmp/datasets/cityscapes,leftImg8bit/val and gtFine/val
+with *_gtFine_labelTrainIds.png labels. No target label conversion/writes.
+
+Keep all original run directories under /root/autodl-tmp/outputs/CausalQ_DG:
+phase22/M0_M1_FORMAL_SEED0_2537653/{M0,M1},
+phase23/P1_FORMAL_SEED0_268fda1/P1,
+phase24/M2_FORMAL_SEED0_72b168a/M2.
+Exact checkpoint subpaths are read from the frozen Git contract;no manual
+selection. If the entire training-output base moved,set
+CAUSALQ_TRAINING_OUTPUT_ROOT to its current base before launching.
+Pretrained weights stay under /root/autodl-tmp/pretrained/dinov3_vitl16.
+
+The launcher evaluates M0,M1,P1,M2 sequentially,500 images each,in separate
+processes. Outputs:/root/autodl-tmp/outputs/CausalQ_DG/phase26/FINAL_TARGET_SEED0_<shortSHA>/.
+Per-model metrics contain native-resolution confusion/class IoU/mIoU,
+checkpoint/manifest/freeze/Git/runtime identity and no-update flags.
+final_comparison.json contains all four results;it does not select a winner.
+M3 is explicitly not_run_hypothesis_unsupported,not a fabricated zero score.
+
+## Monitor or recover
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase26/FINAL_TARGET_SEED0_${SHA}_launcher.log"
+```
+
+Progress prints final_target_evaluated every25 images. If interrupted,rerun
+the SAME start block/SAME SHA. Completed model evaluations are verified and
+reused;only an incomplete model's500-image pass is repeated in a new attempt
+directory. Preserve partial traces and all original checkpoints. No geometry
+or recipe fallback based on target scores. If errors occur,return the last80
+launcher-log lines and preserve all files.
+
+## Return final comparison
+
+Success prints final_target_exit_code=0. Export the same two small metadata
+files;keep target images/labels,full traces and checkpoints on AutoDL.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+cd "/root/autodl-tmp/outputs/CausalQ_DG/phase26/FINAL_TARGET_SEED0_${SHA}"
+sha256sum -c REPORT_SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import base64,gzip,hashlib
+for name,marker in [('final_comparison.json','FINAL_TARGET_COMPARISON'),('REPORT_SHA256SUMS','REPORT_SHA256SUMS')]:
+    raw=Path(name).read_bytes()
+    print(marker+'_SHA256='+hashlib.sha256(raw).hexdigest())
+    print(marker+'_GZIP_BASE64='+base64.b64encode(gzip.compress(raw,mtime=0)).decode())
+PY
+BASH
+echo "导出结束，终端保持打开。"
+```
+
+Stop after final reporting. Target results may not trigger retuning lambda,
+R,architecture,checkpoint choice or revival of the rejected M3 branch.
+The next local phase accepts results and consolidates the study's evidence
+and limitations;no more training is authorized within this evaluation phase.
+
+---
+
+# Archive: Phase25 hypothesis rejected;M3 not started
 
 M2 completed40000 updates/all2497 source images: mIoU73.71820470%,
 delta vsM1=-0.13595782pp. Returned hashes/config/metadata and independent

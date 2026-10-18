@@ -9,7 +9,7 @@ BASH = 'D:/Git/Git/bin/bash.exe' if Path('D:/Git/Git/bin/bash.exe').exists() els
 pytestmark = pytest.mark.skipif(BASH is None, reason='Bash unavailable')
 SCRIPTS = [(ROOT / 'scripts' / name).as_posix() for name in
            ('train_formal_source_phase22.sh', 'train_prediction_source_phase23.sh', 'train_full_cqe_source_phase24.sh',
-            'train_anchor_source_phase25.sh')]
+            'train_anchor_source_phase25.sh','evaluate_target_phase26.sh')]
 
 
 @pytest.mark.parametrize('source', [False, True])
