@@ -1,5 +1,17 @@
 # CausalQ_DG_1016 repository audit
 
+Phase23 active (2026-10-18): returned Phase22 pair report49b13eed... and
+checksums07fbe0f7... verified; embedded individual report serialization
+reproduces original M0/M1 report hashes. All19 source class IoUs and mIoUs
+independently reduced from integer confusion matrices. M0=73.88616267%,
+M1=73.85416251%,delta=-0.03200015pp; full40000 updates/2497 source images,
+same initial head. No target metrics. Phase23 adds only P1 prediction control
+to the unchanged centered baseline: original+photo CE plus detached original
+to photo KL,lambda1,T1,valid pixels only. Fresh seed0/full40000 updates,
+1000-step exact-state recovery,final-only source evaluation. No repeated
+smoke/pilot/census. Full traces/checkpoints stay on AutoDL; local acceptance
+does not claim to have downloaded/replayed them. M2/M3 remain later phases.
+
 Phase22 active (2026-10-17): explicit user instruction assumes current
 verification passed and removes repeated readiness gates. This supersedes
 Phase21 pending instructions below without manufacturing a measured CUDA

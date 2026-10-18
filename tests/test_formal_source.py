@@ -89,11 +89,12 @@ def test_recovery_ignores_incomplete_attempt_and_replays_exact_state(tmp_path, m
         formal.completed_segments(root, metadata, horizon=8, interval=4)
 
 
-def test_formal_cli_never_loads_real_data_locally(tmp_path, monkeypatch):
+@pytest.mark.parametrize('variant', ['M0', 'P1'])
+def test_formal_cli_never_loads_real_data_locally(tmp_path, monkeypatch, variant):
     checkout = tmp_path / 'checkout'
-    destination = checkout / 'configs/strict_dg/formal/m0_seed0.yaml'
+    destination = checkout / f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml'
     destination.parent.mkdir(parents=True)
-    destination.write_bytes((ROOT / 'configs/strict_dg/formal/m0_seed0.yaml').read_bytes())
+    destination.write_bytes((ROOT / f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml').read_bytes())
     monkeypatch.setattr(formal, 'ROOT', checkout)
     monkeypatch.setattr(formal, '_git', lambda *a: '' if a[0] == 'status' else 'a' * 40)
     monkeypatch.setattr(torch.cuda, 'is_available', lambda: False)
@@ -102,7 +103,7 @@ def test_formal_cli_never_loads_real_data_locally(tmp_path, monkeypatch):
     monkeypatch.delitem(sys.modules, 'tools.train', raising=False)
     monkeypatch.delitem(sys.modules, 'causalq.datasets.cityscapes', raising=False)
     with pytest.raises(RuntimeError, match='AutoDL CUDA'):
-        formal.main(['--variant', 'M0', '--output-root', str(tmp_path / 'out')])
+        formal.main(['--variant', variant, '--output-root', str(tmp_path / 'out')])
 
 
 def test_formal_source_import_blocks_target_and_legacy():

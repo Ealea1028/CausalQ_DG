@@ -42,7 +42,7 @@ def save_runner_state(path, model, optimizer, iteration, count, metadata):
 
 
 def train_segment(model, optimizer, dataset, style, config, output, *, start, stop,
-                  metadata, resume=None, device="cuda:0", amp=True):
+                  metadata, resume=None, device="cuda:0", amp=True, update_fn=None):
     if not 0 <= start < stop <= 40000 or (resume is not None) != (start > 0):
         raise ValueError("Invalid source continuation bounds")
     if any(p.requires_grad for p in model.backbone.parameters()):
@@ -73,7 +73,8 @@ def train_segment(model, optimizer, dataset, style, config, output, *, start, st
             label = sample["label"].unsqueeze(0).to(device)
             photo = style.photometric_view(image)
             fingerprint = tree_digest((image, photo, label))
-            record = source_optimizer_update(model, optimizer, image, photo, label, iteration + 1,
+            update = source_optimizer_update if update_fn is None else update_fn
+            record = update(model, optimizer, image, photo, label, iteration + 1,
                                              config, device=device, amp=amp,
                                              loss_fn=deterministic_source_ce)
             record.update(source_id=sample["id"], input_sha256=fingerprint, epoch=sampler["epoch"])

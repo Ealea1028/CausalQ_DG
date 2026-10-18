@@ -1,6 +1,37 @@
 # Method contract
 
-## Active boundary — Phase22 / formal M0-M1 seed0
+## Active boundary — Phase23 / P1 prediction-consistency control
+
+Phase22 M0/M1 completed40000 updates each at2537653. Byte-pinned returned
+reports and original checksum file match; integer19x19 confusion matrices
+independently reproduce all class IoUs and mean IoUs over2497 source images.
+M0=0.7388616266688862,M1=0.7385416251410031;M1-M0=-0.0320001528 percentage
+points. Same initial head hash,split,weights,runtime and budget. Local
+acceptance covers returned reports/confusion counts; full traces/checkpoints
+remain on AutoDL. This single-seed source comparison establishes neither a
+centered-query gain nor target-domain performance. No target access occurred.
+
+P1 follows plan section27: M1 plus prediction consistency. Fresh seed0
+initialization,40000 optimizer updates and every common recipe setting stay
+fixed. Objective = CE(original)+CE(photo)+1.0*KL(p_original.detach()||p_photo),
+T=1,FP32 KL mean over non-ignore GT pixels. This reuses the existing
+prediction_consistency_kl; no new effect loss, learned null, Fourier view,
+attention mechanism or additional forward pass. Backpropagate original CE,
+release that graph, then backpropagate photo CE+KL using the detached original
+prediction. Both views retain the same train-mode dropout as M1.
+
+Nominal lambda_pred=1,T1 come from the existing prediction-control recipe;
+there is only ONE style view here, so its effective KL weight is1 (no legacy
+two-style-view /2 factor). This definition is frozen before target access;
+no weight search. Trace logs unweighted KL,effective weight and total loss.
+Old M0/M1 updater behavior and APIs are preserved by an optional runner
+update function. Existing schema2 sampler/RNG recovery,1000-step snapshots,
+frozen backbone and final-only2497-image source validation are reused.
+Metadata records P1 objective,accepted baseline report hash,exact Git commit
+and environment; initial head must match the accepted pair. No new readiness
+or GPU short-run gate. The next remote action is the full P1 formal run.
+
+## Archive — Phase22 / formal M0-M1 seed0 (completed)
 
 The user explicitly assumes the pending verification passed and requests
 formal training now. Phase21 CUDA replay is assumed, not newly measured;

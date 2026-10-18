@@ -1,4 +1,4 @@
-"""Phase22 formal source-only M0/M1; immutable 1000-update recovery segments."""
+"""Formal source-only M0/M1/P1 with immutable1000-update recovery segments."""
 
 import argparse
 from datetime import datetime, timezone
@@ -65,7 +65,7 @@ def completed_segments(root, metadata, *, horizon=HORIZON, interval=INTERVAL):
 
 
 def run_segments(model, optimizer, dataset, style, config, root, metadata, *, horizon=HORIZON,
-                 interval=INTERVAL, device='cuda:0', amp=True):
+                 interval=INTERVAL, device='cuda:0', amp=True, update_fn=None):
     segments = completed_segments(root, metadata, horizon=horizon, interval=interval)
     start = segments[-1][0]['final_iteration'] if segments else 0
     resume = segments[-1][1] / 'state.pth' if segments else None
@@ -74,7 +74,7 @@ def run_segments(model, optimizer, dataset, style, config, root, metadata, *, ho
         output = root / 'segments' / f'{start:05d}_{stop:05d}_{uuid.uuid4().hex}'
         output.mkdir(parents=True)
         result = train_segment(model, optimizer, dataset, style, config, output,
-            start=start, stop=stop, metadata=metadata, resume=resume, device=device, amp=amp)
+            start=start, stop=stop, metadata=metadata, resume=resume, device=device, amp=amp, update_fn=update_fn)
         record = {**result, 'metadata': metadata,
                   'files_sha256': {name: file_sha(output / name) for name in ('train.jsonl', 'state.pth')}}
         write_json(output / 'complete.json', record)
@@ -91,6 +91,16 @@ def run_variant(args):
     config_path = ROOT / f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml'
     config = yaml.safe_load(config_path.read_bytes())
     validate_formal_config(config, variant)
+    policy = POLICY
+    baseline_audit = None
+    update_fn = None
+    if variant == 'P1':
+        from tools.audit_formal_source_pair import audit_pair
+        from tools.prediction_source_update import prediction_source_update
+        baseline_audit = audit_pair()
+        policy = {**POLICY, 'new_loss_enabled': True, 'cqe_enabled': False,
+                  'prediction_consistency': config['prediction_consistency']}
+        update_fn = prediction_source_update
     git_sha = _git('rev-parse', 'HEAD')
     if _git('status', '--porcelain'):
         raise ValueError('Formal training requires clean exact checkout')
@@ -104,14 +114,18 @@ def run_variant(args):
     environment = {'python': sys.version, 'executable': sys.executable, 'platform': platform.platform(),
         'torch': str(torch.__version__), 'cuda': torch.version.cuda, 'transformers': version('transformers'),
         'gpu': torch.cuda.get_device_name(0)}
+    if baseline_audit is not None and environment != baseline_audit['environment']:
+        raise ValueError('P1 environment differs from accepted matched baseline runtime')
     metadata = {'git_sha': git_sha, 'variant': variant, 'seed': 0, 'config_sha256': file_sha(config_path),
         'config_tree_sha256': tree_digest(config), 'environment': environment,
-        **source_manifest_metadata(), **POLICY, 'formal_training_authorized': True,
+        **source_manifest_metadata(), **policy, 'formal_training_authorized': True,
         'schedule_horizon': HORIZON, 'checkpoint_interval': INTERVAL, 'checkpoint_selection': 'fixed_final',
-        'centered_residuals': variant == 'M1', 'loss_backend': BACKEND, 'sample_workers': 0,
+        'centered_residuals': variant != 'M0', 'loss_backend': BACKEND, 'sample_workers': 0,
         'amp': 'bfloat16', 'deterministic_algorithms': True, 'matmul_allow_tf32': True,
         'cudnn_benchmark': False, 'cublas_workspace_config': ':4096:8',
         'backbone_weights_sha256': config['model']['weights_sha256'], 'backbone_sha256': BACKBONE_STATE_SHA}
+    if baseline_audit is not None:
+        metadata['baseline_audit'] = baseline_audit
     root = args.output_root / variant
     root.mkdir(parents=True, exist_ok=True)
     identity = root / 'metadata.json'
@@ -143,8 +157,10 @@ def run_variant(args):
         raise ValueError('Frozen backbone differs')
     model = QuerySegmentor(backbone, decoder_channels=256, num_classes=19, dropout=.1, queries_per_class=2,
         interaction='static', cross_attention_layers=0, num_heads=8, temperature=.07, alpha_init=0.,
-        centered_residuals=variant == 'M1').to('cuda:0')
+        centered_residuals=variant != 'M0').to('cuda:0')
     initial_head = tree_digest(trainable_state_dict(model))
+    if baseline_audit is not None and initial_head != baseline_audit['initial_head_sha256']:
+        raise ValueError('P1 fresh initialization differs from accepted M0/M1')
     initial = root / 'initialization.json'
     if initial.exists() and json.loads(initial.read_bytes())['head_sha256'] != initial_head:
         raise ValueError('Fresh seed0 initialization differs')
@@ -161,13 +177,13 @@ def run_variant(args):
     style = StyleInterventionBank(**{k: tuple(v) if isinstance(v, list) else v
         for k, v in config['style']['photometric'].items()}).to('cuda:0')
     optimizer = torch.optim.AdamW([p for p in model.parameters() if p.requires_grad], lr=1e-4, weight_decay=.01)
-    segments = run_segments(model, optimizer, train, style, config, root, metadata)
+    segments = run_segments(model, optimizer, train, style, config, root, metadata, update_fn=update_fn)
     output = root / 'evaluations' / uuid.uuid4().hex
     output.mkdir(parents=True)
     _, ids = load_membership()
     evaluation = evaluate_without_training_side_effects(model, optimizer, validation, ids, output)
     final = segments[-1][1] / 'state.pth'
-    report = {'schema_version': 1, 'phase': 22, 'ok': True, 'variant': variant, 'metadata': metadata,
+    report = {'schema_version': 1, 'phase': config['experiment']['phase'], 'ok': True, 'variant': variant, 'metadata': metadata,
         'created_utc': datetime.now(timezone.utc).isoformat(), 'formal_training_authorized': True,
         'formal_optimizer_updates': HORIZON, 'checkpoint_selection': 'fixed_final',
         'initial_head_sha256': initial_head, 'final_head_sha256': tree_digest(trainable_state_dict(model)),
@@ -175,7 +191,7 @@ def run_variant(args):
         'source_evaluation': evaluation, 'source_miou': evaluation['source_miou'],
         'evaluation_trace': str((output / 'source_eval.jsonl').relative_to(root)),
         'peak_reserved_gib_this_process': torch.cuda.max_memory_reserved() / 1024**3,
-        'target_miou': None, **POLICY}
+        'target_miou': None, **policy}
     write_json(root / 'formal_report.json', report)
     print(json.dumps(report, indent=2), flush=True)
 
@@ -220,7 +236,7 @@ def summarize(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', choices=('M0', 'M1', 'summarize'), required=True)
+    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'summarize'), required=True)
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--data-root', type=Path, default=Path('/root/autodl-tmp/datasets'))
     parser.add_argument('--pretrained-root', type=Path, default=Path('/root/autodl-tmp/pretrained'))

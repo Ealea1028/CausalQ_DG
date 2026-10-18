@@ -1,4 +1,4 @@
-"""Phase22 matched no-CQE formal baseline contract, separate from old gates."""
+"""Frozen formal source recipes: Phase22 M0/M1 and Phase23 P1 control."""
 
 from copy import deepcopy
 from pathlib import Path
@@ -11,8 +11,14 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 def formal_config(variant):
+    if variant == 'P1':
+        config = formal_config('M1')
+        config['experiment'] = {'id': 'P1_FORMAL_SEED0', 'phase': 23, 'status': 'formal_training_authorized'}
+        config['prediction_consistency'] = {'enabled': True, 'lambda_pred': 1.0, 'temperature': 1.0,
+            'divergence': 'kl_reference_to_view', 'reference_stop_gradient': True, 'valid_pixels_only': True}
+        return config
     if variant not in ('M0', 'M1'):
-        raise ValueError('Formal variant must be M0 or M1')
+        raise ValueError('Formal variant must be M0, M1 or P1')
     baseline = yaml.safe_load((ROOT / 'configs/strict_dg/gta_dinov3l_m0.yaml').read_text())
     validate_strict_config(baseline)
     config = deepcopy(baseline)
@@ -26,4 +32,4 @@ def formal_config(variant):
 
 def validate_formal_config(config, variant):
     if config != formal_config(variant):
-        raise ValueError('Formal recipe drift: only M1 residual centering may differ')
+        raise ValueError('Formal recipe drift from frozen variant contract')

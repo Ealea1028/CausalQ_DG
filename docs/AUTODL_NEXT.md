@@ -1,4 +1,103 @@
-# Phase22 active — direct formal M0/M1 seed0 training
+# Phase23 active — P1 full-budget prediction-consistency control
+
+M0/M1 already finished40000 updates each at2537653; do not repeat them.
+Returned reports/checksums pass and integer confusion counts independently
+reproduce source mIoUs73.88616267%/73.85416251% (M1-M0=-0.03200015pp).
+No target metrics. Raw checkpoints/full traces stay on AutoDL.
+
+Local verification:535 passed/1 skipped (existing Windows symlink permission),
+Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP1/MKL1/sequential MKL.
+Tests cover the explicit detached-teacher objective,two forwards,zero-weight
+exact M1 update equivalence,stochastic epoch-boundary continuation,source-only
+imports,returned report/confusion reduction and parent-terminal survival.
+No P1 GPU result is claimed by these CPU checks.
+
+Next is plan section27 P1: centered M1 plus prediction consistency. Fresh
+seed0 head identical to the accepted pair,40000 updates,original+photo CE,
+FP32 KL(detached original || photo) on non-ignore pixels,lambda1,T1. Two
+forwards per update; no CQE/Fourier/new mechanism. All other settings and
+source membership match M1. This is a direct formal launch, with no separate
+smoke,pilot,readiness replay,census or file-transfer prerequisite.
+
+## Start P1 formal training
+
+Replace the placeholder with the full SHA from the final handoff. Paste the
+entire child bash block to keep the interactive terminal open on failure.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+bash scripts/train_prediction_source_phase23.sh "$EXPECTED_SHA"
+BASH
+echo "启动检查结束，终端保持打开。"
+```
+
+The launcher uses nohup and an exclusive run lock. Runtime and input paths
+are unchanged: /root/autodl-tmp/envs/causalq-dg/bin/python,
+/root/autodl-tmp/datasets/gta5,/root/autodl-tmp/pretrained/dinov3_vitl16.
+No installation is required. GPU0,torch2.7.0+cu126,transformers4.56.1,BF16,
+512crop,batch1,workers0,strict deterministic CE,AdamW1e-4/wd.01/clip1,
+40000-step PolyLR.9. Accepted baseline hashes/recipe are read from small Git
+metadata within startup, not by rerunning previous experiments. No previous
+checkpoint is loaded into the fresh P1 model.
+
+Outputs are under:
+/root/autodl-tmp/outputs/CausalQ_DG/phase23/P1_FORMAL_SEED0_<shortSHA>/P1/.
+Every1000 updates save an immutable schema2 checkpoint,trace and commit
+marker; there are no manual chunk handoffs. At40000 evaluate all2497 source
+holdout images once,longedge1024/aspect resize+pad16,fixed-final selection.
+No target data or target evaluation. Only P1 is released in this phase;
+M2/M3 are later changes, not silently enabled by this command.
+
+## Monitor or recover
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase23/P1_FORMAL_SEED0_${SHA}_launcher.log"
+```
+
+Progress prints every10 updates; checkpoint commits every1000. If the actual
+worker stops, rerun the SAME startup block at the SAME SHA. It resumes from
+the last committed checkpoint, preserving incomplete attempt directories.
+At most1000 uncommitted updates may need replay. A live duplicate launch
+exits due to the lock. Final evaluation can be retried without retraining.
+Do not delete prior M0/M1 outputs, change the runtime or edit source on AutoDL.
+If failed, send the last80 launcher-log lines and preserve all files.
+
+## Return P1 results
+
+Success prints p1_formal_exit_code=0. Send P1/formal_report.json and the
+original REPORT_SHA256SUMS. Leave full traces/checkpoints on AutoDL.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+cd "/root/autodl-tmp/outputs/CausalQ_DG/phase23/P1_FORMAL_SEED0_${SHA}"
+sha256sum -c REPORT_SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import base64, gzip, hashlib
+for name, marker in [('P1/formal_report.json','P1_FORMAL_REPORT'),('REPORT_SHA256SUMS','REPORT_SHA256SUMS')]:
+    raw=Path(name).read_bytes()
+    print(marker+'_SHA256='+hashlib.sha256(raw).hexdigest())
+    print(marker+'_GZIP_BASE64='+base64.b64encode(gzip.compress(raw,mtime=0)).decode())
+PY
+BASH
+echo "导出结束，终端保持打开。"
+```
+
+Stop after P1 formal training and return results. Source comparison does not
+authorize target-based tuning or establish DG performance. No additional
+verification-only AutoDL job is requested.
+
+---
+
+# Archive: Phase22 formal M0/M1 (completed)
 
 The user authorizes assuming current readiness passed and removing repeated
 engineering gates. Phase21 is not claimed as a newly measured CUDA pass.

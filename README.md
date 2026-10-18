@@ -1,6 +1,17 @@
 # CausalQ-DG
 
-## Active phase — Phase22 / Priority4 formal M0-M1 — 2026-10-17
+## Active phase — Phase23 / Priority4 formal P1 — 2026-10-18
+
+M0/M1 seed0 each completed40000 updates and2497-image source validation at
+2537653. Source mIoU: M0=73.88616267%,M1=73.85416251%,delta=-0.03200015
+percentage points. Returned hashes and independent confusion reduction pass;
+no target metric or generalization/decomposition improvement claim.
+Next: fresh centered P1,40000 updates, same two-view recipe plus valid-pixel
+KL(detached original || photometric),lambda1,T1. No extra smoke/pilot or
+new census. One background launch with1000-step recovery and final-only
+source evaluation. See docs/AUTODL_NEXT.md. M2/M3 remain subsequent phases.
+
+## Archive — Phase22 formal M0-M1 release (completed)
 
 User authorizes proceeding on assumed M1 continuation readiness; this is not
 recorded as a measured CUDA pass. No more standalone readiness/pilot/census
