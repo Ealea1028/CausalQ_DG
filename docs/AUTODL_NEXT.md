@@ -1,4 +1,103 @@
-# Phase23 active — P1 full-budget prediction-consistency control
+# Phase24 active — M2 original Full CQE formal control
+
+P1 is complete at268fda1:40000 updates,source2497 mIoU73.84414155%,
+delta vsM1=-0.01002097 percentage points. Returned hashes/config/metadata
+and independent confusion reduction pass. No target metrics. Do not repeat
+M0/M1/P1 or transfer checkpoints/full traces locally.
+
+Local verification:549 passed/1 skipped (existing Windows symlink permission),
+Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP1/MKL1/sequential MKL.
+Tests cover explicit Full CQE objective/gradients at alpha0 and nonzero alpha,
+two forwards,no anchor branch,zero-weight exact M1 update,stochastic
+epoch-boundary resume,P1 report/confusion acceptance and terminal survival.
+These are CPU tests,not a claim of an M2 GPU result.
+
+This release starts M2 directly: centered M1 plus original Full CQE control,
+fresh seed0/full40000 updates. Objective: original CE+photo CE+1*Full CQE.
+Use public alpha*full_query_delta logits before base addition; detached
+original reference,FP32 per-class L2 normalization,spatial SmoothL1(beta1),
+GT-present class mean over valid pixels. No prediction KL or Anchor-CQE.
+Two forwards per update. Same pinned M1 weights/split/crop/style/runtime and
+optimizer; no sweep,independent smoke,pilot,census or readiness gate.
+
+## Start M2 formal training
+
+Use the full SHA from the final handoff. Paste the entire child bash block;
+it keeps the interactive terminal open even if a startup check fails.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+git fetch origin codex/strict-dg-source-split
+git checkout --detach "$EXPECTED_SHA"
+bash scripts/train_full_cqe_source_phase24.sh "$EXPECTED_SHA"
+BASH
+echo "启动检查结束，终端保持打开。"
+```
+
+Nohup background launch with an exclusive lock. No new installation. Python:
+/root/autodl-tmp/envs/causalq-dg/bin/python;torch2.7.0+cu126,
+transformers4.56.1,RTX4090D,GPU0,BF16,512crop,batch1,workers0,
+deterministic gather-based CE,AdamW1e-4/wd.01/clip1,40000-step PolyLR.9.
+Data:/root/autodl-tmp/datasets/gta5;
+weights:/root/autodl-tmp/pretrained/dinov3_vitl16.
+Source membership remains train22469/val2497. M2 starts from fresh weights
+and seed0 head; no completed experiment checkpoint is promoted.
+
+Outputs:/root/autodl-tmp/outputs/CausalQ_DG/phase24/M2_FORMAL_SEED0_<shortSHA>/M2/.
+No manual training chunks or intermediate holdout sweeps. Every1000 updates
+commit schema2 model/optimizer/sampler/all-RNG state and trace hashes.
+At40000 select fixed final and evaluate the full source holdout once.
+No target access/evaluation in this release. M3 is a subsequent phase.
+
+## Monitor and recover
+
+```bash
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+tail -n 60 "/root/autodl-tmp/outputs/CausalQ_DG/phase24/M2_FORMAL_SEED0_${SHA}_launcher.log"
+```
+
+Progress prints every10 updates and checkpoint commits every1000. The first
+CQE loss may be0 because alpha starts0; that is expected. Trace records
+loss_full_cqe,cqe_weight and total objective. No extra reference-view or
+anchor-view inference is added. If the worker stops, rerun the SAME startup
+block/SAME SHA; recovery preserves partial attempts and restores the last
+committed checkpoint. At most1000 uncommitted updates may need replay.
+Final evaluation can be retried without retraining. Live duplicates exit
+due to the lock. Preserve all completed M0/M1/P1 outputs. If failed, send
+the last80 launcher-log lines; do not edit source or checkpoints on AutoDL.
+
+## Return M2 result
+
+Success prints m2_formal_exit_code=0. Send M2/formal_report.json and the
+original REPORT_SHA256SUMS; keep checkpoints/full traces on AutoDL.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=$(git -C /root/autodl-tmp/CausalQ_DG rev-parse --short=7 HEAD)
+cd "/root/autodl-tmp/outputs/CausalQ_DG/phase24/M2_FORMAL_SEED0_${SHA}"
+sha256sum -c REPORT_SHA256SUMS
+/root/autodl-tmp/envs/causalq-dg/bin/python - <<'PY'
+from pathlib import Path
+import base64,gzip,hashlib
+for name,marker in [('M2/formal_report.json','M2_FORMAL_REPORT'),('REPORT_SHA256SUMS','REPORT_SHA256SUMS')]:
+    raw=Path(name).read_bytes()
+    print(marker+'_SHA256='+hashlib.sha256(raw).hexdigest())
+    print(marker+'_GZIP_BASE64='+base64.b64encode(gzip.compress(raw,mtime=0)).decode())
+PY
+BASH
+echo "导出结束，终端保持打开。"
+```
+
+Stop after M2 formal training and return its result. No target-based tuning
+or claim of DG improvement follows from these source-only comparisons.
+
+---
+
+# Archive: Phase23 P1 (completed)
 
 M0/M1 already finished40000 updates each at2537653; do not repeat them.
 Returned reports/checksums pass and integer confusion counts independently

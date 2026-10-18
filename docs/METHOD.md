@@ -1,6 +1,43 @@
 # Method contract
 
-## Active boundary — Phase23 / P1 prediction-consistency control
+## Active boundary — Phase24 / original Full CQE control M2
+
+P1 completed40000 updates and all2497 source holdout images at268fda1;
+source mIoU=0.7384414154795075,delta vsM1=-0.01002096615 percentage points.
+Returned report9e029d79... and checksumfa22fa5a... verified, including exact
+config and reserialized embedded metadata hashes. Independent integer
+confusion reduction reproduces19 class IoUs and mIoU. Same seed0 initial
+head,splits,weights/runtime as M0/M1. This is a single-seed source result;
+prediction consistency has not shown a source gain. No target access.
+Full checkpoints/traces remain on AutoDL, not locally replayed.
+
+Next follows plan M2: centered M1 plus ORIGINAL Full CQE as a control, not
+Anchor-CQE or a claim that effect invariance helps. Fresh seed0/full40000
+updates, same backbone/query/style/optimizer/geometry and source membership.
+Objective = CE(original)+CE(photo)+1.0*CQE(E_photo,E_original.detach()).
+E_full is the public get_query_effect(output),alpha*full_query_delta_logits
+before adding base logits. It is not prediction logits or an anchor-only
+effect. No alpha detachment or effect recomputation via BF16 logit subtraction.
+
+Reuse causal_query_effect_loss unchanged: cast maps to FP32,mask ignore
+pixels,L2-normalize each class map over ALL valid spatial pixels,spatial sum
+of SmoothL1(beta1),average over GT-present class maps. Class presence chooses
+channels; it does not restrict each channel's map to its GT class region.
+Reference original effect is detached; original CE backward releases its
+graph before photo CE+Full CQE backward. Two backbone forwards per update,
+same train-mode dropout. Alpha starts0 as before; first Full CQE can be0.
+No prediction KL,Fourier,learned null,diversity or necessity penalty.
+
+Lambda_cqe1 and beta1 match the existing original CQE reference recipe.
+With one actual style view,the effective weight is1,with no legacy two-view
+/2 divisor and no search. This normalized training objective must not be
+confused with the raw-variance stability hypothesis. Trace records raw CQE
+loss,effective weight and total objective. Existing schema2 recovery every
+1000 updates and fixed-final2497-image source evaluation are retained.
+No independent GPU smoke/pilot/census/readiness job is required.
+Anchor-CQE/M3 and target evaluation remain later phases.
+
+## Archive — Phase23 / P1 prediction-consistency control (completed)
 
 Phase22 M0/M1 completed40000 updates each at2537653. Byte-pinned returned
 reports and original checksum file match; integer19x19 confusion matrices

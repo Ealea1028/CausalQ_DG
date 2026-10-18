@@ -24,3 +24,6 @@ experiments/STRICT_DG_PHASE22/m0_formal_report.json text eol=lf
 experiments/STRICT_DG_PHASE22/m1_formal_report.json text eol=lf
 experiments/STRICT_DG_PHASE22/REPORT_SHA256SUMS text eol=lf
 scripts/train_prediction_source_phase23.sh text eol=lf
+experiments/STRICT_DG_PHASE23/formal_report.json text eol=lf
+experiments/STRICT_DG_PHASE23/REPORT_SHA256SUMS text eol=lf
+scripts/train_full_cqe_source_phase24.sh text eol=lf

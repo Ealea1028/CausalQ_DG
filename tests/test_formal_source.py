@@ -89,7 +89,7 @@ def test_recovery_ignores_incomplete_attempt_and_replays_exact_state(tmp_path, m
         formal.completed_segments(root, metadata, horizon=8, interval=4)
 
 
-@pytest.mark.parametrize('variant', ['M0', 'P1'])
+@pytest.mark.parametrize('variant', ['M0', 'P1', 'M2'])
 def test_formal_cli_never_loads_real_data_locally(tmp_path, monkeypatch, variant):
     checkout = tmp_path / 'checkout'
     destination = checkout / f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml'

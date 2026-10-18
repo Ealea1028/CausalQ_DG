@@ -1,6 +1,17 @@
 # CausalQ-DG
 
-## Active phase — Phase23 / Priority4 formal P1 — 2026-10-18
+## Active phase — Phase24 / Priority4 formal M2 — 2026-10-18
+
+P1 completed40000 updates and2497-source validation: mIoU73.84414155%,
+delta vsM1=-0.01002097 percentage points. Returned hash-pinned report and
+independent confusion reduction accepted; no source gain or target claim.
+Next: M2 centered+original Full CQE control, fresh seed0/full40000 updates,
+same two-view CE recipe plus normalized Full CQE,lambda1,beta1. No prediction
+KL,Anchor-CQE or other new mechanism. Direct formal launch,1000-step recovery,
+final-only full source validation. No repeated smoke/pilot/census.
+See docs/AUTODL_NEXT.md. Preserve completed M0/M1/P1 outputs.
+
+## Archive — Phase23 formal P1 release (completed)
 
 M0/M1 seed0 each completed40000 updates and2497-image source validation at
 2537653. Source mIoU: M0=73.88616267%,M1=73.85416251%,delta=-0.03200015

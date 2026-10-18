@@ -1,5 +1,15 @@
 # CausalQ_DG_1016 repository audit
 
+Phase24 active (2026-10-18): P1 formal report9e029d79... and original checksum
+fa22fa5a... accepted; config/embedded metadata hashes reproduce all entries.
+Independent integer confusion reduction reproduces source mIoU73.84414155%,
+M1 delta=-0.01002097pp. Full40000 updates,2497 source samples,same fresh
+initialization/runtime. No target metrics or local checkpoint/trace replay.
+Next is one full-budget M2 original Full CQE control,not a new Anchor-CQE
+mechanism. Reuse public alpha*delta effect and original normalized SmoothL1
+loss,detached reference,lambda1,beta1,two forwards,source-only/fixed-final.
+Direct formal launch with existing1000-step recovery; no extra GPU gate.
+
 Phase23 active (2026-10-18): returned Phase22 pair report49b13eed... and
 checksums07fbe0f7... verified; embedded individual report serialization
 reproduces original M0/M1 report hashes. All19 source class IoUs and mIoUs

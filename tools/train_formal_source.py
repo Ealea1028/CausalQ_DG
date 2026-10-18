@@ -1,4 +1,4 @@
-"""Formal source-only M0/M1/P1 with immutable1000-update recovery segments."""
+"""Formal source-only M0/M1/P1/M2 with immutable1000-update recovery segments."""
 
 import argparse
 from datetime import datetime, timezone
@@ -101,6 +101,14 @@ def run_variant(args):
         policy = {**POLICY, 'new_loss_enabled': True, 'cqe_enabled': False,
                   'prediction_consistency': config['prediction_consistency']}
         update_fn = prediction_source_update
+    if variant == 'M2':
+        from tools.audit_formal_source_pair import audit_pair
+        from tools.full_cqe_source_update import full_cqe_source_update
+        baseline_audit = audit_pair()
+        policy = {**POLICY, 'new_loss_enabled': True, 'cqe_enabled': True,
+                  'prediction_consistency_enabled': False, 'effect_definition': 'alpha_times_full_query_delta_pre_addition',
+                  'causal_query_effect': config['causal_query_effect']}
+        update_fn = full_cqe_source_update
     git_sha = _git('rev-parse', 'HEAD')
     if _git('status', '--porcelain'):
         raise ValueError('Formal training requires clean exact checkout')
@@ -115,7 +123,7 @@ def run_variant(args):
         'torch': str(torch.__version__), 'cuda': torch.version.cuda, 'transformers': version('transformers'),
         'gpu': torch.cuda.get_device_name(0)}
     if baseline_audit is not None and environment != baseline_audit['environment']:
-        raise ValueError('P1 environment differs from accepted matched baseline runtime')
+        raise ValueError('Formal control environment differs from accepted matched baseline runtime')
     metadata = {'git_sha': git_sha, 'variant': variant, 'seed': 0, 'config_sha256': file_sha(config_path),
         'config_tree_sha256': tree_digest(config), 'environment': environment,
         **source_manifest_metadata(), **policy, 'formal_training_authorized': True,
@@ -160,7 +168,7 @@ def run_variant(args):
         centered_residuals=variant != 'M0').to('cuda:0')
     initial_head = tree_digest(trainable_state_dict(model))
     if baseline_audit is not None and initial_head != baseline_audit['initial_head_sha256']:
-        raise ValueError('P1 fresh initialization differs from accepted M0/M1')
+        raise ValueError('Formal control fresh initialization differs from accepted M0/M1')
     initial = root / 'initialization.json'
     if initial.exists() and json.loads(initial.read_bytes())['head_sha256'] != initial_head:
         raise ValueError('Fresh seed0 initialization differs')
@@ -236,7 +244,7 @@ def summarize(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'summarize'), required=True)
+    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'summarize'), required=True)
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--data-root', type=Path, default=Path('/root/autodl-tmp/datasets'))
     parser.add_argument('--pretrained-root', type=Path, default=Path('/root/autodl-tmp/pretrained'))
