@@ -1,4 +1,24 @@
-# Phase26 active — frozen final Cityscapes500 comparison
+# Phase27 complete — no pending AutoDL operation
+
+Final comparison accepted2026-10-19. Four formal seed0 runs each finished
+40000 updates;the frozen final Cityscapes500 evaluations are all complete.
+Target mIoU M0/M1/P1/M2=65.2091/65.6598/65.7621/65.8755%.
+M2 vsM1 +0.2158pp is a single-seed point estimate,not a stable-gain claim.
+Anchor raw stability ratio27.6012,0/2497 favor anchor:the required premise
+failed. M3 was not started;M4 and conditional extensions remain stopped.
+
+There is no new command to run on AutoDL. Do not rerun completed evaluations
+or launch further training for this study. Preserve datasets,weights and
+complete run directories remotely for reproducibility;do not add them to Git.
+Final results/limitations:STRICT_DG_FINAL_REPORT.md.
+Accepted metadata:experiments/STRICT_DG_PHASE27/acceptance.json and closeout.json.
+The commands below are archived Phase26 instructions,not current actions.
+Phase27 local full suite:591 passed/1 skipped in85.92s;existing Windows
+unprivileged symlink restriction. CPU-only;Python3.10.20/torch2.10.0+cu128.
+
+---
+
+# Archive — Phase26 frozen final Cityscapes500 comparison
 
 Phase25 finished with status hypothesis_not_supported_stop_new_losses.
 Formal M1 raw anchor/residual variance ratio27.6012;0/2497 images favor anchor.

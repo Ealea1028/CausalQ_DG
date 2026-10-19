@@ -1,6 +1,17 @@
 # CausalQ-DG
 
-## Active phase — Phase26 / frozen final target comparison — 2026-10-18
+## Phase27 complete — final comparison and hypothesis stop — 2026-10-19
+
+All four seed0 models completed40000 updates and final Cityscapes500 evaluation.
+Target mIoU: M0=65.2091%,M1=65.6598%,P1=65.7621%,M2=65.8755%.
+M2 is +0.2158pp vsM1 on target but -0.1360pp on source; one seed does not
+establish a stable gain. The raw anchor-stability prerequisite failed
+(ratio27.6012;0/2497 favor anchor),so M3 was not run. No further AutoDL task
+or training is pending for this study. Target outcomes do not reopen losses.
+See [final report](docs/STRICT_DG_FINAL_REPORT.md),
+[tables](analysis/strict_dg_final/comparison.csv) and docs/AUTODL_NEXT.md.
+
+## Archive — Phase26 / frozen final target comparison — 2026-10-18
 
 Formal M1 raw anchor/residual variance ratio=27.6012;0/2497 images favor
 anchor. Phase25 completed with zero updates;M3 was NOT started. Plan46/55

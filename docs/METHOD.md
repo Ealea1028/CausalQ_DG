@@ -1,6 +1,24 @@
 # Method contract
 
-## Active boundary — Phase26 / final target reporting after hypothesis stop
+## Phase27 complete — accepted final comparison / study closed
+
+Final comparison producer440fd499ae05fe883b9d08a56ddfbea993924529 returned
+all four frozen final40000 checkpoints,500 target images each,zero updates.
+Hash-pinned19-class integer confusion reductions reproduce target mIoU:
+M0=65.20908497%,M1=65.65977427%,P1=65.76210701%,M2=65.87552967%.
+All four share917018489 valid GT pixels and identical class totals.
+M2 target delta vsM1=+0.21575540pp despite source delta=-0.13595782pp;
+do not claim Full CQE necessarily harms DG. One seed/no significance claim.
+Coverage-only trace hashes coincide but contain no prediction values;
+different aggregate confusions must not be mistaken for identical outputs.
+
+Phase25 raw anchor-stability failure still stops M3/M4 and new mechanisms.
+No further remote operation is pending. This closes the existing four-model
+study,not a positive validation of Anchor-CQE or every optional plan branch.
+See STRICT_DG_FINAL_REPORT.md and experiments/STRICT_DG_PHASE27/closeout.json.
+Prior release/freeze files retain their historical before-run state.
+
+## Archive — Phase26 / final target reporting after hypothesis stop
 
 Phase25 returned job0184a3d5.../checksuma1ecb2cf... verifies. Exact M1 final
 checkpoint c2559a43... was used,2497 source IDs/4994 forwards/zero updates,

@@ -1,5 +1,16 @@
 # CausalQ_DG_1016 repository audit
 
+Phase27 complete (2026-10-19): accepted final_comparison.json SHA564d9bed...
+from440fd499ae05fe883b9d08a56ddfbea993924529. All four40000-step seed0
+models evaluated on the frozen500 target images without optimizer updates.
+Target M0/M1/P1/M2=65.2091/65.6598/65.7621/65.8755%;M2 vsM1 +0.2158pp,
+source -0.1360pp. No seed variance/significance/stable-gain claim.
+Formal M1 raw stability ratio27.6012 still fails the Anchor prerequisite;
+M3 not run,M4/extensions stopped. No next AutoDL action or new training.
+Report:docs/STRICT_DG_FINAL_REPORT.md;CSV/figure:analysis/strict_dg_final/.
+Local acceptance checks returned hashes/counts,not actual data/checkpoint replay.
+The dated phase notes below are historical and do not authorize new runs.
+
 Phase26 active (2026-10-18): Phase25 job0184a3d5.../checksuma1ecb2cf...
 accepted;M1 raw anchor/residual ratio27.6012,0/2497 images favor anchor,
 zero optimizer updates,M3 not started. Local scope is returned certificate
