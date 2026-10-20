@@ -1,6 +1,18 @@
 # CausalQ-DG
 
-## Phase27 complete — final comparison and hypothesis stop — 2026-10-19
+## Active phase — Phase28 selective-stability baseline diagnostics — 2026-10-20
+
+Execute [20261020_Diagnostic_Plan.md](20261020_Diagnostic_Plan.md) as a new
+exploratory study after the old target results were seen. Reuse U0=M0,C0=M1,
+CP=P1,CF=M2 final40000 checkpoints;one source-only diagnostic job covers
+amplitude/raw+normalized variance,correlation/cancellation,Query/direct-anchor
+gradients and responsibility,plus three frozen intervention example groups.
+No repeated training,pilot or raw-variance ranking gate. Next phase is formal
+UP/UF/UA/UR;this release performs diagnostics only and never reads target data.
+See [AutoDL handoff](docs/AUTODL_NEXT.md) and
+[disk cleanup advice](docs/AUTODL_DISK_CLEANUP_20261020.md).
+
+## Archive — Phase27 complete — final comparison and hypothesis stop — 2026-10-19
 
 All four seed0 models completed40000 updates and final Cityscapes500 evaluation.
 Target mIoU: M0=65.2091%,M1=65.6598%,P1=65.7621%,M2=65.8755%.

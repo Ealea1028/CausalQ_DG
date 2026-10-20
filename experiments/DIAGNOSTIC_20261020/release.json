@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "phase": 28,
+  "date": "2026-10-20",
+  "study": "diagnostic_20261020",
+  "status": "implementation_complete_awaiting_autodl_source_diagnostics",
+  "authority": "20261020_Diagnostic_Plan.md plus user instruction to execute",
+  "starting_git_sha": "aa39d532a270b9859f51ae1846f74c9df34fba68",
+  "contract_sha256": "b81e2b747bed67fa2b503163dab73b6e2d9c070f624a49f96b4b2362f04e2419",
+  "baseline_variants": [
+    "U0",
+    "C0",
+    "CP",
+    "CF"
+  ],
+  "reused_original_variants": [
+    "M0",
+    "M1",
+    "P1",
+    "M2"
+  ],
+  "samples_per_model": 2497,
+  "views_per_sample": 5,
+  "gradient_geometry": "deterministic_512_crop",
+  "preview_ids": [
+    "18734",
+    "12488",
+    "08744"
+  ],
+  "old_raw_stability_gate_required": false,
+  "training_released_this_phase": false,
+  "optimizer_updates_this_phase": 0,
+  "target_data_access_authorized": false,
+  "target_feedback_already_seen": true,
+  "gpu_or_actual_source_diagnostics_executed_locally": false,
+  "resume": "atomic compressed per-image records; exact commit/contract/checkpoint/ID/source fingerprint",
+  "next_phase": "29: fresh UP/UF/UA/UR seed0 formal40000; no additional pilot/readiness gate",
+  "disk_cleanup": "read-only report and recommendations only; no deletion performed",
+  "local_verification": {
+    "pytest_passed": 619,
+    "pytest_skipped": 1,
+    "duration_seconds": 88.21,
+    "skip_reason": "existing Windows unprivileged symlink restriction",
+    "new_diagnostic_tests": 28,
+    "legacy_photometric_byte_identical_cpu_cases": 9,
+    "active_handoff_shell_blocks_syntax_checked": 4,
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "cuda_visible_devices": "",
+    "omp_num_threads": 1,
+    "mkl_num_threads": 1,
+    "mkl_threading_layer": "SEQUENTIAL"
+  }
+}

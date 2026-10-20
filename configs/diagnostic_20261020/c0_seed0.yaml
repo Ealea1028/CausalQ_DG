@@ -1,0 +1,99 @@
+experiment:
+  id: diagnostic_20261020_C0_SEED0
+  phase: 28
+  status: planned_not_released_for_training
+data:
+  source: gta5
+  targets: []
+  validation: gta5_holdout
+  num_classes: 19
+  num_workers: 0
+  random_scale:
+  - 0.5
+  - 2.0
+  horizontal_flip_probability: 0.5
+  min_valid_fraction: 0.01
+  crop_attempts: 10
+model:
+  backbone: dinov3_vitl16
+  weights_dir: dinov3_vitl16
+  weights_sha256: dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179
+  freeze_backbone: true
+  intermediate_indices:
+  - 6
+  - 12
+  - 18
+  - 24
+  decoder_channels: 256
+  dropout: 0.1
+  query: true
+query:
+  queries_per_class: 2
+  interaction: static
+  alpha_init: 0.0
+  cross_attention_layers: 0
+  num_heads: 8
+  temperature: 0.07
+  aggregation: logsumexp
+  centered_residuals: true
+style:
+  views:
+  - original
+  - photometric
+  sequential_forward: true
+  preserve_geometry: true
+  lambda_cf: 1.0
+  photometric:
+    brightness:
+    - 0.7
+    - 1.3
+    contrast:
+    - 0.7
+    - 1.3
+    saturation:
+    - 0.7
+    - 1.3
+    gamma:
+    - 0.8
+    - 1.2
+    temperature:
+    - 0.9
+    - 1.1
+    grayscale_probability: 0.1
+  fourier:
+    mix_strength:
+    - 0.1
+    - 0.35
+train:
+  crop_size:
+  - 512
+  - 512
+  amp: true
+  batch_size: 1
+  gradient_accumulation: 1
+  max_iterations: 40000
+  seed: 0
+  style: true
+  log_interval: 10
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.01
+  scheduler: poly
+  poly_power: 0.9
+validation:
+  interval: 40000
+  long_edge: 1024
+  patch_size: 16
+  geometry: aspect_resize_pad
+  scope: full_source_holdout
+protocol:
+  name: strict_dg
+  target_access: forbidden_during_training
+  source_validation: gta5_holdout
+  target_evaluation: final_only
+  checkpoint_selection: fixed_final
+  training_authorized: false
+  study: diagnostic_20261020
+  target_feedback_already_seen: true
+  raw_anchor_ranking_required: false

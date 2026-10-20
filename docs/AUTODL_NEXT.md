@@ -1,4 +1,114 @@
-# Phase27 complete — no pending AutoDL operation
+# Phase28 active — selective-stability baseline diagnostics
+
+New authority:20261020_Diagnostic_Plan.md and user request to execute it.
+Old study stays closed. New study tests selective regularization without the
+old raw-anchor ranking gate;previous target feedback is already known.
+
+This release reuses U0=M0,C0=M1,CP=P1,CF=M2 final40000 checkpoints. One
+background job measures the missing amplitude/correlation/gradient/responsibility
+statistics on2497 source IDs,plus three frozen intervention groups. No repeated
+formal training,target evaluation,short smoke,pilot or legacy-artifact roundtrip.
+Next phase is UP/UF/UA/UR formal40000;this launcher releases diagnostics only.
+
+Local checks use synthetic CPU tensors;actual DINO/source/GPU validation is
+the next operation below. Do not mark those actual diagnostics passed locally.
+Implementation inventory and frozen matrix:experiments/DIAGNOSTIC_20261020/.
+Local full suite:619 passed/1 skipped in88.21s,existing Windows unprivileged
+symlink restriction. Python3.10.20/torch2.10.0+cu128,CUDA hidden,OMP/MKL1,
+sequential MKL.28 new diagnostic tests and9 byte-identical legacy photometric
+CPU regression cases. Actual source/CUDA diagnostics remain pending.
+
+## Fetch exact code into a separate checkout
+
+Replace EXPECTED_SHA with the full SHA in the Codex handoff. Each commit gets
+its own checkout so an existing worker cannot observe source changes.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Pass the full SHA'; exit 2; }
+SOURCE_REPO=/root/autodl-tmp/CausalQ_DG
+TASK_REPO="/root/autodl-tmp/CausalQ_DG_diag20261020_${EXPECTED_SHA:0:7}"
+git -C "$SOURCE_REPO" fetch origin codex/diagnostic-20261020
+if [[ ! -e "$TASK_REPO" ]]; then
+  git -C "$SOURCE_REPO" worktree add --detach "$TASK_REPO" "$EXPECTED_SHA"
+fi
+cd "$TASK_REPO"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git status --porcelain)"
+echo "Prepared checkout: $TASK_REPO"
+BASH
+echo '代码准备结束，终端保持打开。'
+```
+
+Optionally run the disk report below from this checkout before launch. Then:
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+cd "/root/autodl-tmp/CausalQ_DG_diag20261020_${EXPECTED_SHA:0:7}"
+export PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020
+bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" baseline-diagnostics
+BASH
+echo '启动检查结束，终端保持打开。'
+```
+
+No installation. Use original datasets/pretrained paths and original runtime.
+Only if the training-output base moved,set CAUSALQ_TRAINING_OUTPUT_ROOT to
+its current location before launch. Do not rearrange individual final states.
+The worker uses an overall run lock,one model per process,and atomic compressed
+per-image records. Rerunning the SAME command resumes completed source IDs;
+completed models are reused. Keep current worktree and output folder until done.
+
+## Monitor and return
+
+Use the same exact SHA for this run;commands run in a child shell.
+
+```bash
+bash <<'BASH'
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase28/BASELINES_${EXPECTED_SHA:0:7}"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase28_export.zip" ]]; then
+  ls -lh "$OUT/phase28_export.zip"
+  sha256sum "$OUT/phase28_export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+Completion:status.json exit_code0;log phase28_exit_code=0. Return phase28_export.zip
+and last80 launcher log lines. The ZIP contains job report,four summaries/CSVs,
+three source image groups and checksums;it excludes checkpoints and complete
+per-image raw records. Download/upload ZIP as a file;do not print it as base64.
+If failed,return status and log;preserve successful sample files for recovery.
+
+## Disk space before launch
+
+See AUTODL_DISK_CLEANUP_20261020.md. This optional report reads sizes only;
+run from the exact new checkout and return the JSON for precise recommendations.
+
+```bash
+df -hT /root/autodl-tmp
+# cd to the prepared diagnostic checkout before the next command.
+/root/autodl-tmp/envs/causalq-dg/bin/python -m tools.report_diagnostic_disk > /root/autodl-tmp/diagnostic_disk_report.json
+cat /root/autodl-tmp/diagnostic_disk_report.json
+```
+
+First candidates:pip cache,duplicate downloaded archives,unreferenced failed
+attempts. Closed-study intermediate segment state files are candidates only
+after preserving exact finals;deletion breaks original segment recovery.
+Never wipe outputs/datasets or everypth file. Preserve four frozen finals,
+DINO weights/source data/Cityscapes,current diagnostic outputs and small metadata.
+No deletion is performed by the diagnostic launcher or disk-report tool.
+
+---
+
+# Archive — Phase27 complete — no pending AutoDL operation
 
 Final comparison accepted2026-10-19. Four formal seed0 runs each finished
 40000 updates;the frozen final Cityscapes500 evaluations are all complete.

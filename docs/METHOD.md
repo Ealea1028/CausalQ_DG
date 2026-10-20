@@ -1,6 +1,51 @@
 # Method contract
 
-## Phase27 complete — accepted final comparison / study closed
+## Active — Phase28 / new selective-stability research
+
+Authority:20261020_Diagnostic_Plan.md plus user request to implement it.
+The prior study remains closed and its negative raw-anchor ranking is retained.
+The new question tests selective regularization rather than assuming anchor
+is already stable. Existing Cityscapes feedback is known;new recipes will be
+frozen before their target evaluation,no target-based selection or tuning.
+
+Matrix:U0/UP/UF/UA/UR are uncentered:none/prediction/Full/Anchor/Residual;
+C0/CP/CF/CA/CR are centered counterparts. Reuse old U0/C0/CP/CF checkpoints.
+Phase28 releases one source-only diagnostic run;new training remains unreleased
+until Phase29. Old M3 guard and frozen evidence are not weakened or overwritten.
+Uncentered anchor access requires explicit diagnostic_20261020 protocol;
+static/no-learned-null scope and legacy default behavior are preserved.
+
+Same-source features produce Full=alpha*delta,Anchor=repeated anchors through
+the identical head,Residual=Full-Anchor. No residual-only causality claim.
+Uncentered a+t/e-t ambiguity is recorded;no post-step recentering is introduced.
+Use2497 source holdout images,longedge1024/pad16,original+four seeded photo
+views. FP32 maps/FP64 moments;raw population variance and per-view RMS-normalized
+variance both reported,zero-energy maps null. Image-class statistics and
+per-image class-macro statistics are separate;GT-present strata and counts
+remain explicit. First photo seed preserves legacy compatibility;two-view
+variance uses denominator4. No old artifact replay gate is required.
+
+Correlation includes signed spatial Pearson/cosine,style deltas and the
+Full variance=Anchor variance+Residual variance+2covariance identity.
+Gradient measurements use deterministic512 crops,eval/autograd,no optimizer,
+separate CE/photo/consistency/total terms. Composite Query gradients differ
+from centered raw-residual gradients. Anchor total=via-query+direct path;
+signed projections/null cases are retained. Responsibility uses native score
+grid softmax over slots,GT-class/all-valid scopes,and separate pixel-weighted
+usage statistics;it is not causal necessity. Only final heads are diagnosed.
+
+Three random IDs18734/12488/08744 are fixed before image access. Actual
+composite photo views and six diagnostic-only component demonstrations are
+saved with seeds/parameters,original input and inverse-normalized PNGs.
+Photometric tracing preserves old draw order/output. No Fourier is trained.
+
+Per-image compressed records commit atomically and resume by exact contract,
+checkpoint,source ID and file fingerprint. No updates or target access.
+Successful runs return an export of summaries/CSVs/examples;raw per-image
+records and original checkpoints remain remote. Check model versions/head,
+RNG and gradient state before/after;do not replay repeated short GPU gates.
+
+## Archive — Phase27 complete — accepted final comparison / study closed
 
 Final comparison producer440fd499ae05fe883b9d08a56ddfbea993924529 returned
 all four frozen final40000 checkpoints,500 target images each,zero updates.

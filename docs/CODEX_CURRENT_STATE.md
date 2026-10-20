@@ -1,5 +1,17 @@
 # CausalQ_DG_1016 repository audit
 
+Phase28 active (2026-10-20): implement20261020_Diagnostic_Plan as a NEW
+post-target-feedback exploratory study. Original raw-stability failure remains.
+U0=M0,C0=M1,CP=P1,CF=M2 reused;no repeated formal training or target evaluation.
+Next AutoDL job:four final source models,2497 images,five photo-style views,
+amplitude/correlation/responsibility plus512-crop read-only Query gradients,
+three frozen example groups. No old ranking gate,pilot or smoke roundtrip.
+Phase29 will release UP/UF/UA/UR formal40000;not trained by Phase28 launcher.
+Only explicit new-protocol uncentered component access is added. Source-only
+diagnostic metrics and traced examples need remote data/GPU,so stop locally
+after tests and exact-SHA handoff. Disk tool reports candidates without deletion.
+Implementation inventory:experiments/DIAGNOSTIC_20261020/implementation_inventory.md.
+
 Phase27 complete (2026-10-19): accepted final_comparison.json SHA564d9bed...
 from440fd499ae05fe883b9d08a56ddfbea993924529. All four40000-step seed0
 models evaluated on the frozen500 target images without optimizer updates.

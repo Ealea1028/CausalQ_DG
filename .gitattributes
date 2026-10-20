@@ -40,3 +40,6 @@ experiments/STRICT_DG_PHASE26/REPORT_SHA256SUMS text eol=lf
 experiments/STRICT_DG_PHASE27/*.json text eol=lf
 analysis/strict_dg_final/*.json text eol=lf
 analysis/strict_dg_final/*.csv text eol=lf
+scripts/run_diagnostic_20261020.sh text eol=lf
+configs/diagnostic_20261020/*.yaml text eol=lf
+experiments/DIAGNOSTIC_20261020/*.json text eol=lf

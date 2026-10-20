@@ -426,9 +426,10 @@ class QuerySegmentor(nn.Module):
         self.backbone.eval()
         return self
 
-    def forward_components(self, images: Tensor, *, include_anchor: bool = False) -> QuerySegmentorOutput:
+    def forward_components(self, images: Tensor, *, include_anchor: bool = False,
+                           component_protocol: str | None = None) -> QuerySegmentorOutput:
         if include_anchor:
-            self._require_anchor_mode()
+            self._require_anchor_mode(component_protocol)
         features = self.backbone(images)
         feature_maps = features.intermediate_maps or (features.patch_map,)
         base_patch_logits = self.decoder(feature_maps)
@@ -561,29 +562,34 @@ class QuerySegmentor(nn.Module):
         """Return the learnable within-class residual queries for regularization."""
         return self.query_bank.query_residuals
 
-    def _require_anchor_mode(self) -> None:
-        if self.interaction != "static" or not self.query_bank.centered_residuals or self.learned_null:
+    def _require_anchor_mode(self, component_protocol: str | None = None) -> None:
+        if component_protocol not in (None, "diagnostic_20261020"):
+            raise ValueError("Unknown component protocol")
+        allow_uncentered = component_protocol == "diagnostic_20261020"
+        if self.interaction != "static" or (not self.query_bank.centered_residuals and not allow_uncentered) or self.learned_null:
             raise ValueError("Anchor-only scope requires centered Static queries without learned-null")
 
-    def _anchor_output(self, images, output):
-        self._require_anchor_mode()
+    def _anchor_output(self, images, output, component_protocol=None):
+        self._require_anchor_mode(component_protocol)
         if (images is None) == (output is None):
             raise ValueError("Provide exactly one of images or output")
         if output is None:
-            output = self.forward_components(images, include_anchor=True)
+            output = self.forward_components(images, include_anchor=True, component_protocol=component_protocol)
         if output.anchor_scaled_delta_logits is None:
             raise RuntimeError("Anchor-only components were not requested")
         return output
 
     def get_anchor_query_effect(self, images: Tensor | None = None, *,
-                               output: QuerySegmentorOutput | None = None) -> Tensor:
+                               output: QuerySegmentorOutput | None = None,
+                               component_protocol: str | None = None) -> Tensor:
         """FP32 pre-addition logit effect of repeated anchors versus branch removal."""
-        return self._anchor_output(images, output).anchor_scaled_delta_logits.float()
+        return self._anchor_output(images, output, component_protocol).anchor_scaled_delta_logits.float()
 
     def get_residual_contribution(self, images: Tensor | None = None, *,
-                                  output: QuerySegmentorOutput | None = None) -> Tensor:
+                                  output: QuerySegmentorOutput | None = None,
+                                  component_protocol: str | None = None) -> Tensor:
         """Output-space full-minus-anchor contribution, not residual-only causality."""
-        output = self._anchor_output(images, output)
+        output = self._anchor_output(images, output, component_protocol)
         return output.scaled_delta_logits.float() - output.anchor_scaled_delta_logits.float()
 
     def get_anchors(self) -> Tensor:

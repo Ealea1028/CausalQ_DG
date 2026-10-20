@@ -78,16 +78,31 @@ class StyleInterventionBank(nn.Module):
         ).uniform_(low, high)
 
     def photometric_view(self, images: Tensor) -> Tensor:
+        return self._photometric(images)
+
+    def photometric_view_with_trace(self, images: Tensor) -> tuple[Tensor, dict]:
+        """Identical draws/order to photometric_view; trace does not draw RNG."""
+        trace = {}
+        return self._photometric(images, trace), trace
+
+    def _photometric(self, images: Tensor, trace: dict | None = None) -> Tensor:
         dtype = images.dtype
         unit = self._unit(images)
-        unit = unit * self._sample(self.brightness, unit)
-        channel_mean = unit.mean(dim=(2, 3), keepdim=True)
-        unit = (unit - channel_mean) * self._sample(self.contrast, unit) + channel_mean
-        gray = unit.mean(dim=1, keepdim=True)
-        unit = (unit - gray) * self._sample(self.saturation, unit) + gray
-        unit = unit.clamp(1e-6, 1.0).pow(self._sample(self.gamma, unit))
 
-        warmth = self._sample(self.temperature, unit)
+        def sample(name):
+            value = self._sample(getattr(self, name), unit)
+            if trace is not None:
+                trace[name] = value.detach().cpu().flatten().tolist()
+            return value
+
+        unit = unit * sample('brightness')
+        channel_mean = unit.mean(dim=(2, 3), keepdim=True)
+        unit = (unit - channel_mean) * sample('contrast') + channel_mean
+        gray = unit.mean(dim=1, keepdim=True)
+        unit = (unit - gray) * sample('saturation') + gray
+        unit = unit.clamp(1e-6, 1.0).pow(sample('gamma'))
+
+        warmth = sample('temperature')
         temperature_scale = torch.cat(
             (warmth, torch.ones_like(warmth), warmth.reciprocal()), dim=1
         )
@@ -97,7 +112,11 @@ class StyleInterventionBank(nn.Module):
                 torch.rand(unit.shape[0], 1, 1, 1, device=unit.device)
                 < self.grayscale_probability
             )
+            if trace is not None:
+                trace['grayscale'] = grayscale.detach().cpu().flatten().tolist()
             unit = torch.where(grayscale, unit.mean(dim=1, keepdim=True), unit)
+        elif trace is not None:
+            trace['grayscale'] = [False] * images.shape[0]
         return self._normalize(unit, dtype)
 
     def fourier_view(self, images: Tensor) -> Tensor:
