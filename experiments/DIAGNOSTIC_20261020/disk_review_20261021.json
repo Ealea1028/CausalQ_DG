@@ -1,0 +1,78 @@
+{
+  "schema_version": 1,
+  "received_date": "2026-10-21",
+  "source_report_sha256": "b376aa4a2a6416e3a8559625d37f6b7e554b549daaa70c7870a3143fb936e58e",
+  "report_is_prior_snapshot_not_live_state": true,
+  "disk_snapshot_bytes": {
+    "total_bytes": 166429982720,
+    "used_bytes": 153957679104,
+    "free_bytes": 12472303616
+  },
+  "top_level_sizes": [
+    {
+      "path": "/root/autodl-tmp/datasets",
+      "bytes": 74797895680,
+      "error": null
+    },
+    {
+      "path": "/root/autodl-tmp/pretrained",
+      "bytes": 3989786624,
+      "error": null
+    },
+    {
+      "path": "/root/autodl-tmp/outputs/CausalQ_DG",
+      "bytes": 29528100864,
+      "error": null
+    },
+    {
+      "path": "/root/.cache/pip",
+      "bytes": 26886144,
+      "error": null
+    },
+    {
+      "path": "/root/.cache/huggingface",
+      "bytes": 0,
+      "error": null
+    },
+    {
+      "path": "/root/.cache/torch",
+      "bytes": 77824,
+      "error": null
+    }
+  ],
+  "protected_final_file_status_from_report": [
+    {
+      "path": "/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_2537653/M0/segments/39000_40000_366687b52bf84759822e10cad8c61834/state.pth",
+      "exists": true,
+      "bytes": 45695617
+    },
+    {
+      "path": "/root/autodl-tmp/outputs/CausalQ_DG/phase22/M0_M1_FORMAL_SEED0_2537653/M1/segments/39000_40000_4a5b0211cc664b7eb4b8d0372daa9dc7/state.pth",
+      "exists": true,
+      "bytes": 45695617
+    },
+    {
+      "path": "/root/autodl-tmp/outputs/CausalQ_DG/phase23/P1_FORMAL_SEED0_268fda1/P1/segments/39000_40000_11ee16a7eb0f4b9c9b7c03788e75b4e4/state.pth",
+      "exists": true,
+      "bytes": 45696897
+    },
+    {
+      "path": "/root/autodl-tmp/outputs/CausalQ_DG/phase24/M2_FORMAL_SEED0_72b168a/M2/segments/39000_40000_64c5b56de5534d0897677eb8604a2446/state.pth",
+      "exists": true,
+      "bytes": 45697089
+    }
+  ],
+  "protected_final_hashes_locally_verified": false,
+  "cleanup_candidate_count": 156,
+  "cleanup_candidate_apparent_bytes": 7128623580,
+  "cleanup_applied_by_codex": false,
+  "observed_console": {
+    "producer_git_sha": "1086bc36c2967bc9ff0f7480faad929b210d393f",
+    "U0_summary_written": true,
+    "C0_completed_images_lower_bound": 150,
+    "expected_images_per_model": 2497,
+    "all_four_completion_not_yet_reported": true
+  },
+  "next_action": "Keep original1086bc3 worker/checkout; optional separate-worktree closed-checkpoint cleanup; return original export on completion",
+  "training_not_started": true
+}

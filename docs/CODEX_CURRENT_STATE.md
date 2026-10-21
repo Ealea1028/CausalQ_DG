@@ -1,5 +1,14 @@
 # CausalQ_DG_1016 repository audit
 
+2026-10-21 Phase28 progress: user console shows U0 summary and C0>=150/2497,
+not all-four completion. Keep worker/checkout1086bc3. Do not rerun diagnostics
+on the cleanup-only update or claim Phase28 passed without returned summaries.
+Disk snapshot155GiB total/11.62GiB free;156 closed-study intermediate states
+total6.64GiB;four final files reported present. New exact-list pruning helper
+defaults to preview;--apply is optional,loses old segment resume,and preserves
+finals/current diagnostics. No remote deletion performed locally. Phase29
+UP/UF/UA/UR follows completed source results,without further engineering gates.
+
 Phase28 active (2026-10-20): implement20261020_Diagnostic_Plan as a NEW
 post-target-feedback exploratory study. Original raw-stability failure remains.
 U0=M0,C0=M1,CP=P1,CF=M2 reused;no repeated formal training or target evaluation.

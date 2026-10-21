@@ -1,4 +1,58 @@
-# Phase28 active — selective-stability baseline diagnostics
+# Phase28 running — preserve original1086bc3 worker — 2026-10-21
+
+Received console confirms U0 summary written and C0 at least150/2497. It does
+not show completion of all four models. No error was reported. Keep the
+original worker and checkout;do not relaunch diagnostics on a new commit.
+Scientific producer remains1086bc36c2967bc9ff0f7480faad929b210d393f.
+No source metrics have been accepted locally from the new diagnostic summaries.
+This update only analyses disk occupancy and adds optional exact-list cleanup.
+Phase29 remains next;do not add a new pilot or raw-anchor ranking gate.
+
+## Read current progress without restarting
+
+```bash
+bash <<'BASH'
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase28/BASELINES_1086bc3
+for V in U0 C0 CP CF; do
+  N=0
+  if [[ -d "$OUT/$V/samples" ]]; then
+    N=$(find "$OUT/$V/samples" -maxdepth 1 -type f -name '*.json.gz' | wc -l)
+  fi
+  echo "$V completed_samples=$N/2497"
+  if [[ -f "$OUT/$V/summary.json" ]]; then echo "$V summary_ready"; fi
+done
+tail -n 40 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase28_export.zip" ]]; then ls -lh "$OUT/phase28_export.zip"; fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+After exit_code0 and phase28_exit_code=0,return the original phase28_export.zip
+and last40 log lines. On failure return status/log,preserve completed samples;
+do not change the running worktree to the cleanup update. No duplicate job.
+
+## Optional disk cleanup while source diagnostics continue
+
+Snapshot:11.62GiB free;156 old nonfinal state files total6.64GiB;all four final
+states reported present. Pip cache is only25MiB. Prioritize exact closed-study
+intermediate candidates if legacy resume is no longer needed. Details and
+limitations:AUTODL_DISK_CLEANUP_20261020.md;source snapshot may now be older.
+
+Fetch the latest handoff SHA into a SEPARATE per-commit worktree using
+git worktree add --detach;do not checkout over CausalQ_DG_diag20261020_1086bc3.
+Run python -m tools.prune_closed_intermediates there for a read-only preview.
+Only explicit --apply removes the frozen156-file allowlist after protected
+final hashes are verified. It never deletes current diagnostic output,images,
+weights,metadata,or directories. Accept lost old segment-resume capability
+before applying. The current Phase28 worker reads only the retained finals.
+
+Local validation for this update is recorded in cleanup_release_20261021.json.
+No actual AutoDL deletion or current source/GPU check has been executed locally.
+
+---
+
+# Archive — initial Phase28 launch instructions
 
 New authority:20261020_Diagnostic_Plan.md and user request to execute it.
 Old study stays closed. New study tests selective regularization without the
