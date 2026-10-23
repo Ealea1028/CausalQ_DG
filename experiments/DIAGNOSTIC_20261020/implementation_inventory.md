@@ -1,5 +1,25 @@
 # Phase28 implementation inventory
 
+2026-10-23 Phase29 follow-up;starting checkout5ef6b30e726eb1ace7d89cdb506547133c267155.
+Received phase28_report/ contains51 checked export files. All four summaries
+report2497 samples,zero updates,unchanged model/RNG,no target access at1086bc3.
+Compact acceptance and interpretation are committed;raw exported images/CSVs
+remain local and full raw per-image records remain remote. No diagnostic replay.
+
+Reused:two-view KL/Full updates,controlled uncentered component API,source-only
+formal runner,deterministic CE,exact1000-step recovery,same seed0 initialization
+and source manifests. Added:exclusive Anchor/Residual CQE update selector,
+four frozen formal YAMLs/initialization-sampling contract,Phase29 background
+mode and reports-only export. No new model parameters or constructor RNG draws.
+Initial/final query norms are observed outside optimizer updates. Old M3 guard,
+Phase28 planned diagnostic YAMLs and original final freeze remain unchanged.
+
+Next real operation is AutoDL formal UP/UF/UA/UR40000 each,then stop for returned
+source reports. CA/CR are plannedPhase30,not implemented/launched in this release.
+No additional short GPU gate or target evaluation. Preserve unrelated user files.
+
+## Original Phase28 inventory
+
 2026-10-20; starting checkout `aa39d532a270b9859f51ae1846f74c9df34fba68`.
 User requests executing `20261020_Diagnostic_Plan.md`, avoiding redundant
 engineering gates and proceeding promptly to formal selective-stability runs.

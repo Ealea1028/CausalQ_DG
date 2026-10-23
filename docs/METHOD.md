@@ -1,6 +1,33 @@
 # Method contract
 
-## Active — Phase28 / new selective-stability research
+## Active — Phase29 / frozen uncentered formal training
+
+Phase28 baseline diagnostics completed at1086bc36c2967bc9ff0f7480faad929b210d393f:
+four variants x2497 source images,five views,zero optimizer updates. Local
+acceptance verifies51 returned file hashes and source-only summary identity;
+it does not replay raw per-image measurements. Raw versus RMS-normalized
+variance ordering differs;neither is used to choose new configurations.
+See DIAGNOSTIC_PHASE28_RESULTS.md and phase28_acceptance.json.
+
+Release UP/UF/UA/UR only:uncentered a+e,fresh seed0 with the exact accepted
+U0 head hash and original pretrained weights/environment.40000 updates each,
+two-view CE weights1/1,one consistency term weight1,original normalization,
+AdamW/poly/clipping/BF16/geometry/photometric distribution unchanged. UP/UF
+reuse existing KL/Full-CQE updates;UA/UR use the controlled new protocol.
+Anchor uses repeated anchors;Residual=FP32 Full-Anchor with BOTH style-side
+paths differentiable and detached original reference. No implicit centering,
+mean penalty,gradient projection,additional mechanism or target access.
+Initial/final per-class query parameter norms are recorded outside training.
+
+The exact YAMLs and initialization/sampling policy are frozen in
+experiments/DIAGNOSTIC_20261020/phase29_freeze.json. Immutable1000-step
+recovery includes optimizer/RNG/sampler;fixed-final source2497 validation
+has no model selection. No new pilot or raw-anchor ranking prerequisite.
+The launcher stops after this phase. Budget retains CA/CR for Phase30,then
+source diagnostics31 and frozen target reporting32. Prior target feedback
+remains disclosed;legacy M3 guard and all old records retain their meaning.
+
+## Archive — Phase28 / new selective-stability research
 
 Authority:20261020_Diagnostic_Plan.md plus user request to implement it.
 The prior study remains closed and its negative raw-anchor ranking is retained.

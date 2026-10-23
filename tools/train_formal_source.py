@@ -1,4 +1,4 @@
-"""Formal source-only M0/M1/P1/M2 with immutable1000-update recovery segments."""
+"""Frozen source-only formal variants with immutable1000-update recovery segments."""
 
 import argparse
 from datetime import datetime, timezone
@@ -18,6 +18,9 @@ from causalq.datasets.strict_source import SourceEvalTransform, build_source_dat
 from causalq.interventions import StyleInterventionBank
 from causalq.models import DINOv3Backbone, QuerySegmentor
 from causalq.protocols.formal_source import ROOT, validate_formal_config
+from causalq.protocols.diagnostic_formal import (
+    NEW_UNCENTERED, matched_baseline, training_policy, validate_training_config, verify_release,
+)
 from causalq.utils.checkpoint import trainable_state_dict
 from causalq.utils.seed import seed_everything
 from tools.audit_strict_source_smoke import BACKBONE_STATE_SHA
@@ -88,12 +91,26 @@ def run_segments(model, optimizer, dataset, style, config, root, metadata, *, ho
 
 def run_variant(args):
     variant = args.variant
-    config_path = ROOT / f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml'
+    new_study = variant in NEW_UNCENTERED
+    config_path = ROOT / (f'configs/diagnostic_20261020/formal/{variant.lower()}_seed0.yaml' if new_study
+                          else f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml')
     config = yaml.safe_load(config_path.read_bytes())
-    validate_formal_config(config, variant)
+    (validate_training_config if new_study else validate_formal_config)(config, variant)
     policy = POLICY
     baseline_audit = None
     update_fn = None
+    if new_study:
+        baseline_audit = matched_baseline()
+        policy = {**training_policy(variant), 'phase29_contract_sha256': verify_release()}
+        if variant == 'UP':
+            from tools.prediction_source_update import prediction_source_update
+            update_fn = prediction_source_update
+        elif variant == 'UF':
+            from tools.full_cqe_source_update import full_cqe_source_update
+            update_fn = full_cqe_source_update
+        else:
+            from tools.selective_cqe_source_update import selective_cqe_source_update
+            update_fn = selective_cqe_source_update
     if variant == 'P1':
         from tools.audit_formal_source_pair import audit_pair
         from tools.prediction_source_update import prediction_source_update
@@ -143,7 +160,7 @@ def run_variant(args):
         'config_tree_sha256': tree_digest(config), 'environment': environment,
         **source_manifest_metadata(), **policy, 'formal_training_authorized': True,
         'schedule_horizon': HORIZON, 'checkpoint_interval': INTERVAL, 'checkpoint_selection': 'fixed_final',
-        'centered_residuals': variant != 'M0', 'loss_backend': BACKEND, 'sample_workers': 0,
+        'centered_residuals': config['query']['centered_residuals'], 'loss_backend': BACKEND, 'sample_workers': 0,
         'amp': 'bfloat16', 'deterministic_algorithms': True, 'matmul_allow_tf32': True,
         'cudnn_benchmark': False, 'cublas_workspace_config': ':4096:8',
         'backbone_weights_sha256': config['model']['weights_sha256'], 'backbone_sha256': BACKBONE_STATE_SHA}
@@ -180,7 +197,7 @@ def run_variant(args):
         raise ValueError('Frozen backbone differs')
     model = QuerySegmentor(backbone, decoder_channels=256, num_classes=19, dropout=.1, queries_per_class=2,
         interaction='static', cross_attention_layers=0, num_heads=8, temperature=.07, alpha_init=0.,
-        centered_residuals=variant != 'M0').to('cuda:0')
+        centered_residuals=config['query']['centered_residuals']).to('cuda:0')
     initial_head = tree_digest(trainable_state_dict(model))
     if baseline_audit is not None and initial_head != baseline_audit['initial_head_sha256']:
         raise ValueError('Formal control fresh initialization differs from accepted M0/M1')
@@ -188,7 +205,11 @@ def run_variant(args):
     if initial.exists() and json.loads(initial.read_bytes())['head_sha256'] != initial_head:
         raise ValueError('Fresh seed0 initialization differs')
     if not initial.exists():
-        write_json(initial, {'head_sha256': initial_head, 'fresh_seed': 0, 'promoted_pilot_checkpoint': False})
+        initial_record = {'head_sha256': initial_head, 'fresh_seed': 0, 'promoted_pilot_checkpoint': False}
+        if new_study:
+            from causalq.analysis.query_gradients import parameter_rows
+            initial_record['query_parameterization'] = parameter_rows(model)
+        write_json(initial, initial_record)
     if variant == 'M1':
         baseline = args.output_root / 'M0'
         if ((baseline / 'initialization.json').exists()
@@ -215,6 +236,9 @@ def run_variant(args):
         'evaluation_trace': str((output / 'source_eval.jsonl').relative_to(root)),
         'peak_reserved_gib_this_process': torch.cuda.max_memory_reserved() / 1024**3,
         'target_miou': None, **policy}
+    if new_study:
+        from causalq.analysis.query_gradients import parameter_rows
+        report['final_query_parameterization'] = parameter_rows(model)
     write_json(root / 'formal_report.json', report)
     print(json.dumps(report, indent=2), flush=True)
 
@@ -259,7 +283,7 @@ def summarize(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'M3', 'summarize'), required=True)
+    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'M3', *NEW_UNCENTERED, 'summarize'), required=True)
     parser.add_argument('--stability-report', type=Path, help='Required positive formal M1 raw-stability evidence for M3')
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--data-root', type=Path, default=Path('/root/autodl-tmp/datasets'))

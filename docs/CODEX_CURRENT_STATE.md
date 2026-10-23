@@ -1,5 +1,17 @@
 # CausalQ_DG_1016 repository audit
 
+2026-10-23 Phase28 completed;Phase29 implementation released locally.
+Returned export expanded under phase28_report/;51 files hash-verified,
+U0/C0/CP/CF each2497 samples,zero updates,no target access,unchanged model/RNG
+per producer1086bc3. No local raw-data/checkpoint replay. Three contact sheets
+reviewed;raw export/images remain untracked. See DIAGNOSTIC_PHASE28_RESULTS.md.
+Next AutoDL action:UP/UF/UA/UR sequential fresh seed0/40000 each,all uncentered,
+one loss each KL/Full/Anchor/Residual,weight1. Same initialization hash,source
+sampling,1000-step recovery,final-only source validation. No repeated pilot,
+baseline diagnostics,raw-ranking gate or target access. CA/CR budget retained
+for Phase30;not launched in29. New configs in configs/diagnostic_20261020/formal/.
+Prior dated progress below is historical.
+
 2026-10-21 Phase28 progress: user console shows U0 summary and C0>=150/2497,
 not all-four completion. Keep worker/checkout1086bc3. Do not rerun diagnostics
 on the cleanup-only update or claim Phase28 passed without returned summaries.

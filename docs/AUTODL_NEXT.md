@@ -1,4 +1,94 @@
-# Phase28 running — preserve original1086bc3 worker — 2026-10-21
+# Phase29 — UP/UF/UA/UR formal training — 2026-10-23
+
+Phase28 finished successfully at1086bc36c2967bc9ff0f7480faad929b210d393f.
+All four models completed2497 source images.51 returned files hash-verified;
+summary provenance/coverage/state accepted,raw records remain remote. Do not
+repeat baseline diagnostics. See DIAGNOSTIC_PHASE28_RESULTS.md.
+
+One background launch trains UP,UF,UA,UR in that order,40000 updates each,
+fresh seed0 initialization matched to U0. All four disable residual centering.
+Each adds only its designated consistency term with weight1. UR style-side
+Full and Anchor both differentiate;the original reference is detached.
+No short pilot,raw-anchor ranking gate or target access. Each final model gets
+one full2497-image source validation. CA/CR are the NEXT phase,not auto-started.
+
+## Prepare a separate exact-commit checkout and launch
+
+Set EXPECTED_SHA to the full implemented SHA in the Codex handoff. This is a
+new Phase29 checkout;keep the old diagnostic checkout/output and final models.
+Use the existing runtime without reinstalling. Check available disk space:
+four40-segment compact-checkpoint runs require roughly6.7GiB plus logs and
+evaluations;actual consumption varies. If space is tight,perform the optional
+reviewed legacy-intermediate cleanup BEFORE training (see disk cleanup doc).
+Never delete the current study or its recovery states.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Pass the full SHA'; exit 2; }
+SOURCE_REPO=/root/autodl-tmp/CausalQ_DG
+TASK_REPO="/root/autodl-tmp/CausalQ_DG_phase29_${EXPECTED_SHA:0:7}"
+git -C "$SOURCE_REPO" fetch origin codex/diagnostic-20261020
+if [[ ! -e "$TASK_REPO" ]]; then
+  git -C "$SOURCE_REPO" worktree add --detach "$TASK_REPO" "$EXPECTED_SHA"
+fi
+cd "$TASK_REPO"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git status --porcelain)"
+export PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020
+bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" train-uncentered
+BASH
+echo '启动检查结束，终端保持打开。'
+```
+
+This returns PID,launcher log and output root. The worker holds the shared
+study lock and a run lock;duplicate launches cannot train concurrently.
+One model runs per process. Same-SHA/same-command relaunch restores committed
+1000-step segments,skips finished variants and preserves incomplete attempts.
+Do not checkout a new SHA underneath a worker. OOM/NaN/environment mismatch
+stops the stage;return logs without changing resolution,batch,weight or code
+on AutoDL. Runtime and initialization checks are inline run protections,
+not separate prerequisite experiments.
+
+## Monitor and return
+
+Use the SAME EXPECTED_SHA as the launch. Commands read only;no extra job.
+
+```bash
+bash <<'BASH'
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase29/UNCENTERED_SEED0_${EXPECTED_SHA:0:7}"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase29_export.zip" ]]; then
+  ls -lh "$OUT/phase29_export.zip"
+  sha256sum "$OUT/phase29_export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+Completion:phase29_exit_code=0 and status.json exit_code0. Return
+phase29_export.zip plus last80 launcher log lines. ZIP contains run manifest,
+four formal reports/configs/metadata/initialization records,combined source
+results and checksums;checkpoints and full traces stay on the instance.
+On failure return status/log and preserve outputs. Run manifest retains
+original start time;each model records exact commit,actual runtime,config,
+weights,source manifests,optimizer budget and final checkpoint identity.
+No current source/CUDA training has been executed locally. Local validation
+for this release is recorded in phase29_release.json.
+Full synthetic CPU suite:655 passed,1 skipped in104.64s. The skip is the
+existing Windows unprivileged-symlink restriction.23 new tests cover selective
+objectives,two forwards,reference detach,residual style gradients,all-four
+exact continuation,CUDA boundary,acceptance,manifest and reports-only export.
+
+---
+
+# Archive — Phase28 running — 2026-10-21 (completed2026-10-23)
 
 Received console confirms U0 summary written and C0 at least150/2497. It does
 not show completion of all four models. No error was reported. Keep the

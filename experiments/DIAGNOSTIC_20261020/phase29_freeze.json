@@ -1,0 +1,70 @@
+{
+  "schema_version": 1,
+  "phase": 29,
+  "study": "diagnostic_20261020",
+  "order": [
+    "UP",
+    "UF",
+    "UA",
+    "UR"
+  ],
+  "seed": 0,
+  "updates_per_variant": 40000,
+  "total_optimizer_updates": 160000,
+  "checkpoint_interval": 1000,
+  "checkpoint_selection": "fixed_final",
+  "centered_residuals": false,
+  "training_configs_sha256": {
+    "UP": "97881db24eca0779f248c21c83171a00a772ed512a41536ed50095aba7f0872d",
+    "UF": "c1ab8dc4c4953e59a3650a95bd33fc4b403a729b59e5e0a41a65d70ec3de9cfe",
+    "UA": "6fca08c36c7e077cd48118eb19ee4139781888069335309c9885a24477e90296",
+    "UR": "580ee318791eaa4d0b9747ffeb3117580fb6c79a2b105fc88673f4a279e04f4b"
+  },
+  "matched_baseline": {
+    "environment": {
+      "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+      "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+      "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+      "torch": "2.7.0+cu126",
+      "cuda": "12.6",
+      "transformers": "4.56.1",
+      "gpu": "NVIDIA GeForce RTX 4090 D"
+    },
+    "initial_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+    "producer_git_sha": "2537653ae9be0d84afbb86e22b5ec2200d280885",
+    "baseline_variant": "U0=M0"
+  },
+  "source_manifests_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "sampler": "torch.randperm(N, CPU Generator.manual_seed(seed+epoch)); workers0",
+  "training_views": [
+    "original",
+    "photometric"
+  ],
+  "ce_weights": [
+    1.0,
+    1.0
+  ],
+  "consistency_weights": {
+    "UP": 1.0,
+    "UF": 1.0,
+    "UA": 1.0,
+    "UR": 1.0
+  },
+  "source_validation": "final_only_all2497_longedge1024_aspect_pad16",
+  "residual_style_anchor_detached": false,
+  "reference_stop_gradient": true,
+  "raw_anchor_ranking_required": false,
+  "additional_pilot_required": false,
+  "target_feedback_already_seen": true,
+  "target_access_authorized": false,
+  "future_centered_controls": [
+    "CA",
+    "CR"
+  ],
+  "future_centered_updates": 80000,
+  "future_diagnostics_phase": 31,
+  "future_target_freeze_phase": 32
+}

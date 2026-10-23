@@ -1,6 +1,17 @@
 # CausalQ-DG
 
-## Active phase — Phase28 selective-stability baseline diagnostics — 2026-10-20
+## Active phase — Phase29 uncentered formal ablations — 2026-10-23
+
+Phase28 returned successfully:four reused final models x2497 source images,
+zero updates,no target access.51 exported files verified locally;per-image
+raw records remain on AutoDL. See [diagnostic results](docs/DIAGNOSTIC_PHASE28_RESULTS.md).
+Phase29 releases UP/UF/UA/UR,each fresh seed0/40000 updates,uncentered residuals,
+two-view CE plus exactly one prediction/Full/Anchor/Residual consistency loss.
+Reuse the1000-step recovery runner and final-only source validation. No pilot,
+raw-stability ranking gate,baseline replay or target access. CA/CR follow in
+Phase30 under the original six-run budget. [AutoDL commands](docs/AUTODL_NEXT.md).
+
+## Archive — Phase28 selective-stability baseline diagnostics — 2026-10-20
 
 Execute [20261020_Diagnostic_Plan.md](20261020_Diagnostic_Plan.md) as a new
 exploratory study after the old target results were seen. Reuse U0=M0,C0=M1,
