@@ -1,4 +1,83 @@
-# Phase30 — CA/CR centered matching controls — 2026-10-24
+# Phase31 — 六个最终模型源域诊断 — 2026-10-24
+
+CA/CR正式训练已完成，每组40000步；本轮六次新训练共240000步全部完成。
+本机已核对Phase30导出10个文件并独立归约源域混淆矩阵。
+CA/CR源域mIoU=73.8365/73.8411%，单种子结果不证明目标域增益。
+参见DIAGNOSTIC_PHASE30_RESULTS.md、phase30_acceptance.json。
+
+当前只执行Phase31：UP/UF/UA/UR/CA/CR各2497张源域诊断，五视图效应/相关性/
+responsibility与固定512裁剪梯度诊断。直接复用Phase28四模型结果及三组干预图，
+不重训、不新增试跑、不按方差排序设门槛、不访问目标域。
+
+## 一次后台启动
+
+将下方EXPECTED_SHA替换为本阶段交付的完整40位SHA。独立worktree运行，保留
+已完成Phase29/30目录。使用原环境，不安装依赖；最终检查点身份已冻结，
+实例内联核对读取的权重与报告。每模型独立进程，共享锁防止重复运行。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo '请使用完整SHA'; exit 2; }
+SOURCE_REPO=/root/autodl-tmp/CausalQ_DG
+TASK_REPO="/root/autodl-tmp/CausalQ_DG_phase31_${EXPECTED_SHA:0:7}"
+git -C "$SOURCE_REPO" fetch origin codex/diagnostic-20261020
+if [[ ! -e "$TASK_REPO" ]]; then
+  git -C "$SOURCE_REPO" worktree add --detach "$TASK_REPO" "$EXPECTED_SHA"
+fi
+cd "$TASK_REPO"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git status --porcelain)"
+export PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_TRAINING_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020
+df -hT /root/autodl-tmp
+bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" final-source-diagnostics
+BASH
+echo '启动检查结束，终端保持打开。'
+```
+
+返回PID、日志和输出目录。与Phase28一样，每50张打印一次进度，每张原子写入
+`VARIANT/samples/ID.json.gz`。同SHA同命令可恢复已完成图像，重建汇总时不会
+重复计数；已完成模型直接跳过GPU工作。遇到OOM/非有限值/环境或证据不匹配，
+保留输出回报日志，不在实例修改代码、分辨率或配置。全量2497张是既定科学诊断，
+不缩减为抽样；不重复单独工程核验。无需把全量逐图明细传回本机。
+
+## 查看进度、完成和导出
+
+使用与启动相同SHA；本命令只读，不另开推理任务。
+
+```bash
+bash <<'BASH'
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase31/FINALS_SEED0_${EXPECTED_SHA:0:7}"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase31_export.zip" ]]; then
+  ls -lh "$OUT/phase31_export.zip"
+  sha256sum "$OUT/phase31_export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+完成条件：phase31_exit_code=0、status.json exit_code=0，产生phase31_export.zip。
+ZIP仅含六份summary.json、六份class_summary.csv、run_manifest.json、
+job_report.json、SHA256SUMS，共15项；不包含检查点、逐图记录或重复干预图。
+从输出目录下载该ZIP，放入本机CausalQ_Project并解压，同时返回日志末尾80行。
+本机接收后分析十模型矩阵，再单独冻结并发布Phase32；本任务不会自动访问目标域。
+
+必要检查保留：检查点/配置/运行身份、有效统计与样本覆盖、诊断不更新模型/RNG。
+本机只完成合成CPU测试，未加载真实权重或数据；准确测试结果见phase31_release.json。
+完整CPU测试：682 passed、1 skipped，106.68秒；跳过项为Windows非特权symlink
+限制。8项新增测试通过，Bash语法检查通过。
+
+---
+
+# Archive — Phase30 — CA/CR centered matching controls — 2026-10-24（已完成）
 
 Phase29 completed at0a0350d025b063cca2668ab0606bd80179f13ea3;all four
 variants trained40000 updates and evaluated2497 source images.18 returned

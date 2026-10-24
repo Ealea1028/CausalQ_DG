@@ -1,6 +1,18 @@
 # CausalQ-DG
 
-## Active phase — Phase30 centered matching controls — 2026-10-24
+## Active phase — Phase31 final source diagnostics — 2026-10-24
+
+Phase30 CA/CR completed40000 updates each and2497-image source validation at
+61e5d64. Source mIoU=73.8365/73.8411%;deltas vsC0=-0.0177/-0.0130pp.
+All six preplanned new runs are complete:240000 updates total. Ten returned
+Phase30 files verified;source confusion independently reduced. See
+[source results](docs/DIAGNOSTIC_PHASE30_RESULTS.md).
+Next:source-only diagnostics of UP/UF/UA/UR/CA/CR final checkpoints,all2497
+images per model,identical Phase28 measurements. Reuse U0/C0/CP/CF summaries
+and three intervention example groups. Zero new updates,no pilot,ranking
+gate,baseline replay or target access. [AutoDL commands](docs/AUTODL_NEXT.md).
+
+## Archive — Phase30 centered matching controls — 2026-10-24
 
 Phase29 UP/UF/UA/UR each completed40000 updates and source2497 validation at
 0a0350d. Source mIoU=73.8831/73.7590/73.8529/73.8912%;U0=73.8862%.

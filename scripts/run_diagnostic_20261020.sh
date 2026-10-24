@@ -8,8 +8,8 @@ EXPECTED_SHA="${1:-}"
 MODE="${2:-baseline-diagnostics}"
 [[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Pass the full40-character Git SHA.' >&2; exit 2; }
 case "$MODE" in
-  baseline-diagnostics|--worker|train-uncentered|--train-uncentered-worker|train-centered-controls|--train-centered-worker) ;;
-  *) echo 'Use baseline-diagnostics, train-uncentered or train-centered-controls.' >&2; exit 2 ;;
+  baseline-diagnostics|--worker|train-uncentered|--train-uncentered-worker|train-centered-controls|--train-centered-worker|final-source-diagnostics|--final-source-worker) ;;
+  *) echo 'Use baseline-diagnostics, train-uncentered, train-centered-controls or final-source-diagnostics.' >&2; exit 2 ;;
 esac
 cd "$(dirname "${BASH_SOURCE[0]}")/.."
 test "$(git rev-parse HEAD)" = "$EXPECTED_SHA" || { echo wrong_commit; exit 1; }
@@ -29,13 +29,18 @@ if [[ "$MODE" == train-centered-controls || "$MODE" == --train-centered-worker ]
   OUT="$BASE/phase30/CENTERED_SEED0_${EXPECTED_SHA:0:7}"
   WORKER_MODE=--train-centered-worker
 fi
+if [[ "$MODE" == final-source-diagnostics || "$MODE" == --final-source-worker ]]; then
+  PHASE=31
+  OUT="$BASE/phase31/FINALS_SEED0_${EXPECTED_SHA:0:7}"
+  WORKER_MODE=--final-source-worker
+fi
 LOG="$OUT/launcher.log"
 test -x "$PY" || { echo missing_python; exit 1; }
 command -v flock >/dev/null || { echo missing_flock; exit 1; }
 mkdir -p "$OUT"
 export PY CUDA_VISIBLE_DEVICES=0 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 MKL_THREADING_LAYER=SEQUENTIAL
 export PYTHONUNBUFFERED=1 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1 CUBLAS_WORKSPACE_CONFIG=:4096:8
-if [[ "$MODE" == baseline-diagnostics || "$MODE" == train-uncentered || "$MODE" == train-centered-controls ]]; then
+if [[ "$MODE" == baseline-diagnostics || "$MODE" == train-uncentered || "$MODE" == train-centered-controls || "$MODE" == final-source-diagnostics ]]; then
   nohup bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" "$WORKER_MODE" >> "$LOG" 2>&1 < /dev/null &
   PID=$!
   echo "worker_pid=$PID"
@@ -58,6 +63,20 @@ flock -n 9 || { echo 'An existing diagnostic worker holds the run lock.'; exit 3
 echo "$$" > "$OUT/worker.pid"
 printf '{"state":"running","phase":%s,"git_sha":"%s"}\n' "$PHASE" "$EXPECTED_SHA" > "$OUT/status.json"
 trap 'CODE=$?; printf "{\"exit_code\":%s,\"phase\":%s,\"git_sha\":\"%s\"}\n" "$CODE" "$PHASE" "$EXPECTED_SHA" > "$OUT/status.json"; if [[ "$CODE" != 0 ]]; then echo "phase${PHASE}_exit_code=$CODE; preserve outputs and return last80 log lines: $LOG"; fi' EXIT
+if [[ "$PHASE" == 31 ]]; then
+  echo "phase31_start_utc=$(date -u +%FT%TZ) git_sha=$EXPECTED_SHA"
+  for VARIANT in initialize UP UF UA UR CA CR package; do
+    "$PY" -m tools.run_final_source_diagnostics --variant "$VARIANT" --output-root "$OUT" \
+      --training-output-root "${CAUSALQ_TRAINING_OUTPUT_ROOT:-/root/autodl-tmp/outputs/CausalQ_DG}" \
+      --data-root "${CAUSALQ_DATA_ROOT:-/root/autodl-tmp/datasets}" \
+      --pretrained-root "${CAUSALQ_PRETRAINED_ROOT:-/root/autodl-tmp/pretrained}"
+  done
+  (cd "$OUT" && sha256sum -c SHA256SUMS && sha256sum phase31_export.zip)
+  echo 'phase31_exit_code=0'
+  echo "Return $OUT/phase31_export.zip and last80 lines of $LOG."
+  echo 'STOP: next local Phase32 target freeze; no training or target access in Phase31.'
+  exit 0
+fi
 if [[ "$PHASE" == 29 || "$PHASE" == 30 ]]; then
   VARIANTS=(UP UF UA UR)
   if [[ "$PHASE" == 30 ]]; then VARIANTS=(CA CR); fi

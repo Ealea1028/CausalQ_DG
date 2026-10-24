@@ -87,9 +87,10 @@ def fingerprint(pair):
                    'mtime_ns': getattr(pair, kind).stat().st_mtime_ns} for kind in ('image', 'label')}
 
 
-def load_model(args, variant):
-    frozen = baseline_records()[variant];source = baseline_source_report(variant)
-    config = formal_config(BASELINES[variant])
+def load_model(args, variant, *, frozen=None, source=None, config=None):
+    frozen = baseline_records()[variant] if frozen is None else frozen
+    source = baseline_source_report(variant) if source is None else source
+    config = formal_config(BASELINES[variant]) if config is None else config
     checkpoint = args.training_output_root / frozen['checkpoint_relative_to_output_root']
     if file_sha(checkpoint) != frozen['checkpoint_sha256']:raise ValueError('Original checkpoint SHA differs')
     weights = args.pretrained_root / config['model']['weights_dir']
@@ -103,7 +104,7 @@ def load_model(args, variant):
         intermediate_indices=config['model']['intermediate_indices'], dtype=torch.bfloat16, local_files_only=True).to('cuda:0')
     model = QuerySegmentor(backbone, decoder_channels=256, num_classes=19, dropout=.1, queries_per_class=2,
         interaction='static', cross_attention_layers=0, num_heads=8, temperature=.07, alpha_init=0.,
-        centered_residuals=variant != 'U0').to('cuda:0').eval()
+        centered_residuals=config['query']['centered_residuals']).to('cuda:0').eval()
     payload = load_training_checkpoint(checkpoint)
     if (payload.get('schema_version') != 2 or payload['iteration'] != 40000 or payload['metadata'] != source['metadata']
             or set(payload['trainable_model']) != set(trainable_state_dict(model))):
@@ -144,22 +145,31 @@ def diagnose_one(model, style, sample, gradient_sample, identity, variant, *, am
 
 def run_baseline(args):
     variant = args.variant;frozen = baseline_records()[variant]
+    return run_diagnostic(args, frozen, baseline_source_report(variant), formal_config(BASELINES[variant]),
+                          phase=28, contract_digest=contract_sha(),
+                          config_path=ROOT / f'configs/diagnostic_20261020/{variant.lower()}_seed0.yaml',
+                          export_previews=variant == 'U0')
+
+
+def run_diagnostic(args, frozen, source, config, *, phase, contract_digest, config_path, export_previews=False):
+    """Shared measurement loop; stage-specific callers supply frozen model identity."""
+    variant = args.variant
     root = args.output_root / variant;root.mkdir(parents=True, exist_ok=True)
-    identity = {'study': STUDY, 'phase': 28, 'variant': variant, 'git_sha': _git('rev-parse', 'HEAD'),
-                'contract_sha256': contract_sha(), 'checkpoint_sha256': frozen['checkpoint_sha256'],
+    identity = {'study': STUDY, 'phase': phase, 'variant': variant, 'git_sha': _git('rev-parse', 'HEAD'),
+                'contract_sha256': contract_digest, 'checkpoint_sha256': frozen['checkpoint_sha256'],
                 'original_config_sha256': frozen['config_sha256'],
-                'diagnostic_config_sha256': file_sha(ROOT / f'configs/diagnostic_20261020/{variant.lower()}_seed0.yaml')}
+                'diagnostic_config_sha256': file_sha(config_path)}
     done = root / 'summary.json'
     if done.exists():
         old = json.loads(done.read_bytes())
         if old['identity'] != identity or old['sample_count'] != 2497 or old['ok'] is not True or not (root / 'class_summary.csv').is_file():
             raise ValueError('Completed diagnostic summary differs')
         print(f'{variant}: complete; reused without GPU work', flush=True);return
-    if not torch.cuda.is_available():raise RuntimeError('Phase28 requires AutoDL CUDA/source data')
+    if not torch.cuda.is_available():raise RuntimeError(f'Phase{phase} requires AutoDL CUDA/source data')
     if str(torch.__version__) != '2.7.0+cu126' or version('transformers') != '4.56.1' or os.getenv('CUBLAS_WORKSPACE_CONFIG') != ':4096:8':
         raise ValueError('Use pinned runtime and CUBLAS_WORKSPACE_CONFIG=:4096:8')
     torch.use_deterministic_algorithms(True);torch.backends.cudnn.benchmark = False;torch.backends.cuda.matmul.allow_tf32 = True
-    model, style, environment = load_model(args, variant)
+    model, style, environment = load_model(args, variant, frozen=frozen, source=source, config=config)
     _, dataset = build_source_datasets(args.data_root / 'gta5', TrainTransform((512, 512)), SourceEvalTransform())
     gradient_data = PairedSegmentationDataset(dataset.pairs, transform=TrainTransform((512, 512)))
     _, ids = load_membership()
@@ -180,7 +190,7 @@ def run_baseline(args):
                 gradient_sample = gradient_data[index]
             record, views, traces = diagnose_one(model, style, sample, gradient_sample, source_id, variant, amp=True)
             record.update(identity=identity, source_id=source_id, source_files=fingerprint(dataset.pairs[index]))
-            if variant == 'U0' and source_id in preview:
+            if export_previews and source_id in preview:
                 with Image.open(dataset.pairs[index].image) as image:raw = image.convert('RGB')
                 export_examples(args.output_root / 'intervention_examples' / source_id, raw, views, traces,
                                 style_seeds(source_id), style, source_id, identity=identity)

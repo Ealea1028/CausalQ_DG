@@ -1,6 +1,31 @@
 # Method contract
 
-## Active — Phase30 / centered matching controls
+## Active — Phase31 / six completed final source diagnostics
+
+Phase30 reports accepted2026-10-24 at61e5d64bf68e26dc22663ae5a8a9999e93e73911:
+CA/CR each40000 updates/source2497;source mIoU73.8365/73.8411%. Ten returned
+file hashes and integer confusion reductions checked locally;no checkpoint
+or full trace replay. All six new formal runs are complete,240000 updates.
+Source differences alone do not establish target gains or selective stability.
+
+Freeze all six final checkpoint/config/head identities in phase31_freeze.json.
+UP/UF/UA/UR/CA/CR reuse the Phase28 measurement loop,all2497 holdout IDs and
+identical seeded original+four photometric views,with deterministic512-crop
+read-only gradients. Centering comes from each original training config;
+only CA/CR enable it. Keep original training producer separate from diagnostic
+producer. Amplitude/raw and RMS-normalized variance,correlation/cancellation,
+Query/direct Anchor gradient paths and responsibility use unchanged formulas.
+Two-view compatibility variance remains separate from five-view variance.
+
+No optimizer,updates,new losses,model selection or target access. Preserve
+model/RNG checks and per-image atomic records for same-commit recovery.
+Reuse Phase28 U0/C0/CP/CF and intervention examples;do not repeat them or
+require whole-run/raw-data transfers. Export six summaries/class CSVs plus
+manifest/checksums;raw per-image records remain on AutoDL. After results
+return,analyse all ten models locally,then release Phase32 target freeze
+and all six new target evaluations. No result-dependent additional training.
+
+## Archive — Phase30 / centered matching controls
 
 Phase29 source-only formal results accepted2026-10-24 at0a0350d025b063cca2668ab0606bd80179f13ea3:
 UP/UF/UA/UR each40000 updates,2497 source images,same fresh initialization.

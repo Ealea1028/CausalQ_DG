@@ -1,0 +1,1804 @@
+{
+  "schema_version": 1,
+  "phase": 30,
+  "accepted_date": "2026-10-24",
+  "accepted": true,
+  "producer_git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+  "file_sha256": {
+    "run_manifest.json": "f373a8de59adce8b060f56207833ad4d12c5b255148926fba66f6a369fe0df84",
+    "CA/formal_report.json": "75cdafc09461797ca091ae844cfe2e0dc4122966061bd8c94623bab7180a69a7",
+    "CA/metadata.json": "b725f341a273164167dbb10336b91ec3483ca4a57b73ca3866918265931d976a",
+    "CA/config.yaml": "f620e283a9a5b7061eeca8cb795189a53999338b15a40bc313c86101a2659291",
+    "CA/initialization.json": "97a431c892f35da6bd77a28373a6a79530ba8261b4e4dcbd05e955851132ef0c",
+    "CR/formal_report.json": "79bb7d601a4b74206a49d4f944f139913c11de01ef7dd00da52460de1f1e92ff",
+    "CR/metadata.json": "761bab64d4af4d19743d804fc515148f02871c733e72d1967c7e7a7270347dee",
+    "CR/config.yaml": "a17018c0a268280894cdc3e877d406459dfb7c4887a7bdc4ca2106e55a82249e",
+    "CR/initialization.json": "97a431c892f35da6bd77a28373a6a79530ba8261b4e4dcbd05e955851132ef0c",
+    "phase30_report.json": "fadfcb079d76ab7f1798152ea08a2c3a307ddea47a688b667d7b4ac970d3b0e2"
+  },
+  "provided_archive_sha256": "16de120d9f319ca7dab6df892a0f7d6140b107c12870ecaf549bc8ea55f01b0b",
+  "archive_bytes_available_locally": false,
+  "checkpoints_and_full_traces_available_locally": false,
+  "source_confusion_reduced_independently": true,
+  "source_gt_class_totals": [
+    462888540,
+    117509515,
+    238400894,
+    27815290,
+    9013851,
+    15052713,
+    1981424,
+    1175893,
+    110956017,
+    31345469,
+    196904738,
+    4748511,
+    365998,
+    36474925,
+    15392733,
+    5351873,
+    1200362,
+    322561,
+    70381
+  ],
+  "independent_source_miou": {
+    "CA": 0.7383646467188165,
+    "CR": 0.7384113558178583
+  },
+  "baseline_source_miou": 0.7385416251410031,
+  "source_delta_vs_baseline_percentage_points": {
+    "CA": -0.01769784221865578,
+    "CR": -0.013026932314474937
+  },
+  "target_data_accessed": false,
+  "formal_report": {
+    "schema_version": 1,
+    "phase": 30,
+    "study": "diagnostic_20261020",
+    "ok": true,
+    "git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+    "finished_utc": "2026-10-24T09:42:02.357505+00:00",
+    "phase30_contract_sha256": "dc68943825404fd9946bf7308c30d397f20e305b00804d83179560828c18c112",
+    "optimizer_updates_per_variant": 40000,
+    "total_optimizer_updates": 80000,
+    "target_data_accessed": false,
+    "target_miou": null,
+    "source_miou": {
+      "CA": 0.7383646467188167,
+      "CR": 0.7384113558178583
+    },
+    "reports": {
+      "CA": {
+        "schema_version": 1,
+        "phase": 30,
+        "ok": true,
+        "variant": "CA",
+        "metadata": {
+          "git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+          "variant": "CA",
+          "seed": 0,
+          "config_sha256": "f620e283a9a5b7061eeca8cb795189a53999338b15a40bc313c86101a2659291",
+          "config_tree_sha256": "f46e08dec691a3b3d97ae9091ac56468322fe0119da4a2abd92128121ac8492f",
+          "environment": {
+            "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+            "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+            "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+            "torch": "2.7.0+cu126",
+            "cuda": "12.6",
+            "transformers": "4.56.1",
+            "gpu": "NVIDIA GeForce RTX 4090 D"
+          },
+          "manifest_sha256": {
+            "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+            "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+          },
+          "train_count": 22469,
+          "val_count": 2497,
+          "source_validation": "gta5_holdout",
+          "target_data_accessed": false,
+          "study": "diagnostic_20261020",
+          "target_feedback_already_seen": true,
+          "new_loss_enabled": true,
+          "consistency_mechanism": "anchor",
+          "consistency_weight": 1.0,
+          "reference_stop_gradient": true,
+          "component_protocol": "diagnostic_20261020",
+          "raw_anchor_ranking_required": false,
+          "style_residual_anchor_detached": false,
+          "residual_definition": "full_effect_minus_repeated_anchor_effect",
+          "new_pilot_required": false,
+          "initialization": "fresh_seed0_matched_C0",
+          "target_evaluation_authorized_this_phase": false,
+          "next_phase": 31,
+          "phase30_contract_sha256": "dc68943825404fd9946bf7308c30d397f20e305b00804d83179560828c18c112",
+          "formal_training_authorized": true,
+          "schedule_horizon": 40000,
+          "checkpoint_interval": 1000,
+          "checkpoint_selection": "fixed_final",
+          "centered_residuals": true,
+          "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+          "sample_workers": 0,
+          "amp": "bfloat16",
+          "deterministic_algorithms": true,
+          "matmul_allow_tf32": true,
+          "cudnn_benchmark": false,
+          "cublas_workspace_config": ":4096:8",
+          "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+          "backbone_sha256": "24e1950a1ad87645cf6f46532a80594b5102af3644ccb55062e689a5b16f71ad",
+          "baseline_audit": {
+            "environment": {
+              "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+              "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+              "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+              "torch": "2.7.0+cu126",
+              "cuda": "12.6",
+              "transformers": "4.56.1",
+              "gpu": "NVIDIA GeForce RTX 4090 D"
+            },
+            "initial_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+            "producer_git_sha": "2537653ae9be0d84afbb86e22b5ec2200d280885",
+            "baseline_variant": "C0=M1"
+          }
+        },
+        "created_utc": "2026-10-24T05:50:20.179057+00:00",
+        "formal_training_authorized": true,
+        "formal_optimizer_updates": 40000,
+        "checkpoint_selection": "fixed_final",
+        "initial_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+        "final_head_sha256": "ab3a7d59fae67706bee67a63140501fb3fc79d1e025fe27de601736a5d687ad2",
+        "checkpoint": "segments/39000_40000_40495aca626842a6998716e1b09e8200/state.pth",
+        "checkpoint_sha256": "ce57410a92900b135d4afea7fad07a2320499f0cd8ad8544bae6cda76c4ec799",
+        "source_evaluation": {
+          "sample_count": 2497,
+          "seen_ids_sha256": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb",
+          "valid_pixel_count": 1276971688,
+          "confusion_matrix": [
+            [
+              454230042,
+              6906720,
+              240236,
+              177193,
+              45712,
+              78384,
+              397,
+              3158,
+              96176,
+              442044,
+              3171,
+              51071,
+              8433,
+              479030,
+              86007,
+              11349,
+              6328,
+              13605,
+              9484
+            ],
+            [
+              5633677,
+              109057121,
+              388419,
+              400210,
+              51746,
+              118480,
+              127,
+              1015,
+              111008,
+              1468714,
+              1258,
+              116362,
+              1121,
+              133754,
+              21467,
+              2108,
+              1057,
+              1781,
+              90
+            ],
+            [
+              163584,
+              671371,
+              226493277,
+              2454971,
+              600108,
+              749847,
+              114795,
+              54826,
+              4311440,
+              475964,
+              1722897,
+              161251,
+              3683,
+              224842,
+              148371,
+              37034,
+              12062,
+              305,
+              266
+            ],
+            [
+              273503,
+              996266,
+              3843425,
+              20807283,
+              383985,
+              158771,
+              2526,
+              6882,
+              673886,
+              392602,
+              63588,
+              51267,
+              1803,
+              98592,
+              36046,
+              2596,
+              21718,
+              515,
+              36
+            ],
+            [
+              208738,
+              68852,
+              1280131,
+              369098,
+              5885306,
+              53687,
+              642,
+              9440,
+              636693,
+              187199,
+              224577,
+              16513,
+              500,
+              40031,
+              12447,
+              797,
+              19130,
+              70,
+              0
+            ],
+            [
+              147736,
+              242475,
+              2736305,
+              122009,
+              50536,
+              8080578,
+              133104,
+              18535,
+              1265512,
+              221136,
+              1910507,
+              16225,
+              643,
+              54249,
+              37295,
+              8271,
+              7351,
+              246,
+              0
+            ],
+            [
+              2555,
+              590,
+              356023,
+              2572,
+              669,
+              105788,
+              1231075,
+              2406,
+              133517,
+              15423,
+              121968,
+              215,
+              64,
+              1470,
+              5176,
+              399,
+              1514,
+              0,
+              0
+            ],
+            [
+              6673,
+              11846,
+              190602,
+              20127,
+              13583,
+              13321,
+              1227,
+              801822,
+              55277,
+              8019,
+              36612,
+              684,
+              12,
+              4799,
+              8820,
+              1543,
+              926,
+              0,
+              0
+            ],
+            [
+              122569,
+              161367,
+              4869370,
+              449460,
+              391882,
+              337187,
+              48081,
+              21992,
+              100089429,
+              1493195,
+              2709242,
+              54695,
+              2684,
+              134118,
+              59383,
+              9948,
+              1246,
+              169,
+              0
+            ],
+            [
+              1304039,
+              2154711,
+              418724,
+              272090,
+              162983,
+              109595,
+              4417,
+              3785,
+              1336525,
+              25255316,
+              237391,
+              22499,
+              1206,
+              47187,
+              11173,
+              1684,
+              1138,
+              597,
+              409
+            ],
+            [
+              23532,
+              3163,
+              1104345,
+              23233,
+              117823,
+              489113,
+              60210,
+              10311,
+              3289695,
+              78330,
+              191667096,
+              4267,
+              1138,
+              7083,
+              20331,
+              3737,
+              1324,
+              6,
+              1
+            ],
+            [
+              84468,
+              379009,
+              282942,
+              50005,
+              14240,
+              16499,
+              65,
+              625,
+              83833,
+              55352,
+              5319,
+              3593878,
+              96714,
+              70113,
+              9241,
+              1954,
+              163,
+              647,
+              3444
+            ],
+            [
+              11915,
+              1024,
+              4187,
+              1094,
+              231,
+              152,
+              8,
+              38,
+              3737,
+              2267,
+              558,
+              6390,
+              313042,
+              5485,
+              703,
+              107,
+              0,
+              13548,
+              1512
+            ],
+            [
+              878357,
+              61617,
+              323193,
+              44705,
+              24184,
+              34521,
+              235,
+              1556,
+              114271,
+              39139,
+              15023,
+              18834,
+              3076,
+              34786442,
+              117785,
+              9784,
+              555,
+              1421,
+              227
+            ],
+            [
+              135598,
+              11258,
+              265312,
+              19280,
+              15219,
+              19059,
+              1165,
+              3296,
+              79994,
+              12954,
+              33872,
+              5761,
+              829,
+              607130,
+              14167002,
+              14412,
+              549,
+              43,
+              0
+            ],
+            [
+              33395,
+              2228,
+              36477,
+              2926,
+              697,
+              3346,
+              304,
+              780,
+              16395,
+              1637,
+              5974,
+              1515,
+              119,
+              25751,
+              26758,
+              5193487,
+              6,
+              78,
+              0
+            ],
+            [
+              7065,
+              70,
+              29886,
+              2329,
+              5486,
+              4837,
+              1016,
+              1521,
+              3534,
+              497,
+              14779,
+              269,
+              0,
+              3189,
+              6487,
+              50978,
+              1068419,
+              0,
+              0
+            ],
+            [
+              18416,
+              2031,
+              979,
+              1062,
+              104,
+              303,
+              0,
+              79,
+              1138,
+              433,
+              0,
+              1099,
+              18639,
+              9699,
+              1049,
+              47,
+              0,
+              267483,
+              0
+            ],
+            [
+              16622,
+              1008,
+              169,
+              0,
+              284,
+              0,
+              0,
+              0,
+              214,
+              1820,
+              0,
+              129,
+              7101,
+              197,
+              4,
+              0,
+              0,
+              962,
+              41871
+            ]
+          ],
+          "source_miou": 0.7383646467188167,
+          "class_iou": [
+            0.9624313435300039,
+            0.8441925831381154,
+            0.8890051328676449,
+            0.6456344293630557,
+            0.5402672811592937,
+            0.4658574279602733,
+            0.5239189988011455,
+            0.6092233489193383,
+            0.8126195807508557,
+            0.6968484303130213,
+            0.9394917464299092,
+            0.6809737914720769,
+            0.6093120758014883,
+            0.9053866096932239,
+            0.8853670169803958,
+            0.9427925791227968,
+            0.8376938269397983,
+            0.7501893121378529,
+            0.4877227722772277
+          ],
+          "valid_classes": 19,
+          "independent_miou": 0.7383646467188165,
+          "confusion_counts_exact": true,
+          "evaluation_rng_unchanged": true,
+          "compatibility_reference_count": 0,
+          "compatibility_ce_max_error": 0.0,
+          "image_mean_ce": 0.173842345903343,
+          "pixel_weighted_ce": 0.17296157176606905,
+          "trace_sha256": "7fe65d81c670a25487948e63221ab1d7d2814036a98644000df772336641ef6a",
+          "training_state_unchanged": true,
+          "model_mode_restored": true
+        },
+        "source_miou": 0.7383646467188167,
+        "evaluation_trace": "evaluations/c2608f8520cc460dbc42d675350324eb/source_eval.jsonl",
+        "peak_reserved_gib_this_process": 1.412109375,
+        "target_miou": null,
+        "study": "diagnostic_20261020",
+        "target_feedback_already_seen": true,
+        "target_data_accessed": false,
+        "new_loss_enabled": true,
+        "consistency_mechanism": "anchor",
+        "consistency_weight": 1.0,
+        "reference_stop_gradient": true,
+        "component_protocol": "diagnostic_20261020",
+        "raw_anchor_ranking_required": false,
+        "style_residual_anchor_detached": false,
+        "residual_definition": "full_effect_minus_repeated_anchor_effect",
+        "new_pilot_required": false,
+        "initialization": "fresh_seed0_matched_C0",
+        "target_evaluation_authorized_this_phase": false,
+        "next_phase": 31,
+        "phase30_contract_sha256": "dc68943825404fd9946bf7308c30d397f20e305b00804d83179560828c18c112",
+        "final_query_parameterization": [
+          {
+            "class_id": 0,
+            "anchor_norm": 0.7264900803565979,
+            "residual_mean_norm": 0.43458500504493713,
+            "raw_residual_norms": [
+              0.7795846462249756,
+              0.7739898562431335
+            ],
+            "centered_residual_norms": [
+              0.6438494920730591,
+              0.6438494920730591
+            ],
+            "full_query_norms": [
+              0.8602526187896729,
+              1.0698716640472412
+            ]
+          },
+          {
+            "class_id": 1,
+            "anchor_norm": 0.5792109370231628,
+            "residual_mean_norm": 0.44764426350593567,
+            "raw_residual_norms": [
+              0.945550799369812,
+              1.0195322036743164
+            ],
+            "centered_residual_norms": [
+              0.8754259943962097,
+              0.8754259943962097
+            ],
+            "full_query_norms": [
+              1.178697943687439,
+              0.9024317860603333
+            ]
+          },
+          {
+            "class_id": 2,
+            "anchor_norm": 0.7982637286186218,
+            "residual_mean_norm": 0.4474404454231262,
+            "raw_residual_norms": [
+              0.6019335985183716,
+              0.5999197959899902
+            ],
+            "centered_residual_norms": [
+              0.4011371433734894,
+              0.40113717317581177
+            ],
+            "full_query_norms": [
+              0.9430632591247559,
+              0.8407756686210632
+            ]
+          },
+          {
+            "class_id": 3,
+            "anchor_norm": 0.787997305393219,
+            "residual_mean_norm": 0.43864989280700684,
+            "raw_residual_norms": [
+              0.6740996837615967,
+              0.6678427457809448
+            ],
+            "centered_residual_norms": [
+              0.5077385306358337,
+              0.5077385306358337
+            ],
+            "full_query_norms": [
+              0.8591837286949158,
+              1.0095937252044678
+            ]
+          },
+          {
+            "class_id": 4,
+            "anchor_norm": 0.8085978031158447,
+            "residual_mean_norm": 0.4422626197338104,
+            "raw_residual_norms": [
+              0.6025846600532532,
+              0.5962419509887695
+            ],
+            "centered_residual_norms": [
+              0.4046110212802887,
+              0.4046110212802887
+            ],
+            "full_query_norms": [
+              0.8397625088691711,
+              0.9643027186393738
+            ]
+          },
+          {
+            "class_id": 5,
+            "anchor_norm": 0.6386716365814209,
+            "residual_mean_norm": 0.4237319529056549,
+            "raw_residual_norms": [
+              0.8941301107406616,
+              0.8909976482391357
+            ],
+            "centered_residual_norms": [
+              0.785572350025177,
+              0.785572350025177
+            ],
+            "full_query_norms": [
+              1.0868172645568848,
+              0.9321368932723999
+            ]
+          },
+          {
+            "class_id": 6,
+            "anchor_norm": 0.7171904444694519,
+            "residual_mean_norm": 0.4244067370891571,
+            "raw_residual_norms": [
+              0.8391188979148865,
+              0.8300145864486694
+            ],
+            "centered_residual_norms": [
+              0.7186107039451599,
+              0.7186107039451599
+            ],
+            "full_query_norms": [
+              0.9772984981536865,
+              1.051862359046936
+            ]
+          },
+          {
+            "class_id": 7,
+            "anchor_norm": 0.8150795102119446,
+            "residual_mean_norm": 0.440019816160202,
+            "raw_residual_norms": [
+              0.5296692848205566,
+              0.552674412727356
+            ],
+            "centered_residual_norms": [
+              0.3152487576007843,
+              0.3152487576007843
+            ],
+            "full_query_norms": [
+              0.8158756494522095,
+              0.9283424019813538
+            ]
+          },
+          {
+            "class_id": 8,
+            "anchor_norm": 0.8305719494819641,
+            "residual_mean_norm": 0.44238707423210144,
+            "raw_residual_norms": [
+              0.6992592215538025,
+              0.6801302433013916
+            ],
+            "centered_residual_norms": [
+              0.5292106866836548,
+              0.5292106866836548
+            ],
+            "full_query_norms": [
+              0.8499082922935486,
+              1.1033961772918701
+            ]
+          },
+          {
+            "class_id": 9,
+            "anchor_norm": 0.581491231918335,
+            "residual_mean_norm": 0.4303918480873108,
+            "raw_residual_norms": [
+              0.9208630919456482,
+              0.9156220555305481
+            ],
+            "centered_residual_norms": [
+              0.8111345171928406,
+              0.8111345171928406
+            ],
+            "full_query_norms": [
+              1.0846203565597534,
+              0.9031838774681091
+            ]
+          },
+          {
+            "class_id": 10,
+            "anchor_norm": 0.7125385999679565,
+            "residual_mean_norm": 0.4259087145328522,
+            "raw_residual_norms": [
+              0.7755098342895508,
+              0.7710525393486023
+            ],
+            "centered_residual_norms": [
+              0.6454227566719055,
+              0.6454227566719055
+            ],
+            "full_query_norms": [
+              0.9405760169029236,
+              0.981774091720581
+            ]
+          },
+          {
+            "class_id": 11,
+            "anchor_norm": 0.6999983191490173,
+            "residual_mean_norm": 0.42558753490448,
+            "raw_residual_norms": [
+              0.7331530451774597,
+              0.7651318907737732
+            ],
+            "centered_residual_norms": [
+              0.616721510887146,
+              0.616721510887146
+            ],
+            "full_query_norms": [
+              0.9420555233955383,
+              0.9236975908279419
+            ]
+          },
+          {
+            "class_id": 12,
+            "anchor_norm": 0.756500780582428,
+            "residual_mean_norm": 0.42831316590309143,
+            "raw_residual_norms": [
+              0.5353257060050964,
+              0.5471080541610718
+            ],
+            "centered_residual_norms": [
+              0.3309052288532257,
+              0.3309052288532257
+            ],
+            "full_query_norms": [
+              0.7546148300170898,
+              0.8911451697349548
+            ]
+          },
+          {
+            "class_id": 13,
+            "anchor_norm": 0.8029184341430664,
+            "residual_mean_norm": 0.4459041953086853,
+            "raw_residual_norms": [
+              0.5780757069587708,
+              0.5767638087272644
+            ],
+            "centered_residual_norms": [
+              0.3668561279773712,
+              0.3668561577796936
+            ],
+            "full_query_norms": [
+              0.8610896468162537,
+              0.9039067029953003
+            ]
+          },
+          {
+            "class_id": 14,
+            "anchor_norm": 0.7951402068138123,
+            "residual_mean_norm": 0.439912885427475,
+            "raw_residual_norms": [
+              0.5577136278152466,
+              0.54936683177948
+            ],
+            "centered_residual_norms": [
+              0.3360072076320648,
+              0.3360072076320648
+            ],
+            "full_query_norms": [
+              0.8726600408554077,
+              0.8536756038665771
+            ]
+          },
+          {
+            "class_id": 15,
+            "anchor_norm": 0.7770310640335083,
+            "residual_mean_norm": 0.44732406735420227,
+            "raw_residual_norms": [
+              0.49131977558135986,
+              0.49652227759361267
+            ],
+            "centered_residual_norms": [
+              0.2094419300556183,
+              0.2094419300556183
+            ],
+            "full_query_norms": [
+              0.8214601278305054,
+              0.7877116799354553
+            ]
+          },
+          {
+            "class_id": 16,
+            "anchor_norm": 0.7580521702766418,
+            "residual_mean_norm": 0.4456944167613983,
+            "raw_residual_norms": [
+              0.4749327003955841,
+              0.4725399613380432
+            ],
+            "centered_residual_norms": [
+              0.16057412326335907,
+              0.16057412326335907
+            ],
+            "full_query_norms": [
+              0.7684411406517029,
+              0.7812506556510925
+            ]
+          },
+          {
+            "class_id": 17,
+            "anchor_norm": 0.7768957614898682,
+            "residual_mean_norm": 0.44336920976638794,
+            "raw_residual_norms": [
+              0.4886486232280731,
+              0.49731650948524475
+            ],
+            "centered_residual_norms": [
+              0.2155790776014328,
+              0.215579092502594
+            ],
+            "full_query_norms": [
+              0.7891009449958801,
+              0.8230445981025696
+            ]
+          },
+          {
+            "class_id": 18,
+            "anchor_norm": 0.7714587450027466,
+            "residual_mean_norm": 0.4459984302520752,
+            "raw_residual_norms": [
+              0.47196143865585327,
+              0.48148247599601746
+            ],
+            "centered_residual_norms": [
+              0.1684396117925644,
+              0.1684396117925644
+            ],
+            "full_query_norms": [
+              0.8246371746063232,
+              0.7530036568641663
+            ]
+          }
+        ]
+      },
+      "CR": {
+        "schema_version": 1,
+        "phase": 30,
+        "ok": true,
+        "variant": "CR",
+        "metadata": {
+          "git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+          "variant": "CR",
+          "seed": 0,
+          "config_sha256": "a17018c0a268280894cdc3e877d406459dfb7c4887a7bdc4ca2106e55a82249e",
+          "config_tree_sha256": "daff4dee00e0cfa1cdf8cf46a46c2e63b4ea8d579adef5e245c87da6bdb322c7",
+          "environment": {
+            "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+            "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+            "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+            "torch": "2.7.0+cu126",
+            "cuda": "12.6",
+            "transformers": "4.56.1",
+            "gpu": "NVIDIA GeForce RTX 4090 D"
+          },
+          "manifest_sha256": {
+            "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+            "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+          },
+          "train_count": 22469,
+          "val_count": 2497,
+          "source_validation": "gta5_holdout",
+          "target_data_accessed": false,
+          "study": "diagnostic_20261020",
+          "target_feedback_already_seen": true,
+          "new_loss_enabled": true,
+          "consistency_mechanism": "residual",
+          "consistency_weight": 1.0,
+          "reference_stop_gradient": true,
+          "component_protocol": "diagnostic_20261020",
+          "raw_anchor_ranking_required": false,
+          "style_residual_anchor_detached": false,
+          "residual_definition": "full_effect_minus_repeated_anchor_effect",
+          "new_pilot_required": false,
+          "initialization": "fresh_seed0_matched_C0",
+          "target_evaluation_authorized_this_phase": false,
+          "next_phase": 31,
+          "phase30_contract_sha256": "dc68943825404fd9946bf7308c30d397f20e305b00804d83179560828c18c112",
+          "formal_training_authorized": true,
+          "schedule_horizon": 40000,
+          "checkpoint_interval": 1000,
+          "checkpoint_selection": "fixed_final",
+          "centered_residuals": true,
+          "loss_backend": "fp32_log_softmax_gather_valid_mean_v1",
+          "sample_workers": 0,
+          "amp": "bfloat16",
+          "deterministic_algorithms": true,
+          "matmul_allow_tf32": true,
+          "cudnn_benchmark": false,
+          "cublas_workspace_config": ":4096:8",
+          "backbone_weights_sha256": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+          "backbone_sha256": "24e1950a1ad87645cf6f46532a80594b5102af3644ccb55062e689a5b16f71ad",
+          "baseline_audit": {
+            "environment": {
+              "python": "3.12.3 | packaged by Anaconda, Inc. | (main, May  6 2024, 19:46:43) [GCC 11.2.0]",
+              "executable": "/root/autodl-tmp/envs/causalq-dg/bin/python",
+              "platform": "Linux-5.15.0-101-generic-x86_64-with-glibc2.35",
+              "torch": "2.7.0+cu126",
+              "cuda": "12.6",
+              "transformers": "4.56.1",
+              "gpu": "NVIDIA GeForce RTX 4090 D"
+            },
+            "initial_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+            "producer_git_sha": "2537653ae9be0d84afbb86e22b5ec2200d280885",
+            "baseline_variant": "C0=M1"
+          }
+        },
+        "created_utc": "2026-10-24T09:41:54.475939+00:00",
+        "formal_training_authorized": true,
+        "formal_optimizer_updates": 40000,
+        "checkpoint_selection": "fixed_final",
+        "initial_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+        "final_head_sha256": "7b726bafb50c5eaba4f937e7c1efd2549ed67507ace44b3a64d6f5e193d344cc",
+        "checkpoint": "segments/39000_40000_9bd2131b05ed4049897dbb9dec3b4c04/state.pth",
+        "checkpoint_sha256": "6f0f60152a6ada18380f3a1c7c937850200e1006c8970c2c44b4c3b24ef8c7a6",
+        "source_evaluation": {
+          "sample_count": 2497,
+          "seen_ids_sha256": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb",
+          "valid_pixel_count": 1276971688,
+          "confusion_matrix": [
+            [
+              454185412,
+              6969096,
+              214064,
+              176625,
+              45156,
+              81291,
+              502,
+              3335,
+              98294,
+              439737,
+              3146,
+              51968,
+              8135,
+              477430,
+              87895,
+              13870,
+              8336,
+              13615,
+              10633
+            ],
+            [
+              5546231,
+              109112524,
+              388197,
+              417235,
+              50519,
+              121833,
+              133,
+              1106,
+              114467,
+              1473889,
+              1304,
+              119435,
+              1114,
+              133942,
+              22480,
+              2130,
+              1186,
+              1706,
+              84
+            ],
+            [
+              162662,
+              668169,
+              226419950,
+              2453380,
+              600906,
+              752122,
+              118416,
+              55796,
+              4386967,
+              464382,
+              1723033,
+              166178,
+              3756,
+              222203,
+              152228,
+              38935,
+              11219,
+              310,
+              282
+            ],
+            [
+              271298,
+              984515,
+              3845085,
+              20790415,
+              401993,
+              156237,
+              2689,
+              6724,
+              693883,
+              380715,
+              67397,
+              53805,
+              1749,
+              97153,
+              41526,
+              2566,
+              17065,
+              442,
+              33
+            ],
+            [
+              209542,
+              66408,
+              1286264,
+              369732,
+              5871076,
+              54116,
+              829,
+              9988,
+              642149,
+              177339,
+              235768,
+              16923,
+              478,
+              38986,
+              13291,
+              812,
+              20084,
+              66,
+              0
+            ],
+            [
+              144768,
+              239408,
+              2732679,
+              120736,
+              51002,
+              8101305,
+              136383,
+              18638,
+              1273171,
+              217557,
+              1892911,
+              16848,
+              641,
+              53404,
+              37853,
+              8009,
+              7133,
+              267,
+              0
+            ],
+            [
+              2561,
+              538,
+              350974,
+              2554,
+              639,
+              104242,
+              1237962,
+              2405,
+              132591,
+              14852,
+              123173,
+              221,
+              66,
+              1470,
+              5277,
+              396,
+              1503,
+              0,
+              0
+            ],
+            [
+              6341,
+              11933,
+              192214,
+              19987,
+              13460,
+              13418,
+              1279,
+              800318,
+              55177,
+              7848,
+              37064,
+              715,
+              11,
+              4720,
+              8898,
+              1593,
+              917,
+              0,
+              0
+            ],
+            [
+              119250,
+              159414,
+              4814538,
+              446572,
+              386675,
+              336164,
+              49791,
+              22744,
+              100132691,
+              1468882,
+              2755392,
+              55627,
+              2858,
+              133010,
+              61247,
+              9832,
+              1166,
+              162,
+              2
+            ],
+            [
+              1286959,
+              2172575,
+              423599,
+              277036,
+              164629,
+              111531,
+              4426,
+              4102,
+              1370190,
+              25204814,
+              237984,
+              23425,
+              1158,
+              47254,
+              11907,
+              2072,
+              857,
+              586,
+              365
+            ],
+            [
+              23976,
+              3025,
+              1104186,
+              22995,
+              113765,
+              499547,
+              59510,
+              10237,
+              3239882,
+              74246,
+              191715789,
+              4114,
+              918,
+              7754,
+              19678,
+              3557,
+              1488,
+              16,
+              55
+            ],
+            [
+              82403,
+              377008,
+              279120,
+              47769,
+              14213,
+              16559,
+              54,
+              645,
+              84759,
+              54809,
+              5468,
+              3606279,
+              93754,
+              70693,
+              9293,
+              1768,
+              155,
+              685,
+              3077
+            ],
+            [
+              11928,
+              1024,
+              4003,
+              1170,
+              261,
+              151,
+              5,
+              40,
+              3384,
+              2627,
+              674,
+              6632,
+              312246,
+              5518,
+              740,
+              107,
+              0,
+              13968,
+              1520
+            ],
+            [
+              877985,
+              61475,
+              331511,
+              44423,
+              24834,
+              33954,
+              386,
+              1668,
+              115761,
+              39388,
+              14427,
+              19660,
+              3672,
+              34773259,
+              120335,
+              9851,
+              544,
+              1554,
+              238
+            ],
+            [
+              133609,
+              10612,
+              259824,
+              18884,
+              14665,
+              18845,
+              1151,
+              3097,
+              79820,
+              12026,
+              34852,
+              5950,
+              843,
+              604359,
+              14180189,
+              13556,
+              398,
+              53,
+              0
+            ],
+            [
+              28393,
+              2399,
+              35217,
+              2969,
+              703,
+              3363,
+              324,
+              759,
+              16805,
+              1366,
+              6156,
+              2061,
+              88,
+              24830,
+              26099,
+              5200233,
+              12,
+              96,
+              0
+            ],
+            [
+              4562,
+              154,
+              29479,
+              2255,
+              7180,
+              5176,
+              998,
+              1440,
+              3784,
+              578,
+              14227,
+              299,
+              0,
+              3162,
+              8749,
+              57598,
+              1060721,
+              0,
+              0
+            ],
+            [
+              17573,
+              2261,
+              931,
+              1148,
+              107,
+              312,
+              0,
+              39,
+              941,
+              473,
+              0,
+              1062,
+              18243,
+              9624,
+              1019,
+              40,
+              0,
+              268788,
+              0
+            ],
+            [
+              15954,
+              1234,
+              177,
+              0,
+              280,
+              0,
+              0,
+              0,
+              145,
+              1980,
+              0,
+              128,
+              6631,
+              201,
+              4,
+              0,
+              0,
+              1055,
+              42592
+            ]
+          ],
+          "source_miou": 0.7384113558178583,
+          "class_iou": [
+            0.9625946773904542,
+            0.8442578136125675,
+            0.8889918023488643,
+            0.644848787683665,
+            0.5383918587327936,
+            0.46662272671821114,
+            0.5249383030148836,
+            0.6069194695204815,
+            0.8123157599454269,
+            0.6966858433359372,
+            0.9395174788638473,
+            0.6812575350964057,
+            0.6121114341332214,
+            0.905302822619088,
+            0.8850861967591547,
+            0.9423161637128493,
+            0.8336216279937914,
+            0.752608206259695,
+            0.4914272527979693
+          ],
+          "valid_classes": 19,
+          "independent_miou": 0.7384113558178583,
+          "confusion_counts_exact": true,
+          "evaluation_rng_unchanged": true,
+          "compatibility_reference_count": 0,
+          "compatibility_ce_max_error": 0.0,
+          "image_mean_ce": 0.17404718387724283,
+          "pixel_weighted_ce": 0.1731411220303909,
+          "trace_sha256": "cf327b5db6fe90b95557ef30926b66ed52452f3a87154a02dd3a161b90039acd",
+          "training_state_unchanged": true,
+          "model_mode_restored": true
+        },
+        "source_miou": 0.7384113558178583,
+        "evaluation_trace": "evaluations/e738a20f3d6f4405a38daa7e823da41b/source_eval.jsonl",
+        "peak_reserved_gib_this_process": 1.431640625,
+        "target_miou": null,
+        "study": "diagnostic_20261020",
+        "target_feedback_already_seen": true,
+        "target_data_accessed": false,
+        "new_loss_enabled": true,
+        "consistency_mechanism": "residual",
+        "consistency_weight": 1.0,
+        "reference_stop_gradient": true,
+        "component_protocol": "diagnostic_20261020",
+        "raw_anchor_ranking_required": false,
+        "style_residual_anchor_detached": false,
+        "residual_definition": "full_effect_minus_repeated_anchor_effect",
+        "new_pilot_required": false,
+        "initialization": "fresh_seed0_matched_C0",
+        "target_evaluation_authorized_this_phase": false,
+        "next_phase": 31,
+        "phase30_contract_sha256": "dc68943825404fd9946bf7308c30d397f20e305b00804d83179560828c18c112",
+        "final_query_parameterization": [
+          {
+            "class_id": 0,
+            "anchor_norm": 0.7635723352432251,
+            "residual_mean_norm": 0.4345768094062805,
+            "raw_residual_norms": [
+              0.7199207544326782,
+              0.6897318363189697
+            ],
+            "centered_residual_norms": [
+              0.5551133751869202,
+              0.5551133751869202
+            ],
+            "full_query_norms": [
+              0.8923966288566589,
+              0.9929829835891724
+            ]
+          },
+          {
+            "class_id": 1,
+            "anchor_norm": 0.8255771994590759,
+            "residual_mean_norm": 0.4476432800292969,
+            "raw_residual_norms": [
+              0.646458625793457,
+              0.7027535438537598
+            ],
+            "centered_residual_norms": [
+              0.5054711699485779,
+              0.5054711699485779
+            ],
+            "full_query_norms": [
+              1.0288194417953491,
+              0.9031545519828796
+            ]
+          },
+          {
+            "class_id": 2,
+            "anchor_norm": 0.874056875705719,
+            "residual_mean_norm": 0.4474398195743561,
+            "raw_residual_norms": [
+              0.6324654817581177,
+              0.6350508332252502
+            ],
+            "centered_residual_norms": [
+              0.44883042573928833,
+              0.44883042573928833
+            ],
+            "full_query_norms": [
+              0.9755094647407532,
+              0.9895603060722351
+            ]
+          },
+          {
+            "class_id": 3,
+            "anchor_norm": 0.925632655620575,
+            "residual_mean_norm": 0.4386498034000397,
+            "raw_residual_norms": [
+              0.5831508040428162,
+              0.5713026523590088
+            ],
+            "centered_residual_norms": [
+              0.3752494752407074,
+              0.3752495050430298
+            ],
+            "full_query_norms": [
+              0.9609990119934082,
+              1.0352277755737305
+            ]
+          },
+          {
+            "class_id": 4,
+            "anchor_norm": 0.8864710927009583,
+            "residual_mean_norm": 0.4422609806060791,
+            "raw_residual_norms": [
+              0.5863862633705139,
+              0.5815461277961731
+            ],
+            "centered_residual_norms": [
+              0.38134971261024475,
+              0.38134971261024475
+            ],
+            "full_query_norms": [
+              0.9858494400978088,
+              0.9437258243560791
+            ]
+          },
+          {
+            "class_id": 5,
+            "anchor_norm": 0.9174001812934875,
+            "residual_mean_norm": 0.4237362742424011,
+            "raw_residual_norms": [
+              0.6024397611618042,
+              0.6043522953987122
+            ],
+            "centered_residual_norms": [
+              0.4295756220817566,
+              0.4295756220817566
+            ],
+            "full_query_norms": [
+              0.9948530197143555,
+              1.0308172702789307
+            ]
+          },
+          {
+            "class_id": 6,
+            "anchor_norm": 0.9349615573883057,
+            "residual_mean_norm": 0.42441025376319885,
+            "raw_residual_norms": [
+              0.6039709448814392,
+              0.5870305895805359
+            ],
+            "centered_residual_norms": [
+              0.41781434416770935,
+              0.41781437397003174
+            ],
+            "full_query_norms": [
+              1.105983018875122,
+              0.9350109100341797
+            ]
+          },
+          {
+            "class_id": 7,
+            "anchor_norm": 0.9302215576171875,
+            "residual_mean_norm": 0.4400172531604767,
+            "raw_residual_norms": [
+              0.5855567455291748,
+              0.5997211933135986
+            ],
+            "centered_residual_norms": [
+              0.3970590829849243,
+              0.3970590829849243
+            ],
+            "full_query_norms": [
+              1.0063011646270752,
+              1.0165108442306519
+            ]
+          },
+          {
+            "class_id": 8,
+            "anchor_norm": 0.9025020599365234,
+            "residual_mean_norm": 0.44238078594207764,
+            "raw_residual_norms": [
+              0.6346343159675598,
+              0.64031982421875
+            ],
+            "centered_residual_norms": [
+              0.45900359749794006,
+              0.45900359749794006
+            ],
+            "full_query_norms": [
+              0.9261391758918762,
+              1.0920872688293457
+            ]
+          },
+          {
+            "class_id": 9,
+            "anchor_norm": 0.875952959060669,
+            "residual_mean_norm": 0.4303957521915436,
+            "raw_residual_norms": [
+              0.6097332835197449,
+              0.6190579533576965
+            ],
+            "centered_residual_norms": [
+              0.4384783208370209,
+              0.4384783208370209
+            ],
+            "full_query_norms": [
+              0.9102622866630554,
+              1.0442874431610107
+            ]
+          },
+          {
+            "class_id": 10,
+            "anchor_norm": 0.851455569267273,
+            "residual_mean_norm": 0.4259113371372223,
+            "raw_residual_norms": [
+              0.6517376899719238,
+              0.6454063653945923
+            ],
+            "centered_residual_norms": [
+              0.4891372323036194,
+              0.4891372323036194
+            ],
+            "full_query_norms": [
+              1.0073413848876953,
+              0.9558906555175781
+            ]
+          },
+          {
+            "class_id": 11,
+            "anchor_norm": 0.9397084712982178,
+            "residual_mean_norm": 0.425579309463501,
+            "raw_residual_norms": [
+              0.5996279120445251,
+              0.6075310111045837
+            ],
+            "centered_residual_norms": [
+              0.4280257523059845,
+              0.4280257523059845
+            ],
+            "full_query_norms": [
+              0.9892206192016602,
+              1.074224591255188
+            ]
+          },
+          {
+            "class_id": 12,
+            "anchor_norm": 0.8824284076690674,
+            "residual_mean_norm": 0.4283105432987213,
+            "raw_residual_norms": [
+              0.5531920790672302,
+              0.5499880909919739
+            ],
+            "centered_residual_norms": [
+              0.347569078207016,
+              0.347569078207016
+            ],
+            "full_query_norms": [
+              0.9061513543128967,
+              0.9888669848442078
+            ]
+          },
+          {
+            "class_id": 13,
+            "anchor_norm": 0.9457404017448425,
+            "residual_mean_norm": 0.44590482115745544,
+            "raw_residual_norms": [
+              0.6025415062904358,
+              0.5961156487464905
+            ],
+            "centered_residual_norms": [
+              0.4004671573638916,
+              0.4004671573638916
+            ],
+            "full_query_norms": [
+              0.9574710130691528,
+              1.0921753644943237
+            ]
+          },
+          {
+            "class_id": 14,
+            "anchor_norm": 0.8872050642967224,
+            "residual_mean_norm": 0.43991079926490784,
+            "raw_residual_norms": [
+              0.5967632532119751,
+              0.5831755995750427
+            ],
+            "centered_residual_norms": [
+              0.39317750930786133,
+              0.39317750930786133
+            ],
+            "full_query_norms": [
+              1.0346883535385132,
+              0.9015891551971436
+            ]
+          },
+          {
+            "class_id": 15,
+            "anchor_norm": 0.8913210034370422,
+            "residual_mean_norm": 0.44732412695884705,
+            "raw_residual_norms": [
+              0.5571977496147156,
+              0.570117175579071
+            ],
+            "centered_residual_norms": [
+              0.3430052697658539,
+              0.3430052697658539
+            ],
+            "full_query_norms": [
+              0.9759726524353027,
+              0.9336426854133606
+            ]
+          },
+          {
+            "class_id": 16,
+            "anchor_norm": 0.7938097715377808,
+            "residual_mean_norm": 0.44568562507629395,
+            "raw_residual_norms": [
+              0.49445411562919617,
+              0.49307981133461
+            ],
+            "centered_residual_norms": [
+              0.2125338464975357,
+              0.2125338464975357
+            ],
+            "full_query_norms": [
+              0.7860155701637268,
+              0.8560307621955872
+            ]
+          },
+          {
+            "class_id": 17,
+            "anchor_norm": 0.8801992535591125,
+            "residual_mean_norm": 0.4433658719062805,
+            "raw_residual_norms": [
+              0.6076459884643555,
+              0.5970131754875183
+            ],
+            "centered_residual_norms": [
+              0.4077448844909668,
+              0.4077448844909668
+            ],
+            "full_query_norms": [
+              0.873691201210022,
+              1.0576752424240112
+            ]
+          },
+          {
+            "class_id": 18,
+            "anchor_norm": 0.8189254403114319,
+            "residual_mean_norm": 0.445997953414917,
+            "raw_residual_norms": [
+              0.5228819251060486,
+              0.5259646773338318
+            ],
+            "centered_residual_norms": [
+              0.27587682008743286,
+              0.27587682008743286
+            ],
+            "full_query_norms": [
+              0.8737799525260925,
+              0.8544018268585205
+            ]
+          }
+        ]
+      }
+    },
+    "next_phase": "Phase31 new-model source diagnostics; no target access"
+  }
+}

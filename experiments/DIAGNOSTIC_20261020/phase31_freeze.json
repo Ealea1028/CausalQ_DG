@@ -1,0 +1,110 @@
+{
+  "schema_version": 1,
+  "study": "diagnostic_20261020",
+  "phase": 31,
+  "order": [
+    "UP",
+    "UF",
+    "UA",
+    "UR",
+    "CA",
+    "CR"
+  ],
+  "source_samples_per_variant": 2497,
+  "views": [
+    "original",
+    "photometric_01",
+    "photometric_02",
+    "photometric_03",
+    "photometric_04"
+  ],
+  "optimizer_updates_this_phase": 0,
+  "training_authorized": false,
+  "target_data_access_authorized": false,
+  "target_feedback_already_seen": true,
+  "new_training_gate": false,
+  "checkpoint_training_updates": 40000,
+  "effect_geometry": "source_longedge1024_aspect_pad16; exclude ignore padding",
+  "gradient_geometry": "deterministic_512_crop; TrainTransform original defaults",
+  "rms_epsilon": 1e-06,
+  "gradient_epsilon": 1e-12,
+  "correlation_fisher_clip": 1e-07,
+  "sampling": "same source IDs, style_seeds and gradient-crop seeds as Phase28",
+  "raw_variance": "population five-view; pair_raw_variance is separate original/photo1 compatibility",
+  "normalized_variance": "per-image/class/view RMS normalization; not raw variance divided by macro RMS squared",
+  "baseline_diagnostics_reused": {
+    "producer_git_sha": "1086bc36c2967bc9ff0f7480faad929b210d393f",
+    "variants": [
+      "U0",
+      "C0",
+      "CP",
+      "CF"
+    ],
+    "repeat_inference": false
+  },
+  "intervention_examples": {
+    "reuse_phase28": true,
+    "ids": [
+      "18734",
+      "12488",
+      "08744"
+    ],
+    "export_again": false
+  },
+  "acceptance_sha256": {
+    "28": "7564bef90659b60eaead4eb4418da841b3b9e1c52f46f08c6f7bbefeb96152fa",
+    "29": "96fe64031e67a16aac5eb59013dce1eeaf23a0ae30d833d5241c13032ffb5526",
+    "30": "dd1ece5538455fa3cbb04947abe8e2738d697c2781ec7953d4ccdde39bccba9e"
+  },
+  "final_checkpoints": {
+    "UP": {
+      "producer_git_sha": "0a0350d025b063cca2668ab0606bd80179f13ea3",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase29/UNCENTERED_SEED0_0a0350d/UP/segments/39000_40000_4d2d27908300492ea03614038be1d195/state.pth",
+      "checkpoint_sha256": "a711a9af5eeba1d5dd66ee25ce52a1856254436980d0311ad72131e8b992d0cf",
+      "head_sha256": "28b09bfc079582228da079bcc23ea253d40826442022d85f5fd95970dd98d530",
+      "config_sha256": "97881db24eca0779f248c21c83171a00a772ed512a41536ed50095aba7f0872d",
+      "source_miou": 0.7388307782153669
+    },
+    "UF": {
+      "producer_git_sha": "0a0350d025b063cca2668ab0606bd80179f13ea3",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase29/UNCENTERED_SEED0_0a0350d/UF/segments/39000_40000_90c3368091f84497b8f3ca4a965e4d46/state.pth",
+      "checkpoint_sha256": "1cc75f3631ad1fdd848d136dd18bc1dc098a6e8df1675243e2a74e40cd20b89c",
+      "head_sha256": "53c6fff262bdd4278ef59de5fbcee229c8e5735cfed32a44dac7b8180b26303a",
+      "config_sha256": "c1ab8dc4c4953e59a3650a95bd33fc4b403a729b59e5e0a41a65d70ec3de9cfe",
+      "source_miou": 0.7375901103715282
+    },
+    "UA": {
+      "producer_git_sha": "0a0350d025b063cca2668ab0606bd80179f13ea3",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase29/UNCENTERED_SEED0_0a0350d/UA/segments/39000_40000_9a27a7696cc243659bc9be8f18fc643f/state.pth",
+      "checkpoint_sha256": "fd9ed479915f04cd9521553340ebd3fa5e4e1dc7d49615b777c44b56598fec36",
+      "head_sha256": "c73a79358f541d504f3dc47f36f145c0ee7ce7d6ec73244dcc31656bbd3ab361",
+      "config_sha256": "6fca08c36c7e077cd48118eb19ee4139781888069335309c9885a24477e90296",
+      "source_miou": 0.7385289066415432
+    },
+    "UR": {
+      "producer_git_sha": "0a0350d025b063cca2668ab0606bd80179f13ea3",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase29/UNCENTERED_SEED0_0a0350d/UR/segments/39000_40000_2220b4ae44b549b6bb94443546938070/state.pth",
+      "checkpoint_sha256": "daac7596c99e62027d2383811247a8d15f84e47dce9e0ae92d1450426caea55a",
+      "head_sha256": "99218993396db50083bd126c7d45309773f00e67b3360c195a044cc33a7fe72a",
+      "config_sha256": "580ee318791eaa4d0b9747ffeb3117580fb6c79a2b105fc88673f4a279e04f4b",
+      "source_miou": 0.7389118801033604
+    },
+    "CA": {
+      "producer_git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase30/CENTERED_SEED0_61e5d64/CA/segments/39000_40000_40495aca626842a6998716e1b09e8200/state.pth",
+      "checkpoint_sha256": "ce57410a92900b135d4afea7fad07a2320499f0cd8ad8544bae6cda76c4ec799",
+      "head_sha256": "ab3a7d59fae67706bee67a63140501fb3fc79d1e025fe27de601736a5d687ad2",
+      "config_sha256": "f620e283a9a5b7061eeca8cb795189a53999338b15a40bc313c86101a2659291",
+      "source_miou": 0.7383646467188167
+    },
+    "CR": {
+      "producer_git_sha": "61e5d64bf68e26dc22663ae5a8a9999e93e73911",
+      "checkpoint_relative_to_output_root": "diagnostic_20261020/phase30/CENTERED_SEED0_61e5d64/CR/segments/39000_40000_9bd2131b05ed4049897dbb9dec3b4c04/state.pth",
+      "checkpoint_sha256": "6f0f60152a6ada18380f3a1c7c937850200e1006c8970c2c44b4c3b24ef8c7a6",
+      "head_sha256": "7b726bafb50c5eaba4f937e7c1efd2549ed67507ace44b3a64d6f5e193d344cc",
+      "config_sha256": "a17018c0a268280894cdc3e877d406459dfb7c4887a7bdc4ca2106e55a82249e",
+      "source_miou": 0.7384113558178583
+    }
+  },
+  "next_phase": "32: local final target freeze, then all six new target evaluations; no tuning"
+}

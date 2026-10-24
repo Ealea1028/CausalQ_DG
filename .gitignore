@@ -39,5 +39,6 @@ analysis/style_examples/
 /analysis_export/
 /phase28_report/
 /phase29_export/
+/phase30_export/
 experiments/*/checkpoints/
 experiments/*/logs/
