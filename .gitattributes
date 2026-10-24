@@ -44,3 +44,7 @@ scripts/run_diagnostic_20261020.sh text eol=lf
 configs/diagnostic_20261020/*.yaml text eol=lf
 configs/diagnostic_20261020/formal/*.yaml text eol=lf
 experiments/DIAGNOSTIC_20261020/*.json text eol=lf
+tools/plot_phase28_diagnostics.py text eol=lf
+analysis/phase28_visualization_20261024/*.json text eol=lf
+analysis/phase28_visualization_20261024/*.html text eol=lf
+analysis/phase28_visualization_20261024/*.svg text eol=lf

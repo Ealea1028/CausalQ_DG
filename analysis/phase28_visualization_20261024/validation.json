@@ -1,0 +1,35 @@
+{
+  "date": "2026-10-24",
+  "scope": "Phase28 returned-summary visualization only",
+  "models": [
+    "U0",
+    "C0",
+    "CP",
+    "CF"
+  ],
+  "source_samples_per_model": 2497,
+  "source_views": 5,
+  "png_figures": 5,
+  "svg_figures": 5,
+  "all_figures_visually_reviewed": true,
+  "png_and_svg_parse_passed": true,
+  "html_local_links_verified": true,
+  "generator_hash_matches_plotted_metrics": true,
+  "new_inference_or_training": false,
+  "raw_per_image_records_recomputed": false,
+  "training_code_or_config_changed": false,
+  "local_checks": {
+    "python": "3.10.20",
+    "matplotlib": "3.10.8",
+    "numpy": "2.2.5",
+    "cuda_visible_devices": "",
+    "focused_passed": 3,
+    "full_command": "python -m pytest -p no:cacheprovider --basetemp=.test-tmp-strict-dg-phase28-visualization-full",
+    "full_passed": 674,
+    "full_skipped": 1,
+    "full_seconds": 107.07,
+    "skip_reason": "Host does not permit unprivileged symlinks"
+  },
+  "limits": "One trained seed. P10-P90 are source-image empirical ranges, not seed confidence intervals. No per-image segmentation or pixel effect maps are included. No new target results.",
+  "svg_postprocessing": "Whitespace and LF normalization; parsed path coordinate tokens unchanged"
+}
