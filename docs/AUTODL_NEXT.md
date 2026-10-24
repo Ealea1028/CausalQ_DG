@@ -1,4 +1,92 @@
-# Phase29 — UP/UF/UA/UR formal training — 2026-10-23
+# Phase30 — CA/CR centered matching controls — 2026-10-24
+
+Phase29 completed at0a0350d025b063cca2668ab0606bd80179f13ea3;all four
+variants trained40000 updates and evaluated2497 source images.18 returned
+files verified;source confusion independently reduced. SourceUP/UF/UA/UR=
+73.8831/73.7590/73.8529/73.8912%. No new target access. See
+DIAGNOSTIC_PHASE29_RESULTS.md and phase29_acceptance.json.
+
+One background task now trains the preplanned CA then CR,40000 updates each,
+fresh matched seed0. Centering is enabled;all other settings matchUA/UR,
+including Anchor/Residual consistency weight1. Reuse the same update code,
+1000-step recovery and final-only full source validation. No short pilot,
+raw-anchor ranking gate,Phase28 replay or target evaluation. Budget was
+fixed before Phase29 results;this is not a result-dependent extension.
+
+## Prepare exact code and launch
+
+Set EXPECTED_SHA to the real full SHA in this phase's Codex handoff. Use a
+new per-commit checkout;do not switch or rerun the finished Phase29 checkout.
+Retain all U-group checkpoints and Phase28 diagnostics. Two40-segment runs
+need approximately3.4GiB extra checkpoint space plus logs/evaluation. If
+space is insufficient,use the existing reviewed legacy-intermediate cleanup
+before training;do not delete Phase29 states. Disk details:
+AUTODL_DISK_CLEANUP_20261020.md. No environment installation is required.
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo 'Pass the full SHA'; exit 2; }
+SOURCE_REPO=/root/autodl-tmp/CausalQ_DG
+TASK_REPO="/root/autodl-tmp/CausalQ_DG_phase30_${EXPECTED_SHA:0:7}"
+git -C "$SOURCE_REPO" fetch origin codex/diagnostic-20261020
+if [[ ! -e "$TASK_REPO" ]]; then
+  git -C "$SOURCE_REPO" worktree add --detach "$TASK_REPO" "$EXPECTED_SHA"
+fi
+cd "$TASK_REPO"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git status --porcelain)"
+export PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020
+df -hT /root/autodl-tmp
+bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" train-centered-controls
+BASH
+echo '启动检查结束，终端保持打开。'
+```
+
+Returns PID,log and output root. Shared study/run locks prevent duplicate
+training. Each model uses a separate process. Same command at the SAME SHA
+resumes1000-step committed segments,skips finished models,and preserves
+partial attempts. OOM/NaN/mismatched runtime stops this phase;return the log
+without editing code,weights,resolution or batch on AutoDL. Runtime,manifest
+and initialization checks are inline protections,not prerequisite experiments.
+The launcher stops afterCA/CR;Phase31 is released after results return.
+
+## Monitor and return
+
+Use the same full SHA as launch;this only reads output.
+
+```bash
+bash <<'BASH'
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase30/CENTERED_SEED0_${EXPECTED_SHA:0:7}"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase30_export.zip" ]]; then
+  ls -lh "$OUT/phase30_export.zip"
+  sha256sum "$OUT/phase30_export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+Completion:phase30_exit_code=0 and status.json exit_code0. Return
+phase30_export.zip and last80 launcher log lines. ZIP includes manifest,
+two reports/configs/metadata/initialization records,combined source metrics
+and checksums. Checkpoints and full traces stay on AutoDL. On failure return
+status/log and preserve outputs. No real weight loading or formal training
+has been executed locally. Local validation:phase30_release.json.
+Full synthetic CPU suite:671 passed,1 skipped in118.23s;the skip is the
+existing Windows unprivileged-symlink restriction.16 new tests cover recipe
+matching,centered objectives/gradients,two forwards,exact continuation,local
+CUDA boundary,export,parent-terminal survival and source count reduction.
+
+---
+
+# Archive — Phase29 formal training — 2026-10-23 (completed2026-10-24)
 
 Phase28 finished successfully at1086bc36c2967bc9ff0f7480faad929b210d393f.
 All four models completed2497 source images.51 returned files hash-verified;

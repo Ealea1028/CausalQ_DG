@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — Phase29 / frozen uncentered formal training
+## Active — Phase30 / centered matching controls
+
+Phase29 source-only formal results accepted2026-10-24 at0a0350d025b063cca2668ab0606bd80179f13ea3:
+UP/UF/UA/UR each40000 updates,2497 source images,same fresh initialization.
+18 checked export files;integer confusion independently reduces to source
+mIoU73.8831/73.7590/73.8529/73.8912%. No remote checkpoints/traces replayed
+locally. New diagnostics and target metrics are not yet measured.
+
+Release the previously budgeted CA/CR,centered counterparts ofUA/UR. Change
+only the original centered_residuals flag and experiment identity;do not
+retune losses,weights,sampling or budget. Same selective CQE update code,
+repeated Anchor,FP32 Full-Anchor,style-side Anchor differentiable,detached
+original reference. Fresh seed0 initialization matched to accepted C0,
+not continuation of any trained model. Center only in the established
+forward parameterization;no post-step projection or extra mechanism.
+
+Freeze configs and initialization/sampling in phase30_freeze.json;40000
+updates each,1000-step full recovery,fixed-final full source validation.
+No repeated pilot,raw-stability ordering gate or target access. Legacy M3
+guard and Phase29 freeze remain unchanged. Stop afterCA/CR;Phase31 diagnoses
+all six new finals,Phase32 freezes new target reporting. Existing target
+feedback remains disclosed and single-seed limitations remain.
+
+## Archive — Phase29 / frozen uncentered formal training
 
 Phase28 baseline diagnostics completed at1086bc36c2967bc9ff0f7480faad929b210d393f:
 four variants x2497 source images,five views,zero optimizer updates. Local

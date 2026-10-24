@@ -1,5 +1,18 @@
 # CausalQ_DG_1016 repository audit
 
+2026-10-24 Phase29 complete;Phase30 centered controls ready for AutoDL.
+UP/UF/UA/UR each40000 updates at0a0350d;source2497 mIoU=73.8831/73.7590/
+73.8529/73.8912%.18 returned file hashes verified,integer source confusion
+independently reduced,common initial head and GT totals accepted. Raw traces
+and checkpoints remain remote;new target metrics/complete diagnostics absent.
+Next:originally planned CA/CR fresh seed0/40000 each,only centering differs
+fromUA/UR;use same losses,weights,source sampler and1000-step recovery.
+No pilot or raw-ranking gate. One background mode train-centered-controls
+stops after final source evaluation/export,then Phase31 follows. Old M3 gate
+and Phase29 frozen recipes remain intact;preserve all four trained U models.
+Results:DIAGNOSTIC_PHASE29_RESULTS.md;freeze:phase30_freeze.json.
+Prior dated notes below are historical.
+
 2026-10-23 Phase28 completed;Phase29 implementation released locally.
 Returned export expanded under phase28_report/;51 files hash-verified,
 U0/C0/CP/CF each2497 samples,zero updates,no target access,unchanged model/RNG

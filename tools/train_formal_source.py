@@ -21,6 +21,9 @@ from causalq.protocols.formal_source import ROOT, validate_formal_config
 from causalq.protocols.diagnostic_formal import (
     NEW_UNCENTERED, matched_baseline, training_policy, validate_training_config, verify_release,
 )
+from causalq.protocols.diagnostic_centered_formal import (
+    NEW_CENTERED, centered_baseline, centered_training_policy, validate_centered_training_config, verify_centered_release,
+)
 from causalq.utils.checkpoint import trainable_state_dict
 from causalq.utils.seed import seed_everything
 from tools.audit_strict_source_smoke import BACKBONE_STATE_SHA
@@ -91,17 +94,23 @@ def run_segments(model, optimizer, dataset, style, config, root, metadata, *, ho
 
 def run_variant(args):
     variant = args.variant
-    new_study = variant in NEW_UNCENTERED
+    new_study = variant in (*NEW_UNCENTERED, *NEW_CENTERED)
     config_path = ROOT / (f'configs/diagnostic_20261020/formal/{variant.lower()}_seed0.yaml' if new_study
                           else f'configs/strict_dg/formal/{variant.lower()}_seed0.yaml')
     config = yaml.safe_load(config_path.read_bytes())
-    (validate_training_config if new_study else validate_formal_config)(config, variant)
+    validator = (validate_centered_training_config if variant in NEW_CENTERED else
+                 validate_training_config if new_study else validate_formal_config)
+    validator(config, variant)
     policy = POLICY
     baseline_audit = None
     update_fn = None
     if new_study:
-        baseline_audit = matched_baseline()
-        policy = {**training_policy(variant), 'phase29_contract_sha256': verify_release()}
+        if variant in NEW_CENTERED:
+            baseline_audit = centered_baseline()
+            policy = {**centered_training_policy(variant), 'phase30_contract_sha256': verify_centered_release()}
+        else:
+            baseline_audit = matched_baseline()
+            policy = {**training_policy(variant), 'phase29_contract_sha256': verify_release()}
         if variant == 'UP':
             from tools.prediction_source_update import prediction_source_update
             update_fn = prediction_source_update
@@ -283,7 +292,7 @@ def summarize(root):
 
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'M3', *NEW_UNCENTERED, 'summarize'), required=True)
+    parser.add_argument('--variant', choices=('M0', 'M1', 'P1', 'M2', 'M3', *NEW_UNCENTERED, *NEW_CENTERED, 'summarize'), required=True)
     parser.add_argument('--stability-report', type=Path, help='Required positive formal M1 raw-stability evidence for M3')
     parser.add_argument('--output-root', type=Path, required=True)
     parser.add_argument('--data-root', type=Path, default=Path('/root/autodl-tmp/datasets'))

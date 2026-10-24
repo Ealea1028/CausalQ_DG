@@ -1,5 +1,22 @@
 # Phase28 implementation inventory
 
+2026-10-24 Phase30 follow-up;starting checkout0a0350d025b063cca2668ab0606bd80179f13ea3.
+Received phase29_export/ with18 checked files,four40000-update source runs,
+matched initial head/environment and full2497-source confusions. Source mIoU
+UP/UF/UA/UR=73.8831/73.7590/73.8529/73.8912%;no target results. Independently
+reduced integer confusion;no checkpoint/trace replay. Store small acceptance
+only;preserve/ignore user export and other unrelated files.
+
+Phase30 adds centered CA/CR frozen recipes and routes the existing selective
+update/1000-step runner into the same background launcher and report exporter.
+No new loss kernel,model parameter or training RNG draw. Centering flag plus
+experiment identity are the only config differences fromUA/UR. C0 initialization
+and source/runtime policy matched. Old M3 guard and Phase29 freeze untouched.
+Next GPU action is two full40000-step formal controls;no standalone pilot,
+diagnostic rerun or target access. Stop after source reports;Phase31 follows.
+
+## Original Phase29 inventory
+
 2026-10-23 Phase29 follow-up;starting checkout5ef6b30e726eb1ace7d89cdb506547133c267155.
 Received phase28_report/ contains51 checked export files. All four summaries
 report2497 samples,zero updates,unchanged model/RNG,no target access at1086bc3.

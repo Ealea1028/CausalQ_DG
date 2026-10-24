@@ -1,6 +1,18 @@
 # CausalQ-DG
 
-## Active phase — Phase29 uncentered formal ablations — 2026-10-23
+## Active phase — Phase30 centered matching controls — 2026-10-24
+
+Phase29 UP/UF/UA/UR each completed40000 updates and source2497 validation at
+0a0350d. Source mIoU=73.8831/73.7590/73.8529/73.8912%;U0=73.8862%.
+18 exported files verified and integer confusion matrices independently
+reduced. No new target scores or stability/gain conclusion. See
+[source results](docs/DIAGNOSTIC_PHASE29_RESULTS.md).
+Next:preplanned CA/CR,each fresh matched seed0/40000 updates,centered queries,
+Anchor/Residual consistency weight1;all other recipes match UA/UR. Reuse
+1000-step recovery and final-only source validation. No new pilot,ranking
+gate,target access or repeated baseline diagnostics. [AutoDL commands](docs/AUTODL_NEXT.md).
+
+## Archive — Phase29 uncentered formal ablations — 2026-10-23
 
 Phase28 returned successfully:four reused final models x2497 source images,
 zero updates,no target access.51 exported files verified locally;per-image

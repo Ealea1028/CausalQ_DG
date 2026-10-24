@@ -38,5 +38,6 @@ analysis/style_examples/
 # Keep small experiment summaries only
 /analysis_export/
 /phase28_report/
+/phase29_export/
 experiments/*/checkpoints/
 experiments/*/logs/
