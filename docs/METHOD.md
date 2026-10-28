@@ -1,6 +1,25 @@
 # Method contract
 
-## Active — Phase32 / final reporting freeze after completed source diagnostics
+## Completed — Phase32 / 20261020 Diagnostic Plan closed
+
+All planned work is complete2026-10-28:four reused final models,six new
+40000-update runs (240000 new updates),ten-model source diagnostics and
+six new Cityscapes500 evaluations. Final producer40c73bcd6914604368c1006e6c3d7ff0e2ad2a0a.
+14 returned file hashes,500-ID coverage traces and ten19-class integer
+confusion reductions accepted locally;checkpoint/image replay was not local.
+TargetUA/CA=66.0753/66.3220%;deltas vsU0/C0=+0.8662/+0.6622pp.
+UR/CR deltas=+0.2633/-0.1212pp. Predeclared target interactions U-minus-C
+are+0.2040pp (Anchor) and+0.3845pp (Residual). All models,contrasts and
+class IoUs are reported in analysis/diagnostic_final_report_20261028.
+
+Results are exploratory after prior target feedback and conditional on one
+training seed. Anchor-only gains coexist with component-scale changes and
+cancellation;source normalized stability does not guarantee target gain.
+No mechanism identification,seed significance or source/target winner
+selection claim. Frozen contracts and old negative raw-ranking evidence
+remain unchanged. No additional training,pilot,seed or AutoDL job is pending.
+
+## Archive — Phase32 / final reporting freeze after completed source diagnostics
 
 Phase31 completed at69432981ca2cc5fa6885f4b5fbdc20ef9f3370df,six finals x2497
 images,five views,zero updates,model/RNG unchanged,no target access.14

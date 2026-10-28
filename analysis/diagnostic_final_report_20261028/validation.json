@@ -1,0 +1,18 @@
+{
+  "new_final_figures_visually_reviewed": 4,
+  "svg_xml_parsed": 4,
+  "html_local_links_resolve": true,
+  "table_row_counts": {
+    "comparison.csv": 10,
+    "predeclared_contrasts.csv": 7,
+    "centering_interactions.csv": 2,
+    "target_class_iou.csv": 190
+  },
+  "generator_hash_matches": true,
+  "svg_cleanup": "trailing whitespace only; numerical path data unchanged",
+  "full_cpu_tests": {
+    "passed": 708,
+    "skipped": 1,
+    "seconds": 144.64
+  }
+}

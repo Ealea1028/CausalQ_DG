@@ -1,0 +1,196 @@
+{
+  "schema_version": 1,
+  "study_status": "complete_single_seed_exploratory",
+  "accepted_target_sha256": "0da500716e88e52bb80a673310c6b4bf5686203d10e8bdc6e58269117cc6d093",
+  "generator_sha256": "41066caa2982f615922fd6ba40edcefe29eaf13326e8d0dc3eb341d1bac56435",
+  "tables": {
+    "comparison": [
+      {
+        "variant": "U0",
+        "centered": false,
+        "consistency": "none",
+        "source_miou_pct": 73.88616266688862,
+        "target_miou_pct": 65.20908497431314,
+        "source_delta_vs_same_parameterization_pp": 0.0,
+        "target_delta_vs_same_parameterization_pp": 0.0,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "UP",
+        "centered": false,
+        "consistency": "prediction",
+        "source_miou_pct": 73.88307782153669,
+        "target_miou_pct": 65.23518148291205,
+        "source_delta_vs_same_parameterization_pp": -0.003084845351930543,
+        "target_delta_vs_same_parameterization_pp": 0.02609650859890511,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "UF",
+        "centered": false,
+        "consistency": "full",
+        "source_miou_pct": 73.75901103715282,
+        "target_miou_pct": 64.7288223483299,
+        "source_delta_vs_same_parameterization_pp": -0.12715162973579996,
+        "target_delta_vs_same_parameterization_pp": -0.4802626259832521,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "UA",
+        "centered": false,
+        "consistency": "anchor",
+        "source_miou_pct": 73.85289066415433,
+        "target_miou_pct": 66.0752607708968,
+        "source_delta_vs_same_parameterization_pp": -0.03327200273429698,
+        "target_delta_vs_same_parameterization_pp": 0.866175796583657,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "UR",
+        "centered": false,
+        "consistency": "residual",
+        "source_miou_pct": 73.89118801033604,
+        "target_miou_pct": 65.47236850184204,
+        "source_delta_vs_same_parameterization_pp": 0.005025343447417896,
+        "target_delta_vs_same_parameterization_pp": 0.2632835275288903,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "C0",
+        "centered": true,
+        "consistency": "none",
+        "source_miou_pct": 73.85416251410031,
+        "target_miou_pct": 65.65977427395717,
+        "source_delta_vs_same_parameterization_pp": 0.0,
+        "target_delta_vs_same_parameterization_pp": 0.0,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "CP",
+        "centered": true,
+        "consistency": "prediction",
+        "source_miou_pct": 73.84414154795074,
+        "target_miou_pct": 65.76210700872151,
+        "source_delta_vs_same_parameterization_pp": -0.010020966149559829,
+        "target_delta_vs_same_parameterization_pp": 0.10233273476434324,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "CF",
+        "centered": true,
+        "consistency": "full",
+        "source_miou_pct": 73.71820469715351,
+        "target_miou_pct": 65.87552967240946,
+        "source_delta_vs_same_parameterization_pp": -0.13595781694679676,
+        "target_delta_vs_same_parameterization_pp": 0.21575539845228864,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "CA",
+        "centered": true,
+        "consistency": "anchor",
+        "source_miou_pct": 73.83646467188167,
+        "target_miou_pct": 66.32195195146393,
+        "source_delta_vs_same_parameterization_pp": -0.017697842218633575,
+        "target_delta_vs_same_parameterization_pp": 0.6621776775067589,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      },
+      {
+        "variant": "CR",
+        "centered": true,
+        "consistency": "residual",
+        "source_miou_pct": 73.84113558178584,
+        "target_miou_pct": 65.53859935886817,
+        "source_delta_vs_same_parameterization_pp": -0.013026932314474937,
+        "target_delta_vs_same_parameterization_pp": -0.12117491508900624,
+        "seed": 0,
+        "training_updates": 40000,
+        "source_samples": 2497,
+        "target_samples": 500
+      }
+    ],
+    "predeclared_contrasts": [
+      {
+        "comparison": "UA-U0",
+        "source_delta_pp": -0.03327200273429698,
+        "target_delta_pp": 0.866175796583657
+      },
+      {
+        "comparison": "UR-U0",
+        "source_delta_pp": 0.005025343447417896,
+        "target_delta_pp": 0.2632835275288903
+      },
+      {
+        "comparison": "UA-UR",
+        "source_delta_pp": -0.038297346181714875,
+        "target_delta_pp": 0.6028922690547667
+      },
+      {
+        "comparison": "UA-UF",
+        "source_delta_pp": 0.09387962700150299,
+        "target_delta_pp": 1.346438422566909
+      },
+      {
+        "comparison": "UA-UP",
+        "source_delta_pp": -0.030187157382366436,
+        "target_delta_pp": 0.8400792879847518
+      },
+      {
+        "comparison": "CA-C0",
+        "source_delta_pp": -0.017697842218633575,
+        "target_delta_pp": 0.6621776775067589
+      },
+      {
+        "comparison": "CR-C0",
+        "source_delta_pp": -0.013026932314474937,
+        "target_delta_pp": -0.12117491508900624
+      }
+    ],
+    "interactions": [
+      {
+        "interaction": "(UA-U0)-(CA-C0)",
+        "source_delta_pp": -0.015574160515663404,
+        "target_delta_pp": 0.20399811907689802
+      },
+      {
+        "interaction": "(UR-U0)-(CR-C0)",
+        "source_delta_pp": 0.018052275761892833,
+        "target_delta_pp": 0.3844584426178965
+      }
+    ]
+  },
+  "source_acceptance_sha256": {
+    "28": "7564bef90659b60eaead4eb4418da841b3b9e1c52f46f08c6f7bbefeb96152fa",
+    "29": "96fe64031e67a16aac5eb59013dce1eeaf23a0ae30d833d5241c13032ffb5526",
+    "30": "dd1ece5538455fa3cbb04947abe8e2738d697c2781ec7953d4ccdde39bccba9e",
+    "31": "a83f6361685471a1696bbd2ab398dbc3e866e73a4b236227ae161965a42cbe4b"
+  },
+  "additional_training_authorized": false
+}

@@ -1,6 +1,20 @@
 # CausalQ-DG
 
-## Active phase — Phase32 frozen final target evaluation — 2026-10-28
+## Completed — 20261020 Diagnostic Plan (Phase28–32) — 2026-10-28
+
+All six new40000-update runs,ten-model source diagnostics and final target
+reporting are complete. Phase32 at40c73bc evaluated all six new finals on
+frozen Cityscapes500;old U0/C0/CP/CF results are reused.14 returned files and
+coverage traces checked;all ten integer confusion matrices independently
+reduced. No further AutoDL action or training is pending.
+TargetUA/CA=66.0753/66.3220%,+0.8662/+0.6622pp vsU0/C0. UR/CR changes=
++0.2633/-0.1212pp. These are single-seed exploratory point estimates,not
+training-seed significance or proof of a unique mechanism. See the
+[complete report](analysis/diagnostic_final_report_20261028/REPORT.md),
+[performance figures](analysis/diagnostic_final_report_20261028/index.html),
+and [source diagnostics](analysis/diagnostic_final_source_20261028/index.html).
+
+## Archive — Phase32 frozen final target evaluation — 2026-10-28 (completed)
 
 Phase31 completed at6943298:six new finals x2497 source images,five views,
 zero updates,no target access.14 exported files checked locally. All six
