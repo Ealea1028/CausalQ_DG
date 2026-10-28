@@ -1,4 +1,80 @@
-# Phase31 — 六个最终模型源域诊断 — 2026-10-24
+# Phase32 — 六个新增模型最终 Cityscapes500 评估 — 2026-10-28
+
+Phase31已完成，六模型各2497张/五视图；14个导出文件哈希及摘要来源、覆盖和
+无更新状态已在本机核对。十模型源域图表见DIAGNOSTIC_PHASE31_RESULTS.md。
+全部240000步新增正式训练早已完成；当前按原方案进入最终评估，不追加训练。
+
+只评估UP/UF/UA/UR/CA/CR，各500张，共3000次目标图像推理。复用旧U0/C0/CP/CF
+已接受的目标域结果。合同在Git的phase32_target_freeze.json冻结：最终40000步
+检查点、原配置、native1024×2048整图BF16、原500清单、19类trainIds/ignore255，
+无resize/crop/flip/TTA/sliding。全部报告，不按源域诊断挑选模型或事后改方案。
+
+## 启动最终评估
+
+EXPECTED_SHA使用本阶段交付的完整40位SHA。使用独立worktree和原环境；不切换
+已完成Phase31工作区，不重复旧诊断或试跑。保留所有最终检查点和结果目录。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || { echo '请使用完整SHA'; exit 2; }
+SOURCE_REPO=/root/autodl-tmp/CausalQ_DG
+TASK_REPO="/root/autodl-tmp/CausalQ_DG_phase32_${EXPECTED_SHA:0:7}"
+git -C "$SOURCE_REPO" fetch origin codex/diagnostic-20261020
+if [[ ! -e "$TASK_REPO" ]]; then
+  git -C "$SOURCE_REPO" worktree add --detach "$TASK_REPO" "$EXPECTED_SHA"
+fi
+cd "$TASK_REPO"
+test "$(git rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git status --porcelain)"
+export PY=/root/autodl-tmp/envs/causalq-dg/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_TRAINING_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020
+bash scripts/run_diagnostic_20261020.sh "$EXPECTED_SHA" target-evaluation
+BASH
+echo '启动检查结束，终端保持打开。'
+```
+
+后台逐模型独立进程运行，共享锁防止重复任务。每25张打印进度。
+同SHA同命令可跳过已完成并核对过的模型；某模型中途失败时保留其attempt，
+下次仅重做该模型未完成的500张评估。不会从多个完成结果中挑选最高分。
+遇到OOM或环境/数据/检查点不匹配，保留日志回报，不在实例修改代码或几何。
+检查点身份、有效标签与覆盖、模型/RNG不更新、混淆矩阵归约是内联必要保护，
+不是额外GPU门槛。无需安装环境、重新扫描源数据或再做短期实验。
+
+## 查看状态并返回结果
+
+```bash
+bash <<'BASH'
+EXPECTED_SHA=FULL_40_CHARACTER_SHA_FROM_CODEX
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/diagnostic_20261020/phase32/FINAL_TARGET_SEED0_${EXPECTED_SHA:0:7}"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/status.json" ]]; then cat "$OUT/status.json"; fi
+if [[ -f "$OUT/phase32_export.zip" ]]; then
+  ls -lh "$OUT/phase32_export.zip"
+  sha256sum "$OUT/phase32_export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+完成条件：phase32_exit_code=0、status.json exit_code=0。自动产生
+phase32_export.zip，含run_manifest.json、六模型metrics.json/target_eval.jsonl、
+十模型final_comparison.json及SHA256SUMS，共15项；不含检查点或数据图片。
+下载ZIP并解压到本机CausalQ_Project，同时返回日志末尾80行。
+
+返回后在本机核对混淆矩阵、生成完整源域/目标域比较与结项报告。所有差值及
+中心化交互预先冻结，单种子仅报告点估计；目标结果不触发调参、加种子或新训练。
+本机从未加载真实权重、源/目标数据或执行CUDA推理。测试详情见phase32_release.json。
+完整CPU测试：694 passed、1 skipped，149.51秒；跳过项为Windows非特权symlink
+限制。新增12项测试，含旧target回归的21项focused测试通过；六组图表已视觉检查。
+
+---
+
+# Archive — Phase31 — 六个最终模型源域诊断 — 2026-10-24（已完成）
 
 CA/CR正式训练已完成，每组40000步；本轮六次新训练共240000步全部完成。
 本机已核对Phase30导出10个文件并独立归约源域混淆矩阵。

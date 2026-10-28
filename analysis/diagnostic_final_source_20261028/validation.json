@@ -1,0 +1,15 @@
+{
+  "figures_visually_reviewed": 6,
+  "png_count": 6,
+  "svg_xml_parsed": 6,
+  "json_parsed": true,
+  "html_image_links_resolve": true,
+  "generator_hash_matches": true,
+  "class_csv_scope": "expanded aggregate summary, not per-image records; local/archive only",
+  "svg_cleanup": "trailing whitespace removed; numerical/path data unchanged",
+  "full_cpu_tests": {
+    "passed": 694,
+    "skipped": 1,
+    "seconds": 149.51
+  }
+}

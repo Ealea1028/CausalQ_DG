@@ -1,6 +1,18 @@
 # CausalQ-DG
 
-## Active phase — Phase31 final source diagnostics — 2026-10-24
+## Active phase — Phase32 frozen final target evaluation — 2026-10-28
+
+Phase31 completed at6943298:six new finals x2497 source images,five views,
+zero updates,no target access.14 exported files checked locally. All six
+new formal runs are complete:240000 updates total. Ten-model source figures
+and per-model/per-class tables are in analysis/diagnostic_final_source_20261028;
+see [source analysis](docs/DIAGNOSTIC_PHASE31_RESULTS.md).
+Next:evaluate UP/UF/UA/UR/CA/CR on the frozen Cityscapes500,native1024x2048
+whole-image BF16. Reuse old U0/C0/CP/CF target results,report all ten and the
+predeclared comparisons. No extra training,pilot,model selection or tuning.
+[AutoDL commands](docs/AUTODL_NEXT.md).
+
+## Archive — Phase31 final source diagnostics — 2026-10-24（completed2026-10-28）
 
 Phase30 CA/CR completed40000 updates each and2497-image source validation at
 61e5d64. Source mIoU=73.8365/73.8411%;deltas vsC0=-0.0177/-0.0130pp.

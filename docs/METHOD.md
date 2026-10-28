@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — Phase31 / six completed final source diagnostics
+## Active — Phase32 / final reporting freeze after completed source diagnostics
+
+Phase31 completed at69432981ca2cc5fa6885f4b5fbdc20ef9f3370df,six finals x2497
+images,five views,zero updates,model/RNG unchanged,no target access.14
+returned JSON/CSV files verified locally;per-image records/checkpoints stay
+remote. Ten-model analysis reuses old Phase28 summaries and distinguishes
+raw versus RMS-normalized variance,two versus five views,macro versus
+GT-present and pixel-weighted statistics. See DIAGNOSTIC_PHASE31_RESULTS.md.
+
+The originally planned six new training runs are complete (240000 updates).
+Release one final target task for all UP/UF/UA/UR/CA/CR,each fixed-final40000,
+500 frozen Cityscapes IDs,native1024x2048 whole-image BF16,argmax,no resize,
+crop,flip,TTA or sliding. Reuse unchanged Phase26 U0/C0/CP/CF results;do not
+run the old four again. Same dataset reader and metric loop as the old final
+evaluation,with original per-variant centering,weights and runtime preserved.
+
+phase32_target_freeze.json pins all ten checkpoint/source identities,complete
+new recipes via config SHA,old target result hash,target membership/geometry
+and predeclared source/target contrasts and interactions. No loss/weight/budget
+changes,no best-checkpoint selection,optimizer,pilot or new training. Target
+scores are reporting only. Prior target feedback and one-seed uncertainty
+remain disclosed. After returned results,produce the complete report and stop.
+
+## Archive — Phase31 / six completed final source diagnostics
 
 Phase30 reports accepted2026-10-24 at61e5d64bf68e26dc22663ae5a8a9999e93e73911:
 CA/CR each40000 updates/source2497;source mIoU73.8365/73.8411%. Ten returned
