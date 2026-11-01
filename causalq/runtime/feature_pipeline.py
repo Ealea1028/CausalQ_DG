@@ -22,6 +22,7 @@ class FeatureWindow:
     features: DINOv3Features
     ready: object = None
     data_wait_seconds: float = 0.
+    timing_events: tuple = ()
 
     def logical(self):
         for i, sample in enumerate(self.samples):
@@ -40,6 +41,8 @@ class FeaturePipeline:
         iterator = iter(loader)
         size = self.profile['backbone_microbatch_views'] // 2
         stream = torch.cuda.Stream(device=self.device) if self.device.type == 'cuda' else None
+        if stream is not None:
+            stream.wait_stream(torch.cuda.current_stream(self.device))
         queue = deque()
         exhausted = False
         while queue or not exhausted:
@@ -61,12 +64,17 @@ class FeaturePipeline:
                 if stream is not None:
                     views = views.pin_memory() if not views.is_pinned() else views
                 with torch.cuda.stream(stream) if stream is not None else nullcontext():
+                    timing = tuple(torch.cuda.Event(enable_timing=True) for _ in range(3)) if stream is not None else ()
+                    if timing: timing[0].record(stream)
+                    gpu_views = views.to(self.device, non_blocking=True)
+                    if timing: timing[1].record(stream)
                     with torch.no_grad(), torch.autocast(self.device.type, dtype=torch.bfloat16, enabled=self.amp):
-                        features = self.backbone(views.to(self.device, non_blocking=True))
+                        features = self.backbone(gpu_views)
+                    if timing: timing[2].record(stream)
                     ready = torch.cuda.Event() if stream is not None else None
                     if ready is not None:
                         ready.record(stream)
-                queue.append(FeatureWindow(samples, features, ready, wait))
+                queue.append(FeatureWindow(samples, features, ready, wait, timing))
             if queue:
                 window = queue.popleft()
                 if stream is not None:

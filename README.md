@@ -1,5 +1,17 @@
 # CausalQ-DG
 
+## Active — Phase33 HPI DINOv2 patch16 preparation — 2026-11-01
+
+Execute [the new plan](20261031_CausalQ_HPI_DINOv2_Plan.md) one phase at a time.
+Local implementation adds a frozen state-compatible DINOv2-L/16 adapter,
+canonical paired input, bounded shared features and independent head recovery.
+Only prepare/status/package are released. Next: one AutoDL source-only CUDA
+prepare and bounded throughput calibration, zero formal updates and no target
+access. Weight/runtime/hardware identities await returned measurements.
+See [current AutoDL commands](docs/AUTODL_NEXT.md) and
+[implementation map](experiments/HPI_DINOV2_20261031/implementation_map.md).
+Historical studies below stay closed; their target scores are not new baselines.
+
 ## Completed — 20261020 Diagnostic Plan (Phase28–32) — 2026-10-28
 
 All six new40000-update runs,ten-model source diagnostics and final target

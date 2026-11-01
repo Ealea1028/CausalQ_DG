@@ -1,5 +1,44 @@
 # Method contract
 
+## Active — Phase33 / HPI DINOv2 study, prepare only
+
+Authority: 20261031_CausalQ_HPI_DINOv2_Plan.md v2 and user implementation request.
+One phase only. Replace DINOv3 with HPI-CLIP's frozen DINOv2-L14 adapted to
+patch16/512: bicubic FP32 kernel14→16 and spatial position37→32, no compensation,
+strict state load; all other tensors unchanged. DINOv2 LN/LayerScale/CLS and
+position offset0.1 remain. Decoder receives raw blocks5/11/17/23 (zero based);
+query receives final normalized patch tokens. No VLM or HPI segmentation head.
+
+Map old U0=M0 and UA scientific recipes into the independent new study.
+Preserve q=a+e/R2/static/alpha0, paired summed CE and detached-original Anchor
+CQE for UA only. Keep512 geometry,19 trainIds,22469/2497 split, AdamW1e-4,
+poly.9/40000 and clip1. Public image APIs and all old study guards remain.
+
+Execution now uses canonical step/view-local SHA256 seeds, randperm(seed+epoch),
+spawn CPU loaders or bounded threads when shared memory is small. Shared frozen
+no_grad features are normal tensors. Heads have disjoint trainable parameters,
+optimizer/RNG/cursor; only frozen inputs are shared. GPU cache has at most two
+live windows; CPU prefetch overlaps decoding. Extra GPU computation overlap
+is deferred until timing supports it. New groups pair inputs without claiming
+historical bitwise trajectories. Recovery markers commit only hashed CPU
+snapshots; partially written states never advance a head cursor.
+
+Phase33 prepare performs no optimizer steps, formal training or target access.
+It returns official/converted weight hashes, strict loading, finite BF16
+forward/backward, source pairing, single/paired numerical comparisons,
+synthetic native target geometry,2-warmup/5-repeat physical-batch calibration,
+4/8/12-worker timings, telemetry and a180-second optional compile probe.
+Frozen numerical tolerances: atol0.1/rtol0.05 and relative L2<=0.02 on frozen
+BF16 features. These are engineering tolerances, not segmentation criteria.
+Hardware/weight/runtime identities remain null until AutoDL evidence returns.
+Only prepare/status/package are executable; later training/target actions fail
+explicitly. Phase34 freezes the returned identities before releasing U0/UA.
+
+The seven planned models,280000 total future updates and all contrasts are
+predeclared in the plan. B0 aliases U0. No B1–B5 mechanism is implemented now;
+no source raw-variance ranking gate. All old studies and negative results
+below retain their original scope. New target scores remain null.
+
 ## Completed — Phase32 / 20261020 Diagnostic Plan closed
 
 All planned work is complete2026-10-28:four reused final models,six new

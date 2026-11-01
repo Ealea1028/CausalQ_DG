@@ -78,14 +78,15 @@ class TrainTransform:
             raise ValueError("crop_attempts must be positive")
 
     def _sample_crop_box(self, label: Image.Image, *, generator=None) -> tuple[int, int, int, int]:
+        rng_options = {} if generator is None else {'generator': generator}
         crop_height, crop_width = self.crop_size
         max_left = label.width - crop_width
         max_top = label.height - crop_height
         best_box = (0, 0, crop_width, crop_height)
         best_valid_fraction = -1.0
         for _ in range(self.crop_attempts):
-            left = int(torch.randint(max_left + 1, (), generator=generator).item()) if max_left else 0
-            top = int(torch.randint(max_top + 1, (), generator=generator).item()) if max_top else 0
+            left = int(torch.randint(max_left + 1, (), **rng_options).item()) if max_left else 0
+            top = int(torch.randint(max_top + 1, (), **rng_options).item()) if max_top else 0
             box = (left, top, left + crop_width, top + crop_height)
             crop = np.asarray(label.crop(box), dtype=np.uint8)
             valid_fraction = float(np.count_nonzero(crop != IGNORE_INDEX) / crop.size)
@@ -103,7 +104,7 @@ class TrainTransform:
             return best_box
 
         valid_offset = (
-            int(torch.randint(int(valid_indices.size), (), generator=generator).item())
+            int(torch.randint(int(valid_indices.size), (), **rng_options).item())
             if valid_indices.size > 1
             else 0
         )
@@ -116,10 +117,10 @@ class TrainTransform:
         top = minimum_top
         if maximum_left > minimum_left:
             left += int(
-                torch.randint(maximum_left - minimum_left + 1, (), generator=generator).item()
+                torch.randint(maximum_left - minimum_left + 1, (), **rng_options).item()
             )
         if maximum_top > minimum_top:
-            top += int(torch.randint(maximum_top - minimum_top + 1, (), generator=generator).item())
+            top += int(torch.randint(maximum_top - minimum_top + 1, (), **rng_options).item())
         return left, top, left + crop_width, top + crop_height
 
     def __call__(self, image: Image.Image, label: Image.Image, *, generator=None) -> tuple[Tensor, Tensor]:
@@ -144,7 +145,7 @@ class TrainTransform:
                 fill=IGNORE_INDEX,
             )
 
-        box = self._sample_crop_box(label, generator=generator)
+        box = self._sample_crop_box(label) if generator is None else self._sample_crop_box(label, generator=generator)
         image = image.crop(box)
         label = label.crop(box)
 

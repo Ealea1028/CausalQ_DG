@@ -85,6 +85,8 @@ def test_checkpoint_and_summary_provenance() -> None:
 
 def test_static_model_build_does_not_create_attention(monkeypatch, tmp_path: Path) -> None:
     import torch
+    # Inspect construction on CPU; this test never exercises device transfer.
+    monkeypatch.setattr(torch.nn.Module, 'to', lambda self, *args, **kwargs: self)
 
     class FakeBackbone(torch.nn.Module):
         freeze = True

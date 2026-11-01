@@ -76,6 +76,7 @@ def loader_policy(profile, *, shm_bytes=None):
         import shutil
         shm_bytes = shutil.disk_usage('/dev/shm').free if Path('/dev/shm').exists() else 0
     return {'mode': 'threads' if workers and shm_bytes < pinned * 2 else 'spawn', 'workers': workers,
+            'torch_threads_per_process':1 if workers and shm_bytes < pinned * 2 else profile['cpu_main_threads'],
             'estimated_pinned_bytes': pinned, 'estimated_host_bytes': host, 'shm_available_bytes': shm_bytes}
 
 
@@ -99,13 +100,20 @@ class ThreadLoader:
 
     def __iter__(self):
         from collections import deque
-        with ThreadPoolExecutor(self.workers) as pool:
-            pending = deque()
-            index = 0
-            while pending or index < len(self.dataset):
-                while index < len(self.dataset) and len(pending) < self.workers * self.prefetch:
-                    pending.append(pool.submit(self.dataset.__getitem__, index)); index += 1
-                sample = pending.popleft().result()
-                if self.pin and torch.cuda.is_available():
-                    sample = {**sample, 'views': sample['views'].pin_memory(), 'label': sample['label'].pin_memory()}
-                yield sample
+        previous_threads = torch.get_num_threads()
+        # Intraop pools are process-wide: fallback uses one Torch thread in
+        # the whole decoder process instead of oversubscribing every worker.
+        torch.set_num_threads(1)
+        try:
+            with ThreadPoolExecutor(self.workers) as pool:
+                pending = deque()
+                index = 0
+                while pending or index < len(self.dataset):
+                    while index < len(self.dataset) and len(pending) < self.workers * self.prefetch:
+                        pending.append(pool.submit(self.dataset.__getitem__, index)); index += 1
+                    sample = pending.popleft().result()
+                    if self.pin and torch.cuda.is_available():
+                        sample = {**sample, 'views': sample['views'].pin_memory(), 'label': sample['label'].pin_memory()}
+                    yield sample
+        finally:
+            torch.set_num_threads(previous_threads)

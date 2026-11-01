@@ -1,0 +1,4 @@
+# Install torch2.7.0 + torchvision0.22.0 from the cu128 index first.
+numpy==1.26.4
+Pillow==11.1.0
+PyYAML==6.0.2
