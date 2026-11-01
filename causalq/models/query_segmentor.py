@@ -430,11 +430,19 @@ class QuerySegmentor(nn.Module):
                            component_protocol: str | None = None) -> QuerySegmentorOutput:
         if include_anchor:
             self._require_anchor_mode(component_protocol)
-        features = self.backbone(images)
+        return self.forward_features(self.backbone(images), images.shape[-2:],
+                                     include_anchor=include_anchor, component_protocol=component_protocol)
+
+    def forward_features(self, features, output_size, *, include_anchor: bool = False,
+                         component_protocol: str | None = None) -> QuerySegmentorOutput:
+        """Consume read-only frozen features; keep the image API and math intact."""
+        if include_anchor:
+            self._require_anchor_mode(component_protocol)
+        batch_size = features.patch_tokens.shape[0]
         feature_maps = features.intermediate_maps or (features.patch_map,)
         base_patch_logits = self.decoder(feature_maps)
 
-        grouped_queries = self.query_bank(images.shape[0])
+        grouped_queries = self.query_bank(batch_size)
         residual_image_tokens = features.patch_tokens
         if self.query_attention is None:
             contextual_queries = grouped_queries
@@ -444,7 +452,7 @@ class QuerySegmentor(nn.Module):
                 flat_queries,
                 features.patch_tokens,
             ).reshape(
-                images.shape[0],
+                batch_size,
                 self.num_classes,
                 self.queries_per_class,
                 self.backbone.hidden_size,
@@ -456,7 +464,7 @@ class QuerySegmentor(nn.Module):
                 features.patch_tokens,
             )
             contextual_queries = contextual_queries.reshape(
-                images.shape[0],
+                batch_size,
                 self.num_classes,
                 self.queries_per_class,
                 self.backbone.hidden_size,
@@ -469,7 +477,6 @@ class QuerySegmentor(nn.Module):
         )
         delta_patch_logits = torch.logsumexp(query_score_maps, dim=2)
 
-        output_size = images.shape[-2:]
         base_logits = F.interpolate(
             base_patch_logits,
             size=output_size,
@@ -488,7 +495,7 @@ class QuerySegmentor(nn.Module):
         null_query_states = None
         if self.null_query_bank is not None:
             null_query_states = self.null_query_bank(
-                images.shape[0], self.num_classes
+                batch_size, self.num_classes
             )
             null_score_maps = self.query_head.query_scores(
                 residual_image_tokens,
@@ -506,7 +513,7 @@ class QuerySegmentor(nn.Module):
         anchor_logits = anchor_scaled_delta_logits = anchor_query_states = None
         if include_anchor:
             anchor_query_states = self.get_anchors()[None, :, None, :].expand(
-                images.shape[0], -1, self.queries_per_class, -1)
+                batch_size, -1, self.queries_per_class, -1)
             anchor_delta = self.query_head.delta_logits(
                 residual_image_tokens, anchor_query_states, grid_size=grid_size)
             anchor_delta = F.interpolate(anchor_delta, size=output_size, mode="bilinear", align_corners=False)
@@ -563,9 +570,9 @@ class QuerySegmentor(nn.Module):
         return self.query_bank.query_residuals
 
     def _require_anchor_mode(self, component_protocol: str | None = None) -> None:
-        if component_protocol not in (None, "diagnostic_20261020"):
+        if component_protocol not in (None, "diagnostic_20261020", "hpi_dinov2_20261031"):
             raise ValueError("Unknown component protocol")
-        allow_uncentered = component_protocol == "diagnostic_20261020"
+        allow_uncentered = component_protocol in ("diagnostic_20261020", "hpi_dinov2_20261031")
         if self.interaction != "static" or (not self.query_bank.centered_residuals and not allow_uncentered) or self.learned_null:
             raise ValueError("Anchor-only scope requires centered Static queries without learned-null")
 
