@@ -70,27 +70,27 @@ class StyleInterventionBank(nn.Module):
 
     @staticmethod
     def _sample(
-        value_range: tuple[float, float], images: Tensor
+        value_range: tuple[float, float], images: Tensor, generator=None
     ) -> Tensor:
         low, high = value_range
         return torch.empty(
             images.shape[0], 1, 1, 1, device=images.device, dtype=images.dtype
-        ).uniform_(low, high)
+        ).uniform_(low, high, generator=generator)
 
-    def photometric_view(self, images: Tensor) -> Tensor:
-        return self._photometric(images)
+    def photometric_view(self, images: Tensor, *, generator=None) -> Tensor:
+        return self._photometric(images, generator=generator)
 
-    def photometric_view_with_trace(self, images: Tensor) -> tuple[Tensor, dict]:
+    def photometric_view_with_trace(self, images: Tensor, *, generator=None) -> tuple[Tensor, dict]:
         """Identical draws/order to photometric_view; trace does not draw RNG."""
         trace = {}
-        return self._photometric(images, trace), trace
+        return self._photometric(images, trace, generator=generator), trace
 
-    def _photometric(self, images: Tensor, trace: dict | None = None) -> Tensor:
+    def _photometric(self, images: Tensor, trace: dict | None = None, *, generator=None) -> Tensor:
         dtype = images.dtype
         unit = self._unit(images)
 
         def sample(name):
-            value = self._sample(getattr(self, name), unit)
+            value = self._sample(getattr(self, name), unit, generator=generator)
             if trace is not None:
                 trace[name] = value.detach().cpu().flatten().tolist()
             return value
@@ -109,7 +109,7 @@ class StyleInterventionBank(nn.Module):
         unit = unit * temperature_scale
         if self.grayscale_probability:
             grayscale = (
-                torch.rand(unit.shape[0], 1, 1, 1, device=unit.device)
+                torch.rand(unit.shape[0], 1, 1, 1, device=unit.device, generator=generator)
                 < self.grayscale_probability
             )
             if trace is not None:

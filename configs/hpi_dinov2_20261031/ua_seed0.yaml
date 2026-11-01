@@ -1,0 +1,112 @@
+experiment:
+  id: UA_D2P16
+  phase: 33
+  status: prepare_only
+data:
+  source: gta5
+  targets: []
+  validation: gta5_holdout
+  num_classes: 19
+  random_scale:
+  - 0.5
+  - 2.0
+  horizontal_flip_probability: 0.5
+  min_valid_fraction: 0.01
+  crop_attempts: 10
+model:
+  backbone: dinov2_vitl14_hpi_p16
+  weights_dir: dinov2_vitl14
+  weights_sha256: null
+  freeze_backbone: true
+  intermediate_indices:
+  - 5
+  - 11
+  - 17
+  - 23
+  decoder_channels: 256
+  dropout: 0.1
+  query: true
+  intermediate_normalization: raw_post_block
+  final_token_normalization: final_layer_norm
+query:
+  queries_per_class: 2
+  interaction: static
+  alpha_init: 0.0
+  cross_attention_layers: 0
+  num_heads: 8
+  temperature: 0.07
+  aggregation: logsumexp
+  centered_residuals: false
+style:
+  views:
+  - original
+  - photometric
+  sequential_forward: head_only_backbone_batched
+  preserve_geometry: true
+  lambda_cf: 1.0
+  photometric:
+    brightness:
+    - 0.7
+    - 1.3
+    contrast:
+    - 0.7
+    - 1.3
+    saturation:
+    - 0.7
+    - 1.3
+    gamma:
+    - 0.8
+    - 1.2
+    temperature:
+    - 0.9
+    - 1.1
+    grayscale_probability: 0.1
+  fourier:
+    mix_strength:
+    - 0.1
+    - 0.35
+train:
+  crop_size:
+  - 512
+  - 512
+  amp: true
+  batch_size: 1
+  gradient_accumulation: 1
+  max_iterations: 40000
+  seed: 0
+  style: true
+  log_interval: 50
+optimizer:
+  type: AdamW
+  lr: 0.0001
+  weight_decay: 0.01
+  scheduler: poly
+  poly_power: 0.9
+validation:
+  interval: 40000
+  long_edge: 1024
+  patch_size: 16
+  geometry: aspect_resize_pad
+  scope: full_source_holdout
+protocol:
+  name: hpi_dinov2_20261031
+  target_access: forbidden_during_training
+  source_validation: gta5_holdout
+  target_evaluation: final_only
+  checkpoint_selection: fixed_final
+  training_authorized: false
+  study: hpi_dinov2_20261031
+  target_feedback_already_seen: true
+  raw_anchor_ranking_required: false
+causal_query_effect:
+  enabled: true
+  lambda_cqe: 1.0
+  effect_space: logits
+  reference_stop_gradient: true
+  normalization: l2_per_class_map
+  present_classes_only: true
+  valid_pixels_only: true
+  loss: smooth_l1
+  smooth_l1_beta: 1.0
+  component: anchor
+runtime_profile: configs/hpi_dinov2_20261031/runtime_high_throughput.yaml

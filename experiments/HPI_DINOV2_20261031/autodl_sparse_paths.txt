@@ -1,0 +1,17 @@
+/causalq/
+/configs/hpi_dinov2_20261031/
+/experiments/HPI_DINOV2_20261031/
+/manifests/
+/third_party/hpi_dinov2/LICENSE
+/third_party/hpi_dinov2/NOTICE.md
+/scripts/run_hpi_dinov2_20261031.sh
+/tools/run_hpi_dinov2_20261031.py
+/requirements/hpi_dinov2_cu128.txt
+/pyproject.toml
+/.gitattributes
+/.gitignore
+/AGENTS.md
+/README.md
+/docs/METHOD.md
+/docs/AUTODL_NEXT.md
+/20261031_CausalQ_HPI_DINOv2_Plan.md

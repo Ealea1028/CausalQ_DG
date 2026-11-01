@@ -84,6 +84,8 @@ def test_shared_loader_uses_frozen_centering_flag_not_baseline_name(tmp_path, mo
     m = model(variant.startswith('C'));backbone = m.backbone
     monkeypatch.setattr(backbone, 'to', lambda *a, **k: backbone)
     monkeypatch.setattr(m, 'to', lambda *a, **k: m)
+    # This is a CPU loader/config unit test: its style buffers also stay on CPU.
+    monkeypatch.setattr(shared.StyleInterventionBank, 'to', lambda self, *a, **k: self)
     captured = {}
     def constructor(*args, **kwargs):
         captured.update(kwargs)
