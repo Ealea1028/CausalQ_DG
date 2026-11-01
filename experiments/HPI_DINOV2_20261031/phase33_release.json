@@ -29,7 +29,7 @@
     "seconds": 147.8,
     "skip_reason": "Windows does not permit unprivileged symlinks"
   },
-  "new_hpi_tests": 14,
+  "new_hpi_tests": 13,
   "bash_handoff_blocks_syntax_checked": 7,
   "sparse_import_closure": {
     "ok": true,
