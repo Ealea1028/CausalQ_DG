@@ -1,4 +1,191 @@
-# 当前操作：无；20261020 Diagnostic Plan 已完成 — 2026-10-28
+# 当前操作：Phase33 — HPI DINOv2-L/patch16 准备 — 2026-11-01
+
+本机完整CPU测试：721 passed、1 skipped（Windows符号链接权限）、147.80秒；7段交接Bash语法和精简检出依赖闭包通过。
+
+本机实现完成；下一步依赖新 AutoDL 的真实权重、源数据和 CUDA，因此在此停止。
+本次只运行 prepare，0 次 optimizer.step；不启动 U0/UA，不迁移或读取 Cityscapes。
+
+运行代码固定 SHA：`114242fb72ab99192a821cc4acc650664c3cdaef`。发布分支：`codex/hpi-dinov2-20261031`。
+下列命令在**新实例终端**按1–6顺序执行，每段都是子 Bash，不会关闭交互终端。
+系统盘30GB，环境/缓存/数据均放数据盘。建议数据盘约200GB，以实际可用空间为准。
+旧实例地址和SSH端口由第4步交互读取；无需把凭据写进代码。若源数据已在相同目录，可跳过第4步。
+
+## 1. 新实例硬件与空间
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+nvidia-smi
+df -hT /root/autodl-tmp
+df -h /dev/shm
+findmnt -T /root/autodl-tmp
+mkdir -p /root/autodl-tmp/{datasets,pretrained,outputs,envs,cache}
+BASH
+echo '硬件与空间查看结束，终端保持打开。'
+```
+
+## 2. 拉取本次固定代码
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=114242fb72ab99192a821cc4acc650664c3cdaef
+RELEASE_REF=codex/hpi-dinov2-20261031
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || {
+  echo '请使用本阶段Codex交付的完整SHA'; exit 2;
+}
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+FRESH_CLONE=0
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+  FRESH_CLONE=1
+fi
+if [[ "$FRESH_CLONE" -eq 0 ]]; then
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show \
+  "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+du -sh "$CODE_DIR"
+echo "CODE_DIR=$CODE_DIR"
+BASH
+echo '代码准备结束，终端保持打开。'
+```
+
+## 3. 创建独立环境
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=114242fb72ab99192a821cc4acc650664c3cdaef
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 2
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+ENV_DIR=/root/autodl-tmp/envs/causalq-hpi
+export PIP_CACHE_DIR=/root/autodl-tmp/cache/pip
+export TORCH_HOME=/root/autodl-tmp/cache/torch
+export TORCHINDUCTOR_CACHE_DIR=/root/autodl-tmp/cache/torchinductor
+export CUDA_CACHE_PATH=/root/autodl-tmp/cache/cuda
+mkdir -p "$TORCHINDUCTOR_CACHE_DIR" "$CUDA_CACHE_PATH"
+if [[ ! -x "$ENV_DIR/bin/python" ]]; then
+  conda create -y -p "$ENV_DIR" python=3.12 pip
+fi
+PY="$ENV_DIR/bin/python"
+"$PY" -m pip install torch==2.7.0 torchvision==0.22.0 \
+  --index-url https://download.pytorch.org/whl/cu128
+"$PY" -m pip install -r "$CODE_DIR/requirements/hpi_dinov2_cu128.txt"
+"$PY" -m pip check
+"$PY" -c 'import torch; print(torch.__version__, torch.version.cuda); print(torch.cuda.get_device_name(0)); print(torch.cuda.get_device_capability(0)); print(torch.cuda.get_arch_list())'
+BASH
+echo '环境准备结束，终端保持打开。'
+```
+
+## 4. 迁移源数据
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+read -r -p "旧实例SSH主机（例如 connect.example.com）：" OLD_HOST </dev/tty
+read -r -p "旧实例SSH端口：" OLD_SSH_PORT </dev/tty
+OLD_SSH="root@$OLD_HOST"
+[[ "$OLD_SSH" != *REPLACE* && "$OLD_SSH_PORT" =~ ^[0-9]+$ ]] || exit 2
+NEW_DATA=/root/autodl-tmp/datasets
+mkdir -p "$NEW_DATA/gta5/images/images" "$NEW_DATA/gta5/labels_trainIds"
+rsync -a --partial --info=progress2 -e "ssh -p $OLD_SSH_PORT" \
+  "$OLD_SSH:/root/autodl-tmp/datasets/gta5/images/images/" \
+  "$NEW_DATA/gta5/images/images/"
+rsync -a --partial --info=progress2 -e "ssh -p $OLD_SSH_PORT" \
+  "$OLD_SSH:/root/autodl-tmp/datasets/gta5/labels_trainIds/" \
+  "$NEW_DATA/gta5/labels_trainIds/"
+du -sh "$NEW_DATA/gta5"
+df -hT /root/autodl-tmp
+BASH
+echo '源数据迁移结束，终端保持打开。'
+```
+
+## 5. 下载唯一必要权重
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+WEIGHT_DIR=/root/autodl-tmp/pretrained/dinov2_vitl14
+WEIGHT="$WEIGHT_DIR/dinov2_vitl14_pretrain.pth"
+mkdir -p "$WEIGHT_DIR"
+if [[ ! -f "$WEIGHT" ]]; then
+  curl -fL --retry 3 --retry-delay 2 --continue-at - \
+    https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth \
+    -o "$WEIGHT.partial"
+  mv "$WEIGHT.partial" "$WEIGHT"
+fi
+sha256sum "$WEIGHT"
+ls -lh "$WEIGHT"
+BASH
+echo '权重下载结束，终端保持打开。'
+```
+
+## 6. 提交一次后台 prepare
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=114242fb72ab99192a821cc4acc650664c3cdaef
+[[ "$EXPECTED_SHA" =~ ^[0-9a-f]{40}$ ]] || exit 2
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/runtime_high_throughput.yaml"
+export TORCHINDUCTOR_CACHE_DIR=/root/autodl-tmp/cache/torchinductor
+export CUDA_CACHE_PATH=/root/autodl-tmp/cache/cuda
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" prepare
+BASH
+echo '准备任务已提交，终端保持打开。'
+```
+
+prepare 自动返回 PID、固定输出目录、launcher.log；已后台脱离终端，无需额外 nohup。
+同SHA已完成时只返回原目录；失败保留旧attempt后可重试；运行中用下方status查看，不要重复提交。
+可选编译超时180秒或不受支持时回退 eager+SDPA；实际错误保留日志，回传后由本机修复发布新SHA。
+
+## 7. 查看状态并下载返回包
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=114242fb72ab99192a821cc4acc650664c3cdaef
+OUT="/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase33/PREPARE_${EXPECTED_SHA:0:7}"
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+cat "$OUT/status.json"
+if [[ -f "$OUT/export.zip" ]]; then
+  ls -lh "$OUT/export.zip"
+  sha256sum "$OUT/export.zip"
+fi
+BASH
+echo '查看结束，终端保持打开。'
+```
+
+成功条件：`status.json` 的 `status=complete`、`exit_code=0`，日志中 `phase33_exit_code=0`。
+请下载该目录的 `export.zip` 到本机项目，并提示我继续；同时贴日志末尾80行。失败时也返回已有ZIP与日志。
+导出含权重身份、实际环境、source_pairing、prepare_report、hardware_profile、输入/编译/吞吐记录、
+GPU遥测与摘要、run_manifest、SHA256SUMS；不含数据、预训练权重和checkpoint。
+权重原始/转换SHA、环境和硬件执行profile将在回传后写入Git，再发布Phase34。
+不根据prepare表现修改科学batch、分辨率、损失或训练预算。
+
+---
+
+# Archive — 20261020 Diagnostic Plan 已完成 — 2026-10-28
 
 Phase28–32全部完成。六次新增正式训练共240000步、十模型全2497张源域诊断、
 六个新模型各500张最终目标域评估均已完成；旧四模型结果按冻结规则复用。

@@ -1,0 +1,54 @@
+{
+  "phase": 33,
+  "study": "hpi_dinov2_20261031",
+  "code_release_sha": "114242fb72ab99192a821cc4acc650664c3cdaef",
+  "date": "2026-11-01",
+  "local_verification_only": true,
+  "environment": {
+    "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]",
+    "executable": "D:\\CrossDomainProject\\CausalQ_Project\\.venv\\Scripts\\python.exe",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "torch": "2.7.0+cpu",
+    "numpy": "1.26.4",
+    "Pillow": "11.1.0",
+    "pytest": "8.4.2",
+    "PyYAML": "6.0.2"
+  },
+  "command": ".venv/Scripts/python.exe -m pytest --basetemp=.test-tmp-strict-dg-hpi-full-v4",
+  "environment_overrides": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "MPLBACKEND": "Agg"
+  },
+  "full_suite": {
+    "passed": 721,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 147.8,
+    "skip_reason": "Windows does not permit unprivileged symlinks"
+  },
+  "new_hpi_tests": 14,
+  "bash_handoff_blocks_syntax_checked": 7,
+  "sparse_import_closure": {
+    "ok": true,
+    "sha": "114242fb72ab99192a821cc4acc650664c3cdaef",
+    "analysis_present": false,
+    "old_tools_present": false,
+    "entrypoint_help": true,
+    "prepare_cohort_backbone_imports": true
+  },
+  "previous_failures_resolved": [
+    "isolated CPU dependencies instead of missing torch/global MKL plotting conflict",
+    "two old construction tests now mock device transfer on CPU",
+    "optional generator preserves legacy randint call shape"
+  ],
+  "real_weight_loading_local": false,
+  "real_data_decoding_local": false,
+  "gpu_verification_local": false,
+  "formal_training_released": false,
+  "target_access_released": false,
+  "next_required_verification": "AutoDL prepare: actual weights/source/CUDA/throughput; zero optimizer steps",
+  "raw_full_test_log_sha256": "f142e5f9f88dc3a42338594ef2d150aec8dcec859bbf5824f3d448a9d1f654f5"
+}
