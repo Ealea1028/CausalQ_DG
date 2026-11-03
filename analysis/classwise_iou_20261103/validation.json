@@ -1,0 +1,19 @@
+{
+  "date": "2026-11-03",
+  "scope": "historical DINOv3 source/target classwise IoU; current HPI DINOv2 preparation unchanged",
+  "models": 10,
+  "classes": 19,
+  "domains": 2,
+  "iou_cells": 380,
+  "figures_visually_checked": 2,
+  "new_cpu_tests": 4,
+  "full_cpu_tests": {
+    "passed": 725,
+    "skipped": 1,
+    "seconds": 176.09
+  },
+  "skip_reason": "Windows unprivileged symlink permission",
+  "real_dataset_or_checkpoint_loaded": false,
+  "svg_cleanup": "trailing whitespace only; XML parsed",
+  "html_local_image_links_resolve": true
+}
