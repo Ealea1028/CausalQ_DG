@@ -1,4 +1,98 @@
-# 当前操作：Phase33 — HPI DINOv2-L/patch16 准备 — 2026-11-01
+# 当前操作：Phase34 — U0/UA 正式训练与联合源诊断 — 2026-11-04
+
+Phase33 返回ZIP及14文件校验和通过；0更新、无目标访问。
+冻结物理batch32、worker12、eager+SDPA、实际环境和权重；不再运行prepare。
+本阶段同一协调进程共享骨干，U0/UA各fresh seed0/40000更新，共80000更新。
+每1000步各头独立保存，固定final，不选best。结束后联合源2497五视图诊断。
+不需要重新安装环境、迁移/下载数据、转换权重或新增pilot。
+
+运行SHA：`9243205c5da354e67c0998b35bb4f462276b8c7e`；分支：`codex/hpi-dinov2-20261031`。
+
+## 1. 精简检出固定代码
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=9243205c5da354e67c0998b35bb4f462276b8c7e
+RELEASE_REF=codex/hpi-dinov2-20261031
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+FRESH=0
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+  FRESH=1
+fi
+if [[ "$FRESH" -eq 0 ]]; then
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+echo "代码准备成功：$CODE_DIR"
+BASH
+```
+
+## 2. 一次提交正式训练（中断恢复执行同一段）
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=9243205c5da354e67c0998b35bb4f462276b8c7e
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/runtime_high_throughput.yaml"
+export TORCHINDUCTOR_CACHE_DIR=/root/autodl-tmp/cache/torchinductor
+export CUDA_CACHE_PATH=/root/autodl-tmp/cache/cuda
+export OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1
+export CUBLAS_WORKSPACE_CONFIG=:4096:8
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" train-baselines
+echo '启动命令成功；请确认上方打印了PID、输出目录和launcher.log。'
+BASH
+```
+
+启动器自动脱离终端并加共享锁，无需另套nohup。正常运行只用第3段查看状态。
+同SHA同ACTION跳过各头已提交更新；未提交部分从其最后完整1000步状态恢复。
+保留attempt；完成的源图记录不重复推理。发生错误回传，不在实例编辑受控代码或YAML。
+
+## 3. 查看状态与回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase34/BASELINES_9243205
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/training_status.json" ]]; then cat "$OUT/training_status.json"; fi
+cat "$OUT/status.json"
+for NAME in export.zip examples.zip; do
+  if [[ -f "$OUT/$NAME" ]]; then
+    ls -lh "$OUT/$NAME"
+    sha256sum "$OUT/$NAME"
+  fi
+done
+BASH
+```
+
+完成依据：status=complete、exit_code=0、formal_optimizer_updates=80000；
+formal_report中U0/UA各40000，source_metrics各2497图、19×19整数混淆矩阵。
+训练途中training_status是当前进度；恢复进度以完整checkpoint标记为准。
+下载export.zip及examples.zip到本机项目phase34_export，并回传末尾80行日志。
+导出包括配置、权重/检查点身份、训练输入覆盖、源指标/逐类CSV、效应与两种责任统计、
+环境/吞吐/遥测摘要及SHA256SUMS；不包含checkpoint或全量源逐图诊断记录。
+全部结果回传后本机验收，下一阶段才发布B1/B2/B3。目标域仍只在Phase37最终冻结后访问。
+
+---
+
+# Archive — Phase33 — 已验收，勿重跑 prepare
 
 本机完整CPU测试：721 passed、1 skipped（Windows符号链接权限）、147.80秒；7段交接Bash语法和精简检出依赖闭包通过。
 

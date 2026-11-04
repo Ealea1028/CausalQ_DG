@@ -1,0 +1,47 @@
+{
+  "phase": 34,
+  "code_release_sha": "9243205c5da354e67c0998b35bb4f462276b8c7e",
+  "date": "2026-11-04",
+  "source_only": true,
+  "formal_training_executed_locally": false,
+  "full_cpu_suite": {
+    "passed": 729,
+    "skipped": 1,
+    "seconds": 136.36,
+    "warnings": 14,
+    "skip_reason": "Windows unprivileged symlinks"
+  },
+  "test_command": ".venv/Scripts/python.exe -m pytest --basetemp=.test-tmp-strict-dg-phase34-final",
+  "test_log_sha256": "484297a95496834f750c9645eddaac4ad55a7423e462e1081fa82e04dda9636e",
+  "environment": {
+    "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.22631-SP0",
+    "torch": "2.7.0+cpu",
+    "numpy": "1.26.4",
+    "Pillow": "11.1.0",
+    "pytest": "8.4.2",
+    "PyYAML": "6.0.2"
+  },
+  "sparse_import_closure": {
+    "passed": true,
+    "no_old_tools_or_analysis": true,
+    "frozen_files_verified": true,
+    "entrypoint_help": true
+  },
+  "bash_handoff_blocks_checked": 3,
+  "next_action": "train-baselines",
+  "scientific_updates_per_variant": 40000,
+  "total_updates": 80000,
+  "expected_physical_batch": 32,
+  "expected_workers": 12,
+  "compile_enabled": false,
+  "target_access_authorized": false,
+  "local_tests_cover": [
+    "independent gradients/RNG/optimizer",
+    "head-specific recovery cursors",
+    "absolute-step training coverage across interrupted attempts",
+    "source diagnostics metrics and no-replay resume",
+    "Phase31 style seed compatibility",
+    "compact export excludes weights/checkpoints"
+  ]
+}
