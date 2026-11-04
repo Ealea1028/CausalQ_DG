@@ -1,0 +1,11 @@
+{
+  "source_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428",
+  "converted_tensor_digest": "aa777efc1addc1a848a986e358f5f6243b3a26d349fe061be1984253c8d32242",
+  "recipe": "hpi_clip_fp32_bicubic_align_corners_false_v1",
+  "changed_keys": [
+    "patch_embed.proj.weight",
+    "pos_embed"
+  ],
+  "source_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth",
+  "converted_file_sha256": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+}

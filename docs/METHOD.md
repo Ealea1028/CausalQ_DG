@@ -1,6 +1,28 @@
 # Method contract
 
-## Active — Phase33 / HPI DINOv2 study, prepare only
+## Active — Phase34 / paired baseline cohort
+
+Phase33 accepted2026-11-04:ZIP eac4c4f845e0b1fca964092ab8039ea07b886f0f8095f160a858b5a58cb631c1,
+14 checked files,zero updates,no target access. Raw/converted weights and
+runtime tensor digests,actual package/GPU identity and batch32/worker12/eager
+execution are frozen in experiments/HPI_DINOV2_20261031. Compile failed and
+is disabled. New common head f95c6100… differs from historical e15b11e3…;
+do not claim historical initialization equality. New U0/UA remain identical.
+
+Fresh U0/UA each40000 updates,logical batch1,two summed CE,UA Anchor CQE only,
+same frozen scientific recipe. Share only original backbone features; each
+head has its own optimizer,RNG,cursor and immutable1000-step compact commits.
+Recovery aligns full windows and skips already committed updates per head.
+Partial attempts remain as provenance; checkpoints determine committed count.
+Training traces distinguish cohort ticks,per-head updates and total80000.
+Only the final40000 heads receive joint source2497/five-view diagnostics.
+Original-view predictions contribute mIoU once; raw/RMS-normalized effects,
+correlation/cancellation,slot and class responsibilities remain distinct.
+Source records commit per image and resume without replaying completed images.
+Three fixed intervention example groups export once for the cohort.
+No target data,additional pilot,new loss or ranking gate. B1–B5 await Phase35.
+
+## Archive — Phase33 / HPI DINOv2 study, prepare only
 
 Authority: 20261031_CausalQ_HPI_DINOv2_Plan.md v2 and user implementation request.
 One phase only. Replace DINOv3 with HPI-CLIP's frozen DINOv2-L14 adapted to

@@ -1,0 +1,24 @@
+{
+  "accepted": true,
+  "producer_sha": "114242fb72ab99192a821cc4acc650664c3cdaef",
+  "zip_sha256": "eac4c4f845e0b1fca964092ab8039ea07b886f0f8095f160a858b5a58cb631c1",
+  "files_verified": {
+    "compile.log": "dc459dabae68df12af03f54788d2c33a7ee32e0a0bde010c403ef90df474d5a6",
+    "compile_profile.json": "51a75cd306b03c723395e9fc26f612b3d63306a7e893c697d8b02f0420885648",
+    "gpu_telemetry.csv": "3eb14b37a1cfb7ec58782532de4cc0855f0e4a137eb290b162dd08aba7d72b2f",
+    "gpu_telemetry_summary.json": "608472842f9d32ed0e4db6b81a43c4ac2abc008e9b7915751563a00f8e570631",
+    "hardware_profile.json": "d3d1155d44ebdea279cd989b8525d5394f3502749293abc9d58c56491c77db8a",
+    "input_benchmark.json": "61b1390ba31df6e3b05c09dc8e466cdb479876e91a712395007ba9e6ece5fcc0",
+    "launcher.log": "a4d34102e2e34ddbfa486f620286aaa95afb89adf4cf8b48a8dafdbbaaf5258e",
+    "prepare_report.json": "5a141fa03aba4cb09f41afd39bfc550bdf44880f10110f93d268ddc23853a080",
+    "run_manifest.json": "00eaa1abf9fd22466e0c9bd6a377bca6c705d07f40060234aad74823ee4b3d83",
+    "runtime.json": "49ac1c67c2a8c49ad3f6a4c97cef155a004ffae546181f83e9a7c5dab5a295a5",
+    "source_pairing.json": "4729b5871c3d74f33261a1023c83c262382ad6867a34d77105a7076618651637",
+    "status.json": "79948752c1bca84bee2bdfe053500997ed65899f34f9999c40ad3b4ac1a1d2a0",
+    "throughput.jsonl": "c73cd60068ab75055fcbb3140bd3c7f256b956ba1cd0bbe88449797f59b9a955",
+    "weight_identity.json": "90ad718b9a1be0273a8ecb58bd0c45e3da95439bcb8a053fd89200d5099ed492"
+  },
+  "local_checkpoint_or_image_replay": false,
+  "formal_updates": 0,
+  "target_accessed": false
+}

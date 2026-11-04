@@ -4,6 +4,7 @@ tests/test_hpi*.py text eol=lf
 scripts/run_hpi_dinov2_20261031.sh text eol=lf
 tools/run_hpi_dinov2_20261031.py text eol=lf
 configs/hpi_dinov2_20261031/*.yaml text eol=lf
+configs/hpi_dinov2_20261031/formal/*.yaml text eol=lf
 experiments/HPI_DINOV2_20261031/* text eol=lf
 requirements/hpi_dinov2_cu128.txt text eol=lf
 third_party/hpi_dinov2/* text eol=lf

@@ -4,7 +4,7 @@ optimizer_updates_per_variant: 40000
 cohort_training: true
 backbone_microbatch_views: 32
 feature_queue_windows: 2
-data_workers: 8
+data_workers: 12
 prefetch_factor: 2
 pin_memory: true
 persistent_workers: true
@@ -12,18 +12,26 @@ cpu_main_threads: 4
 cpu_worker_threads: 1
 host_pipeline_budget_gib: 24
 pinned_memory_budget_gib: 4
-prepare_backbone_memory_fraction: 0.60
+prepare_backbone_memory_fraction: 0.6
 total_gpu_memory_fraction: 0.85
 attention_backend: sdpa_auto
-compile_frozen_backbone: auto_once
+compile_frozen_backbone: false
 compile_time_limit_seconds: 180
 source_view_batch: 5
 target_image_batch: 2
 counterfactual_chunk: 4
 metric_log_interval: 50
 gpu_telemetry_interval_seconds: 2
-batch_candidates: [8, 16, 32, 64, 128]
-worker_candidates: [4, 8, 12]
+batch_candidates:
+- 8
+- 16
+- 32
+- 64
+- 128
+worker_candidates:
+- 4
+- 8
+- 12
 warmup_iterations: 2
 timed_iterations: 5
 numerical_atol: 0.1

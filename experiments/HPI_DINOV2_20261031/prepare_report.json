@@ -1,0 +1,166 @@
+{
+  "ok": true,
+  "study": "hpi_dinov2_20261031",
+  "formal_optimizer_updates": 0,
+  "optimizer_steps": 0,
+  "target_data_accessed": false,
+  "weight_identity": {
+    "source_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428",
+    "converted_tensor_digest": "aa777efc1addc1a848a986e358f5f6243b3a26d349fe061be1984253c8d32242",
+    "recipe": "hpi_clip_fp32_bicubic_align_corners_false_v1",
+    "changed_keys": [
+      "patch_embed.proj.weight",
+      "pos_embed"
+    ],
+    "source_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth",
+    "converted_file_sha256": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+  },
+  "initialization": {
+    "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+    "historical_head_sha256": "e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a",
+    "matches_historical_head": false
+  },
+  "real_source_single_vs_paired_feature_errors": {
+    "original": [
+      {
+        "max_abs": 0.06008338928222656,
+        "relative_l2": 0.001661082380451262
+      },
+      {
+        "max_abs": 0.06008338928222656,
+        "relative_l2": 0.0016610824968665838
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      }
+    ],
+    "photo": [
+      {
+        "max_abs": 0.06093788146972656,
+        "relative_l2": 0.0016609781887382269
+      },
+      {
+        "max_abs": 0.06093788146972656,
+        "relative_l2": 0.001660978072322905
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      },
+      {
+        "max_abs": 0.0,
+        "relative_l2": 0.0
+      }
+    ]
+  },
+  "shared_feature_pipeline": {
+    "data_wait_seconds": 0.2777194641530514,
+    "physical_views": 32,
+    "h2d_ms": 2.8254079818725586,
+    "backbone_ms": 185.81532287597656,
+    "head_updates": 0,
+    "bounded_head_backward_only": true
+  },
+  "backward_checks": [
+    {
+      "variant": "U0",
+      "diagnostic_alpha": 0.0,
+      "losses": [
+        3.106072187423706,
+        2.905296802520752,
+        0.0
+      ],
+      "forward_backward_ms": 879.8361206054688,
+      "gradient_l2": 35.90723419189453
+    },
+    {
+      "variant": "U0",
+      "diagnostic_alpha": 0.1,
+      "losses": [
+        3.0286991596221924,
+        2.908625364303589,
+        0.0
+      ],
+      "forward_backward_ms": 20.910879135131836,
+      "gradient_l2": 37.24867630004883
+    },
+    {
+      "variant": "UA",
+      "diagnostic_alpha": 0.0,
+      "losses": [
+        2.9848453998565674,
+        3.0579683780670166,
+        0.0
+      ],
+      "forward_backward_ms": 99.93791961669922,
+      "gradient_l2": 35.91530227661133
+    },
+    {
+      "variant": "UA",
+      "diagnostic_alpha": 0.1,
+      "losses": [
+        2.89750337600708,
+        2.988524913787842,
+        0.0014648905489593744
+      ],
+      "forward_backward_ms": 28.179712295532227,
+      "gradient_l2": 36.82117462158203
+    }
+  ],
+  "native_geometry_synthetic": [
+    {
+      "batch": 1,
+      "synthetic_only": true,
+      "gpu_ms_per_forward": 98.12944030761719,
+      "end_to_end_views_per_second": 10.184515169755226,
+      "peak_allocated_bytes": 988533248,
+      "peak_reserved_bytes": 1121976320
+    },
+    {
+      "batch": 2,
+      "synthetic_only": true,
+      "gpu_ms_per_forward": 180.84877014160156,
+      "end_to_end_views_per_second": 11.056141024940445,
+      "peak_allocated_bytes": 1252798976,
+      "peak_reserved_bytes": 1570766848
+    },
+    {
+      "batch": 4,
+      "synthetic_only": true,
+      "gpu_ms_per_forward": 384.5718994140625,
+      "end_to_end_views_per_second": 10.399969443470612,
+      "peak_allocated_bytes": 1781330432,
+      "peak_reserved_bytes": 2350907392
+    }
+  ],
+  "frozen_backbone_unchanged": true,
+  "runtime_backbone_tensor_digest": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b",
+  "memory_accounting": "batch measurements include shared backbone/cache; head parameter bytes separate",
+  "head_trainable_parameters": 3799828,
+  "per_head_parameter_bytes": 15199312,
+  "per_head_adamw_moment_bytes_when_initialized": 30398624,
+  "cohort_backward_peak_allocated_bytes": 4890259456,
+  "prepare_peak_allocated_bytes": 1781330432,
+  "prepare_peak_reserved_bytes": 2350907392
+}

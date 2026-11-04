@@ -1,0 +1,13 @@
+{
+  "manifest_sha256": {
+    "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+    "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+  },
+  "train_count": 22469,
+  "val_count": 2497,
+  "source_validation": "gta5_holdout",
+  "target_data_accessed": false,
+  "paired_files": 24966,
+  "decoded_full_census": false,
+  "examples_in_holdout": true
+}

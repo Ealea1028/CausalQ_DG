@@ -144,5 +144,5 @@ def test_launcher_rejects_unreleased_actions_and_has_valid_bash():
     assert subprocess.run([bash,'-n',script],capture_output=True).returncode==0
     result=subprocess.run([bash,'-c','source "$1" invalid prepare; echo parent_alive:$?', 'test',script],capture_output=True,text=True)
     assert 'parent_alive:2' in result.stdout
-    result=subprocess.run([bash,script,'a'*40,'train-baselines'],capture_output=True)
+    result=subprocess.run([bash,script,'a'*40,'train-b1-b3'],capture_output=True)
     assert result.returncode==2

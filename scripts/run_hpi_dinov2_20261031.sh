@@ -6,7 +6,7 @@ causalq_hpi_main() (
     echo 'Usage: bash scripts/run_hpi_dinov2_20261031.sh FULL_SHA prepare|status|package' >&2
     return 2
   fi
-  case "$2" in prepare|status|package) ;; *) echo 'Phase33: this action is not released' >&2; return 2 ;; esac
+  case "$2" in prepare|train-baselines|status|package) ;; *) echo 'This action is not released' >&2; return 2 ;; esac
   local code_dir
   code_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
   cd "$code_dir"

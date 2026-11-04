@@ -1,0 +1,20 @@
+{
+  "phase": 34,
+  "variants": [
+    "U0",
+    "UA"
+  ],
+  "horizon": 40000,
+  "checkpoint_interval": 1000,
+  "total_optimizer_updates": 80000,
+  "target_access": false,
+  "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+  "files": {
+    "configs/hpi_dinov2_20261031/runtime_high_throughput.yaml": "880c5031f9abf96385b1165e3952f202f7c4b8a5f7f0e01afae380b77bcd97d2",
+    "configs/hpi_dinov2_20261031/formal/u0_seed0.yaml": "f4d8c34c112eaf30ddc0ee77b6c3e33265f56fc5fa52c406cefe2f6209b05a84",
+    "configs/hpi_dinov2_20261031/formal/ua_seed0.yaml": "8f317b44c17d612b7b21aafed34ce27be26d0dfebdd28575434d84f75c6fe05c",
+    "experiments/HPI_DINOV2_20261031/runtime.json": "49ac1c67c2a8c49ad3f6a4c97cef155a004ffae546181f83e9a7c5dab5a295a5",
+    "experiments/HPI_DINOV2_20261031/weight_identity.json": "90ad718b9a1be0273a8ecb58bd0c45e3da95439bcb8a053fd89200d5099ed492",
+    "experiments/HPI_DINOV2_20261031/hardware_profile.json": "d3d1155d44ebdea279cd989b8525d5394f3502749293abc9d58c56491c77db8a"
+  }
+}

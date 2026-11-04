@@ -100,6 +100,8 @@ class CohortRunner:
                 raise ValueError('Missing input before head recovery cursor')
             label = sample['label'][None].to(original.patch_tokens.device, non_blocking=True)
             with head.random_scope():
+                events=tuple(torch.cuda.Event(enable_timing=True) for _ in range(2)) if label.is_cuda else ()
+                if events:events[0].record()
                 head.model.train()
                 head.optimizer.zero_grad(set_to_none=True)
                 values = update_fn(head, original, photo, label, label.shape[-2:], amp=amp)
@@ -108,11 +110,12 @@ class CohortRunner:
                 if not torch.isfinite(values).all():
                     raise FloatingPointError('Nonfinite cohort loss')
                 head.optimizer.step()
+                if events:events[1].record()
                 head.cursor += 1
                 for group in head.optimizer.param_groups:
                     group['lr'] = self.lr * (1 - head.cursor / self.horizon) ** self.power
                 # Keep metrics on device; caller flushes at controlled intervals.
-                records[head.name] = {'optimizer_updates': head.cursor, 'losses': values, 'gradient_norm': norm.detach()}
+                records[head.name] = {'optimizer_updates': head.cursor, 'losses': values, 'gradient_norm': norm.detach(), 'timing_events':events}
             if tuple(x._version for x in tensors) != versions:
                 raise ValueError('Head modified shared frozen features in-place')
         return {'cohort_tick': step + 1, 'heads': records}

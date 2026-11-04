@@ -1,6 +1,16 @@
 # CausalQ-DG
 
-## Active — Phase33 HPI DINOv2 patch16 preparation — 2026-11-01
+## Active — Phase34 paired HPI DINOv2 baselines — 2026-11-04
+
+Phase33 accepted:14 exported files and ZIP hash verified; no local weight or
+image replay. Freeze physical batch32,12 CPU workers,eager+SDPA and the actual
+RTX6000D runtime/weight identities. U0/UA now train fresh seed0/40000 updates
+each in one shared-backbone cohort,total80000 updates,1000-step recovery.
+Joint five-view source2497 diagnostics reuse original predictions for mIoU.
+Only source data is accessed; target evaluation and B1–B5 remain later phases.
+See [AutoDL handoff](docs/AUTODL_NEXT.md).
+
+## Archive — Phase33 HPI DINOv2 patch16 preparation — 2026-11-01
 
 Execute [the new plan](20261031_CausalQ_HPI_DINOv2_Plan.md) one phase at a time.
 Local implementation adds a frozen state-compatible DINOv2-L/16 adapter,
