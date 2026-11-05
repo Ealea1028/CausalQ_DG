@@ -31,11 +31,11 @@ def load_config(variant):
     return config
 
 
-def build_head(backbone, *, seed=0, decoder_channels=256, num_classes=19, dropout=.1):
+def build_head(backbone, *, seed=0, decoder_channels=256, num_classes=19, dropout=.1, head_type=QuerySegmentor):
     # Backbone construction/load must never consume the common head sequence.
     with torch.random.fork_rng(devices=[]):
         torch.set_rng_state(torch.Generator(device='cpu').manual_seed(seed).get_state())
-        return QuerySegmentor(backbone, decoder_channels=decoder_channels, num_classes=num_classes,
+        return head_type(backbone, decoder_channels=decoder_channels, num_classes=num_classes,
                               dropout=dropout, queries_per_class=2, interaction='static',
                               centered_residuals=False, alpha_init=0., temperature=.07)
 
