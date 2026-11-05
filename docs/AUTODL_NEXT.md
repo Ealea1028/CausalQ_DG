@@ -1,4 +1,75 @@
-# 当前操作：Phase34 v3 增量性能验收 — 2026-11-05
+# 当前操作：Phase35 — B1/B2/B3 正式训练与联合源诊断 — 2026-11-05
+
+Phase34 v3 返回包及14个报告文件已核验。计时14.25/15.37/15.80样本每秒，32/64差异在5%区间，
+选择显存较低的双缓冲batch32。12 spawn worker、8样本装载包、预取2。相对旧路径+7.85%，低于10%目标。
+正式训练单独统计至少120秒的稳态GPU活动。U0/UA 已接受结果直接用于后续比较。
+
+固定运行SHA：`c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9`。本机完整测试737 passed、1 skipped，精简检出与冻结核对通过。
+每个B头fresh seed0、40000更新，共120000；逻辑batch1，每1000步各自提交。运行结束自动做联合源域诊断。
+
+## 1. 精简检出并启动，断点恢复使用同一段
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9
+RELEASE_REF=codex/hpi-dinov2-20261031
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+else
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/execution_v3_formal.yaml"
+test -x "$PY"
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" train-b1-b3
+BASH
+```
+
+沿用已准备的环境、GTA5和已转换权重。启动器打印PID和目录后后台运行。
+恢复从各头最后的完整检查点开始，已提交更新按头跳过。正常运行用下方命令查看。
+
+## 2. 查看状态并回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase35/B1_B3_c4a7b6f
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/training_status.json" ]]; then cat "$OUT/training_status.json"; fi
+cat "$OUT/status.json"
+for NAME in export.zip examples.zip; do
+  if [[ -f "$OUT/$NAME" ]]; then
+    ls -lh "$OUT/$NAME"
+    sha256sum "$OUT/$NAME"
+  fi
+done
+BASH
+```
+
+完成依据：status=complete、exit_code=0、formal_optimizer_updates=120000。
+每组2497张源图、19×19混淆矩阵，B2/B3另含门控/注入及128图主路径诊断，训练稳态遥测单列。
+下载export.zip与examples.zip到本机phase35_export并回传日志末尾80行；失败时回传错误日志与已有包。
+验收后进入Phase36，目标评估安排在Phase37。
+
+---
+
+# Archive — Phase34 v3 性能验收（已完成）
 
 Phase34 v2 已验收：两个ZIP、23个报告文件、40000个配对训练步、两组2497源图覆盖及整数混淆矩阵通过。
 U0/UA 源 mIoU=72.4142/72.3767%，各40000步已完成，保留原产出及最终权重，不重训或迁移。

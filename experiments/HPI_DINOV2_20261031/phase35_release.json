@@ -1,0 +1,30 @@
+{
+  "phase": 35,
+  "code_release_sha": "c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9",
+  "date": "2026-11-05",
+  "action": "train-b1-b3",
+  "variants": [
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "formal_optimizer_updates_per_variant": 40000,
+  "total_optimizer_updates": 120000,
+  "target_access": false,
+  "execution_version": "v3_batch32_frozen",
+  "source_holdout_images": 2497,
+  "main_path_images": 128,
+  "full_cpu_suite": {
+    "passed": 737,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 151.77,
+    "skip_reason": "Windows unprivileged symlinks"
+  },
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.7.0+cpu",
+  "full_log_sha256": "2ce4b0d89927e70892b41afb035b2658303f8867b0a2dc085b7235ceb6f93fdd",
+  "sparse_import_closure": true,
+  "bash_blocks_checked": 2,
+  "local_gpu_training_executed": false
+}
