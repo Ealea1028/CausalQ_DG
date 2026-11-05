@@ -1,6 +1,21 @@
 # CausalQ-DG
 
-## Active — Phase34 paired HPI DINOv2 baselines — 2026-11-04
+## Active — Phase34 v3 performance check — 2026-11-05
+
+Phase34 v2 accepted: U0/UA each40000 updates and2497-image source diagnostics. Source mIoU72.4142/72.3767%; target untouched. One bounded v3 `performance-check` now compares complete execution paths with disposable heads and zero formal updates. No baseline retraining. See [AutoDL commands](docs/AUTODL_NEXT.md).
+
+## Archive — Phase34 throughput plan v3 — 2026-11-05
+
+The plan now requires batched loading with 12 spawn workers, bounded comparison
+of larger physical backbone batches, event-driven double buffering and complete
+cohort throughput/GPU-activity acceptance. Effective training batch=1 and 40000
+updates per model remain fixed by the user's choice. Phase33 evidence is reused;
+the v3 execution changes and performance-check action are planned, not released.
+The existing Phase34 SHA still denotes its frozen v2 execution. See
+[plan section5.7](20261031_CausalQ_HPI_DINOv2_Plan.md)
+and [current handoff boundary](docs/AUTODL_NEXT.md).
+
+## Published — Phase34 paired HPI DINOv2 baselines — 2026-11-04
 
 Phase33 accepted:14 exported files and ZIP hash verified; no local weight or
 image replay. Freeze physical batch32,12 CPU workers,eager+SDPA and the actual

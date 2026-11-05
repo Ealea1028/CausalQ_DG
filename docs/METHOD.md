@@ -1,6 +1,41 @@
 # Method contract
 
-## Active — Phase34 / paired baseline cohort
+## Active — Phase34 v3 execution acceptance — 2026-11-05
+
+The v2 baselines are complete at9243205. Both archive hashes,23 report hashes,40000 paired input ticks and two2497-image integer confusion reductions were checked. U0/UA source mIoU72.4142/72.3767%; no target access. Freeze producer/checkpoint identities as returned.
+
+The v3 performance action uses 8-sample packets, bounded spawn/thread loading, event-controlled two-slot H2D/backbone execution and batched loss collection. CPU tests preserve input, optimizer and head RNG; source utility batches exact geometry and original-view confusion, preserving image-local FP64 statistics. This action does not run source diagnosis.
+
+Compare v2 serial32, v3 double-buffer32 and one eligible larger batch,2 warmup+4 timed windows each, at most1024 disposable updates per head and zero formal updates. Measure checkpoint cost and distinguish short-window telemetry from eligible120-second steady telemetry. Do not treat the full v2 invocation GPU activity as training steady state. Returned evidence determines the execution strategy for future groups; U0/UA are not retrained.
+
+## Archive — Phase34 / throughput revision v3 — 2026-11-05
+
+The user explicitly retains effective batch1,40000 formal updates per model,
+two-view objective,optimizer/LR/precision/geometry and the seven-model matrix.
+Revise execution only:12 spawn workers as the measured starting point,8-source
+loader packets,prefetch2 with bounded candidate4,physical backbone batches
+32/64/128 (256 only when supported),and two event-controlled live GPU windows.
+Each head still performs a separate optimizer step for each source sample.
+
+Phase33 isolated backbone throughput was173.43/163.74/162.10 views/s at
+batch32/64/128. It supports no automatic larger-is-faster claim. The current
+producer waits for head consumption at window boundaries; real cross-window
+overlap remains to be implemented and verified. Compare complete cohorts,
+including data/H2D/heads and checkpoint cost,then freeze a new execution version.
+Engineering targets:steady GPU-activity median80%,cohort throughput+10% versus
+the old path,data wait<10%,peak reserved<=85% of visible memory. These are
+unmeasured acceptance targets,not scientific selection criteria or a speed claim.
+
+Plan section5.7 bounds the incremental performance check:at most3 complete
+cohort candidates,2 warmup+4 timed full feature windows each,at most1024 disposable engineering
+updates per head and zero formal updates,no mIoU/target access. Reuse accepted
+weights/runtime/data;do not rerun Phase33. The temporary states never become
+formal initial states. A new performance-check action/profile/release is needed;
+this document-only revision does not change executable configuration or acceptance
+metadata. Preserve existing producer/checkpoint identities; any execution-policy
+migration requires explicit cursor/RNG/optimizer/input continuity records.
+
+## Published — Phase34 / paired baseline cohort
 
 Phase33 accepted2026-11-04:ZIP eac4c4f845e0b1fca964092ab8039ea07b886f0f8095f160a858b5a58cb631c1,
 14 checked files,zero updates,no target access. Raw/converted weights and

@@ -1,0 +1,18 @@
+execution_version: v3_candidate_only
+loader_packet_samples: 8
+initial_workers: 12
+worker_candidates: [12, 8, 16]
+prefetch_factor: 2
+optional_prefetch_factor: 4
+input_probe_samples: 192
+input_warmup_packets: 4
+old_batch_views: 32
+larger_batch_candidates: [64, 128]
+warmup_windows: 2
+timed_windows: 4
+maximum_updates_per_head: 1024
+speed_tie_fraction: 0.05
+target_speedup_fraction: 0.10
+target_gpu_median_percent: 80
+target_data_wait_fraction: 0.10
+minimum_steady_seconds: 120

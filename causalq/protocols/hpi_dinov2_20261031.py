@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[2]
 STUDY = 'hpi_dinov2_20261031'
 HORIZON = 40000
 HISTORICAL_HEAD_SHA = 'e15b11e3b4d645fc17d936576a5d1fee49b418ce30d5ef265d899788f72d6c7a'
-RELEASED_ACTIONS = ('prepare', 'train-baselines', 'status', 'package')
+RELEASED_ACTIONS = ('prepare', 'train-baselines', 'performance-check', 'status', 'package')
 
 
 def load_profile(path=None):

@@ -56,11 +56,12 @@ class Telemetry:
         self.path, self.interval, self.stop = Path(path), interval, threading.Event()
 
     def __enter__(self):
+        self.started = time.monotonic()
         def worker():
             with self.path.open('w', newline='') as stream:
                 writer = csv.writer(stream)
                 writer.writerow(['elapsed_seconds', 'utilization_percent', 'memory_used_mib', 'power_w', 'status'])
-                started = time.monotonic()
+                started = self.started
                 while not self.stop.is_set():
                     try:
                         line = subprocess.check_output(['nvidia-smi', '--query-gpu=utilization.gpu,memory.used,power.draw',

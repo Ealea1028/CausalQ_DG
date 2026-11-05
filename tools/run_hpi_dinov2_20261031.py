@@ -31,7 +31,8 @@ def package(out):
     if status.exists() and json.loads(status.read_text()).get('status') in ('running','submitted'):
         raise RuntimeError('Package is read-only and requires a finished or failed preparation')
     files = sorted(p for p in out.rglob('*') if p.is_file() and p.suffix in ('.json','.jsonl','.csv','.log','.yaml')
-                   and not {'records','checkpoints','attempts','examples'}.intersection(p.relative_to(out).parts))
+                   and not {'records','checkpoints','attempts','examples'}.intersection(p.relative_to(out).parts)
+                   and not any(part.startswith('disposable_') for part in p.relative_to(out).parts))
     checksums = ''.join(f'{file_sha(p)}  {p.relative_to(out).as_posix()}\n' for p in files)
     (out/'SHA256SUMS').write_text(checksums, encoding='ascii', newline='\n')
     stage = out/'export.zip.partial'
@@ -46,17 +47,21 @@ def run(out, expected, action='prepare'):
     verify_checkout(expected)
     profile=load_profile(os.environ.get('CAUSALQ_RUNTIME_PROFILE'))
     write_json(out/'status.json',{'status':'running','git_sha':expected,'formal_optimizer_updates':0})
-    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':34 if action=='train-baselines' else 33,
+    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':33 if action=='prepare' else 34,
         'target_data_accessed':False,'planned_formal_optimizer_updates':80000 if action=='train-baselines' else 0,'runtime_profile':profile,
         'tracked_file_sha256':{name:file_sha(ROOT/name) for name in git('ls-files').splitlines() if (ROOT/name).is_file()},
         'python':sys.executable,'code_root':str(ROOT),'data_root':os.environ['CAUSALQ_DATA_ROOT'],
         'pretrained_root':os.environ['CAUSALQ_PRETRAINED_ROOT']})
     code=0
     try:
-        with Telemetry(out/'gpu_telemetry.csv',profile['gpu_telemetry_interval_seconds']):
+        from contextlib import nullcontext
+        with (nullcontext() if action=='performance-check' else Telemetry(out/'gpu_telemetry.csv',profile['gpu_telemetry_interval_seconds'])):
             if action=='train-baselines':
                 from causalq.runtime.hpi_training import train_baselines
                 train_baselines(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
+            elif action=='performance-check':
+                from causalq.runtime.hpi_performance import performance_check
+                performance_check(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
             else:
                 prepare(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'])
     except Exception as exc:
@@ -107,9 +112,9 @@ def launch(out, expected, action='prepare'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('expected_sha',nargs='?')
-    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-baselines','train-b1-b3','train-b4-b5','target-evaluation'))
+    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-b1-b3','train-b4-b5','target-evaluation'))
     parser.add_argument('--run',action='store_true')
-    parser.add_argument('--stage',choices=('prepare','train-baselines'),default='prepare')
+    parser.add_argument('--stage',choices=('prepare','train-baselines','performance-check'),default='prepare')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--compile-probe',type=Path)
     parser.add_argument('--probe-profile',type=Path)
@@ -119,10 +124,10 @@ def main():
         compile_probe(args.compile_probe,args.output,json.loads(args.probe_profile.read_text()))
         return 0
     if args.action not in RELEASED_ACTIONS:
-        parser.error('Only prepare/train-baselines/status/package released; further variants and target access await later phases')
+        parser.error('Further variants and target access await later phases')
     verify_checkout(args.expected_sha)
-    stage=args.action if args.action in ('prepare','train-baselines') else args.stage
-    phase,prefix=(34,'BASELINES') if stage=='train-baselines' else (33,'PREPARE')
+    stage=args.action if args.action in ('prepare','train-baselines','performance-check') else args.stage
+    phase,prefix={'prepare':(33,'PREPARE'),'train-baselines':(34,'BASELINES'),'performance-check':(34,'PERF_V3')}[stage]
     output=Path(os.environ['CAUSALQ_OUTPUT_ROOT'])/f'phase{phase}'/f'{prefix}_{args.expected_sha[:7]}'
     if args.output is not None and args.output.resolve()!=output.resolve():
         parser.error('Output must be the exact phase/SHA directory')
