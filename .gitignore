@@ -43,6 +43,8 @@ analysis/style_examples/
 /phase31_export/
 /phase32_export/
 /phase33_export/
+/phase34_export/
+/phase34_performance_export/
 /analysis/diagnostic_final_source_20261028/class_metrics.csv
 experiments/*/checkpoints/
 experiments/*/logs/
