@@ -1,0 +1,26 @@
+{
+  "phase": 34,
+  "execution_version": "v3_candidate_only",
+  "code_release_sha": "86ce3913bb8361a6f2a92a102f89bf2da7d6b759",
+  "date": "2026-11-05",
+  "accepted_formal_producer": "9243205c5da354e67c0998b35bb4f462276b8c7e",
+  "action": "performance-check",
+  "formal_updates": 0,
+  "target_access": false,
+  "source_miou_evaluation": false,
+  "full_cpu_suite": {
+    "passed": 733,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 158.68,
+    "skip_reason": "Windows unprivileged symlinks"
+  },
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.7.0+cpu",
+  "log_sha256": "32432ec23d3416b0af72745f7d7484b972621cf92c8664b5b0fbfe8d4024789b",
+  "sparse_import_closure": true,
+  "bash_blocks_checked": 2,
+  "preserved_phase34_freeze": true,
+  "performance_measured": false,
+  "formal_profile_frozen": false
+}

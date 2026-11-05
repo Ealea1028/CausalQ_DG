@@ -1,4 +1,90 @@
-# 当前操作：Phase34 — U0/UA 正式训练与联合源诊断 — 2026-11-04
+# 当前操作：Phase34 v3 增量性能验收 — 2026-11-05
+
+Phase34 v2 已验收：两个ZIP、23个报告文件、40000个配对训练步、两组2497源图覆盖及整数混淆矩阵通过。
+U0/UA 源 mIoU=72.4142/72.3767%，各40000步已完成，保留原产出及最终权重，不重训或迁移。
+依方案第5.7和14节，本次只执行 `performance-check`，使用隔离临时头，0正式更新、无mIoU和目标访问。
+现有环境、GTA5与已转换权重直接复用；不重跑prepare。完整CPU测试733 passed、1 skipped，精简检出通过。
+
+固定运行SHA：`86ce3913bb8361a6f2a92a102f89bf2da7d6b759`。分支：`codex/hpi-dinov2-20261031`。
+
+## 1. 精简检出并启动一次 v3 性能检查
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=86ce3913bb8361a6f2a92a102f89bf2da7d6b759
+RELEASE_REF=codex/hpi-dinov2-20261031
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+else
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/runtime_high_throughput.yaml"
+test -x "$PY"
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" performance-check
+BASH
+```
+
+检查启动器打印的PID、输出目录及launcher.log。协调进程自动后台运行，无需再套nohup。
+先测成批装载；随后比较旧串行32、新双缓冲32及一个合格较大batch。每候选2个预热+4个计时窗口，
+每头总临时更新最多1024，正式更新0。临时检查点只计时后丢弃。<120秒遥测不判定稳态达标。
+
+## 2. 查看状态与回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase34/PERF_V3_86ce391
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+cat "$OUT/status.json"
+if [[ -f "$OUT/export.zip" ]]; then
+  ls -lh "$OUT/export.zip"
+  sha256sum "$OUT/export.zip"
+fi
+BASH
+```
+
+成功时status=complete、exit_code=0、formal_optimizer_updates=0，export.zip含performance_v3.json、
+输入探测、候选窗口计时与遥测、临时更新计数、运行清单及SHA256SUMS。
+下载export.zip到本机phase34_performance_export并回传末尾80行；失败也返回现有日志和包。
+回传后根据实测冻结后续模型组的执行策略。Phase34 U0/UA已结，不再补训；暂不启动B1–B5。
+
+---
+
+# Archive — Phase34 v3 文档修订，已由上方执行入口取代
+
+用户已选择保留有效训练batch=1和每模型40000正式更新，增强多进程DataLoader、
+成批装载、较大骨干物理batch和异步预取。具体契约见方案第5.7节。
+Phase33已验收，不重跑prepare，不重新安装环境、迁移数据或转换权重。
+
+本次仅修改方案和阶段说明；v3的8样本装载包、事件双缓冲及performance-check
+入口尚未实现，当前没有可执行的v3新SHA或新命令。接手实施者先在本机完成实现、
+完整CPU测试与精简部署验证，再发布精确SHA及一次增量AutoDL性能验收命令。
+
+下方9243205命令仍只代表此前冻结的batch32/worker12执行方式，不会启用v3。
+如已有正式任务，保留其状态和输出；不因文档修订自动中断、重启或修改实例YAML。
+切换执行方式须另行发布带旧/新身份和每头已提交游标的恢复迁移命令，避免重复更新。
+性能回传后冻结真实策略，再发布对应训练/恢复命令。B1–B5仍留待后续阶段。
+
+---
+
+# 已发布的v2操作：Phase34 — U0/UA 正式训练与联合源诊断 — 2026-11-04
 
 Phase33 返回ZIP及14文件校验和通过；0更新、无目标访问。
 冻结物理batch32、worker12、eager+SDPA、实际环境和权重；不再运行prepare。
