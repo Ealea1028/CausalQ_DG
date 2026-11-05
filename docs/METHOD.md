@@ -1,6 +1,14 @@
 # Method contract
 
-## Active — Phase34 v3 execution acceptance — 2026-11-05
+## Active — Phase35 / anchor-only, routing and localization
+
+Phase34 v3 ZIP and14 report files verified. The matched batch32 temporary head and RNG digests agree. Serial32/double32/double64 measured14.25/15.37/15.80 source samples/s. Choose double32 under the5% memory tie rule. Gain7.85%; steady GPU activity awaits a120-second training interval. Frozen execution uses12 workers,8-sample packets,prefetch2 and two live feature slots.
+
+B1 zeroes/freezes query residuals after identical common initialization and keeps R=2 logsumexp. B2 adds one eight-head Aᵀ(AV) route over unique class anchors with a spatial sigmoid gate and gamma0.1, writing the same update to normalized tokens and raw layer24. B3 adds0.1 times the average of two area-normalized localization losses. Router seed20261031 is separate from common initialization and dropout.
+
+Three independent fresh seed0 heads each train40000 logical batch1 steps with shared frozen features and1000-step recovery. Source-only final diagnostics use exact-geometry batches and original-view confusion. B2/B3 add128-image class-deletion records and routing/gate summaries. Target reporting and B4/B5 remain later phases.
+
+## Archive — Phase34 v3 execution acceptance — 2026-11-05
 
 The v2 baselines are complete at9243205. Both archive hashes,23 report hashes,40000 paired input ticks and two2497-image integer confusion reductions were checked. U0/UA source mIoU72.4142/72.3767%; no target access. Freeze producer/checkpoint identities as returned.
 

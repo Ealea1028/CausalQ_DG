@@ -1,0 +1,478 @@
+{
+  "accepted": true,
+  "producer_sha": "86ce3913bb8361a6f2a92a102f89bf2da7d6b759",
+  "zip_sha256": "845272cc1e7bd07f2e636957cefea1700bef70a233163b46813dd15cc1fa67f8",
+  "verified_files": {
+    "input_probes.json": "e31f147203ebf884a26e0b8d7ba5353c75bad9e4a8b372eeb54ed759e2817b20",
+    "launcher.log": "4b2ca2c1f6d1c2d4671f0e3b52eab43be71cf039781999bad97009aa74aa175c",
+    "performance_v3.json": "682ca54e19cfdba57cad6ad9a27321c7dbd171dd892aca3566242e215cd39bd4",
+    "run_manifest.json": "f6c6f1a5e2f007120d8de54102d0bead71c1275f73850ea42d1c31def15028f7",
+    "status.json": "9b39b5fa8c18f1bd24895ea20c6b7a5dee20b3894ff2c619ac7e14a1979253c5",
+    "v2_serial.json": "739514db16dabd51a620c8a9b51486fffc17d8bfba6a4c669018b08af0dcf388",
+    "v2_serial_telemetry.csv": "b672f471f8b6edbe0516494ec5d72f6dca91d7a5eb2a40cea48946bda22e58e6",
+    "v2_serial_updates.jsonl": "bb6a18b307e4ef6b27a8ce27192d25ce5f3b9b59e7734ca338e4a2b8faefd6f3",
+    "v3_batch32.json": "ceec0ee71ed341d00b4de686e2cb43dff1f752ac61a8062698e29e4e2b80055f",
+    "v3_batch32_telemetry.csv": "f340c8ceecddf490c7dec13ea07966f027b1d4d56dffdbfa40017acfae9ac48b",
+    "v3_batch32_updates.jsonl": "bb6a18b307e4ef6b27a8ce27192d25ce5f3b9b59e7734ca338e4a2b8faefd6f3",
+    "v3_batch64.json": "0cc37339e4b6eda94d829b4eedbf3f0a0e0ebd458c56c071092e6d9cff7aad9f",
+    "v3_batch64_telemetry.csv": "158820016f5ba5acbcd4a5ca75ad1ad7bc192513a3ddebeffb337728d182c91f",
+    "v3_batch64_updates.jsonl": "0ac406c2bfe7aa0856e109458b2749fce90d8f2510773116b8b62f7b05f194f0"
+  },
+  "decision": "within_5_percent_choose_lower_reserved_memory",
+  "performance": {
+    "git_sha": "86ce3913bb8361a6f2a92a102f89bf2da7d6b759",
+    "study": "hpi_dinov2_20261031",
+    "execution_version": "v3_candidate_only",
+    "formal_optimizer_updates": 0,
+    "target_data_accessed": false,
+    "source_miou_computed": false,
+    "phase34_completed_baselines_reused": true,
+    "engineering_updates_per_head": 384,
+    "runtime": {
+      "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+      "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+      "torch": "2.7.0+cu128",
+      "cuda_runtime": "12.8",
+      "gpu": "NVIDIA RTX 6000D",
+      "compute_capability": [
+        12,
+        0
+      ],
+      "visible_memory_bytes": 89173131264,
+      "torch_arch_list": [
+        "sm_75",
+        "sm_80",
+        "sm_86",
+        "sm_90",
+        "sm_100",
+        "sm_120",
+        "compute_120"
+      ],
+      "deterministic_algorithms": true,
+      "cublas_workspace_config": ":4096:8",
+      "pip_freeze": [
+        "filelock==4.2.4",
+        "fsspec==2026.9.0",
+        "Jinja2==3.1.6",
+        "MarkupSafe==3.0.3",
+        "mpmath==1.3.0",
+        "networkx==3.7",
+        "numpy==1.26.4",
+        "nvidia-cublas-cu12==12.8.3.14",
+        "nvidia-cuda-cupti-cu12==12.8.57",
+        "nvidia-cuda-nvrtc-cu12==12.8.61",
+        "nvidia-cuda-runtime-cu12==12.8.57",
+        "nvidia-cudnn-cu12==9.7.1.26",
+        "nvidia-cufft-cu12==11.3.3.41",
+        "nvidia-cufile-cu12==1.13.0.11",
+        "nvidia-curand-cu12==10.3.9.55",
+        "nvidia-cusolver-cu12==11.7.2.55",
+        "nvidia-cusparse-cu12==12.5.7.53",
+        "nvidia-cusparselt-cu12==0.6.3",
+        "nvidia-nccl-cu12==2.26.2",
+        "nvidia-nvjitlink-cu12==12.8.61",
+        "nvidia-nvtx-cu12==12.8.55",
+        "packaging==26.3",
+        "pillow==11.1.0",
+        "PyYAML==6.0.2",
+        "setuptools==84.2.1",
+        "sympy==1.14.0",
+        "torch==2.7.0+cu128",
+        "torchvision==0.22.0+cu128",
+        "triton==3.3.0",
+        "typing_extensions==4.16.0",
+        "wheel==0.48.0"
+      ],
+      "nvidia_smi": "Wed Nov  4 13:27:05 2026       \n+-----------------------------------------------------------------------------------------+\n| NVIDIA-SMI 595.71.05              Driver Version: 595.71.05      CUDA Version: 13.2     |\n+-----------------------------------------+------------------------+----------------------+\n| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |\n| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |\n|                                         |                        |               MIG M. |\n|=========================================+========================+======================|\n|   0  NVIDIA RTX 6000D               On  |   00000000:38:00.0 Off |                  Off |\n| N/A   33C    P0             91W /  600W |       3MiB /  85651MiB |    100%      Default |\n|                                         |                        |             Disabled |\n+-----------------------------------------+------------------------+----------------------+\n\n+-----------------------------------------------------------------------------------------+\n| Processes:                                                                              |\n|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |\n|        ID   ID                                                               Usage      |\n|=========================================================================================|\n|  No running processes found                                                             |\n+-----------------------------------------------------------------------------------------+\n"
+    },
+    "weight_identity": {
+      "source_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428",
+      "converted_tensor_digest": "aa777efc1addc1a848a986e358f5f6243b3a26d349fe061be1984253c8d32242",
+      "recipe": "hpi_clip_fp32_bicubic_align_corners_false_v1",
+      "changed_keys": [
+        "patch_embed.proj.weight",
+        "pos_embed"
+      ],
+      "source_url": "https://dl.fbaipublicfiles.com/dinov2/dinov2_vitl14/dinov2_vitl14_pretrain.pth",
+      "converted_file_sha256": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+    },
+    "candidates": [
+      {
+        "candidate": "v2_serial",
+        "logical_batch": 1,
+        "physical_views": 32,
+        "workers": 12,
+        "loader": {
+          "mode": "spawn",
+          "workers": 12,
+          "torch_threads_per_process": 4,
+          "estimated_pinned_bytes": 251658240,
+          "estimated_host_bytes": 6694109184,
+          "shm_available_bytes": 59055800320
+        },
+        "double_buffer": false,
+        "peak_live_slots": 1,
+        "formal_updates": 0,
+        "engineering_updates_per_head": {
+          "U0": 96,
+          "UA": 96
+        },
+        "timed_windows": [
+          {
+            "index": 2,
+            "steps": 16,
+            "wait": 0.0009312964975833893,
+            "stage": 0.0,
+            "collate": 0.0,
+            "pinned": null,
+            "h2d_ms": 1.9124480485916138,
+            "backbone_ms": 185.1486053466797,
+            "wall_seconds": 1.082919180393219
+          },
+          {
+            "index": 3,
+            "steps": 16,
+            "wait": 0.0030081849545240402,
+            "stage": 0.0,
+            "collate": 0.0,
+            "pinned": null,
+            "h2d_ms": 2.159679889678955,
+            "backbone_ms": 184.7565155029297,
+            "wall_seconds": 1.0906255263835192
+          },
+          {
+            "index": 4,
+            "steps": 16,
+            "wait": 0.00041977129876613617,
+            "stage": 0.0,
+            "collate": 0.0,
+            "pinned": null,
+            "h2d_ms": 1.9234240055084229,
+            "backbone_ms": 184.9615936279297,
+            "wall_seconds": 1.0861701145768166
+          },
+          {
+            "index": 5,
+            "steps": 16,
+            "wait": 0.0002270825207233429,
+            "stage": 0.0,
+            "collate": 0.0,
+            "pinned": null,
+            "h2d_ms": 1.9086400270462036,
+            "backbone_ms": 184.57289123535156,
+            "wall_seconds": 1.0649437848478556
+          }
+        ],
+        "timed_cohort_samples_per_second": 14.248561493403699,
+        "timed_per_head_updates_per_second": {
+          "U0": 14.248561493403699,
+          "UA": 14.248561493403699
+        },
+        "wall_seconds": 23.45018574409187,
+        "timed_seconds": 4.491681495681405,
+        "cold_and_warmup_seconds": 18.958504248410463,
+        "checkpoint_seconds_included": 0.16426603868603706,
+        "head_event_ms_including_warmup": {
+          "U0": 3362.332628250122,
+          "UA": 3005.954916000366
+        },
+        "data_wait_fraction": 0.0010210731272924205,
+        "peak_allocated_bytes": 2478108672,
+        "memory_bytes": 3355443200,
+        "disposable_final_head_digests": {
+          "U0": "5ddc5909a394a47886393f7b9faa945bbf40be21f78f5a35d99a4a36030491d0",
+          "UA": "fd28eb345122434ea5dabd3a35c1993a39bda8ea28c3db9bac68c00e24243ab7"
+        },
+        "disposable_final_rng_digests": {
+          "U0": "544da96ea931abfd1fc706e4598ef53d35c282482af2c41bf64ff53d6d29ca7a",
+          "UA": "544da96ea931abfd1fc706e4598ef53d35c282482af2c41bf64ff53d6d29ca7a"
+        },
+        "same_input_feature_errors": null,
+        "activity": {
+          "interval_seconds": 4.491681495681405,
+          "samples": 2,
+          "steady_eligible": false,
+          "median_percent": 74.5,
+          "mean_percent": 74.5,
+          "p10_percent": 69.0,
+          "p90_percent": 69.0,
+          "below_50_fraction": 0.0
+        }
+      },
+      {
+        "candidate": "v3_batch32",
+        "logical_batch": 1,
+        "physical_views": 32,
+        "workers": 12,
+        "loader": {
+          "mode": "spawn",
+          "reason": null,
+          "workers": 12,
+          "prefetch": 2,
+          "packet_samples": 8,
+          "shared_memory_required_bytes": 2415919104,
+          "shared_memory_available_bytes": 59055800320,
+          "pinned_bound_bytes": 2013265920,
+          "host_bound_bytes": 11140071424,
+          "sample_tensor_bytes": 8388608
+        },
+        "double_buffer": true,
+        "peak_live_slots": 2,
+        "formal_updates": 0,
+        "engineering_updates_per_head": {
+          "U0": 96,
+          "UA": 96
+        },
+        "timed_windows": [
+          {
+            "index": 2,
+            "steps": 16,
+            "wait": 6.166473031044006e-05,
+            "stage": 0.008840328082442284,
+            "collate": 0.07071598432958126,
+            "pinned": true,
+            "h2d_ms": 2.5667519569396973,
+            "backbone_ms": 190.73114013671875,
+            "wall_seconds": 1.0468873623758554
+          },
+          {
+            "index": 3,
+            "steps": 16,
+            "wait": 7.146969437599182e-05,
+            "stage": 0.009427664801478386,
+            "collate": 0.10997186042368412,
+            "pinned": true,
+            "h2d_ms": 2.5775680541992188,
+            "backbone_ms": 190.84681701660156,
+            "wall_seconds": 1.0286365039646626
+          },
+          {
+            "index": 4,
+            "steps": 16,
+            "wait": 6.023235619068146e-05,
+            "stage": 0.008704232051968575,
+            "collate": 0.07147031836211681,
+            "pinned": true,
+            "h2d_ms": 2.5730559825897217,
+            "backbone_ms": 191.1898193359375,
+            "wall_seconds": 1.0277134329080582
+          },
+          {
+            "index": 5,
+            "steps": 16,
+            "wait": 7.42599368095398e-05,
+            "stage": 0.00932035781443119,
+            "collate": 0.0550635252147913,
+            "pinned": true,
+            "h2d_ms": 2.565056085586548,
+            "backbone_ms": 189.9402313232422,
+            "wall_seconds": 0.8858834970742464
+          }
+        ],
+        "timed_cohort_samples_per_second": 15.366815825991063,
+        "timed_per_head_updates_per_second": {
+          "U0": 15.366815825991063,
+          "UA": 15.366815825991063
+        },
+        "wall_seconds": 22.79925963282585,
+        "timed_seconds": 4.16481857560575,
+        "cold_and_warmup_seconds": 18.6344410572201,
+        "checkpoint_seconds_included": 0.17380107752978802,
+        "head_event_ms_including_warmup": {
+          "U0": 2582.0057582855225,
+          "UA": 3241.977117538452
+        },
+        "data_wait_fraction": 6.425891376258287e-05,
+        "peak_allocated_bytes": 2679468032,
+        "memory_bytes": 3573547008,
+        "disposable_final_head_digests": {
+          "U0": "5ddc5909a394a47886393f7b9faa945bbf40be21f78f5a35d99a4a36030491d0",
+          "UA": "fd28eb345122434ea5dabd3a35c1993a39bda8ea28c3db9bac68c00e24243ab7"
+        },
+        "disposable_final_rng_digests": {
+          "U0": "544da96ea931abfd1fc706e4598ef53d35c282482af2c41bf64ff53d6d29ca7a",
+          "UA": "544da96ea931abfd1fc706e4598ef53d35c282482af2c41bf64ff53d6d29ca7a"
+        },
+        "same_input_feature_errors": [
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          }
+        ],
+        "activity": {
+          "interval_seconds": 4.16481857560575,
+          "samples": 2,
+          "steady_eligible": false,
+          "median_percent": 92.0,
+          "mean_percent": 92.0,
+          "p10_percent": 87.0,
+          "p90_percent": 87.0,
+          "below_50_fraction": 0.0
+        }
+      },
+      {
+        "candidate": "v3_batch64",
+        "logical_batch": 1,
+        "physical_views": 64,
+        "workers": 12,
+        "loader": {
+          "mode": "spawn",
+          "reason": null,
+          "workers": 12,
+          "prefetch": 2,
+          "packet_samples": 8,
+          "shared_memory_required_bytes": 2415919104,
+          "shared_memory_available_bytes": 59055800320,
+          "pinned_bound_bytes": 2281701376,
+          "host_bound_bytes": 11676942336,
+          "sample_tensor_bytes": 8388608
+        },
+        "double_buffer": true,
+        "peak_live_slots": 2,
+        "formal_updates": 0,
+        "engineering_updates_per_head": {
+          "U0": 192,
+          "UA": 192
+        },
+        "timed_windows": [
+          {
+            "index": 2,
+            "steps": 32,
+            "wait": 9.464658796787262e-05,
+            "stage": 0.022144373506307602,
+            "collate": 0.12367395870387554,
+            "pinned": true,
+            "h2d_ms": 5.004159927368164,
+            "backbone_ms": 402.8717041015625,
+            "wall_seconds": 2.073641223832965
+          },
+          {
+            "index": 3,
+            "steps": 32,
+            "wait": 0.00013095326721668243,
+            "stage": 0.023751292377710342,
+            "collate": 0.10730559192597866,
+            "pinned": true,
+            "h2d_ms": 5.011712074279785,
+            "backbone_ms": 402.6915283203125,
+            "wall_seconds": 2.070241268724203
+          },
+          {
+            "index": 4,
+            "steps": 32,
+            "wait": 9.533949196338654e-05,
+            "stage": 0.020666852593421936,
+            "collate": 0.12498869746923447,
+            "pinned": true,
+            "h2d_ms": 5.056992053985596,
+            "backbone_ms": 402.6925048828125,
+            "wall_seconds": 2.0933511815965176
+          },
+          {
+            "index": 5,
+            "steps": 32,
+            "wait": 9.831786155700684e-05,
+            "stage": 0.01781557872891426,
+            "collate": 0.12166892737150192,
+            "pinned": true,
+            "h2d_ms": 5.057184219360352,
+            "backbone_ms": 401.1404113769531,
+            "wall_seconds": 1.711224677041173
+          }
+        ],
+        "timed_cohort_samples_per_second": 15.800354522096427,
+        "timed_per_head_updates_per_second": {
+          "U0": 15.800354522096427,
+          "UA": 15.800354522096427
+        },
+        "wall_seconds": 29.22775232978165,
+        "timed_seconds": 8.101084049791098,
+        "cold_and_warmup_seconds": 21.126668279990554,
+        "checkpoint_seconds_included": 0.15093216113746166,
+        "head_event_ms_including_warmup": {
+          "U0": 5189.000452041626,
+          "UA": 6502.1885414123535
+        },
+        "data_wait_fraction": 5.175322291783404e-05,
+        "peak_allocated_bytes": 4526071808,
+        "memory_bytes": 5955911680,
+        "disposable_final_head_digests": {
+          "U0": "13ae4a954f68ef74ecbfdf1f3adee60112dbfb372af32d71ca9fd42ad299d8ea",
+          "UA": "038586d5f135637973cba549d37307c3cc8ab01744460d92cde0a86a874d2463"
+        },
+        "disposable_final_rng_digests": {
+          "U0": "e53c1e63003637e60faebfe0d234b38546164b81aa2ebd9f6163f24a53392b1b",
+          "UA": "e53c1e63003637e60faebfe0d234b38546164b81aa2ebd9f6163f24a53392b1b"
+        },
+        "same_input_feature_errors": [
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          },
+          {
+            "max_abs": 0.0,
+            "relative_l2": 0.0
+          }
+        ],
+        "activity": {
+          "interval_seconds": 8.101084049791098,
+          "samples": 3,
+          "steady_eligible": false,
+          "median_percent": 77.0,
+          "mean_percent": 77.33333333333333,
+          "p10_percent": 77.0,
+          "p90_percent": 77.0,
+          "below_50_fraction": 0.0
+        }
+      }
+    ],
+    "recommended": "v3_batch32",
+    "matched_batch32_disposable_state": {
+      "head_digests_equal": true,
+      "rng_digests_equal": true
+    },
+    "speedup_fraction": 0.07848191083044109,
+    "speed_target_met": false,
+    "data_wait_target_met": true,
+    "gpu_activity_target_met": null,
+    "memory_target_met": true,
+    "disposable_states_deleted": true,
+    "profile_frozen": false
+  }
+}

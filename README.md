@@ -1,6 +1,10 @@
 # CausalQ-DG
 
-## Active — Phase34 v3 performance check — 2026-11-05
+## Active — Phase35 B1/B2/B3 — 2026-11-05
+
+Phase34 v3 performance evidence accepted. Select double-buffer32 within the5% tie band,12 workers and8-sample packets. Measured gain7.85%, below the10% target. Phase35 runs fresh B1/B2/B3,40000 updates each, then joint source2497 diagnostics. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+
+## Archive — Phase34 v3 performance check — 2026-11-05
 
 Phase34 v2 accepted: U0/UA each40000 updates and2497-image source diagnostics. Source mIoU72.4142/72.3767%; target untouched. One bounded v3 `performance-check` now compares complete execution paths with disposable heads and zero formal updates. No baseline retraining. See [AutoDL commands](docs/AUTODL_NEXT.md).
 

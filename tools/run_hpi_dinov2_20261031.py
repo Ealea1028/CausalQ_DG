@@ -45,20 +45,26 @@ def package(out):
 def run(out, expected, action='prepare'):
     from causalq.runtime.hpi_prepare import Telemetry, prepare, telemetry_summary
     verify_checkout(expected)
-    profile=load_profile(os.environ.get('CAUSALQ_RUNTIME_PROFILE'))
+    phase={'prepare':33,'train-b1-b3':35}.get(action,34)
+    planned={'train-baselines':80000,'train-b1-b3':120000}.get(action,0)
+    profile=load_profile(os.environ.get('CAUSALQ_RUNTIME_PROFILE'),phase=phase)
     write_json(out/'status.json',{'status':'running','git_sha':expected,'formal_optimizer_updates':0})
-    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':33 if action=='prepare' else 34,
-        'target_data_accessed':False,'planned_formal_optimizer_updates':80000 if action=='train-baselines' else 0,'runtime_profile':profile,
+    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':phase,
+        'target_data_accessed':False,'planned_formal_optimizer_updates':planned,'runtime_profile':profile,
         'tracked_file_sha256':{name:file_sha(ROOT/name) for name in git('ls-files').splitlines() if (ROOT/name).is_file()},
         'python':sys.executable,'code_root':str(ROOT),'data_root':os.environ['CAUSALQ_DATA_ROOT'],
         'pretrained_root':os.environ['CAUSALQ_PRETRAINED_ROOT']})
     code=0
     try:
         from contextlib import nullcontext
-        with (nullcontext() if action=='performance-check' else Telemetry(out/'gpu_telemetry.csv',profile['gpu_telemetry_interval_seconds'])):
+        with (nullcontext() if action=='performance-check' else Telemetry(out/'gpu_telemetry.csv',profile['gpu_telemetry_interval_seconds'])) as monitor:
             if action=='train-baselines':
                 from causalq.runtime.hpi_training import train_baselines
                 train_baselines(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
+            elif action=='train-b1-b3':
+                from causalq.runtime.hpi_training import train_cohort
+                train_cohort(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],
+                             git_sha=expected,phase=35,telemetry_origin=monitor.started)
             elif action=='performance-check':
                 from causalq.runtime.hpi_performance import performance_check
                 performance_check(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
@@ -70,8 +76,18 @@ def run(out, expected, action='prepare'):
         write_json(out/'failure.json',{'error':str(exc),'type':type(exc).__name__,'git_sha':expected})
     if (out/'gpu_telemetry.csv').exists():
         write_json(out/'gpu_telemetry_summary.json',telemetry_summary(out/'gpu_telemetry.csv'))
+    if action=='train-b1-b3':
+        from causalq.runtime.hpi_performance import activity
+        intervals=[]
+        for directory in (*sorted((out/'attempts').glob('*')),out):
+            interval_path=directory/'training_interval.json'
+            if interval_path.is_file() and (directory/'gpu_telemetry.csv').is_file():
+                interval=json.loads(interval_path.read_text())
+                intervals.append({'attempt':directory.relative_to(out).as_posix(),
+                    **activity(directory/'gpu_telemetry.csv',interval['start'],interval['stop'],120)})
+        write_json(out/'training_activity.json',{'training_intervals':intervals,'steady_minimum_seconds':120})
     write_json(out/'status.json',{'status':'complete' if code==0 else 'failed','exit_code':code,
-        'git_sha':expected,'formal_optimizer_updates':(80000 if code==0 else None) if action=='train-baselines' else 0,
+        'git_sha':expected,'formal_optimizer_updates':planned if code==0 or not planned else None,
         'target_data_accessed':False})
     print(f'{action}_exit_code={code}\noutput_directory={out}\nexport={out / "export.zip"}',flush=True)
     package(out)
@@ -112,9 +128,11 @@ def launch(out, expected, action='prepare'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('expected_sha',nargs='?')
-    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-b1-b3','train-b4-b5','target-evaluation'))
+    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-b4-b5','target-evaluation'))
     parser.add_argument('--run',action='store_true')
-    parser.add_argument('--stage',choices=('prepare','train-baselines','performance-check'),default='prepare')
+    stages={'prepare':(33,'PREPARE'),'train-baselines':(34,'BASELINES'),'performance-check':(34,'PERF_V3'),
+            'train-b1-b3':(35,'B1_B3')}
+    parser.add_argument('--stage',choices=tuple(stages),default='prepare')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--compile-probe',type=Path)
     parser.add_argument('--probe-profile',type=Path)
@@ -126,8 +144,8 @@ def main():
     if args.action not in RELEASED_ACTIONS:
         parser.error('Further variants and target access await later phases')
     verify_checkout(args.expected_sha)
-    stage=args.action if args.action in ('prepare','train-baselines','performance-check') else args.stage
-    phase,prefix={'prepare':(33,'PREPARE'),'train-baselines':(34,'BASELINES'),'performance-check':(34,'PERF_V3')}[stage]
+    stage=args.action if args.action in stages else args.stage
+    phase,prefix=stages[stage]
     output=Path(os.environ['CAUSALQ_OUTPUT_ROOT'])/f'phase{phase}'/f'{prefix}_{args.expected_sha[:7]}'
     if args.output is not None and args.output.resolve()!=output.resolve():
         parser.error('Output must be the exact phase/SHA directory')

@@ -1,0 +1,23 @@
+{
+  "phase": 35,
+  "variants": [
+    "B1",
+    "B2",
+    "B3"
+  ],
+  "horizon": 40000,
+  "checkpoint_interval": 1000,
+  "total_optimizer_updates": 120000,
+  "target_access": false,
+  "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+  "execution_version": "v3_batch32_frozen",
+  "files": {
+    "configs/hpi_dinov2_20261031/execution_v3_formal.yaml": "adabd83c69bd89e82096211193548e0532a7f997aa22ae0e17d18ae26621f919",
+    "experiments/HPI_DINOV2_20261031/phase34_v3_acceptance.json": "1673ab883755294ff76045ab2b538aec9b7649d8b3f7abebcfa369f21300783d",
+    "experiments/HPI_DINOV2_20261031/phase34_freeze.json": "af38612bd423ed84a4fb941fc6ccaf9d6fd9014edd6e8c89e5888bcb445d5131",
+    "experiments/HPI_DINOV2_20261031/source_intervention128.txt": "cd463ce271078cd330ba1791de6551985006cee5dfcf64f347e935adb2302d60",
+    "configs/hpi_dinov2_20261031/formal/b1_seed0.yaml": "c3bdcffa9deb1c6aefde435ea3039b3572328211546c9eb06d0cd7617f41e5be",
+    "configs/hpi_dinov2_20261031/formal/b2_seed0.yaml": "699e8464a83e2b7b72d30df9f710473329df0dc3366d6a092f3e2fdb59136c4f",
+    "configs/hpi_dinov2_20261031/formal/b3_seed0.yaml": "86736b412c3b4c67d698d4b25f0e7d83c74adc74422b44a76a2865b0e7d18727"
+  }
+}

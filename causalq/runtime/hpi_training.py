@@ -20,17 +20,19 @@ from causalq.metrics.miou import MeanIoU
 from .identity import file_sha, tree_digest, write_json
 from .input_stream import CanonicalInputStream, make_loader
 from .feature_pipeline import FeaturePipeline, slice_features
-from .cohort_runner import CohortRunner, IndependentHead, capture_rng, head_state, commit_head, restore_head
+from .cohort_runner import CohortRunner, IndependentHead, capture_rng, head_state, commit_head, restore_head, baseline_backward
 from .hpi_prepare import configure
 
 DIRECTORY = ROOT/'experiments/HPI_DINOV2_20261031'
 
 
-def verify_freeze():
-    freeze=json.loads((DIRECTORY/'phase34_freeze.json').read_text())
+def verify_freeze(phase=34):
+    if phase==35:
+        verify_freeze(34)
+    freeze=json.loads((DIRECTORY/f'phase{phase}_freeze.json').read_text())
     for name,digest in freeze['files'].items():
         if file_sha(ROOT/name)!=digest:
-            raise ValueError(f'Phase34 frozen file changed: {name}')
+            raise ValueError(f'Phase{phase} frozen file changed: {name}')
     return freeze
 
 
@@ -65,23 +67,39 @@ def export_coverage(out,variants,horizon):
         'paired_inputs':True,'input_coverage_sha256':file_sha(Path(out)/'input_coverage.jsonl')}
 
 
-def train_windows(runner, windows, output, identity, *, amp=True, interval=1000):
+def train_windows(runner, windows, output, identity, *, amp=True, interval=1000,
+                  update_fn=baseline_backward, batched_metrics=False):
     """A head commits its own cursor; a shared tick never replaces update counts."""
     buffered=[]
     log_path=Path(output)/'training.jsonl'
-    with log_path.open('a') as log:
-        for window in windows:
+    started=time.monotonic();steady_start=None;checkpoint_seconds=0.;data_wait_seconds=0.
+    start_cursors={head.name:head.cursor for head in runner.heads}
+    with log_path.open('a') as log, (Path(output)/'throughput.jsonl').open('a') as timing:
+        for window_index, window in enumerate(windows):
+            data_wait_seconds+=window.data_wait_seconds
             for sample,original,photo in window.logical():
-                record=runner.update(sample,original,photo,amp=amp)
+                record=runner.update(sample,original,photo,amp=amp,update_fn=update_fn)
                 buffered.append((record,sample['metadata']))
                 if record['cohort_tick']%50==0 or record['cohort_tick']==runner.horizon:
+                    metrics = {}
+                    if batched_metrics:
+                        for head in runner.heads:
+                            items=[item['heads'][head.name] for item,_ in buffered if head.name in item['heads']]
+                            if not items:
+                                continue
+                            packed=torch.stack([torch.cat((item['losses'],item['gradient_norm'].reshape(1))) for item in items]).cpu().tolist()
+                            if items[-1]['timing_events']:
+                                items[-1]['timing_events'][1].synchronize()
+                            metrics[head.name]=iter(packed)
                     for item,metadata in buffered:
                         row={'cohort_tick':item['cohort_tick'],'input':metadata,'heads':{}}
                         for name,data in item['heads'].items():
+                            values=next(metrics[name]) if batched_metrics else data['losses'].cpu().tolist()+[float(data['gradient_norm'].cpu())]
                             row['heads'][name]={'optimizer_updates':data['optimizer_updates'],
-                                'losses':data['losses'].cpu().tolist(),'gradient_norm':float(data['gradient_norm'].cpu())}
+                                'losses':values[:-1],'gradient_norm':values[-1]}
                             if data['timing_events']:
-                                data['timing_events'][1].synchronize()
+                                if not batched_metrics:
+                                    data['timing_events'][1].synchronize()
                                 row['heads'][name]['update_gpu_ms']=data['timing_events'][0].elapsed_time(data['timing_events'][1])
                         log.write(json.dumps(row)+'\n')
                     log.flush();buffered.clear()
@@ -91,16 +109,26 @@ def train_windows(runner, windows, output, identity, *, amp=True, interval=1000)
                     print('cohort_tick',record['cohort_tick'],{h.name:h.cursor for h in runner.heads},flush=True)
                 for head in runner.heads:
                     if head.name in record['heads'] and (head.cursor%interval==0 or head.cursor==runner.horizon):
+                        save_start=time.monotonic()
                         commit_head(head,Path(output)/'checkpoints',identity)
+                        checkpoint_seconds+=time.monotonic()-save_start
+            del sample,original,photo
             if window.timing_events:
                 window.timing_events[-1].synchronize()
-                with (Path(output)/'throughput.jsonl').open('a') as timing:
-                    timing.write(json.dumps({'physical_views':window.features.patch_tokens.shape[0],
+                timing.write(json.dumps({'physical_views':window.features.patch_tokens.shape[0],
                         'data_wait_seconds':window.data_wait_seconds,
+                        'staging_seconds':getattr(window,'staging_seconds',0.),
                         'h2d_ms':window.timing_events[0].elapsed_time(window.timing_events[1]),
-                        'backbone_ms':window.timing_events[1].elapsed_time(window.timing_events[2])})+'\n')
+                        'backbone_ms':window.timing_events[-2].elapsed_time(window.timing_events[-1])})+'\n')
                 if torch.cuda.max_memory_reserved()>torch.cuda.get_device_properties(0).total_memory*.85:
                     raise RuntimeError('Cohort exceeded frozen85% total GPU memory budget')
+            if window_index==1:
+                steady_start=time.monotonic()
+    stopped=time.monotonic();elapsed=stopped-started
+    return {'wall_seconds':elapsed,'steady_start_monotonic':steady_start,'stop_monotonic':stopped,
+            'checkpoint_seconds':checkpoint_seconds,'data_wait_seconds':data_wait_seconds,
+            'cohort_ticks_per_second':max(head.cursor-start_cursors[head.name] for head in runner.heads)/elapsed,
+            'updates_per_head_per_second':{head.name:(head.cursor-start_cursors[head.name])/elapsed for head in runner.heads}}
 
 
 def class_responsibility(scores,labels):
@@ -126,20 +154,65 @@ def diagnostic_seeds(identity):
     return [intervention_seed(identity)]+[int(hashlib.sha256(f'diagnostic_20261020:photo-{i}:{identity}'.encode()).hexdigest()[:8],16) for i in (2,3,4)]
 
 
-def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=True):
+def source_record_key(pair, identity, head_digests):
+    return {'identity':identity,'heads':head_digests,'id':pair.sample_id,
+            'image_size':pair.image.stat().st_size,'label_size':pair.label.stat().st_size}
+
+
+def batched_source_records(heads, backbone, dataset, out, identity, head_digests, style, examples,
+                           profile, intervention_ids, *, device, amp):
+    from .hpi_source_batch import batched_source_readout, source_batches
+    pairs = {pair.sample_id: pair for pair in dataset.pairs}
+
+    def missing():
+        for index, pair in enumerate(dataset.pairs):
+            if (out/'records'/f'{pair.sample_id}.json').exists():
+                continue
+            sample = dataset[index]
+            image = sample['image'][None]
+            views, traces = [image], []
+            seeds = diagnostic_seeds(pair.sample_id)
+            for seed in seeds:
+                view, trace = style.photometric_view_with_trace(image, generator=torch.Generator().manual_seed(seed))
+                views.append(view)
+                traces.append(trace)
+            if pair.sample_id in examples:
+                with Image.open(pair.image) as raw:
+                    export_examples(out/'examples'/pair.sample_id, raw, views, traces, seeds, style, pair.sample_id, identity=identity)
+            yield pair.sample_id, torch.cat(views), sample['label'][None]
+
+    completed = 0
+    batches = source_batches(missing(), max_images=profile['source_diagnostic_image_batch'],
+                             budget_bytes=profile['source_readout_budget_bytes'])
+    for batch in batches:
+        predictions = batched_source_readout(heads, backbone, batch, device=device, amp=amp,
+            intervention_ids=intervention_ids, counterfactual_chunk=profile['counterfactual_chunk'])
+        for sample_id, models in predictions.items():
+            key = source_record_key(pairs[sample_id], identity, head_digests)
+            write_json(out/'records'/f'{sample_id}.json', {'key': key, 'models': models})
+            completed += 1
+            if completed % 25 == 0:
+                print('new_source_records', completed, flush=True)
+
+
+def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=True,profile=None,intervention_ids=()):
     out=Path(out);out.mkdir(parents=True,exist_ok=True)
     style=StyleInterventionBank()
     summaries={h.name:DiagnosticSummary() for h in heads}
     class_summaries={h.name:DiagnosticSummary() for h in heads}
-    metrics={h.name:MeanIoU() for h in heads}
+    metrics={h.name:MeanIoU(h.model.num_classes) for h in heads}
     head_digests={h.name:tree_digest(head_state(h.model)) for h in heads}
     for h in heads:h.model.eval()
     examples={'18734','12488','08744'}
+    route_rows={h.name:[] for h in heads}
+    intervention_rows={h.name:{} for h in heads}
+    if profile is not None:
+        batched_source_records(heads,backbone,dataset,out,identity,head_digests,style,examples,profile,intervention_ids,
+                               device=device,amp=amp)
     for index,pair in enumerate(dataset.pairs):
         record_path=out/'records'/f'{pair.sample_id}.json'
         # Binding records to final heads makes resuming analysis read-only.
-        key={'identity':identity,'heads':head_digests,'id':pair.sample_id,
-             'image_size':pair.image.stat().st_size,'label_size':pair.label.stat().st_size}
+        key=source_record_key(pair,identity,head_digests)
         if record_path.exists():
             record=json.loads(record_path.read_text())
             if record['key']!=key:raise ValueError('Source diagnostic resume identity differs')
@@ -153,7 +226,7 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
             with torch.inference_mode(),torch.autocast(torch.device(device).type,dtype=torch.bfloat16,enabled=amp):
                 features=backbone(torch.cat(views).to(device,non_blocking=True))
                 for h in heads:
-                    effects=[];scores=[];confusion=MeanIoU()
+                    effects=[];scores=[];confusion=MeanIoU(h.model.num_classes)
                     for view in range(5):
                         result=h.model.forward_features(slice_features(features,view,view+1),image.shape[-2:],
                             include_anchor=True,component_protocol=STUDY)
@@ -177,13 +250,32 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
             class_summaries[h.name].add_rows('class_responsibility',value['class_responsibility'])
             class_summaries[h.name].images+=1
             metrics[h.name].confusion+=torch.tensor(value['confusion'],dtype=torch.int64)
+            if 'routing' in value:
+                route_rows[h.name].append(value['routing'])
+            if 'main_path' in value:
+                intervention_rows[h.name][pair.sample_id]=value['main_path']
         if (index+1)%25==0:print('source_images',index+1,'/',len(dataset),flush=True)
     for h in heads:
         if tree_digest(head_state(h.model))!=head_digests[h.name]:raise ValueError('Source diagnostics changed head')
         directory=out/h.name;directory.mkdir(exist_ok=True)
+        if route_rows[h.name]:
+            from statistics import fmean
+            rows = route_rows[h.name]
+            if len(rows)!=len(dataset) or set(intervention_rows[h.name])!=set(intervention_ids):
+                raise ValueError('Routing diagnostics coverage mismatch')
+            write_json(directory/'routing_summary.json',{'image_count':len(rows),'gamma':fmean(r['gamma'] for r in rows),
+                **{key:[fmean(r[key][i] for r in rows) for i in range(5)] for key in
+                   ('gate_mean','injection_feature_update_rms','route_patch_entropy')},
+                'mean_gate_style_variance':fmean(r['gate_mean_style_variance'] for r in rows)})
+            write_json(directory/'main_path128.json',{'image_count':len(intervention_ids),'views':5,
+                'scope':'GT-present class deletion, route plus selected additive readout',
+                'by_image':intervention_rows[h.name]})
         write_json(directory/'source_metrics.json',{**metrics[h.name].compute(),
             'confusion_matrix':metrics[h.name].confusion.tolist(),'sample_count':len(dataset),
-            'source_ids':[p.sample_id for p in dataset.pairs],'target_miou':None,'head_sha256':head_digests[h.name]})
+            'source_ids':[p.sample_id for p in dataset.pairs],'target_miou':None,'head_sha256':head_digests[h.name],
+            'residual_status':getattr(h.model,'residual_status','trainable'),
+            'effective_independent_queries_per_class':getattr(h.model,'effective_independent_queries_per_class',2),
+            'slot_status':'duplicated_anchor_slots' if getattr(h.model,'residual_status',None)=='structurally_absent' else 'distinct_slots'})
         write_json(directory/'source_effect_summary.json',summaries[h.name].result())
         write_json(directory/'class_responsibility.json',class_summaries[h.name].result())
         with (directory/'source_class_iou.csv').open('w',newline='') as stream:
@@ -199,7 +291,14 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
 
 
 def train_baselines(out,profile,*,data_root,pretrained_root,git_sha):
-    configure();freeze=verify_freeze()
+    return train_cohort(out,profile,data_root=data_root,pretrained_root=pretrained_root,git_sha=git_sha,phase=34)
+
+
+def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry_origin=None):
+    configure();freeze=verify_freeze(phase)
+    ablations = phase == 35
+    if ablations and profile['execution_version'] != freeze['execution_version']:
+        raise ValueError('Phase35 requires the frozen v3 profile')
     runtime=json.loads((DIRECTORY/'runtime.json').read_text())
     if torch.__version__!=runtime['torch'] or torch.cuda.get_device_name()!=runtime['gpu'] or list(torch.cuda.get_device_capability())!=runtime['compute_capability']:
         raise ValueError('Frozen runtime/GPU differs from accepted Phase33')
@@ -220,28 +319,56 @@ def train_baselines(out,profile,*,data_root,pretrained_root,git_sha):
     accepted=json.loads((DIRECTORY/'prepare_report.json').read_text())
     if backbone_digest!=accepted['runtime_backbone_tensor_digest']:raise ValueError('Runtime backbone digest differs')
     train,val=build_source_datasets(Path(data_root)/'gta5',TrainTransform((512,512)),SourceEvalTransform())
-    identity={'git_sha':git_sha,'freeze_sha256':file_sha(DIRECTORY/'phase34_freeze.json'),'backbone':backbone_digest}
+    identity={'git_sha':git_sha,'freeze_sha256':file_sha(DIRECTORY/f'phase{phase}_freeze.json'),'backbone':backbone_digest}
     out=Path(out);heads=[]
     for name in freeze['variants']:
         (out/f'config_{name}.yaml').write_bytes((ROOT/f'configs/{STUDY}/formal/{name.lower()}_seed0.yaml').read_bytes())
     for name in freeze['variants']:
-        model=build_head(backbone).cuda()
-        if initialization_identity(model)['initial_head_sha256']!=freeze['initial_head_sha256']:raise ValueError('Fresh common head initialization differs')
+        if ablations:
+            from .hpi_phase35 import build_ablation_head
+            model=build_ablation_head(backbone,name,freeze['initial_head_sha256']).cuda()
+        else:
+            model=build_head(backbone).cuda()
+            if initialization_identity(model)['initial_head_sha256']!=freeze['initial_head_sha256']:
+                raise ValueError('Fresh common head initialization differs')
         optimizer=torch.optim.AdamW([p for p in model.parameters() if p.requires_grad],lr=1e-4,weight_decay=.01)
         head=IndependentHead(name,model,optimizer,capture_rng(),anchor_cqe=name=='UA')
         restore_head(head,out/'checkpoints',identity)
+        if ablations:
+            from causalq.models.hpi_anchor_only import verify_frozen_residuals
+            verify_frozen_residuals(model)
         if not 0<=head.cursor<=40000 or any(g['lr']!=1e-4*(1-head.cursor/40000)**.9 for g in optimizer.param_groups):
             raise ValueError('Restored cursor/LR differs')
         heads.append(head)
     runner=CohortRunner(heads)
     start=time.monotonic()
+    timing=None
     if min(h.cursor for h in heads)<40000:
         stream=CanonicalInputStream(train.pairs,start=runner.aligned_start(profile['backbone_microbatch_views']))
-        loader=make_loader(stream,profile)
-        train_windows(runner,FeaturePipeline(backbone,profile)(loader),out,identity)
+        if ablations:
+            from .hpi_double_buffer import DoubleBuffer
+            from .hpi_packets import packet_loader
+            from .hpi_phase35 import ablation_backward
+            loader,policy=packet_loader(stream,profile)
+            write_json(out/'loader_policy.json',policy)
+            timing=train_windows(runner,DoubleBuffer(backbone,profile)(loader),out,identity,
+                                 update_fn=ablation_backward,batched_metrics=True)
+            del loader
+            if timing['steady_start_monotonic'] is not None and telemetry_origin is not None:
+                write_json(out/'training_interval.json',{'start':timing['steady_start_monotonic']-telemetry_origin,
+                    'stop':timing['stop_monotonic']-telemetry_origin})
+        else:
+            loader=make_loader(stream,profile)
+            train_windows(runner,FeaturePipeline(backbone,profile)(loader),out,identity)
     if any(h.cursor!=40000 for h in heads):raise ValueError('Incomplete formal updates')
     coverage=export_coverage(out,freeze['variants'],40000)
-    source_diagnostics(heads,backbone,val,out/'source',identity)
+    if ablations:
+        intervention_ids=(DIRECTORY/'source_intervention128.txt').read_text().splitlines()
+        if len(set(intervention_ids))!=128 or not set(intervention_ids)<={p.sample_id for p in val.pairs}:
+            raise ValueError('Frozen intervention subset differs from source holdout')
+        source_diagnostics(heads,backbone,val,out/'source',identity,profile=profile,intervention_ids=intervention_ids)
+    else:
+        source_diagnostics(heads,backbone,val,out/'source',identity)
     if tree_digest(backbone.state_dict())!=backbone_digest or any(p.grad is not None for p in backbone.parameters()):
         raise ValueError('Backbone changed during training/diagnostics')
     final_checkpoints={}
@@ -254,11 +381,13 @@ def train_baselines(out,profile,*,data_root,pretrained_root,git_sha):
     with zipfile.ZipFile(out/'examples.zip','w',compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted((out/'source/examples').rglob('*')):
             if path.is_file():archive.write(path,path.relative_to(out/'source/examples'))
-    write_json(out/'formal_report.json',{'phase':34,'git_sha':git_sha,'identity':identity,
+    write_json(out/'formal_report.json',{'phase':phase,'git_sha':git_sha,'identity':identity,
         'input_coverage':coverage,
         'final_checkpoints':final_checkpoints,'weight_identity':weight_identity,
-        'head_updates':{h.name:h.cursor for h in heads},'total_optimizer_updates':80000,
+        'head_updates':{h.name:h.cursor for h in heads},'total_optimizer_updates':freeze['total_optimizer_updates'],
         'target_data_accessed':False,'checkpoint_selection':'fixed_final','invocation_elapsed_seconds':time.monotonic()-start,
+        'training_invocation_timing':timing,
+        'training_loss_fields':['original_ce','photometric_ce','weighted_localization' if ablations else 'weighted_anchor_cqe'],
         'runtime_packages':actual_packages,'peak_allocated_bytes':torch.cuda.max_memory_allocated(),
         'per_head_trainable_parameters':{h.name:sum(p.numel() for p in h.model.parameters() if p.requires_grad) for h in heads},
         'peak_reserved_bytes':torch.cuda.max_memory_reserved(),
