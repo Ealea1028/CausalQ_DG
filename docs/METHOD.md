@@ -1,6 +1,24 @@
 # Method contract
 
-## Active — Phase35 / anchor-only, routing and localization
+## Active — Phase36 / prediction-effect invariance and positive contribution
+
+B4 and B5 start from identical seed0 B3-topology initializations. Each runs
+40000 logical batch1 updates on the canonical GTA5 stream. An independent
+absolute-step RNG samples one GT-present class, shared by both views and heads.
+The off forward deletes that class's route writeback and additive readout.
+It recomputes the gate and decoder from shared frozen features and replays
+the on-forward dropout without advancing the primary RNG. Gradients flow
+through both on views. The off probabilities are detached.
+
+Both heads retain the two CE terms and B3 localization. B4 adds FP32 two-view
+population variance of the GT-region prediction effect with weight 1. B5
+adds a hinge on the signed mean effect with margin 0.02 and weight 0.1.
+The fixed final heads run five-view diagnostics over all 2497 source images,
+including routing and the frozen 128-image class-deletion subset. The
+main-path report retains per-image/class data and equal-weight image summaries.
+Target access is reserved for Phase37.
+
+## Archive — Phase35 / anchor-only, routing and localization
 
 Phase34 v3 ZIP and14 report files verified. The matched batch32 temporary head and RNG digests agree. Serial32/double32/double64 measured14.25/15.37/15.80 source samples/s. Choose double32 under the5% memory tie rule. Gain7.85%; steady GPU activity awaits a120-second training interval. Frozen execution uses12 workers,8-sample packets,prefetch2 and two live feature slots.
 

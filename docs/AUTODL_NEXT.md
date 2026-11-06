@@ -1,4 +1,82 @@
-# 当前操作 — Phase35 B1/B2/B3 联合源诊断续跑
+# 当前操作 — Phase36 B4/B5 正式训练与联合源诊断
+
+Phase35 源域结果已验收。B1/B2/B3 的源域 mIoU 为 72.4013%、72.4495%、72.4771%。
+主 ZIP 和 33 个报告文件已核验，2497 张记录来自原诊断的 180 张和补丁续跑的 2317 张。
+本地缺少 Phase35 示例 ZIP，验收记录保留 AutoDL 报出的哈希。符合稳态口径的训练 GPU 利用率中位数为 68%，低于 80% 工程目标。
+
+本次 AutoDL 运行 SHA 为 `189cec5d3c659b99a26afd72d490598416a17ce8`。复用已验收的 RTX 6000D、PyTorch 2.7.0+cu128、GTA5 和转换权重。
+B4/B5 从相同的 seed0 头初始化各做 40000 次更新，共 80000 次，每 1000 步独立保存。
+B4 加预测效应不变性，B5 在此基础上加 0.02 正贡献阈值。训练后联合诊断各 2497 张源图，并对固定 128 张图报告主路径干预。目标域留到 Phase37。
+本地测试 748 项通过、1 项跳过。精简检出、冻结哈希和启动命令语法已核对。实际 CUDA 运行和显存峰值待 AutoDL 验证。
+
+## 1. 精简检出并启动
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=189cec5d3c659b99a26afd72d490598416a17ce8
+RELEASE_REF=codex/hpi-dinov2-20261031
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+else
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/execution_v3_formal.yaml"
+test -x "$PY"
+test -d "$CAUSALQ_DATA_ROOT/gta5/images/images"
+test -d "$CAUSALQ_DATA_ROOT/gta5/labels_trainIds"
+test -s "$CAUSALQ_PRETRAINED_ROOT/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth"
+df -hT /root/autodl-tmp
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" train-b4-b5
+BASH
+```
+
+启动器打印 PID 并返回终端。若任务中断，确认旧协调进程已退出后执行同一段，从各头最后一个完整检查点续跑。
+本阶段沿用 Phase35 的多进程源域诊断实现，日志中的 `cohort_tick` 是共享训练进度，`total_source_records` 是源域诊断进度。
+
+## 2. 查看状态并回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase36/B4_B5_189cec5
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+cat "$OUT/status.json"
+for NAME in training_status.json source_loader.json source/provenance.json; do
+  if [[ -f "$OUT/$NAME" ]]; then cat "$OUT/$NAME"; fi
+done
+for NAME in export.zip examples.zip; do
+  if [[ -f "$OUT/$NAME" ]]; then
+    ls -lh "$OUT/$NAME"
+    sha256sum "$OUT/$NAME"
+  fi
+done
+BASH
+```
+
+完成时确认 `status=complete`、`exit_code=0`、两头各 40000 步、累计 `80000`、`target_data_accessed=false` 及两个 ZIP 均已生成。
+下载两个 ZIP 到本机 `phase36_export`，保留原压缩包，并解压 `export.zip`。回传状态、末尾日志和两个 SHA256。
+验收通过后才进入 Phase37 的七组最终目标评估。
+
+---
+
+# Archive — Phase35 B1/B2/B3 联合源诊断续跑（已完成）
 
 训练提交 `c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9`，诊断补丁 `3dfbdca5fca19830e06ad102056197a7a11a277d`。
 续跑要求三个头都通过 40000 步最终检查点校验，沿用原输出目录和已提交的逐图 JSON。

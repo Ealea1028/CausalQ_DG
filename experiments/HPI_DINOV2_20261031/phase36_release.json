@@ -1,0 +1,35 @@
+{
+  "phase": 36,
+  "code_release_sha": "189cec5d3c659b99a26afd72d490598416a17ce8",
+  "action": "train-b4-b5",
+  "variants": [
+    "B4",
+    "B5"
+  ],
+  "formal_optimizer_updates_per_variant": 40000,
+  "total_optimizer_updates": 80000,
+  "target_access": false,
+  "execution_version": "v3_batch32_frozen",
+  "source_holdout_images": 2497,
+  "main_path_images": 128,
+  "autodl_environment": {
+    "python_path": "/root/autodl-tmp/envs/causalq-hpi/bin/python",
+    "runtime_lock": "experiments/HPI_DINOV2_20261031/runtime.json",
+    "torch": "2.7.0+cu128",
+    "cuda_runtime": "12.8",
+    "gpu": "NVIDIA RTX 6000D"
+  },
+  "full_cpu_suite": {
+    "passed": 748,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 169.16,
+    "skip_reason": "Windows unprivileged symlinks"
+  },
+  "python": "3.12.4 | packaged by Anaconda, Inc. | (main, Jun 18 2024, 15:03:56) [MSC v.1929 64 bit (AMD64)]",
+  "torch": "2.7.0+cpu",
+  "full_log_sha256": "390c97bf8409455235575b4db695f23bde53930f6d08bdd3b4a28450acfb9e75",
+  "sparse_import_closure": true,
+  "bash_blocks_checked": 2,
+  "local_gpu_training_executed": false
+}

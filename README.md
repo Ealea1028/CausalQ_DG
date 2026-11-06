@@ -1,6 +1,15 @@
 # CausalQ-DG
 
-## Active — Phase35 B1/B2/B3 — 2026-11-05
+## Active — Phase36 B4/B5
+
+Phase35 source results are accepted. B1/B2/B3 each completed 40000 updates
+and the 2497-image source diagnostics. Source mIoU was 72.4013%, 72.4495% and
+72.4771%, respectively. Phase36 trains two fresh seed0 heads, each for 40000
+updates, with the frozen v3 execution profile. B4 adds prediction-effect
+invariance. B5 also adds the signed positive-contribution margin. Both run
+joint source-only diagnostics. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+
+## Archive — Phase35 B1/B2/B3 — 2026-11-05
 
 Phase34 v3 performance evidence accepted. Select double-buffer32 within the5% tie band,12 workers and8-sample packets. Measured gain7.85%, below the10% target. Phase35 runs fresh B1/B2/B3,40000 updates each, then joint source2497 diagnostics. See [AutoDL handoff](docs/AUTODL_NEXT.md).
 
