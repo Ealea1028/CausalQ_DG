@@ -1,0 +1,45 @@
+{
+  "phase": 36,
+  "variants": [
+    "B4",
+    "B5"
+  ],
+  "horizon": 40000,
+  "checkpoint_interval": 1000,
+  "total_optimizer_updates": 80000,
+  "target_access": false,
+  "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+  "execution_version": "v3_batch32_frozen",
+  "checkpoint_selection": "fixed_final",
+  "source_holdout_images": 2497,
+  "main_path_images": 128,
+  "training_effect_policy": {
+    "architecture": "fresh_seed0_B3_topology",
+    "router_seed": 20261031,
+    "intervention": "delete_selected_class_route_writeback_and_selected_additive_readout",
+    "recompute_gate_and_base_decoder": true,
+    "sampling": "uniform_gt_present_absolute_step_local_cpu_rng_same_for_both_views_and_heads",
+    "sampling_seed": 20261031,
+    "stop_off_gradient": true,
+    "share_dropout": true,
+    "off_rng_advances_primary_sequence": false,
+    "precision": "float32_probability_effect_and_loss",
+    "lambda_inv": 1.0,
+    "lambda_use": {
+      "B4": 0.0,
+      "B5": 0.1
+    },
+    "margin": 0.02
+  },
+  "files": {
+    "experiments/HPI_DINOV2_20261031/phase35_freeze.json": "8bf482769c522212cd32ed1011849b7c637f7bdb816c19ecf6efe003132cebb3",
+    "experiments/HPI_DINOV2_20261031/phase35_acceptance.json": "1f8c455b3d62ea8e2d1cae4f6a06b0e11916055f2fd5b8f8f93966f29f7d4ff4",
+    "experiments/HPI_DINOV2_20261031/source_intervention128.txt": "cd463ce271078cd330ba1791de6551985006cee5dfcf64f347e935adb2302d60",
+    "configs/hpi_dinov2_20261031/execution_v3_formal.yaml": "adabd83c69bd89e82096211193548e0532a7f997aa22ae0e17d18ae26621f919",
+    "configs/hpi_dinov2_20261031/formal/b4_seed0.yaml": "0632cde6ca313a2d8f21e7911eed318bcbb136311874d4450cf9553449d4aeb3",
+    "configs/hpi_dinov2_20261031/formal/b5_seed0.yaml": "37bfbeb7a9297ca3832af490460a2ec75b3b4666af26362a62d7e502ec180c4f",
+    "causalq/models/hpi_query_route.py": "e9c51aba53b8757916fff8d8f244dcc2348ac233beaa955bad6f7b3a413ec3c0",
+    "causalq/runtime/hpi_phase36.py": "8e8c39fb8c732b7d0ee177f4358b52b80cfc48dde6f2bd1cc14922cc37a51aed",
+    "causalq/losses/query_effect_invariance.py": "56f0944654c5fd1a010edcf7a68d1137d72261ef5ffbf59ad0dcccd980d9bc08"
+  }
+}

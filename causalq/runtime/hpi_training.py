@@ -28,8 +28,8 @@ DIRECTORY = ROOT/'experiments/HPI_DINOV2_20261031'
 
 
 def verify_freeze(phase=34):
-    if phase==35:
-        verify_freeze(34)
+    if phase in (35, 36):
+        verify_freeze(phase - 1)
     freeze=json.loads((DIRECTORY/f'phase{phase}_freeze.json').read_text())
     for name,digest in freeze['files'].items():
         if file_sha(ROOT/name)!=digest:
@@ -282,6 +282,7 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
         directory=out/h.name;directory.mkdir(exist_ok=True)
         if route_rows[h.name]:
             from statistics import fmean
+            from .hpi_source_batch import summarize_main_path
             rows = route_rows[h.name]
             if len(rows)!=len(dataset) or set(intervention_rows[h.name])!=set(intervention_ids):
                 raise ValueError('Routing diagnostics coverage mismatch')
@@ -291,6 +292,7 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
                 'mean_gate_style_variance':fmean(r['gate_mean_style_variance'] for r in rows)})
             write_json(directory/'main_path128.json',{'image_count':len(intervention_ids),'views':5,
                 'scope':'GT-present class deletion, route plus selected additive readout',
+                'image_macro':summarize_main_path(intervention_rows[h.name]),
                 'by_image':intervention_rows[h.name]})
         write_json(directory/'source_metrics.json',{**metrics[h.name].compute(),
             'confusion_matrix':metrics[h.name].confusion.tolist(),'sample_count':len(dataset),
@@ -323,11 +325,18 @@ def require_final_source_heads(heads):
 
 def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry_origin=None,source_resume=False):
     configure();freeze=verify_freeze(phase)
-    ablations = phase == 35
-    if source_resume and not ablations:
+    ablations = phase in (35, 36)
+    if source_resume and phase != 35:
         raise ValueError('Source recovery is only released for Phase35')
     if ablations and profile['execution_version'] != freeze['execution_version']:
-        raise ValueError('Phase35 requires the frozen v3 profile')
+        raise ValueError(f'Phase{phase} requires the frozen v3 profile')
+    loss_fields = ('original_ce', 'photometric_ce', 'weighted_anchor_cqe')
+    if phase == 36:
+        from .hpi_phase36 import TRAINING_LOSS_FIELDS, effect_backward
+        loss_fields, update_fn = TRAINING_LOSS_FIELDS, effect_backward
+    elif phase == 35:
+        from .hpi_phase35 import ablation_backward
+        loss_fields, update_fn = ('original_ce', 'photometric_ce', 'weighted_localization'), ablation_backward
     runtime=json.loads((DIRECTORY/'runtime.json').read_text())
     if torch.__version__!=runtime['torch'] or torch.cuda.get_device_name()!=runtime['gpu'] or list(torch.cuda.get_device_capability())!=runtime['compute_capability']:
         raise ValueError('Frozen runtime/GPU differs from accepted Phase33')
@@ -356,7 +365,8 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
     for name in freeze['variants']:
         if ablations:
             from .hpi_phase35 import build_ablation_head
-            model=build_ablation_head(backbone,name,freeze['initial_head_sha256']).cuda()
+            architecture = 'B3' if phase == 36 else name
+            model=build_ablation_head(backbone,architecture,freeze['initial_head_sha256']).cuda()
         else:
             model=build_head(backbone).cuda()
             if initialization_identity(model)['initial_head_sha256']!=freeze['initial_head_sha256']:
@@ -382,11 +392,10 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
         if ablations:
             from .hpi_double_buffer import DoubleBuffer
             from .hpi_packets import packet_loader
-            from .hpi_phase35 import ablation_backward
             loader,policy=packet_loader(stream,profile)
             write_json(out/'loader_policy.json',policy)
             timing=train_windows(runner,DoubleBuffer(backbone,profile)(loader),out,identity,
-                                 update_fn=ablation_backward,batched_metrics=True)
+                                 update_fn=update_fn,batched_metrics=True)
             del loader
             if timing['steady_start_monotonic'] is not None and telemetry_origin is not None:
                 write_json(out/'training_interval.json',{'start':timing['steady_start_monotonic']-telemetry_origin,
@@ -423,7 +432,7 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
         'head_updates':{h.name:h.cursor for h in heads},'total_optimizer_updates':freeze['total_optimizer_updates'],
         'target_data_accessed':False,'checkpoint_selection':'fixed_final','invocation_elapsed_seconds':time.monotonic()-start,
         'training_invocation_timing':timing,
-        'training_loss_fields':['original_ce','photometric_ce','weighted_localization' if ablations else 'weighted_anchor_cqe'],
+        'training_loss_fields':loss_fields,
         'runtime_packages':actual_packages,'peak_allocated_bytes':torch.cuda.max_memory_allocated(),
         'per_head_trainable_parameters':{h.name:sum(p.numel() for p in h.model.parameters() if p.requires_grad) for h in heads},
         'peak_reserved_bytes':torch.cuda.max_memory_reserved(),

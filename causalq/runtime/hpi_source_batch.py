@@ -1,5 +1,6 @@
 """Budgeted exact-geometry source readout; keep reductions image-local."""
 from collections import OrderedDict
+from statistics import fmean
 import torch
 from causalq.protocols.hpi_dinov2_20261031 import STUDY
 from causalq.analysis.selective_stability import (
@@ -57,6 +58,22 @@ def main_path_rows(model, features, factual_logits, label, offset, chunk):
                      'negative_fraction': float((effect < -1e-6).double().mean()),
                      'near_zero_fraction': float((effect.abs() <= 1e-6).double().mean())})
     return rows
+
+
+def summarize_main_path(by_image):
+    """Weight each image equally after averaging its GT-present classes."""
+    images = tuple(by_image.values())
+    if not images:
+        return None
+    if any(not rows for rows in images):
+        raise ValueError('Main-path summary requires GT-present classes for every image')
+    scalar_keys = ('mean_tau', 'variance', 'positive_fraction', 'negative_fraction', 'near_zero_fraction')
+    return {
+        'population': 'equal_weight_images_over_gt_present_classes',
+        **{key: fmean(fmean(row[key] for row in rows) for rows in images) for key in scalar_keys},
+        **{key: [fmean(fmean(row[key][view] for row in rows) for rows in images) for view in range(5)]
+           for key in ('on', 'off', 'tau')},
+    }
 
 
 @torch.inference_mode()

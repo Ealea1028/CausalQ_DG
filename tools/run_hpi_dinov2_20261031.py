@@ -11,6 +11,10 @@ import zipfile
 from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, PHASE35_TRAINING_SHA, RELEASED_ACTIONS, load_profile
 from causalq.runtime.identity import file_sha, write_json
 
+STAGES = {'prepare': (33, 'PREPARE'), 'train-baselines': (34, 'BASELINES'), 'performance-check': (34, 'PERF_V3'),
+          'train-b1-b3': (35, 'B1_B3'), 'resume-phase35-source': (35, 'B1_B3'), 'train-b4-b5': (36, 'B4_B5')}
+FORMAL_UPDATES = {'train-baselines': 80000, 'train-b1-b3': 120000, 'train-b4-b5': 80000}
+
 
 def git(*args):
     return subprocess.check_output(['git', '-C', str(ROOT), *args], text=True).strip()
@@ -46,8 +50,8 @@ def run(out, expected, action='prepare'):
     from causalq.runtime.hpi_prepare import Telemetry, prepare, telemetry_summary
     verify_checkout(expected)
     source_resume = action == 'resume-phase35-source'
-    phase={'prepare':33,'train-b1-b3':35,'resume-phase35-source':35}.get(action,34)
-    planned={'train-baselines':80000,'train-b1-b3':120000}.get(action,0)
+    phase=STAGES[action][0]
+    planned=FORMAL_UPDATES.get(action,0)
     recovery = {'training_git_sha': PHASE35_TRAINING_SHA, 'diagnostic_git_sha': expected,
                 'formal_optimizer_updates_this_invocation': 0} if source_resume else {}
     profile=load_profile(os.environ.get('CAUSALQ_RUNTIME_PROFILE'),phase=phase)
@@ -65,10 +69,10 @@ def run(out, expected, action='prepare'):
             if action=='train-baselines':
                 from causalq.runtime.hpi_training import train_baselines
                 train_baselines(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
-            elif phase==35:
+            elif phase in (35, 36):
                 from causalq.runtime.hpi_training import train_cohort
                 train_cohort(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],
-                             git_sha=expected,phase=35,telemetry_origin=monitor.started,source_resume=source_resume)
+                             git_sha=expected,phase=phase,telemetry_origin=monitor.started,source_resume=source_resume)
             elif action=='performance-check':
                 from causalq.runtime.hpi_performance import performance_check
                 performance_check(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
@@ -80,7 +84,7 @@ def run(out, expected, action='prepare'):
         write_json(out/'failure.json',{'error':str(exc),'type':type(exc).__name__,'git_sha':expected})
     if (out/'gpu_telemetry.csv').exists():
         write_json(out/'gpu_telemetry_summary.json',telemetry_summary(out/'gpu_telemetry.csv'))
-    if phase==35:
+    if phase in (35, 36):
         from causalq.runtime.hpi_performance import activity
         intervals=[]
         for directory in (*sorted((out/'attempts').glob('*')),out):
@@ -138,11 +142,9 @@ def launch(out, expected, action='prepare'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('expected_sha',nargs='?')
-    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-b4-b5','target-evaluation'))
+    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'target-evaluation'))
     parser.add_argument('--run',action='store_true')
-    stages={'prepare':(33,'PREPARE'),'train-baselines':(34,'BASELINES'),'performance-check':(34,'PERF_V3'),
-            'train-b1-b3':(35,'B1_B3'),'resume-phase35-source':(35,'B1_B3')}
-    parser.add_argument('--stage',choices=tuple(stages),default='prepare')
+    parser.add_argument('--stage',choices=tuple(STAGES),default='prepare')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--compile-probe',type=Path)
     parser.add_argument('--probe-profile',type=Path)
@@ -154,8 +156,8 @@ def main():
     if args.action not in RELEASED_ACTIONS:
         parser.error('Further variants and target access await later phases')
     verify_checkout(args.expected_sha)
-    stage=args.action if args.action in stages else args.stage
-    phase,prefix=stages[stage]
+    stage=args.action if args.action in STAGES else args.stage
+    phase,prefix=STAGES[stage]
     output_sha=PHASE35_TRAINING_SHA if stage=='resume-phase35-source' else args.expected_sha
     output=Path(os.environ['CAUSALQ_OUTPUT_ROOT'])/f'phase{phase}'/f'{prefix}_{output_sha[:7]}'
     if args.output is not None and args.output.resolve()!=output.resolve():
