@@ -2,7 +2,9 @@
 from collections import OrderedDict
 import torch
 from causalq.protocols.hpi_dinov2_20261031 import STUDY
-from causalq.analysis.selective_stability import effect_and_correlation_rows, multiview_responsibility_rows
+from causalq.analysis.selective_stability import (
+    effect_and_correlation_rows, multiview_responsibility_rows, structural_effect_and_correlation_rows,
+)
 from causalq.models.dinov3_wrapper import DINOv3Features
 from .feature_pipeline import feature_tensors
 
@@ -85,8 +87,11 @@ def batched_source_readout(heads,backbone,cases,*,device='cuda',amp=True,interve
             confusion.scatter_add_(1,encoded,torch.ones_like(encoded))
             confusion=confusion[:,:-1].reshape(len(cases),classes,classes).cpu().tolist()
             full=prediction.scaled_delta_logits.float()
-            anchor=full if structural else prediction.anchor_scaled_delta_logits.float()
-            maps=torch.stack((full,anchor,full-anchor)).cpu()
+            if structural:
+                maps = full.cpu()
+            else:
+                anchor = prediction.anchor_scaled_delta_logits.float()
+                maps = torch.stack((full, anchor, full-anchor)).cpu()
             scores=prediction.query_score_maps.float().cpu()
             if route is not None:
                 attention = route.patch_attention.float()
@@ -96,9 +101,13 @@ def batched_source_readout(heads,backbone,cases,*,device='cuda',amp=True,interve
                 gamma = float(route.gamma)
             for j,(identity,_,label) in enumerate(cases):
                 sl=slice(j*v,(j+1)*v)
-                effects=[dict(zip(('full','anchor','residual'),maps[:,i:i+1])) for i in range(sl.start,sl.stop)]
                 image_scores=[scores[i:i+1] for i in range(sl.start,sl.stop)]
-                effect_rows,correlation_rows=effect_and_correlation_rows(effects,label)
+                if structural:
+                    effect_rows, correlation_rows = structural_effect_and_correlation_rows(maps[sl], label)
+                else:
+                    effects = [dict(zip(('full','anchor','residual'), maps[:, i:i+1]))
+                               for i in range(sl.start, sl.stop)]
+                    effect_rows, correlation_rows = effect_and_correlation_rows(effects, label)
                 record={'effects':effect_rows,'correlations':correlation_rows,'gradients':[],
                     'responsibility':multiview_responsibility_rows(image_scores,label),
                     'class_responsibility':class_responsibility(image_scores,label),

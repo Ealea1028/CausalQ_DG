@@ -32,36 +32,63 @@ def effect_and_correlation_rows(views, labels):
     if shape[0] != 1 or shape[2:] != labels.shape[1:] or any(
             set(v) != set(COMPONENTS) or any(x.shape != shape for x in v.values()) for v in views):
         raise ValueError('Multi-style effect shapes differ')
+    return _effect_rows(labels, shape[1], len(views), views)
+
+
+@torch.no_grad()
+def structural_effect_and_correlation_rows(full, labels):
+    """The anchor is the full effect and the residual is identically zero."""
+    if full.ndim != 4 or len(full) < 2 or labels.shape != (1, *full.shape[-2:]):
+        raise ValueError('Multi-style structural effect shapes differ')
+    return _effect_rows(labels, full.shape[1], len(full), None, full=full)
+
+
+def _effect_rows(labels, classes, view_count, views, *, full=None):
+    structural = full is not None
     valid = labels[0] != 255
     if not valid.any():
         raise ValueError('No valid source pixels')
+    valid_pixels = int(valid.sum())
     effects, correlations = [], []
-    for c in range(shape[1]):
-        maps = {k: torch.stack([v[k][0, c][valid].float().double() for v in views]) for k in COMPONENTS}
+    for c in range(classes):
+        if structural:
+            f = full[:, c, valid].float().double()
+            maps = {'full': f, 'residual': torch.zeros_like(f)}
+        else:
+            maps = {k: torch.stack([v[k][0, c][valid].float().double() for v in views]) for k in COMPONENTS}
         if any(not torch.isfinite(x).all() for x in maps.values()):
             raise ValueError('Nonfinite effect')
-        common = {'class_id': c, 'present': bool((labels[0] == c).any()), 'valid_pixels': int(valid.sum())}
+        common = {'class_id': c, 'present': bool((labels[0] == c).any()), 'valid_pixels': valid_pixels}
+        variances = {}
         for component, x in maps.items():
             rms = x.square().mean(1).sqrt()
             normalized = x / rms.clamp_min(EPS)[:, None]
             all_nonzero = bool((rms > EPS).all())
             pair_nonzero = bool((rms[:2] > EPS).all())
-            effects.append({**common, 'component': component,
+            # The two-pass FP64 moment vectorizes the short view axis on CPU.
+            variance = _style_variance if structural else _legacy_style_variance
+            raw_variance = variances[component] = variance(x)
+            row = {**common, 'component': component,
                 'mean_abs': float(x.abs().mean()), 'joint_rms': float(x.square().mean().sqrt()),
                 'view_rms': rms.tolist(), 'view_mean_abs': x.abs().mean(1).tolist(), 'view_signed_mean': x.mean(1).tolist(),
-                'raw_variance': float(x.var(dim=0, unbiased=False).mean()),
-                'rms_normalized_variance': float(normalized.var(dim=0, unbiased=False).mean()) if all_nonzero else None,
+                'raw_variance': float(raw_variance),
+                'rms_normalized_variance': float(variance(normalized)) if all_nonzero else None,
                 'pair_raw_variance': float((x[0] - x[1]).square().mean() / 4),
                 'pair_rms_normalized_variance': float((normalized[0] - normalized[1]).square().mean() / 4) if pair_nonzero else None,
                 'near_zero_view_count': int((rms <= EPS).sum()),
-                'rms_style_cv': _ratio(rms.std(unbiased=False), rms.mean())})
-        a, r, f = maps['anchor'], maps['residual'], maps['full']
-        va, vr, vf = [x.var(dim=0, unbiased=False).mean() for x in (a, r, f)]
-        covariance = ((a - a.mean(0)) * (r - r.mean(0))).mean()
+                'rms_style_cv': _ratio(rms.std(unbiased=False), rms.mean())}
+            effects.append(row)
+            if structural and component == 'full':
+                effects.append({**row, 'component': 'anchor'})
+        r, f = maps['residual'], maps['full']
+        a = f if structural else maps['anchor']
+        vf, vr = variances['full'], variances['residual']
+        va = vf if structural else variances['anchor']
+        covariance = 0.0 if structural else ((a - a.mean(0)) * (r - r.mean(0))).mean()
         correlations.append({**common, 'component': 'variance_decomposition', 'view_index': -1,
             'anchor_variance': float(va), 'residual_variance': float(vr), 'full_variance': float(vf),
             'style_covariance': float(covariance), 'variance_identity_abs_error': float((vf - va - vr - 2 * covariance).abs())})
-        for s in range(len(views)):
+        for s in range(view_count):
             ar = _correlation(a[s], r[s]); fa = _correlation(f[s], a[s])
             af, rr, ff = [x[s].square().mean().sqrt() for x in (a, r, f)]
             row = {**common, 'component': 'spatial', 'view_index': s,
@@ -78,6 +105,14 @@ def effect_and_correlation_rows(views, labels):
                     row.update({name + '_' + k: v for k, v in _correlation(x, y).items()})
             correlations.append(row)
     return effects, correlations
+
+
+def _style_variance(x):
+    return (x - x.mean(0)).square_().mean()
+
+
+def _legacy_style_variance(x):
+    return x.var(dim=0, unbiased=False).mean()
 
 
 @torch.no_grad()

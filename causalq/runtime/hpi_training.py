@@ -1,14 +1,14 @@
 """Phase34 paired baseline cohort and resumable joint source diagnostics."""
 import csv
-import hashlib
 import json
+from math import ceil
 import os
 from pathlib import Path
 import time
 import torch
 import yaml
 from PIL import Image
-from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, build_head, initialization_identity
+from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, PHASE35_TRAINING_SHA, build_head, initialization_identity
 from causalq.models.dinov2_wrapper import DINOv2Backbone
 from causalq.datasets.segmentation import TrainTransform
 from causalq.datasets.strict_source import build_source_datasets, SourceEvalTransform
@@ -22,6 +22,7 @@ from .input_stream import CanonicalInputStream, make_loader
 from .feature_pipeline import FeaturePipeline, slice_features
 from .cohort_runner import CohortRunner, IndependentHead, capture_rng, head_state, commit_head, restore_head, baseline_backward
 from .hpi_prepare import configure
+from .hpi_source_loader import SourceDiagnosticDataset, diagnostic_seeds, source_loader
 
 DIRECTORY = ROOT/'experiments/HPI_DINOV2_20261031'
 
@@ -148,54 +149,65 @@ def class_responsibility(scores,labels):
     return rows
 
 
-def diagnostic_seeds(identity):
-    from causalq.analysis.query_components import intervention_seed
-    # Exact Phase31 view seed rule; no import of historical acceptance files.
-    return [intervention_seed(identity)]+[int(hashlib.sha256(f'diagnostic_20261020:photo-{i}:{identity}'.encode()).hexdigest()[:8],16) for i in (2,3,4)]
-
-
 def source_record_key(pair, identity, head_digests):
     return {'identity':identity,'heads':head_digests,'id':pair.sample_id,
             'image_size':pair.image.stat().st_size,'label_size':pair.label.stat().st_size}
 
 
 def batched_source_records(heads, backbone, dataset, out, identity, head_digests, style, examples,
-                           profile, intervention_ids, *, device, amp):
+                           profile, intervention_ids, *, device, amp, diagnostic_git_sha):
     from .hpi_source_batch import batched_source_readout, source_batches
     pairs = {pair.sample_id: pair for pair in dataset.pairs}
+    indices = []
+    for index, pair in enumerate(dataset.pairs):
+        path = out/'records'/f'{pair.sample_id}.json'
+        if not path.exists():
+            indices.append(index)
+        elif json.loads(path.read_text())['key'] != source_record_key(pair, identity, head_digests):
+            raise ValueError(f'Source diagnostic resume identity differs: {pair.sample_id}')
+    reused = len(dataset) - len(indices)
+    print('source_records_reused', reused, '/', len(dataset), flush=True)
+    if not indices:
+        return
+    transform = dataset.transform
+    maximum_edge = (ceil(transform.long_edge / transform.patch_size) * transform.patch_size
+                    if isinstance(transform, SourceEvalTransform) else 1024)
+    workers = profile['data_workers'] if torch.device(device).type == 'cuda' else 0
+    loader, policy = source_loader(SourceDiagnosticDataset(dataset, indices, style), profile,
+                                   workers=workers, maximum_edge=maximum_edge)
+    write_json(out.parent/'source_loader.json', policy)
+    print('source_loader', json.dumps(policy), flush=True)
 
-    def missing():
-        for index, pair in enumerate(dataset.pairs):
-            if (out/'records'/f'{pair.sample_id}.json').exists():
-                continue
-            sample = dataset[index]
-            image = sample['image'][None]
-            views, traces = [image], []
-            seeds = diagnostic_seeds(pair.sample_id)
-            for seed in seeds:
-                view, trace = style.photometric_view_with_trace(image, generator=torch.Generator().manual_seed(seed))
-                views.append(view)
-                traces.append(trace)
-            if pair.sample_id in examples:
-                with Image.open(pair.image) as raw:
-                    export_examples(out/'examples'/pair.sample_id, raw, views, traces, seeds, style, pair.sample_id, identity=identity)
-            yield pair.sample_id, torch.cat(views), sample['label'][None]
+    def prepared():
+        for packet in loader:
+            for sample in packet:
+                sample_id = sample['id']
+                if sample_id in examples:
+                    with Image.open(pairs[sample_id].image) as raw:
+                        export_examples(out/'examples'/sample_id, raw, sample['views'].split(1),
+                                        sample['traces'], sample['seeds'], style, sample_id, identity=identity)
+                yield sample_id, sample['views'], sample['label']
 
     completed = 0
-    batches = source_batches(missing(), max_images=profile['source_diagnostic_image_batch'],
+    batches = source_batches(prepared(), max_images=profile['source_diagnostic_image_batch'],
                              budget_bytes=profile['source_readout_budget_bytes'])
     for batch in batches:
+        if completed == 0:
+            print('source_first_batch', [sample_id for sample_id, _, _ in batch], flush=True)
         predictions = batched_source_readout(heads, backbone, batch, device=device, amp=amp,
             intervention_ids=intervention_ids, counterfactual_chunk=profile['counterfactual_chunk'])
         for sample_id, models in predictions.items():
             key = source_record_key(pairs[sample_id], identity, head_digests)
-            write_json(out/'records'/f'{sample_id}.json', {'key': key, 'models': models})
+            write_json(out/'records'/f'{sample_id}.json', {
+                'key': key, 'models': models, 'diagnostic_git_sha': diagnostic_git_sha})
             completed += 1
-            if completed % 25 == 0:
-                print('new_source_records', completed, flush=True)
+            if completed == 1 or completed % 25 == 0 or completed == len(indices):
+                print('new_source_records', completed, '/', len(indices),
+                      'total_source_records', reused + completed, '/', len(dataset), flush=True)
 
 
-def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=True,profile=None,intervention_ids=()):
+def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=True,profile=None,
+                       intervention_ids=(),diagnostic_git_sha=None):
     out=Path(out);out.mkdir(parents=True,exist_ok=True)
     style=StyleInterventionBank()
     summaries={h.name:DiagnosticSummary() for h in heads}
@@ -206,9 +218,11 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
     examples={'18734','12488','08744'}
     route_rows={h.name:[] for h in heads}
     intervention_rows={h.name:{} for h in heads}
+    diagnostic_counts={}
     if profile is not None:
+        diagnostic_git_sha = diagnostic_git_sha or identity.get('git_sha')
         batched_source_records(heads,backbone,dataset,out,identity,head_digests,style,examples,profile,intervention_ids,
-                               device=device,amp=amp)
+                               device=device,amp=amp,diagnostic_git_sha=diagnostic_git_sha)
     for index,pair in enumerate(dataset.pairs):
         record_path=out/'records'/f'{pair.sample_id}.json'
         # Binding records to final heads makes resuming analysis read-only.
@@ -217,6 +231,8 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
             record=json.loads(record_path.read_text())
             if record['key']!=key:raise ValueError('Source diagnostic resume identity differs')
         else:
+            if profile is not None:
+                raise ValueError(f'Batched source diagnostics did not commit {pair.sample_id}')
             sample=dataset[index];image=sample['image'][None];labels=sample['label'][None]
             views=[image];traces=[];seeds=diagnostic_seeds(pair.sample_id)
             for seed in seeds:
@@ -244,6 +260,9 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
                 with Image.open(pair.image) as raw:
                     export_examples(out/'examples'/pair.sample_id,raw,views,traces,seeds,style,pair.sample_id,identity=identity)
             write_json(record_path,record)
+        if profile is not None:
+            producer=record.get('diagnostic_git_sha') or identity.get('git_sha')
+            diagnostic_counts[producer]=diagnostic_counts.get(producer,0)+1
         for h in heads:
             value=record['models'][h.name]
             summaries[h.name].add_image(value)
@@ -255,6 +274,9 @@ def source_diagnostics(heads,backbone,dataset,out,identity,*,device='cuda',amp=T
             if 'main_path' in value:
                 intervention_rows[h.name][pair.sample_id]=value['main_path']
         if (index+1)%25==0:print('source_images',index+1,'/',len(dataset),flush=True)
+    if profile is not None:
+        write_json(out/'provenance.json',{'training_git_sha':identity.get('git_sha'),
+            'records_by_diagnostic_git_sha':diagnostic_counts})
     for h in heads:
         if tree_digest(head_state(h.model))!=head_digests[h.name]:raise ValueError('Source diagnostics changed head')
         directory=out/h.name;directory.mkdir(exist_ok=True)
@@ -294,9 +316,16 @@ def train_baselines(out,profile,*,data_root,pretrained_root,git_sha):
     return train_cohort(out,profile,data_root=data_root,pretrained_root=pretrained_root,git_sha=git_sha,phase=34)
 
 
-def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry_origin=None):
+def require_final_source_heads(heads):
+    if len(heads) != 3 or any(h.cursor != 40000 for h in heads):
+        raise ValueError('Phase35 source recovery requires all three final 40000-update heads')
+
+
+def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry_origin=None,source_resume=False):
     configure();freeze=verify_freeze(phase)
     ablations = phase == 35
+    if source_resume and not ablations:
+        raise ValueError('Source recovery is only released for Phase35')
     if ablations and profile['execution_version'] != freeze['execution_version']:
         raise ValueError('Phase35 requires the frozen v3 profile')
     runtime=json.loads((DIRECTORY/'runtime.json').read_text())
@@ -319,7 +348,8 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
     accepted=json.loads((DIRECTORY/'prepare_report.json').read_text())
     if backbone_digest!=accepted['runtime_backbone_tensor_digest']:raise ValueError('Runtime backbone digest differs')
     train,val=build_source_datasets(Path(data_root)/'gta5',TrainTransform((512,512)),SourceEvalTransform())
-    identity={'git_sha':git_sha,'freeze_sha256':file_sha(DIRECTORY/f'phase{phase}_freeze.json'),'backbone':backbone_digest}
+    training_git_sha = PHASE35_TRAINING_SHA if source_resume else git_sha
+    identity={'git_sha':training_git_sha,'freeze_sha256':file_sha(DIRECTORY/f'phase{phase}_freeze.json'),'backbone':backbone_digest}
     out=Path(out);heads=[]
     for name in freeze['variants']:
         (out/f'config_{name}.yaml').write_bytes((ROOT/f'configs/{STUDY}/formal/{name.lower()}_seed0.yaml').read_bytes())
@@ -340,6 +370,10 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
         if not 0<=head.cursor<=40000 or any(g['lr']!=1e-4*(1-head.cursor/40000)**.9 for g in optimizer.param_groups):
             raise ValueError('Restored cursor/LR differs')
         heads.append(head)
+        if source_resume:
+            print('source_resume_head', name, head.cursor, flush=True)
+    if source_resume:
+        require_final_source_heads(heads)
     runner=CohortRunner(heads)
     start=time.monotonic()
     timing=None
@@ -366,7 +400,8 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
         intervention_ids=(DIRECTORY/'source_intervention128.txt').read_text().splitlines()
         if len(set(intervention_ids))!=128 or not set(intervention_ids)<={p.sample_id for p in val.pairs}:
             raise ValueError('Frozen intervention subset differs from source holdout')
-        source_diagnostics(heads,backbone,val,out/'source',identity,profile=profile,intervention_ids=intervention_ids)
+        source_diagnostics(heads,backbone,val,out/'source',identity,profile=profile,intervention_ids=intervention_ids,
+                           diagnostic_git_sha=git_sha)
     else:
         source_diagnostics(heads,backbone,val,out/'source',identity)
     if tree_digest(backbone.state_dict())!=backbone_digest or any(p.grad is not None for p in backbone.parameters()):
@@ -381,7 +416,8 @@ def train_cohort(out,profile,*,data_root,pretrained_root,git_sha,phase,telemetry
     with zipfile.ZipFile(out/'examples.zip','w',compression=zipfile.ZIP_DEFLATED) as archive:
         for path in sorted((out/'source/examples').rglob('*')):
             if path.is_file():archive.write(path,path.relative_to(out/'source/examples'))
-    write_json(out/'formal_report.json',{'phase':phase,'git_sha':git_sha,'identity':identity,
+    recovery={'diagnostic_git_sha':git_sha,'formal_optimizer_updates_this_invocation':0} if source_resume else {}
+    write_json(out/'formal_report.json',{'phase':phase,'git_sha':training_git_sha,'identity':identity,**recovery,
         'input_coverage':coverage,
         'final_checkpoints':final_checkpoints,'weight_identity':weight_identity,
         'head_updates':{h.name:h.cursor for h in heads},'total_optimizer_updates':freeze['total_optimizer_updates'],

@@ -1,4 +1,4 @@
-"""Exact-commit HPI prepare and Phase34 paired-baseline coordinator."""
+"""Exact-commit HPI preparation, training and source recovery coordinator."""
 import argparse
 import json
 import os
@@ -8,7 +8,7 @@ import sys
 import traceback
 import zipfile
 
-from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, RELEASED_ACTIONS, load_profile
+from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, PHASE35_TRAINING_SHA, RELEASED_ACTIONS, load_profile
 from causalq.runtime.identity import file_sha, write_json
 
 
@@ -45,11 +45,15 @@ def package(out):
 def run(out, expected, action='prepare'):
     from causalq.runtime.hpi_prepare import Telemetry, prepare, telemetry_summary
     verify_checkout(expected)
-    phase={'prepare':33,'train-b1-b3':35}.get(action,34)
+    source_resume = action == 'resume-phase35-source'
+    phase={'prepare':33,'train-b1-b3':35,'resume-phase35-source':35}.get(action,34)
     planned={'train-baselines':80000,'train-b1-b3':120000}.get(action,0)
+    recovery = {'training_git_sha': PHASE35_TRAINING_SHA, 'diagnostic_git_sha': expected,
+                'formal_optimizer_updates_this_invocation': 0} if source_resume else {}
     profile=load_profile(os.environ.get('CAUSALQ_RUNTIME_PROFILE'),phase=phase)
-    write_json(out/'status.json',{'status':'running','git_sha':expected,'formal_optimizer_updates':0})
-    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':phase,
+    write_json(out/'status.json',{'status':'running','git_sha':expected,
+        'formal_optimizer_updates':None if source_resume else 0,**recovery})
+    write_json(out/'run_manifest.json',{'git_sha':expected,'study':STUDY,'action':action,'phase':phase,**recovery,
         'target_data_accessed':False,'planned_formal_optimizer_updates':planned,'runtime_profile':profile,
         'tracked_file_sha256':{name:file_sha(ROOT/name) for name in git('ls-files').splitlines() if (ROOT/name).is_file()},
         'python':sys.executable,'code_root':str(ROOT),'data_root':os.environ['CAUSALQ_DATA_ROOT'],
@@ -61,10 +65,10 @@ def run(out, expected, action='prepare'):
             if action=='train-baselines':
                 from causalq.runtime.hpi_training import train_baselines
                 train_baselines(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
-            elif action=='train-b1-b3':
+            elif phase==35:
                 from causalq.runtime.hpi_training import train_cohort
                 train_cohort(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],
-                             git_sha=expected,phase=35,telemetry_origin=monitor.started)
+                             git_sha=expected,phase=35,telemetry_origin=monitor.started,source_resume=source_resume)
             elif action=='performance-check':
                 from causalq.runtime.hpi_performance import performance_check
                 performance_check(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
@@ -76,7 +80,7 @@ def run(out, expected, action='prepare'):
         write_json(out/'failure.json',{'error':str(exc),'type':type(exc).__name__,'git_sha':expected})
     if (out/'gpu_telemetry.csv').exists():
         write_json(out/'gpu_telemetry_summary.json',telemetry_summary(out/'gpu_telemetry.csv'))
-    if action=='train-b1-b3':
+    if phase==35:
         from causalq.runtime.hpi_performance import activity
         intervals=[]
         for directory in (*sorted((out/'attempts').glob('*')),out):
@@ -86,9 +90,10 @@ def run(out, expected, action='prepare'):
                 intervals.append({'attempt':directory.relative_to(out).as_posix(),
                     **activity(directory/'gpu_telemetry.csv',interval['start'],interval['stop'],120)})
         write_json(out/'training_activity.json',{'training_intervals':intervals,'steady_minimum_seconds':120})
+    cumulative_updates = 120000 if source_resume else planned
     write_json(out/'status.json',{'status':'complete' if code==0 else 'failed','exit_code':code,
-        'git_sha':expected,'formal_optimizer_updates':planned if code==0 or not planned else None,
-        'target_data_accessed':False})
+        'git_sha':expected,'formal_optimizer_updates':cumulative_updates if code==0 or not cumulative_updates else None,
+        'target_data_accessed':False,**recovery})
     print(f'{action}_exit_code={code}\noutput_directory={out}\nexport={out / "export.zip"}',flush=True)
     package(out)
     return code
@@ -109,6 +114,11 @@ def launch(out, expected, action='prepare'):
     if status.exists() and json.loads(status.read_text()).get('status')=='complete':
         print(f'already_complete\noutput_directory={out}\nexport={out / "export.zip"}')
         return
+    if action=='resume-phase35-source':
+        for name in ('B1','B2','B3'):
+            markers = list((out/'checkpoints'/name).glob('40000_*/complete.json'))
+            if len(markers) != 1:
+                raise ValueError(f'Phase35 source recovery requires one final checkpoint for {name}')
     # Keep failed evidence instead of overwriting it on a same-SHA retry.
     if (out/'run_manifest.json').exists():
         from datetime import datetime,timezone
@@ -131,7 +141,7 @@ def main():
     parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'train-b4-b5','target-evaluation'))
     parser.add_argument('--run',action='store_true')
     stages={'prepare':(33,'PREPARE'),'train-baselines':(34,'BASELINES'),'performance-check':(34,'PERF_V3'),
-            'train-b1-b3':(35,'B1_B3')}
+            'train-b1-b3':(35,'B1_B3'),'resume-phase35-source':(35,'B1_B3')}
     parser.add_argument('--stage',choices=tuple(stages),default='prepare')
     parser.add_argument('--output',type=Path)
     parser.add_argument('--compile-probe',type=Path)
@@ -146,7 +156,8 @@ def main():
     verify_checkout(args.expected_sha)
     stage=args.action if args.action in stages else args.stage
     phase,prefix=stages[stage]
-    output=Path(os.environ['CAUSALQ_OUTPUT_ROOT'])/f'phase{phase}'/f'{prefix}_{args.expected_sha[:7]}'
+    output_sha=PHASE35_TRAINING_SHA if stage=='resume-phase35-source' else args.expected_sha
+    output=Path(os.environ['CAUSALQ_OUTPUT_ROOT'])/f'phase{phase}'/f'{prefix}_{output_sha[:7]}'
     if args.output is not None and args.output.resolve()!=output.resolve():
         parser.error('Output must be the exact phase/SHA directory')
     if args.action=='status':
