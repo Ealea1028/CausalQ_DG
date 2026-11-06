@@ -15,3 +15,8 @@ def effect_invariance_loss(effects):
     """Population variance of the original and photometric effects."""
     original, photo = effects.float().unbind()
     return (original - photo).square() / 4
+
+
+def positive_contribution_loss(effects):
+    """Reward a positive average effect up to the fixed 0.02 margin."""
+    return (0.02 - effects.float().mean()).relu()

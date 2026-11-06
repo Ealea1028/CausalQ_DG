@@ -2,11 +2,15 @@
 import torch
 
 from causalq.losses.hpi_localization import patch_localization_loss
-from causalq.losses.query_effect_invariance import effect_invariance_loss, gt_region_prediction_effect
+from causalq.losses.query_effect_invariance import (
+    effect_invariance_loss, gt_region_prediction_effect, positive_contribution_loss,
+)
 from causalq.losses.source_ce import deterministic_source_ce
 from .input_stream import input_seed
 
 EFFECT_CLASS_SEED = 20261031
+TRAINING_LOSS_FIELDS = ('original_ce', 'photometric_ce', 'weighted_localization',
+                        'weighted_effect_invariance', 'weighted_positive_contribution')
 
 
 def sample_present_class(label, step):
@@ -40,6 +44,8 @@ def paired_class_forward(model, features, output_size, category, *, amp):
 
 
 def effect_backward(head, original, photo, label, output_size, *, amp=False):
+    if head.name not in ('B4', 'B5'):
+        raise ValueError('Effect training requires a B4 or B5 head')
     category = sample_present_class(label, head.cursor)
     ce_losses, localization, effects = [], [], []
     for features in (original, photo):
@@ -48,6 +54,8 @@ def effect_backward(head, original, photo, label, output_size, *, amp=False):
         localization.append(.05 * patch_localization_loss(route.match_logits, label, features.patch_map.shape[-2:]))
         effects.append(gt_region_prediction_effect(on.logits, off, label, category))
     loc = sum(localization)
-    invariance = effect_invariance_loss(torch.stack(effects))
-    (sum(ce_losses) + loc + invariance).backward()
-    return torch.stack((*ce_losses, loc, invariance)).detach()
+    effects = torch.stack(effects)
+    invariance = effect_invariance_loss(effects)
+    use = .1 * positive_contribution_loss(effects) if head.name == 'B5' else invariance.new_zeros(())
+    (sum(ce_losses) + loc + invariance + use).backward()
+    return torch.stack((*ce_losses, loc, invariance, use)).detach()

@@ -3,7 +3,9 @@ from types import SimpleNamespace
 import pytest
 import torch
 
-from causalq.losses.query_effect_invariance import effect_invariance_loss, gt_region_prediction_effect
+from causalq.losses.query_effect_invariance import (
+    effect_invariance_loss, gt_region_prediction_effect, positive_contribution_loss,
+)
 from causalq.runtime.hpi_phase36 import paired_class_forward, sample_present_class
 
 
@@ -63,3 +65,16 @@ def test_on_off_share_dropout_and_advance_rng_only_once():
         assert torch.equal(on.logits, off)
         assert on.logits.requires_grad and not off.requires_grad
         assert torch.equal(torch.get_rng_state(), expected)
+
+
+@pytest.mark.parametrize(('effects', 'expected', 'gradient'), [
+    ([-.05, .01], .04, [-.5, -.5]),
+    ([.02, .02], 0., [0., 0.]),
+    ([.025, .035], 0., [0., 0.]),
+])
+def test_positive_contribution_uses_signed_effect_and_stops_at_margin(effects, expected, gradient):
+    effects = torch.tensor(effects, requires_grad=True)
+    loss = positive_contribution_loss(effects)
+    assert loss.item() == pytest.approx(expected, abs=1e-8)
+    loss.backward()
+    assert effects.grad.tolist() == gradient
