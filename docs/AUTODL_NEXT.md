@@ -1,18 +1,60 @@
-# 当前操作：Phase35 — B1/B2/B3 正式训练与联合源诊断 — 2026-11-05
+# 当前操作 — Phase35 B1/B2/B3 联合源诊断续跑
 
-Phase34 v3 返回包及14个报告文件已核验。计时14.25/15.37/15.80样本每秒，32/64差异在5%区间，
-选择显存较低的双缓冲batch32。12 spawn worker、8样本装载包、预取2。相对旧路径+7.85%，低于10%目标。
-正式训练单独统计至少120秒的稳态GPU活动。U0/UA 已接受结果直接用于后续比较。
+训练提交 `c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9`，诊断补丁 `3dfbdca5fca19830e06ad102056197a7a11a277d`。
+续跑要求三个头都通过 40000 步最终检查点校验，沿用原输出目录和已提交的逐图 JSON。
+正式训练更新累计 120000，本次更新为 0。诊断继续覆盖原图加四种风格、全部 2497 张源图和冻结的 128 张主路径干预子集。
 
-固定运行SHA：`c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9`。本机完整测试737 passed、1 skipped，精简检出与冻结核对通过。
-每个B头fresh seed0、40000更新，共120000；逻辑batch1，每1000步各自提交。运行结束自动做联合源域诊断。
+GTA5 解码与四次风格变换由 12 个 CPU worker 处理。装载批次上限为 32 张，由 24 GiB 主机预算和可用共享内存决定实际批次。
+GPU 继续按相同分辨率合批，每批至多两张图。FP64 统计复用相同的 full/anchor 效应并采用两遍方差归约。
+在本机 544×1024、19 类、五视图的合成输入上，单头效应与相关性归约从 10.2 秒降到 3.6 秒，标量最大绝对误差约 2.2×10⁻¹⁶。
+本机 `python -m pytest` 为 740 passed、1 skipped。精简检出、冻结哈希、入口目录和 Bash 语法均已核对。整轮吞吐待 AutoDL 验证。
 
-## 1. 精简检出并启动，断点恢复使用同一段
+## 1. 停止旧诊断进程
+
+此命令只向命令行与原 Phase35 任务完全匹配的进程发送 SIGTERM，然后等协调器锁释放。保留最终检查点及已提交记录。
 
 ```bash
 bash <<'BASH'
 set -euo pipefail
-EXPECTED_SHA=c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9
+ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+OUT="$ROOT/phase35/B1_B3_c4a7b6f"
+PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+test -d "$OUT/checkpoints"
+"$PY" - "$OUT" <<'PYCODE'
+import json
+import os
+import signal
+import sys
+from pathlib import Path
+
+status = Path(sys.argv[1]) / 'status.json'
+if status.is_file() and json.loads(status.read_text()).get('status') == 'complete':
+    print('Phase35 already complete')
+    sys.exit(0)
+expected = [
+    '-m', 'tools.run_hpi_dinov2_20261031', 'c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9',
+    'train-b1-b3', '--run', '--output', sys.argv[1],
+]
+for path in Path('/proc').glob('[0-9]*/cmdline'):
+    try:
+        args = path.read_bytes().rstrip(b'\0').split(b'\0')
+        if [os.fsdecode(arg) for arg in args[1:]] == expected:
+            pid = int(path.parent.name)
+            os.kill(pid, signal.SIGTERM)
+            print(f'SIGTERM {pid}')
+    except (FileNotFoundError, ProcessLookupError, PermissionError):
+        continue
+PYCODE
+flock -w 30 "$ROOT/coordinator.lock" true
+BASH
+```
+
+## 2. 检出补丁并启动续跑
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=3dfbdca5fca19830e06ad102056197a7a11a277d
 RELEASE_REF=codex/hpi-dinov2-20261031
 CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
 if [[ ! -d "$CODE_DIR/.git" ]]; then
@@ -36,14 +78,14 @@ export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
 export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
 export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/execution_v3_formal.yaml"
 test -x "$PY"
-bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" train-b1-b3
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" resume-phase35-source
 BASH
 ```
 
-沿用已准备的环境、GTA5和已转换权重。启动器打印PID和目录后后台运行。
-恢复从各头最后的完整检查点开始，已提交更新按头跳过。正常运行用下方命令查看。
+沿用已准备的环境、GTA5 和已转换权重。启动器打印 PID 并返回终端。
+如需再次续跑，等前一个进程退出后执行同一段。启动器会把旧日志和状态文件归档到 `attempts/`。
 
-## 2. 查看状态并回传
+## 3. 查看状态并回传
 
 ```bash
 bash <<'BASH'
@@ -51,8 +93,9 @@ set -euo pipefail
 OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase35/B1_B3_c4a7b6f
 test -d "$OUT"
 tail -n 80 "$OUT/launcher.log"
-if [[ -f "$OUT/training_status.json" ]]; then cat "$OUT/training_status.json"; fi
 cat "$OUT/status.json"
+if [[ -f "$OUT/source_loader.json" ]]; then cat "$OUT/source_loader.json"; fi
+if [[ -f "$OUT/source/provenance.json" ]]; then cat "$OUT/source/provenance.json"; fi
 for NAME in export.zip examples.zip; do
   if [[ -f "$OUT/$NAME" ]]; then
     ls -lh "$OUT/$NAME"
@@ -62,10 +105,10 @@ done
 BASH
 ```
 
-完成依据：status=complete、exit_code=0、formal_optimizer_updates=120000。
-每组2497张源图、19×19混淆矩阵，B2/B3另含门控/注入及128图主路径诊断，训练稳态遥测单列。
-下载export.zip与examples.zip到本机phase35_export并回传日志末尾80行；失败时回传错误日志与已有包。
-验收后进入Phase36，目标评估安排在Phase37。
+`source_records_reused` 是复用记录数，`source_first_batch` 表示首批已交给推理与统计，`total_source_records` 是累计进度。
+若状态为 `complete`，确认 `exit_code=0`、累计更新 120000、本次更新 0、`target_data_accessed=false` 及两个 ZIP 均已生成。
+将 `export.zip` 解压到本机 `phase35_export`，同时保留 `examples.zip` 并回传状态、末尾日志和两个 SHA256。
+失败时回传末尾日志与状态。Phase35 验收后进入 Phase36，目标评估安排在 Phase37。
 
 ---
 
