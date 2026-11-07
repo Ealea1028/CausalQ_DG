@@ -1,6 +1,10 @@
 # CausalQ-DG
 
-## Active — Phase36 B4/B5
+## Active — Phase37 fixed-final target evaluation
+
+Phase36 B4/B5 are accepted at source mIoU 72.4607% and 72.4340%. All seven heads completed 40000 updates each. Phase37 evaluates the seven frozen finals on Cityscapes val500 at native 1024×2048 with BF16 and shared backbone batch2. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+
+## Archive — Phase36 B4/B5
 
 Phase35 source results are accepted. B1/B2/B3 each completed 40000 updates
 and the 2497-image source diagnostics. Source mIoU was 72.4013%, 72.4495% and

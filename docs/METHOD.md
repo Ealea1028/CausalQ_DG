@@ -1,6 +1,10 @@
 # Method contract
 
-## Active — Phase36 / prediction-effect invariance and positive contribution
+## Active — Phase37 fixed-final target evaluation
+
+Freeze all seven checkpoint files, head digests, producer SHAs, configurations and source reports before target access. Evaluate Cityscapes val500 at native 1024×2048 with BF16, batch2, argmax, and one shared backbone. Each head contributes an independent confusion matrix. Image-level records bind input file hashes and evaluation identity, allowing recovery. This phase performs zero optimizer updates. Report all eight predeclared contrasts, all seven scores and class IoUs.
+
+## Archive — Phase36 / prediction-effect invariance and positive contribution
 
 B4 and B5 start from identical seed0 B3-topology initializations. Each runs
 40000 logical batch1 updates on the canonical GTA5 stream. An independent

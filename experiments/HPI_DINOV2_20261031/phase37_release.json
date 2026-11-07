@@ -1,0 +1,26 @@
+{
+  "phase": 37,
+  "code_release_sha": "f6c647e20f007f15ae1876a0d02c87746ed156b0",
+  "action": "target-evaluation",
+  "models": [
+    "U0",
+    "UA",
+    "B1",
+    "B2",
+    "B3",
+    "B4",
+    "B5"
+  ],
+  "formal_optimizer_updates": 0,
+  "full_cpu_suite": {
+    "passed": 752,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 155.27
+  },
+  "sparse_import_closure": true,
+  "bash_blocks_checked": 3,
+  "local_target_data_accessed": false,
+  "local_gpu_executed": false,
+  "full_log_sha256": "4640bdf9c729aadcbe56658fdd6a6bf7f456fa60df7790208c54cd1257378a55"
+}

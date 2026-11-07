@@ -1,4 +1,95 @@
-# 当前操作 — Phase36 B4/B5 正式训练与联合源诊断
+# 当前操作 — Phase37 七组固定最终头的目标评估
+
+Phase36 两个 ZIP 和 32 个报告文件已核验。B4/B5 各 40000 更新，源域 mIoU 为 72.4607%、72.4340%，各 2497 张源图和 128 图主路径干预覆盖完整。训练稳态 GPU 利用率中位数为 62%，低于 80% 工程目标。
+
+运行 SHA 为 `f6c647e20f007f15ae1876a0d02c87746ed156b0`。七组最终头、各自训练 SHA、配置、源诊断和 val500 清单已写入 `target_freeze.json`。评估以 batch2 共享骨干特征，各组独立预测，原生 1024×2048 整图 BF16。累计训练更新 280000，本阶段更新 0。
+
+本地全量测试 752 项通过、1 项跳过，精简检出、冻结身份和三段 Bash 语法均已核对。实际目标 CUDA 推理待 AutoDL 验证。
+
+## 1. 准备 Cityscapes val
+
+若当前实例已具有两个 val 目录，可直接执行下一步。否则先启动保存数据的旧实例，在当前实例终端执行下方命令，提示时粘贴完整 SSH 登录命令。旧实例的数据路径沿用方案约定。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+read -r -a OLD_CMD -p "粘贴旧实例完整 SSH 命令（ssh -p 端口 root@主机）：" </dev/tty
+[[ ${#OLD_CMD[@]} -eq 4 && "${OLD_CMD[0]}" == ssh && "${OLD_CMD[1]}" == -p ]] || exit 2
+OLD_PORT="${OLD_CMD[2]}"
+OLD_SSH="${OLD_CMD[3]}"
+[[ "$OLD_PORT" =~ ^[0-9]+$ && "$OLD_SSH" =~ ^root@[A-Za-z0-9.-]+$ ]] || exit 2
+CITY=/root/autodl-tmp/datasets/cityscapes
+mkdir -p "$CITY/leftImg8bit/val" "$CITY/gtFine/val"
+rsync -a --partial --info=progress2 -e "ssh -p $OLD_PORT"   "$OLD_SSH:/root/autodl-tmp/datasets/cityscapes/leftImg8bit/val/" "$CITY/leftImg8bit/val/"
+rsync -a --partial --info=progress2 -e "ssh -p $OLD_PORT"   "$OLD_SSH:/root/autodl-tmp/datasets/cityscapes/gtFine/val/" "$CITY/gtFine/val/"
+df -hT /root/autodl-tmp
+BASH
+```
+
+读取器可直接将官方 labelIds 转成 trainIds，也兼容已有 labelTrainIds。评估启动时会检查固定 500 图清单及原生尺寸。
+
+## 2. 检出并后台启动
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=f6c647e20f007f15ae1876a0d02c87746ed156b0
+RELEASE_REF=codex/hpi-dinov2-20261031
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_hpi_${EXPECTED_SHA:0:7}"
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch "$RELEASE_REF" --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+else
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 --filter=blob:none origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/HPI_DINOV2_20261031/autodl_sparse_paths.txt" |
+  git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+test -z "$(git -C "$CODE_DIR" status --porcelain)"
+cd "$CODE_DIR"
+export PY=/root/autodl-tmp/envs/causalq-hpi/bin/python
+export CAUSALQ_DATA_ROOT=/root/autodl-tmp/datasets
+export CAUSALQ_PRETRAINED_ROOT=/root/autodl-tmp/pretrained
+export CAUSALQ_OUTPUT_ROOT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031
+export CAUSALQ_RUNTIME_PROFILE="$CODE_DIR/configs/hpi_dinov2_20261031/execution_v3_formal.yaml"
+test -x "$PY"
+test -d "$CAUSALQ_DATA_ROOT/cityscapes/leftImg8bit/val"
+test -d "$CAUSALQ_DATA_ROOT/cityscapes/gtFine/val"
+test -s "$CAUSALQ_PRETRAINED_ROOT/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth"
+df -hT /root/autodl-tmp
+bash scripts/run_hpi_dinov2_20261031.sh "$EXPECTED_SHA" target-evaluation
+BASH
+```
+
+沿用现有环境、转换权重及三个正式训练组的原输出目录。入口会校验七个最终检查点文件和头张量摘要。任务中断后，确认旧进程退出，再执行同一段，从已提交的逐图记录继续。
+
+## 3. 查看状态并回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/hpi_dinov2_20261031/phase37/TARGET_f6c647e
+test -d "$OUT"
+tail -n 80 "$OUT/launcher.log"
+cat "$OUT/status.json"
+if [[ -f "$OUT/target_report.json" ]]; then cat "$OUT/target_report.json"; fi
+if [[ -f "$OUT/export.zip" ]]; then
+  ls -lh "$OUT/export.zip"
+  sha256sum "$OUT/export.zip"
+fi
+BASH
+```
+
+完成依据为 `status=complete`、`exit_code=0`、`formal_optimizer_updates=0`、`target_data_accessed=true`，七组各 500 张图。
+下载并保留 `export.zip`，解压到本机 `phase37_export`，回传末尾日志、状态和 ZIP 的 SHA256。之后进入 Phase38 完整结果汇总。
+
+---
+
+# Archive — Phase36 B4/B5 正式训练与联合源诊断
 
 Phase35 源域结果已验收。B1/B2/B3 的源域 mIoU 为 72.4013%、72.4495%、72.4771%。
 主 ZIP 和 33 个报告文件已核验，2497 张记录来自原诊断的 180 张和补丁续跑的 2317 张。
