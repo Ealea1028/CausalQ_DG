@@ -1,0 +1,155 @@
+{
+  "phase": 37,
+  "models": {
+    "U0": {
+      "run_directory": "phase34/BASELINES_9243205",
+      "checkpoint": "checkpoints/U0/40000_b80b0516173f4b14aedd1e15f428de64/state.pth",
+      "checkpoint_sha256": "1f7af7f4cf58e880abf09ed5ceb6e284d820cf3f0efa5fc2db8166203e9fd606",
+      "head_sha256": "799052ea0958d68956769003cfc04286e8d1f182077568d372fb0c899cbe945f",
+      "identity": {
+        "git_sha": "9243205c5da354e67c0998b35bb4f462276b8c7e",
+        "freeze_sha256": "af38612bd423ed84a4fb941fc6ccaf9d6fd9014edd6e8c89e5888bcb445d5131",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/u0_seed0.yaml",
+      "source_miou": 0.7241415490504267
+    },
+    "UA": {
+      "run_directory": "phase34/BASELINES_9243205",
+      "checkpoint": "checkpoints/UA/40000_a0a7a291d66346c28d9ed79cf6bc73ca/state.pth",
+      "checkpoint_sha256": "a3562b8c1903764a0f0f7d9a8d48a8346858f52c3222a826128bad5a61420902",
+      "head_sha256": "b2c63e42c139e0bed53348238e54bc8509de422b3670febd26db7e4bfdb7fc4f",
+      "identity": {
+        "git_sha": "9243205c5da354e67c0998b35bb4f462276b8c7e",
+        "freeze_sha256": "af38612bd423ed84a4fb941fc6ccaf9d6fd9014edd6e8c89e5888bcb445d5131",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/ua_seed0.yaml",
+      "source_miou": 0.7237665732083038
+    },
+    "B1": {
+      "run_directory": "phase35/B1_B3_c4a7b6f",
+      "checkpoint": "checkpoints/B1/40000_78b9c86f82b14ea8a69164ca48b48c7d/state.pth",
+      "checkpoint_sha256": "2dce096361ece3fff5381754de2462fe7a46404b0875ce45c594aa6dc0053e83",
+      "head_sha256": "c41bd62b4b44ae5ec846441d9a1962939681ae9a6e8962fd2c7ca3174ea6ca20",
+      "identity": {
+        "git_sha": "c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9",
+        "freeze_sha256": "8bf482769c522212cd32ed1011849b7c637f7bdb816c19ecf6efe003132cebb3",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/b1_seed0.yaml",
+      "source_miou": 0.724013410998665
+    },
+    "B2": {
+      "run_directory": "phase35/B1_B3_c4a7b6f",
+      "checkpoint": "checkpoints/B2/40000_56a3f1f9f08949f5b57cbaa17e03ba44/state.pth",
+      "checkpoint_sha256": "65947394629ec6e3d375369d5b941b60d8444ec9344ca5325d381a27aa66deb3",
+      "head_sha256": "dad58a6651596f48bb919f088385093d54e55acc2cc0d8eeed5589d33882b42e",
+      "identity": {
+        "git_sha": "c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9",
+        "freeze_sha256": "8bf482769c522212cd32ed1011849b7c637f7bdb816c19ecf6efe003132cebb3",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/b2_seed0.yaml",
+      "source_miou": 0.7244945439043476
+    },
+    "B3": {
+      "run_directory": "phase35/B1_B3_c4a7b6f",
+      "checkpoint": "checkpoints/B3/40000_9ff1d979ab8844d59d46c7cc99ab9c4d/state.pth",
+      "checkpoint_sha256": "e51ca322f09df43ea2e2b2db29711881152e3103bce30d8ef754ee1f3f6804ed",
+      "head_sha256": "9b5ada5e27215e898d8dfbc56e2cf1c2e6d0e09cfd3aecf7b9925231e31f3d36",
+      "identity": {
+        "git_sha": "c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9",
+        "freeze_sha256": "8bf482769c522212cd32ed1011849b7c637f7bdb816c19ecf6efe003132cebb3",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/b3_seed0.yaml",
+      "source_miou": 0.724771204754871
+    },
+    "B4": {
+      "run_directory": "phase36/B4_B5_189cec5",
+      "checkpoint": "checkpoints/B4/40000_6f9712685220415fa3a30f7063926a74/state.pth",
+      "checkpoint_sha256": "18555027ce232e77ea30183a41b78f8add90d0714a7d40bed33fd3bf7b65fbc3",
+      "head_sha256": "efadc115ca3079972e92bf3049ad042bd55dc87150dcc8e3aa6f133660cc46ea",
+      "identity": {
+        "git_sha": "189cec5d3c659b99a26afd72d490598416a17ce8",
+        "freeze_sha256": "0db8c8515b48c35ed644d874a3bae3a49faa7905385986496431d5b7ce0721a4",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/b4_seed0.yaml",
+      "source_miou": 0.7246072952065967
+    },
+    "B5": {
+      "run_directory": "phase36/B4_B5_189cec5",
+      "checkpoint": "checkpoints/B5/40000_5eb5f69f5437418db15466d773905ca0/state.pth",
+      "checkpoint_sha256": "0aa198ceb622be4c43d488012125ea69f976efb8705b3b7b7de9bdf95d6063ac",
+      "head_sha256": "ea67cbd1c4b219d99c3067a17bb8993c78f33171d5636d2c1d37dc771bb32af7",
+      "identity": {
+        "git_sha": "189cec5d3c659b99a26afd72d490598416a17ce8",
+        "freeze_sha256": "0db8c8515b48c35ed644d874a3bae3a49faa7905385986496431d5b7ce0721a4",
+        "backbone": "db490b2f47014d17ed9c75804a49b84eb264721d7a2a5ade16de1a5b649d562b"
+      },
+      "config": "configs/hpi_dinov2_20261031/formal/b5_seed0.yaml",
+      "source_miou": 0.7243399674745475
+    }
+  },
+  "formal_optimizer_updates": 0,
+  "target_samples": 500,
+  "geometry": [
+    1024,
+    2048
+  ],
+  "batch_size": 2,
+  "precision": "BF16",
+  "selection": "fixed_final_40000",
+  "target_manifest": "manifests/cityscapes_val500.txt",
+  "comparisons": [
+    [
+      "UA",
+      "U0"
+    ],
+    [
+      "B1",
+      "U0"
+    ],
+    [
+      "B2",
+      "B1"
+    ],
+    [
+      "B3",
+      "B2"
+    ],
+    [
+      "B4",
+      "B3"
+    ],
+    [
+      "B5",
+      "B4"
+    ],
+    [
+      "B5",
+      "U0"
+    ],
+    [
+      "B5",
+      "UA"
+    ]
+  ],
+  "files": {
+    "experiments/HPI_DINOV2_20261031/phase34_acceptance.json": "a3e41954d6f4e8fd2504fa4196a271eb088423e7375d503ae500a3a033073096",
+    "experiments/HPI_DINOV2_20261031/phase35_acceptance.json": "1f8c455b3d62ea8e2d1cae4f6a06b0e11916055f2fd5b8f8f93966f29f7d4ff4",
+    "experiments/HPI_DINOV2_20261031/phase36_acceptance.json": "b2a83a3f03f55312aed7f7fa64cb3fc25e191ff8e3c822203a84e3dc8ee3a61f",
+    "configs/hpi_dinov2_20261031/formal/u0_seed0.yaml": "f4d8c34c112eaf30ddc0ee77b6c3e33265f56fc5fa52c406cefe2f6209b05a84",
+    "configs/hpi_dinov2_20261031/formal/ua_seed0.yaml": "8f317b44c17d612b7b21aafed34ce27be26d0dfebdd28575434d84f75c6fe05c",
+    "configs/hpi_dinov2_20261031/formal/b1_seed0.yaml": "c3bdcffa9deb1c6aefde435ea3039b3572328211546c9eb06d0cd7617f41e5be",
+    "configs/hpi_dinov2_20261031/formal/b2_seed0.yaml": "699e8464a83e2b7b72d30df9f710473329df0dc3366d6a092f3e2fdb59136c4f",
+    "configs/hpi_dinov2_20261031/formal/b3_seed0.yaml": "86736b412c3b4c67d698d4b25f0e7d83c74adc74422b44a76a2865b0e7d18727",
+    "configs/hpi_dinov2_20261031/formal/b4_seed0.yaml": "0632cde6ca313a2d8f21e7911eed318bcbb136311874d4450cf9553449d4aeb3",
+    "configs/hpi_dinov2_20261031/formal/b5_seed0.yaml": "37bfbeb7a9297ca3832af490460a2ec75b3b4666af26362a62d7e502ec180c4f",
+    "experiments/HPI_DINOV2_20261031/weight_identity.json": "90ad718b9a1be0273a8ecb58bd0c45e3da95439bcb8a053fd89200d5099ed492",
+    "experiments/HPI_DINOV2_20261031/runtime.json": "49ac1c67c2a8c49ad3f6a4c97cef155a004ffae546181f83e9a7c5dab5a295a5",
+    "manifests/cityscapes_val500.txt": "3960bb34afdfbbc6a5a5be887626d7ab03196691de54d0c00eb047153e03ab4c"
+  }
+}

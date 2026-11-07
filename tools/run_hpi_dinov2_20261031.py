@@ -12,7 +12,7 @@ from causalq.protocols.hpi_dinov2_20261031 import ROOT, STUDY, PHASE35_TRAINING_
 from causalq.runtime.identity import file_sha, write_json
 
 STAGES = {'prepare': (33, 'PREPARE'), 'train-baselines': (34, 'BASELINES'), 'performance-check': (34, 'PERF_V3'),
-          'train-b1-b3': (35, 'B1_B3'), 'resume-phase35-source': (35, 'B1_B3'), 'train-b4-b5': (36, 'B4_B5')}
+          'train-b1-b3': (35, 'B1_B3'), 'resume-phase35-source': (35, 'B1_B3'), 'train-b4-b5': (36, 'B4_B5'), 'target-evaluation': (37, 'TARGET')}
 FORMAL_UPDATES = {'train-baselines': 80000, 'train-b1-b3': 120000, 'train-b4-b5': 80000}
 
 
@@ -73,6 +73,10 @@ def run(out, expected, action='prepare'):
                 from causalq.runtime.hpi_training import train_cohort
                 train_cohort(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],
                              git_sha=expected,phase=phase,telemetry_origin=monitor.started,source_resume=source_resume)
+            elif action=='target-evaluation':
+                from causalq.runtime.hpi_target import evaluate_target
+                evaluate_target(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],
+                    pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],output_root=os.environ['CAUSALQ_OUTPUT_ROOT'],git_sha=expected)
             elif action=='performance-check':
                 from causalq.runtime.hpi_performance import performance_check
                 performance_check(out,profile,data_root=os.environ['CAUSALQ_DATA_ROOT'],pretrained_root=os.environ['CAUSALQ_PRETRAINED_ROOT'],git_sha=expected)
@@ -97,7 +101,7 @@ def run(out, expected, action='prepare'):
     cumulative_updates = 120000 if source_resume else planned
     write_json(out/'status.json',{'status':'complete' if code==0 else 'failed','exit_code':code,
         'git_sha':expected,'formal_optimizer_updates':cumulative_updates if code==0 or not cumulative_updates else None,
-        'target_data_accessed':False,**recovery})
+        'target_data_accessed':action=='target-evaluation',**recovery})
     print(f'{action}_exit_code={code}\noutput_directory={out}\nexport={out / "export.zip"}',flush=True)
     package(out)
     return code
@@ -142,7 +146,7 @@ def launch(out, expected, action='prepare'):
 def main():
     parser=argparse.ArgumentParser(description=__doc__)
     parser.add_argument('expected_sha',nargs='?')
-    parser.add_argument('action',nargs='?',choices=(*RELEASED_ACTIONS,'target-evaluation'))
+    parser.add_argument('action',nargs='?',choices=RELEASED_ACTIONS)
     parser.add_argument('--run',action='store_true')
     parser.add_argument('--stage',choices=tuple(STAGES),default='prepare')
     parser.add_argument('--output',type=Path)

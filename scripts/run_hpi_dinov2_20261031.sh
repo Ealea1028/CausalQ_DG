@@ -3,10 +3,10 @@
 causalq_hpi_main() (
   set -euo pipefail
   if [[ $# -ne 2 || ! "$1" =~ ^[0-9a-f]{40}$ ]]; then
-    echo 'Usage: bash scripts/run_hpi_dinov2_20261031.sh FULL_SHA prepare|train-baselines|performance-check|train-b1-b3|resume-phase35-source|train-b4-b5|status|package' >&2
+    echo 'Usage: bash scripts/run_hpi_dinov2_20261031.sh FULL_SHA prepare|train-baselines|performance-check|train-b1-b3|resume-phase35-source|train-b4-b5|target-evaluation|status|package' >&2
     return 2
   fi
-  case "$2" in prepare|train-baselines|performance-check|train-b1-b3|resume-phase35-source|train-b4-b5|status|package) ;; *) echo 'This action is not released' >&2; return 2 ;; esac
+  case "$2" in prepare|train-baselines|performance-check|train-b1-b3|resume-phase35-source|train-b4-b5|target-evaluation|status|package) ;; *) echo 'This action is not released' >&2; return 2 ;; esac
   local code_dir
   code_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
   cd "$code_dir"
