@@ -1,6 +1,14 @@
 # Method contract
 
-## Active — Phase37 fixed-final target evaluation
+## Completed — HPI DINOv2 study, Phase33–38
+
+All seven seed0 models completed 40000 updates each. The seven fixed-final
+Cityscapes val500 evaluations are accepted after independent integer confusion
+reductions. B5 target mIoU is 62.0539%, +0.1100 percentage points versus U0.
+B2 is 62.1193%. All eight predeclared contrasts and negative results appear in
+the [final report](../analysis/hpi_dinov2_final/REPORT.md). This exploratory single-seed study is complete.
+
+## Archive — Phase37 fixed-final target evaluation
 
 Freeze all seven checkpoint files, head digests, producer SHAs, configurations and source reports before target access. Evaluate Cityscapes val500 at native 1024×2048 with BF16, batch2, argmax, and one shared backbone. Each head contributes an independent confusion matrix. Image-level records bind input file hashes and evaluation identity, allowing recovery. This phase performs zero optimizer updates. Report all eight predeclared contrasts, all seven scores and class IoUs.
 

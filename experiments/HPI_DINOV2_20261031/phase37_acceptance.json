@@ -1,0 +1,68 @@
+{
+  "accepted": true,
+  "phase": 37,
+  "producer_sha": "f6c647e20f007f15ae1876a0d02c87746ed156b0",
+  "archive_sha256": "116c782de8a080b0b09d74c68f4177da41fd9e260cad9e0943e47765be91a4a6",
+  "files_verified": {
+    "B1/target_metrics.json": "6360f9900cca2cf5f835aaf2783a0a7da2686f99e28e4d50521194e806895cfc",
+    "B2/target_metrics.json": "a2270fa26aec163ef228718f6e6a2be66e72ff2b8d74668ec059b8d28f98af93",
+    "B3/target_metrics.json": "863c5801ce9f33ebd85c793beea41ead0f92120e96ed606f95c1f72caf4c2447",
+    "B4/target_metrics.json": "b250b2b21b9dacbf24c7a22b873e26aa9f7b846bae369c389d8a86468b8d2ed6",
+    "B5/target_metrics.json": "1adaaaf3176cf789a9d5ccb9d4b6d2a6b896067e0fe9a01007d13a5eb9f6594a",
+    "U0/target_metrics.json": "b27b915b9f79d07420c047256d834a0162d25898e2f837645160f5ae12ae8e95",
+    "UA/target_metrics.json": "0024089695642bf9f4580e938171a59cdf0354b8d6256a8854985b5257137304",
+    "class_iou.csv": "5f14caca4f856205feb764665cbeba389cd213b4e597890e8490fc979e0dd0f1",
+    "gpu_telemetry.csv": "dc1ecc6f87864d0379c7816584e215a34ae2bf0364f88ba90f44847afa92f085",
+    "gpu_telemetry_summary.json": "1e0642bcfd59bebd37551fe06716f13b5dfbd29f0ea06eff55fd320c45479fcb",
+    "launcher.log": "10c6d1ebef925c5f8754fca4b0aa787fe4b63d9c43d6b1703de970ef87e42908",
+    "run_manifest.json": "5238ed31635d37e8470756266e1ec84d915469a19b36cc390f1beba31119c69a",
+    "runtime_actual.json": "4601c97b7c164382c8d93ae1d6b2e98ac227b4afb339973b26777bff622db0a4",
+    "status.json": "0c075a57445c9fc25433016a92d529e21a7b155f0b04adc2f86c274d6ea29812",
+    "target_report.json": "99182e6b9c557dc43434f119ff85881f20c851c4bd80c1328db3dc33cedaaf32"
+  },
+  "all_seven_integer_confusions_reduced": true,
+  "target_ids_checked_per_model": 500,
+  "valid_pixels_per_model": 917018489,
+  "target_report": {
+    "identity": {
+      "evaluation_git_sha": "f6c647e20f007f15ae1876a0d02c87746ed156b0",
+      "target_freeze_sha256": "f5b7fbfb07859747f4cbe4870320b8e2b16d144f4eadedbe0364781e7b7be677"
+    },
+    "target_miou": {
+      "U0": 0.619438795386742,
+      "UA": 0.6202060260282948,
+      "B1": 0.6198073215622423,
+      "B2": 0.6211928980908535,
+      "B3": 0.6211493700211995,
+      "B4": 0.6204218274213652,
+      "B5": 0.6205391358340175
+    },
+    "source_miou": {
+      "U0": 0.7241415490504267,
+      "UA": 0.7237665732083038,
+      "B1": 0.724013410998665,
+      "B2": 0.7244945439043476,
+      "B3": 0.724771204754871,
+      "B4": 0.7246072952065967,
+      "B5": 0.7243399674745475
+    },
+    "comparisons_pp": {
+      "UA_minus_U0": 0.07672306415528185,
+      "B1_minus_U0": 0.03685261755003166,
+      "B2_minus_B1": 0.13855765286112653,
+      "B3_minus_B2": -0.004352806965401967,
+      "B4_minus_B3": -0.07275425998343188,
+      "B5_minus_B4": 0.011730841265233938,
+      "B5_minus_U0": 0.11003404472755829,
+      "B5_minus_UA": 0.03331098057227644
+    },
+    "formal_optimizer_updates": 0,
+    "target_data_accessed": true,
+    "sample_count_per_model": 500,
+    "invocation_evaluation_seconds": 141.8829593192786,
+    "torch": "2.7.0+cu128",
+    "gpu": "NVIDIA RTX 6000D",
+    "peak_allocated_bytes": 3621679616,
+    "peak_reserved_bytes": 4282384384
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "phase": 38,
+  "date": "2026-11-09",
+  "status": "complete",
+  "study": "hpi_dinov2_20261031",
+  "formal_training_models": 7,
+  "updates_per_model": 40000,
+  "total_formal_optimizer_updates": 280000,
+  "source_images_per_model": 2497,
+  "target_images_per_model": 500,
+  "all_eight_predeclared_contrasts_reported": true,
+  "target_producer_sha": "f6c647e20f007f15ae1876a0d02c87746ed156b0",
+  "report": "analysis/hpi_dinov2_final/REPORT.md",
+  "files_sha256": {
+    "analysis/hpi_dinov2_final/class_iou.csv": "60f11a36125257a149efa83d0c081ea685ed2b1cfa53faaf0e623df72de59d7f",
+    "analysis/hpi_dinov2_final/class_iou.svg": "caf24e2ecabe4cc2bb83e7d7fbe0bcddc08f36a66ea753d7c50a68c8bdbb0414",
+    "analysis/hpi_dinov2_final/contrasts.csv": "77a421f8da5d13c4a01a2a127d10f3ccb279da1b7d1625bb2df9f6c74b6760c6",
+    "analysis/hpi_dinov2_final/diagnostics.csv": "b723aa5a32bf9b4a4f8e98a958e91e900a19c682d03e0f4755f31f0964c24fa1",
+    "analysis/hpi_dinov2_final/engineering.json": "8b7785becdad37d5ec36780e1445a2a1b65cbd5d97e4c81a89e0a07bbf01cd6a",
+    "analysis/hpi_dinov2_final/main_path.csv": "c38f1e10d24a22c428f1b31ce174dfea1230a03eed85bfedefcb251dc99b64f1",
+    "analysis/hpi_dinov2_final/models.csv": "27adab7556130b1e536d6808983ce42f58eee4427fa74f1168a9844447a17906",
+    "analysis/hpi_dinov2_final/REPORT.md": "5ec44d96289cdf1dd4ff5fe298827213167639853e2460933528bc962d0b5810",
+    "analysis/hpi_dinov2_final/target_comparisons.png": "6912c59236bb5856ec63eb201bf73ba3ada788349418a700b8a75c5f663d14ca",
+    "analysis/hpi_dinov2_final/target_comparisons.svg": "d65398b525d9d872e2664be953751540d3e132f9a166cb1519eee44d7396da8c"
+  },
+  "local_validation": {
+    "passed": 754,
+    "skipped": 1,
+    "warnings": 14,
+    "seconds": 184.27,
+    "log_sha256": "ca5a0c6115c47e18a446daebc9d1c2fe987095df4ceab68b88d602803040e0be",
+    "python": "3.12.4",
+    "torch": "2.7.0+cpu"
+  },
+  "additional_autodl_action_pending": false,
+  "known_missing_evidence": [
+    "Phase35 examples ZIP was reported remotely but not returned locally",
+    "Phase35 original training timing breakdown absent in returned recovery package"
+  ],
+  "engineering_targets_met": false,
+  "next_action": "none"
+}

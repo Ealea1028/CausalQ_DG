@@ -1,0 +1,157 @@
+[
+  {
+    "phase": 34,
+    "training_sha": "9243205c5da354e67c0998b35bb4f462276b8c7e",
+    "formal_updates": 80000,
+    "logical_batch": 1,
+    "physical_backbone_views": 32,
+    "workers": 12,
+    "prefetch": 2,
+    "timing": null,
+    "invocation_seconds": 67924.49030244164,
+    "peak_reserved_bytes": 4519362560,
+    "training_activity": null,
+    "invocation_telemetry": {
+      "samples": 32594,
+      "nvml_activity_is_not_tensor_core_utilization": true,
+      "utilization_percent": {
+        "count": 32594,
+        "mean": 3.8342639749647174,
+        "min": 0.0,
+        "max": 100.0,
+        "median": 0.0
+      },
+      "memory_used_mib": {
+        "count": 32594,
+        "mean": 4991.957568877708,
+        "min": 0.0,
+        "max": 5037.0,
+        "median": 5037.0
+      },
+      "power_w": {
+        "count": 32594,
+        "mean": 87.86726912928759,
+        "min": 78.37,
+        "max": 240.94,
+        "median": 81.73
+      }
+    }
+  },
+  {
+    "phase": 35,
+    "training_sha": "c4a7b6fd8722fa2186ee2ce284b25fe7fadb6da9",
+    "formal_updates": 120000,
+    "logical_batch": 1,
+    "physical_backbone_views": 32,
+    "workers": 12,
+    "prefetch": 2,
+    "timing": null,
+    "invocation_seconds": 8166.4175729602575,
+    "peak_reserved_bytes": 7046430720,
+    "training_activity": {
+      "training_intervals": [
+        {
+          "attempt": "attempts/20261105T142531943878Z",
+          "interval_seconds": 3593.213621702045,
+          "samples": 1714,
+          "steady_eligible": true,
+          "median_percent": 68.0,
+          "mean_percent": 70.0565927654609,
+          "p10_percent": 61.0,
+          "p90_percent": 87.0,
+          "below_50_fraction": 0.005250875145857643
+        }
+      ],
+      "steady_minimum_seconds": 120
+    },
+    "invocation_telemetry": {
+      "samples": 3912,
+      "nvml_activity_is_not_tensor_core_utilization": true,
+      "utilization_percent": {
+        "count": 3912,
+        "mean": 7.429959100204499,
+        "min": 0.0,
+        "max": 100.0,
+        "median": 0.0
+      },
+      "memory_used_mib": {
+        "count": 3912,
+        "mean": 7314.380368098159,
+        "min": 1.0,
+        "max": 7339.0,
+        "median": 7337.0
+      },
+      "power_w": {
+        "count": 3912,
+        "mean": 95.02047034764827,
+        "min": 29.83,
+        "max": 207.3,
+        "median": 85.46
+      }
+    }
+  },
+  {
+    "phase": 36,
+    "training_sha": "189cec5d3c659b99a26afd72d490598416a17ce8",
+    "formal_updates": 80000,
+    "logical_batch": 1,
+    "physical_backbone_views": 32,
+    "workers": 12,
+    "prefetch": 2,
+    "timing": {
+      "wall_seconds": 3265.435685975477,
+      "steady_start_monotonic": 8825643.509865304,
+      "stop_monotonic": 8828886.69983921,
+      "checkpoint_seconds": 8.366649225354195,
+      "data_wait_seconds": 1.7617396004498005,
+      "cohort_ticks_per_second": 12.249513953618376,
+      "updates_per_head_per_second": {
+        "B4": 12.249513953618376,
+        "B5": 12.249513953618376
+      }
+    },
+    "invocation_seconds": 9186.46388774924,
+    "peak_reserved_bytes": 9955180544,
+    "training_activity": {
+      "training_intervals": [
+        {
+          "attempt": ".",
+          "interval_seconds": 3243.1899739056826,
+          "samples": 1545,
+          "steady_eligible": true,
+          "median_percent": 62.0,
+          "mean_percent": 65.71456310679612,
+          "p10_percent": 57.0,
+          "p90_percent": 90.0,
+          "below_50_fraction": 0.004530744336569579
+        }
+      ],
+      "steady_minimum_seconds": 120
+    },
+    "invocation_telemetry": {
+      "samples": 4387,
+      "nvml_activity_is_not_tensor_core_utilization": true,
+      "utilization_percent": {
+        "count": 4387,
+        "mean": 28.949395942557555,
+        "min": 0.0,
+        "max": 100.0,
+        "median": 0.0
+      },
+      "memory_used_mib": {
+        "count": 4387,
+        "mean": 8086.9808525188055,
+        "min": 1.0,
+        "max": 10227.0,
+        "median": 10227.0
+      },
+      "power_w": {
+        "count": 4387,
+        "mean": 130.88380670161843,
+        "min": 79.13,
+        "max": 220.34,
+        "median": 108.89
+      }
+    }
+  }
+]

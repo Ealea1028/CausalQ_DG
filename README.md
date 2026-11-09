@@ -1,6 +1,14 @@
 # CausalQ-DG
 
-## Active — Phase37 fixed-final target evaluation
+## Completed — HPI DINOv2 study, Phase33–38
+
+All seven seed0 models completed 40000 updates each. The seven fixed-final
+Cityscapes val500 evaluations are accepted after independent integer confusion
+reductions. B5 target mIoU is 62.0539%, +0.1100 percentage points versus U0.
+B2 is 62.1193%. All eight predeclared contrasts and negative results appear in
+the [final report](analysis/hpi_dinov2_final/REPORT.md). This exploratory single-seed study is complete.
+
+## Archive — Phase37 fixed-final target evaluation
 
 Phase36 B4/B5 are accepted at source mIoU 72.4607% and 72.4340%. All seven heads completed 40000 updates each. Phase37 evaluates the seven frozen finals on Cityscapes val500 at native 1024×2048 with BF16 and shared backbone batch2. See [AutoDL handoff](docs/AUTODL_NEXT.md).
 
