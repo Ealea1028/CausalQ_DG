@@ -4,6 +4,7 @@ import gc
 import hashlib
 import json
 import os
+import platform
 import signal
 from pathlib import Path
 import subprocess
@@ -14,7 +15,7 @@ import traceback
 import torch
 
 from causalq.datasets.segmentation import TrainTransform
-from causalq.datasets.strict_source import build_source_datasets,SourceEvalTransform
+from causalq.datasets.strict_source import build_source_datasets,SourceEvalTransform,MANIFEST_HASHES
 from causalq.models.hpi_anchor_only import freeze_query_residuals,verify_frozen_residuals
 from causalq.models.hpi_query_route import QueryFeatureRouter
 from causalq.models.lora_routing import LoRARoutedQuerySegmentor
@@ -201,6 +202,13 @@ def run(args):
             'resume_acceptance_sha256':file_sha(acceptance),'batch_numerical_tolerances':BF16_BATCH_TOLERANCES,
             'bounds':{'candidates_per_workload':3,'warmup_updates':20,'timed_seconds':120,'candidate_cap_seconds':300,'max_updates_per_candidate':MAX_UPDATES}}
     try:
+        report['runtime']={'python':sys.version,'platform':platform.platform(),'torch':str(torch.__version__),
+            'cuda_runtime':torch.version.cuda,'pip_freeze':subprocess.check_output([sys.executable,'-m','pip','freeze'],text=True).splitlines(),
+            'nvidia_smi':subprocess.check_output(['nvidia-smi','--query-gpu=name,driver_version,memory.total',
+                                                '--format=csv,noheader,nounits','--id=0'],text=True).strip()}
+        report['source_manifest_sha256']=MANIFEST_HASHES
+        report['data_root']=str(args.data_root.resolve()); report['pretrained_root']=str(args.pretrained_root.resolve())
+        report['phase39_report_sha256']=file_sha(ROOT/'experiments/LORA_CAUSALQ_1114/phase39_report.json')
         for name in ('dinov3_vitl16','dinov2_vitl14_hpi_p16'):
             for variant in ('UA','B3'):
                 rows=[]
