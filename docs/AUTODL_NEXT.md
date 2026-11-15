@@ -1,4 +1,107 @@
-# 当前操作 — LoRA Phase39 真实双骨干接入检查（2026-11-15）
+# 当前操作 — Phase40 源域 batch8 跨进程恢复检查
+
+Phase39已验收：返回ZIP实际为tar.gz，压缩包/解压报告/日志逐字节核对；D3和D2权重身份与历史一致。两骨干均98304个LoRA参数、24个A/B矩阵梯度有效、零增量精确一致、原始权重未变，Patch/CLS为[1,8192,1024]/[1,1024]。6次可丢弃工程更新，0正式更新，无数据/目标访问。验收元数据在experiments/LORA_CAUSALQ_1114/phase39_acceptance.json。
+
+本机已完成HPI优化器、学习率、有效batch8更新和完整LoRA+head/optimizer/RNG检查点。全量测试765 passed、1 skipped（Windows符号链接权限），193.92秒；5项聚焦测试通过，启动脚本Bash语法和精简检出依赖闭包检查通过。本机未读取真实数据或权重。
+
+下一步只能在AutoDL验证真实源数据与独立进程恢复，因此在此停止。运行SHA：`2cfbb3b89d2761b576b688085ca4ba18adab5f8c`，发布分支`codex/lora-causalq-1114`。
+
+只运行Phase40的resume-check：每个骨干3个独立进程，连续4次更新对比2次保存+2次恢复，有效源batch8、microbatch1/累积8、12 workers（共享内存不足时有界线程回退）。总16次可丢弃工程更新，0正式更新，最多32个不同的规范源样本位置重复读取；两骨干合计128次源图暴露、256视图。两次读取的实际张量及输入参数哈希必须一致。仅读取GTA5源域；无mIoU、目标访问或正式训练。
+
+本次不是吞吐定标，不宣称达到GPU利用率目标。恢复证据验收后，在Phase40继续发布UA/B3的有界吞吐定标；Phase41–46仍未开放。
+
+## 1. 拉取新的独立代码目录
+
+复用已经通过Phase39的环境、权重和源数据，不更改旧代码目录。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=2cfbb3b89d2761b576b688085ca4ba18adab5f8c
+DIR=/root/autodl-tmp/CausalQ_DG_lora1114_2cfbb3b
+if [[ ! -d "$DIR/.git" ]]; then
+  test ! -e "$DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch codex/lora-causalq-1114 --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$DIR"
+else
+  test -z "$(git -C "$DIR" status --porcelain)"
+fi
+git -C "$DIR" fetch --depth 1 origin "$SHA"
+git -C "$DIR" show "$SHA:experiments/LORA_CAUSALQ_1114/autodl_sparse_paths.txt" | \
+  git -C "$DIR" sparse-checkout set --no-cone --stdin
+git -C "$DIR" checkout --detach "$SHA"
+test "$(git -C "$DIR" rev-parse HEAD)" = "$SHA"
+BASH
+```
+
+## 2. 核对源数据并后台启动
+
+需要的固定源数据布局为`gta5/images/images/`与`gta5/labels_trainIds/`，共24966个配对样本，按Git内22469/2497清单划分。入口会检查完整文件成员，但只解码这次恢复检查所需的训练样本，不推理holdout。不需要迁移或读取Cityscapes。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_2cfbb3b
+export PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+for P in \
+  /root/autodl-tmp/datasets/gta5/images/images \
+  /root/autodl-tmp/datasets/gta5/labels_trainIds; do
+  if [[ ! -d "$P" ]]; then
+    echo "缺少源数据目录：$P。请回传，不要启动或临时更换数据划分。"
+    exit 2
+  fi
+done
+bash scripts/check_lora_resume.sh 2cfbb3b89d2761b576b688085ca4ba18adab5f8c
+BASH
+```
+
+## 3. 查看进度
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_resume_2cfbb3b
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/launcher.pid" ]]; then
+  ps -p "$(cat "$OUT/launcher.pid")" -o pid,etime,args || true
+fi
+if [[ -f "$OUT/report.json" ]]; then
+  /root/autodl-tmp/envs/causalq-lora1114/bin/python - "$OUT/report.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1]))
+print({k:r.get(k) for k in ('ok','exit_code','git_sha','formal_optimizer_updates','target_data_accessed','performance_calibration_complete')})
+for m in r.get('models',[]):
+    print({k:m.get(k) for k in ('model','engineering_updates','continuous_vs_resumed_model_max_abs','optimizer_max_abs','rng_equal','inputs_equal','base_unchanged')})
+if r.get('error'): print(r['error'])
+PY
+fi
+BASH
+```
+
+每个worker需重新加载真实骨干和建立有界加载器，初始化期间主日志可能没有新行。不要重复启动、切换当前运行的SHA或删除输出。首次失败返回日志；现有最终报告会阻止盲目重跑。
+
+## 4. 导出结果
+
+父进程结束、report.json生成后执行，检查点与优化器留在实例，返回所有小型JSON/日志以便定位子进程错误：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_resume_2cfbb3b
+test -f "$OUT/report.json" || { echo '最终报告尚未生成，请先查看进度'; exit 2; }
+tar --exclude='*.pt' --exclude='*.partial' \
+  -czf "$OUT/../phase40_resume_2cfbb3b_return.tar.gz" -C "$OUT" .
+sha256sum "$OUT/../phase40_resume_2cfbb3b_return.tar.gz"
+ls -lh "$OUT/../phase40_resume_2cfbb3b_return.tar.gz"
+BASH
+```
+
+将此tar.gz下载并解压到本机`phase40_export/`，然后告知我。失败也请返回该包，保留所有原始状态。成功应为两个模型各8工程更新、模型/完整AdamW状态在预设atol1e-6/rtol1e-5内一致、RNG及实际输入张量哈希完全相同、原始权重不变。吞吐定标尚未完成，不能因此直接启动正式训练。
+
+---
+
+# Archive — Phase39 已验收，勿重跑
 
 本机已实现 Q/V LoRA、可微骨干路径、Patch/CLS 返回和研究权限。下一步必须在 AutoDL 使用真实权重和 CUDA 验证；现在停止本机推进。只执行下列合成输入检查，不训练正式模型，不读取数据集或目标域。
 
