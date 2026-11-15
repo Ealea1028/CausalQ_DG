@@ -1,4 +1,100 @@
-# 当前操作 — Phase40 源域 batch8 跨进程恢复检查
+# 当前操作 — Phase40 RNG初始化修复后复验
+
+收到`phase40_export/phase40_resume_2cfbb3b_return/`并核对压缩包与解压文件字节一致。原运行**未通过**：DINOv3的连续4步/前缀2步/恢复2步均已完成，最终随机状态比较失败；DINOv2尚未开始。原始报告、日志、检查点全部保留，失败摘要在`experiments/LORA_CAUSALQ_1114/phase40_resume_failure_2cfbb3b.json`。
+
+已独立核对返回的32个源位置输入张量哈希、输入参数和四次loss完全一致，三份base摘要相同。原审计器在model/optimizer比较之后才触发RNG异常，但未导出数值误差；本机没有重放未返回的模型检查点，不能据此宣称Phase40通过。
+
+定位到Torch之外的Python/NumPy随机状态未初始化。修复在各独立worker开头初始化Python/NumPy/Torch为seed0，再在恢复路径加载完整checkpoint RNG，恢复后不重新设seed。未改变CausalQ损失、学习率、batch、更新数、数值容差或严格RNG相等要求。新增独立进程CPU回归与逐provider诊断。下一步仍需AutoDL复验，在此停止本机推进。
+
+本机验证：767 passed、1 skipped（Windows符号链接权限），200.71秒；7项聚焦测试、独立进程RNG回归和旧状态只读诊断smoke通过。
+
+新运行SHA：`db4ed7f8d391a2039024d140e83b8deeceb8eaa1`，分支`codex/lora-causalq-1114`。本次先只读核验旧检查点哈希并导出Python/NumPy/Torch/CUDA各自的RNG比较，再在新目录从相同初始化执行双骨干4对2+2。共16次新的工程更新，正式更新0；只用源域，不运行吞吐定标或Phase41训练。
+
+## 1. 拉取修复版本
+
+环境、权重、源数据路径全部复用；旧输出与代码目录保持原样。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=db4ed7f8d391a2039024d140e83b8deeceb8eaa1
+DIR=/root/autodl-tmp/CausalQ_DG_lora1114_db4ed7f
+if [[ ! -d "$DIR/.git" ]]; then
+  test ! -e "$DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch codex/lora-causalq-1114 --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$DIR"
+else
+  test -z "$(git -C "$DIR" status --porcelain)"
+fi
+git -C "$DIR" fetch --depth 1 origin "$SHA"
+git -C "$DIR" show "$SHA:experiments/LORA_CAUSALQ_1114/autodl_sparse_paths.txt" | \
+  git -C "$DIR" sparse-checkout set --no-cone --stdin
+git -C "$DIR" checkout --detach "$SHA"
+test "$(git -C "$DIR" rev-parse HEAD)" = "$SHA"
+BASH
+```
+
+## 2. 后台启动复验
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_db4ed7f
+export PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+bash scripts/check_lora_resume.sh db4ed7f8d391a2039024d140e83b8deeceb8eaa1
+BASH
+```
+
+初次失败没有正式训练状态需要续跑；本次用新的随机初始化合同和独立输出验证恢复，不修改旧检查点来伪造通过。旧检查点只读审计结果写入新输出的`previous_rng_audit.json`；若旧文件已不在，诊断条目可为空，但不把旧运行改判为通过。
+
+## 3. 查看状态和诊断
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_resume_db4ed7f
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/launcher.pid" ]]; then
+  ps -p "$(cat "$OUT/launcher.pid")" -o pid,etime,args || true
+fi
+if [[ -f "$OUT/previous_rng_audit.json" ]]; then cat "$OUT/previous_rng_audit.json"; fi
+if [[ -f "$OUT/report.json" ]]; then
+  /root/autodl-tmp/envs/causalq-lora1114/bin/python - "$OUT/report.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1]))
+print({k:r.get(k) for k in ('ok','exit_code','git_sha','formal_optimizer_updates','target_data_accessed')})
+for m in r.get('models',[]):
+    print({k:m.get(k) for k in ('model','engineering_updates','continuous_vs_resumed_model_max_abs','optimizer_max_abs','rng_equal','inputs_equal','base_unchanged')})
+if r.get('error'): print(r['error'])
+PY
+fi
+BASH
+```
+
+子进程重新加载模型/数据时主日志可能暂时无输出。若失败，请保留所有报告和子日志，不在实例修改源码、删除完成标记或放宽容差。
+
+## 4. 回传复验结果
+
+父进程结束后执行。仅打包JSON、日志等小型证据，模型与优化器状态留在实例：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_resume_db4ed7f
+test -f "$OUT/report.json" || { echo '最终报告尚未生成，请先查看进度'; exit 2; }
+tar --exclude='*.pt' --exclude='*.partial' \
+  -czf "$OUT/../phase40_resume_db4ed7f_return.tar.gz" -C "$OUT" .
+sha256sum "$OUT/../phase40_resume_db4ed7f_return.tar.gz"
+ls -lh "$OUT/../phase40_resume_db4ed7f_return.tar.gz"
+BASH
+```
+
+下载并解压到本机`phase40_export/phase40_resume_db4ed7f_return/`，保留旧的`phase40_resume_2cfbb3b_return/`，然后告知我。成功标准仍是两个模型、各8次工程更新、模型/优化器状态满足原atol1e-6/rtol1e-5，Python/NumPy/Torch/CUDA状态及真实输入哈希全部一致，原始权重不变，正式更新0、目标访问false。验收通过后才继续Phase40吞吐定标。
+
+---
+
+# Archive — Phase40 首次恢复检查（未通过，保留原步骤）
 
 Phase39已验收：返回ZIP实际为tar.gz，压缩包/解压报告/日志逐字节核对；D3和D2权重身份与历史一致。两骨干均98304个LoRA参数、24个A/B矩阵梯度有效、零增量精确一致、原始权重未变，Patch/CLS为[1,8192,1024]/[1,1024]。6次可丢弃工程更新，0正式更新，无数据/目标访问。验收元数据在experiments/LORA_CAUSALQ_1114/phase39_acceptance.json。
 
