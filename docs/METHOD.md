@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — LoRA dual-backbone Phase39, 2026-11-15
+## Active — LoRA Phase40 source-only fresh-process recovery
+
+Phase39 is accepted from hash-verified returned report/log/archive bytes.
+Both DINO weight identities match history; all24 adapter matrix gradients per
+backbone are finite and positive. No local weight replay or mIoU inference.
+See experiments/LORA_CAUSALQ_1114/phase39_acceptance.json.
+
+Release only resume-check: two UA L1 engineering models, effective source batch8,
+microbatch1/accumulation8, HPI AdamW1e-4/wd1e-5/norm0/poly.9/min1e-6 and linear
+1500-step warmup ratio1e-6. Per-image CE terms are summed across views; original
+Anchor reference is detached; photo CQE differentiable. Every sample/view uses
+an absolute-position head dropout RNG scope, preserving microbatch pairing.
+
+Compare three independent processes per backbone:4 continuous updates,2 prefix
+updates with an immutable compact checkpoint,then2 resumed updates. Compare
+complete trainable/head state, AdamW moments/groups, complete RNG and actual
+input tensor hashes; verify base weights unchanged. Total16 disposable engineering
+updates,zero formal updates; only canonical GTA5 source input is read. No source
+or target mIoU, no target access, no Phase41 launch. This is the recovery portion
+of Phase40, not throughput acceptance. Bounded UA/B3 calibration remains pending.
+
+## Archive — Phase39 implementation and real-weight gate (accepted)
+
+### Phase39 original scope, 2026-11-15
 
 Authority: LoRA_CausalQ_1114_Plan.md and user's implementation request.
 Only Q/V rank4 alpha4 adapters in zero-based blocks18–23 are added; all original

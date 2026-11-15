@@ -1,12 +1,16 @@
 # CausalQ-DG
 
-## Active — LoRA dual-backbone Phase39
+## Active — LoRA Phase40 source-only recovery
 
 Implementing [LoRA_CausalQ_1114_Plan.md](LoRA_CausalQ_1114_Plan.md), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
 objectives; both wrappers now expose CLS separately from Patch/register tokens.
-Only the real-weight synthetic `backbone-gate` is released. No formal training,
-dataset access or performance claim. AutoDL evidence is required before Phase40.
+Phase39 returned evidence is accepted: exact initial outputs, both 98304-parameter
+adapters, valid gradients, unchanged base weights and native Patch/CLS shapes.
+Phase40 releases source-only fresh-process 4 versus2+2 recovery with effective
+batch8, HPI optimizer/schedule and complete LoRA+head/optimizer/RNG checkpoints.
+No formal training, target access or throughput acceptance. UA/B3 performance
+calibration remains a subsequent Phase40 action after recovery evidence returns.
 See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.
 
 ## Completed — HPI DINOv2 study, Phase33–38

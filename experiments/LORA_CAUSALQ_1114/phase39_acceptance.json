@@ -1,0 +1,17 @@
+{
+  "accepted": true,
+  "producer_git_sha": "68992d869509cbcc5ab4b824fcc3fe67f35f43f4",
+  "formal_optimizer_updates": 0,
+  "engineering_updates": 6,
+  "source_data_accessed": false,
+  "target_data_accessed": false,
+  "received_files": {
+    "report.json": "00b0f3ee3318510da5ae91a1aa8665ca15fbd61ebcd2a6116fd5da2174b58f0c",
+    "launcher.log": "a3f034fdacfb48abba95b2f28b5dac20535cd646fc974926b6307afd27954a0d",
+    "return.tar.gz": "fe484b2a2bc83e06e8c85bfcfd49ade9b455f3743f4aa4a3916629792e36c161"
+  },
+  "independently_checked": "archive bytes, report schema, target layout, all gradients, historical weight hashes",
+  "remote_only_checks": "weight immutability and numerical forward/backward were reported by AutoDL; not replayed locally",
+  "next_phase": 40,
+  "performance_and_fresh_process_resume_accepted": false
+}

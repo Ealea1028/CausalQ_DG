@@ -48,3 +48,5 @@ analysis/style_examples/
 /analysis/diagnostic_final_source_20261028/class_metrics.csv
 experiments/*/checkpoints/
 experiments/*/logs/
+/phase39_export/
+/phase40_export/

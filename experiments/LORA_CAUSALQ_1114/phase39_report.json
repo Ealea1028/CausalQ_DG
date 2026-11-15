@@ -1,0 +1,348 @@
+{
+  "ok": true,
+  "study": "lora_causalq_1114",
+  "phase": 39,
+  "action": "backbone-gate",
+  "formal_optimizer_updates": 0,
+  "dataset_accessed": false,
+  "target_data_accessed": false,
+  "models": [
+    {
+      "model": "dinov3_vitl16",
+      "weights": "/root/autodl-tmp/pretrained/dinov3_vitl16",
+      "weight_files": {
+        "model.safetensors": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179",
+        "config.json": "135ecd23e34a70b6fbed8b083fdecb319b7e3a54e3d849258bbe4ddcf1783bb5",
+        "configuration.json": "2e298ee07ca76e112e8cb5524061000871a464b0088d14becb7d0564215a9380",
+        "preprocessor_config.json": "960c41d1f3a7778b936365769a2d90550b318a6c0a53a0296957adacfe5e0dd7"
+      },
+      "lora": {
+        "blocks_zero_based": [
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "rank": 4,
+        "alpha_lora": 4.0,
+        "targets": [
+          {
+            "path": "model.layer.18.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.18.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          },
+          {
+            "path": "model.layer.19.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.19.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          },
+          {
+            "path": "model.layer.20.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.20.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          },
+          {
+            "path": "model.layer.21.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.21.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          },
+          {
+            "path": "model.layer.22.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.22.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          },
+          {
+            "path": "model.layer.23.attention.q_proj",
+            "components": [
+              "q"
+            ]
+          },
+          {
+            "path": "model.layer.23.attention.v_proj",
+            "components": [
+              "v"
+            ]
+          }
+        ],
+        "trainable_parameters": 98304
+      },
+      "zero_delta_exact": true,
+      "frozen_digest": "72760d1ba9014be1e0d3ac25db7e762821a07caa04a7ddd5e0359cebe4b841ac",
+      "engineering_updates": 3,
+      "losses": [
+        {
+          "ce_original": 2.9982895851135254,
+          "ce_photo": 3.0064234733581543,
+          "cqe": 0.0,
+          "grad_norm": 4.781400680541992
+        },
+        {
+          "ce_original": 2.9781317710876465,
+          "ce_photo": 2.98337984085083,
+          "cqe": 0.00013532768934965134,
+          "grad_norm": 3.4945409297943115
+        },
+        {
+          "ce_original": 2.9664902687072754,
+          "ce_photo": 2.9697670936584473,
+          "cqe": 0.00012097409489797428,
+          "grad_norm": 2.270435333251953
+        }
+      ],
+      "final_adapter_gradient_norms": {
+        "model.layer.18.attention.v_proj.q.A": 5.338555979506054e-07,
+        "model.layer.18.attention.v_proj.q.B": 6.049765943316743e-05,
+        "model.layer.18.attention.q_proj.q.A": 6.57692112326913e-07,
+        "model.layer.18.attention.q_proj.q.B": 2.1213971194811165e-05,
+        "model.layer.19.attention.v_proj.q.A": 4.645358444577141e-07,
+        "model.layer.19.attention.v_proj.q.B": 5.8559129683999345e-05,
+        "model.layer.19.attention.q_proj.q.A": 6.847220106465102e-07,
+        "model.layer.19.attention.q_proj.q.B": 1.79724047484342e-05,
+        "model.layer.20.attention.v_proj.q.A": 7.838324336262303e-07,
+        "model.layer.20.attention.v_proj.q.B": 5.3353491239249706e-05,
+        "model.layer.20.attention.q_proj.q.A": 1.212370875691704e-06,
+        "model.layer.20.attention.q_proj.q.B": 2.423626028758008e-05,
+        "model.layer.21.attention.v_proj.q.A": 1.3759200783169945e-06,
+        "model.layer.21.attention.v_proj.q.B": 6.46986227366142e-05,
+        "model.layer.21.attention.q_proj.q.A": 2.5393107989657437e-06,
+        "model.layer.21.attention.q_proj.q.B": 6.514153210446239e-05,
+        "model.layer.22.attention.v_proj.q.A": 3.5677883261087118e-06,
+        "model.layer.22.attention.v_proj.q.B": 0.00013748453056905419,
+        "model.layer.22.attention.q_proj.q.A": 5.341537985259492e-07,
+        "model.layer.22.attention.q_proj.q.B": 2.9057348001515493e-05,
+        "model.layer.23.attention.v_proj.q.A": 4.940656708640745e-06,
+        "model.layer.23.attention.v_proj.q.B": 9.377944661537185e-05,
+        "model.layer.23.attention.q_proj.q.A": 8.152325676746841e-07,
+        "model.layer.23.attention.q_proj.q.B": 3.719741289387457e-05
+      },
+      "native_patch_shape": [
+        1,
+        8192,
+        1024
+      ],
+      "native_cls_shape": [
+        1,
+        1024
+      ]
+    },
+    {
+      "model": "dinov2_vitl14_hpi_p16",
+      "weights": "/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth",
+      "weight_files": {
+        "dinov2_vitl14_hpi_p16.pth": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+      },
+      "lora": {
+        "blocks_zero_based": [
+          18,
+          19,
+          20,
+          21,
+          22,
+          23
+        ],
+        "rank": 4,
+        "alpha_lora": 4.0,
+        "targets": [
+          {
+            "path": "model.blocks.18.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          },
+          {
+            "path": "model.blocks.19.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          },
+          {
+            "path": "model.blocks.20.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          },
+          {
+            "path": "model.blocks.21.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          },
+          {
+            "path": "model.blocks.22.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          },
+          {
+            "path": "model.blocks.23.attn.qkv",
+            "components": [
+              "q",
+              "v"
+            ]
+          }
+        ],
+        "trainable_parameters": 98304
+      },
+      "zero_delta_exact": true,
+      "frozen_digest": "af6eda7af000b63f642d5fb04fd8d4ec877469f6c136d93c128e3c76b5e54e28",
+      "engineering_updates": 3,
+      "losses": [
+        {
+          "ce_original": 2.9927539825439453,
+          "ce_photo": 2.9902901649475098,
+          "cqe": 0.0,
+          "grad_norm": 3.572535753250122
+        },
+        {
+          "ce_original": 2.980173349380493,
+          "ce_photo": 2.980376720428467,
+          "cqe": 0.00834294781088829,
+          "grad_norm": 3.5140695571899414
+        },
+        {
+          "ce_original": 2.9724693298339844,
+          "ce_photo": 2.9685850143432617,
+          "cqe": 0.0045280735939741135,
+          "grad_norm": 2.2035036087036133
+        }
+      ],
+      "final_adapter_gradient_norms": {
+        "model.blocks.18.attn.qkv.q.A": 3.0259674531407654e-05,
+        "model.blocks.18.attn.qkv.q.B": 0.0012817971874028444,
+        "model.blocks.18.attn.qkv.v.A": 5.075035005575046e-05,
+        "model.blocks.18.attn.qkv.v.B": 0.002572728553786874,
+        "model.blocks.19.attn.qkv.q.A": 2.9291210012161173e-05,
+        "model.blocks.19.attn.qkv.q.B": 0.001570401364006102,
+        "model.blocks.19.attn.qkv.v.A": 3.150279007968493e-05,
+        "model.blocks.19.attn.qkv.v.B": 0.0024852477945387363,
+        "model.blocks.20.attn.qkv.q.A": 4.0392860682914034e-05,
+        "model.blocks.20.attn.qkv.q.B": 0.0018203547224402428,
+        "model.blocks.20.attn.qkv.v.A": 7.178130181273445e-05,
+        "model.blocks.20.attn.qkv.v.B": 0.0039366199634969234,
+        "model.blocks.21.attn.qkv.q.A": 5.136545587447472e-05,
+        "model.blocks.21.attn.qkv.q.B": 0.0015574973076581955,
+        "model.blocks.21.attn.qkv.v.A": 0.0001319747680099681,
+        "model.blocks.21.attn.qkv.v.B": 0.00337539822794497,
+        "model.blocks.22.attn.qkv.q.A": 4.0901362808654085e-05,
+        "model.blocks.22.attn.qkv.q.B": 0.0009628109401091933,
+        "model.blocks.22.attn.qkv.v.A": 8.846387936500832e-05,
+        "model.blocks.22.attn.qkv.v.B": 0.004812547005712986,
+        "model.blocks.23.attn.qkv.q.A": 2.600723564682994e-05,
+        "model.blocks.23.attn.qkv.q.B": 0.0035358308814466,
+        "model.blocks.23.attn.qkv.v.A": 0.0003490047820378095,
+        "model.blocks.23.attn.qkv.v.B": 0.012236136943101883
+      },
+      "native_patch_shape": [
+        1,
+        8192,
+        1024
+      ],
+      "native_cls_shape": [
+        1,
+        1024
+      ]
+    }
+  ],
+  "git_sha": "68992d869509cbcc5ab4b824fcc3fe67f35f43f4",
+  "environment": {
+    "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+    "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+    "torch": "2.7.0+cu128",
+    "cuda": "12.8",
+    "gpu": "NVIDIA RTX 6000D",
+    "visible_memory_bytes": 89173131264,
+    "transformers": "4.56.1"
+  },
+  "pip_freeze": [
+    "certifi==2026.10.23",
+    "charset-normalizer==3.5.2",
+    "filelock==4.2.4",
+    "fsspec==2026.9.0",
+    "hf-xet==1.8.0",
+    "huggingface_hub==0.36.2",
+    "idna==3.20",
+    "Jinja2==3.1.6",
+    "MarkupSafe==3.0.3",
+    "mpmath==1.3.0",
+    "networkx==3.7",
+    "numpy==1.26.4",
+    "nvidia-cublas-cu12==12.8.3.14",
+    "nvidia-cuda-cupti-cu12==12.8.57",
+    "nvidia-cuda-nvrtc-cu12==12.8.61",
+    "nvidia-cuda-runtime-cu12==12.8.57",
+    "nvidia-cudnn-cu12==9.7.1.26",
+    "nvidia-cufft-cu12==11.3.3.41",
+    "nvidia-cufile-cu12==1.13.0.11",
+    "nvidia-curand-cu12==10.3.9.55",
+    "nvidia-cusolver-cu12==11.7.2.55",
+    "nvidia-cusparse-cu12==12.5.7.53",
+    "nvidia-cusparselt-cu12==0.6.3",
+    "nvidia-nccl-cu12==2.26.2",
+    "nvidia-nvjitlink-cu12==12.8.61",
+    "nvidia-nvtx-cu12==12.8.55",
+    "packaging==26.3",
+    "pillow==11.1.0",
+    "py-spy==0.4.3",
+    "PyYAML==6.0.2",
+    "regex==2026.11.9",
+    "requests==2.34.2",
+    "safetensors==0.8.0",
+    "setuptools==84.2.1",
+    "sympy==1.14.0",
+    "tokenizers==0.22.2",
+    "torch==2.7.0+cu128",
+    "torchvision==0.22.0+cu128",
+    "tqdm==4.70.1",
+    "transformers==4.56.1",
+    "triton==3.3.0",
+    "typing_extensions==4.16.0",
+    "urllib3==2.8.0",
+    "wheel==0.48.0"
+  ],
+  "peak_allocated_bytes": 1882040320,
+  "peak_reserved_bytes": 2174746624,
+  "seconds": 10.396849719807506,
+  "exit_code": 0
+}

@@ -1,0 +1,19 @@
+{
+  "phase": 40,
+  "action": "resume-check",
+  "full_suite": {
+    "passed": 765,
+    "skipped": 1,
+    "seconds": 193.92
+  },
+  "focused_tests": 5,
+  "interpreter": "E:/Anaconda/envs/pytorch/python.exe",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "skip_reason": "Windows unprivileged symlink unavailable",
+  "launcher_bash_syntax_checked": true,
+  "real_weight_or_data_access_local": false,
+  "fresh_process_cuda_recovery_passed": null,
+  "performance_profile_frozen": false
+}

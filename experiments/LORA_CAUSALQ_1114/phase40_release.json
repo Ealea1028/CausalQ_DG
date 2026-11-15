@@ -1,0 +1,21 @@
+{
+  "study": "lora_causalq_1114",
+  "phase": 40,
+  "action": "resume-check",
+  "formal_training_authorized": false,
+  "formal_optimizer_updates": 0,
+  "source_data_access_authorized": true,
+  "target_access_authorized": false,
+  "backbones": ["dinov3_vitl16", "dinov2_vitl14_hpi_p16"],
+  "variant": "UA",
+  "effective_source_batch": 8,
+  "microbatch_source": 1,
+  "engineering_updates_per_backbone": 8,
+  "total_engineering_updates": 16,
+  "processes_per_backbone": ["continuous_4", "prefix_2", "resume_2"],
+  "data_workers": 12,
+  "loader_packet_samples": 8,
+  "prefetch_factor": 2,
+  "performance_profile_frozen": false,
+  "next": "Return fresh-process recovery evidence, then release bounded UA/B3 throughput calibration in Phase40; do not start Phase41"
+}
