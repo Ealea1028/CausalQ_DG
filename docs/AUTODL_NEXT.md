@@ -1,4 +1,131 @@
-# 当前操作 — Phase40 UA/B3 双骨干吞吐定标
+# 当前操作 — Phase41 核心 L0 正式训练
+
+`phase40_perf_432ab4a_return`已验收：压缩包与解压文件逐字节核对、12个候选报告/数值门槛/原始遥测重新归约、预声明选择规则复算均通过。4063次工程更新全部丢弃，不作正式初始化。
+
+| 定标负载（均为L1） | 选中源图microbatch/累积 | 源图/s | GPU中位数 / p10 |
+| --- | --- | --- | --- |
+| DINOv3 UA | 4 / 2 | 23.6064 | 94 / 90% |
+| DINOv3 B3 | 4 / 2 | 25.0311 | 91 / 88% |
+| DINOv2 UA | 4 / 2 | 24.9151 | 97 / 96% |
+| DINOv2 B3 | 4 / 2 | 27.1483 | 97 / 96% |
+
+冻结`execution_profile.json`：有效源batch8、BF16、12 workers、packet8、prefetch2、双输入槽；共享内存不足时沿用有界线程回退。不能把L1吞吐当作L0的实测速度或训练ETA。
+
+本机已完成Phase41实现，完整CPU测试 **780 passed、1 skipped，226.47秒**；20项聚焦测试通过，跳过项仅Windows符号链接权限。旧路由数学/源码保持不变。85个冻结文本身份经Git提交字节核验，最小导出树的合同检查、CLI导入/help/status通过。本机未读取真实图像/大权重，也未执行GPU训练。
+
+**运行提交：`1af6b2e91e54083be433341f9fc8958954536272`**；分支`codex/lora-causalq-1114`。下一步需要实例GPU、源数据和真实权重，在本机停止。
+
+## 本次唯一允许范围
+
+- Phase41：先DINOv3，再DINOv2；每种骨干的U0、UA、C0、CA四个L0模型，共8模型，各40000次正式更新，总320000次。
+- 使用原始冻结DINO和新seed0公共头；不接续历史UA/CA或工程状态。四头参数、优化器独立，只共享同一批冻结骨干的no-grad特征；此共享入口拒绝LoRA骨干。
+- 非中心化U0/UA、中心化C0/CA；只有UA/CA增加原Anchor CQE。原两视图CE、R2/static/alpha0、HPI AdamW/学习率保持不变。
+- 每1000次更新保存不可覆盖的独立头检查点；已提交头可错位恢复，部分失败更新不保存。记录源码SHA、环境、配置、输入ID及参数hash、完整RNG和文件hash。
+- L0实际负载尚未实测：20个真实正式tick后，每120秒有效墙钟检查GPU中位数≥70%、p10≥60%、有效样本≥100、数据等待<10%、reserved≤85%。包含输入等待，仅排除检查点保存暂停。不达标保存安全进度并停止，回传后本机分析，不自动重复跑或进入下一骨干。这20个tick计入正式40k，不是丢弃pilot。
+- 本阶段不读取Cityscapes；source/target mIoU保持null。源域mIoU、anchor/residual跨风格方差、query responsibility和联合PCA在Phase45统一执行，目标评估在Phase46执行。
+
+## 1. 在AutoDL拉取固定提交
+
+复用现有环境、数据和权重；保留旧代码、输出和检查点。不要在实例上修改源码。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=1af6b2e91e54083be433341f9fc8958954536272
+DIR=/root/autodl-tmp/CausalQ_DG_lora1114_1af6b2e
+if [[ ! -d "$DIR/.git" ]]; then
+  test ! -e "$DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch codex/lora-causalq-1114 --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$DIR"
+else
+  test -z "$(git -C "$DIR" status --porcelain)"
+fi
+git -C "$DIR" fetch --depth 1 origin "$SHA"
+git -C "$DIR" show "$SHA:experiments/LORA_CAUSALQ_1114/autodl_sparse_paths.txt" | \
+  git -C "$DIR" sparse-checkout set --no-cone --stdin
+git -C "$DIR" checkout --detach "$SHA"
+test "$(git -C "$DIR" rev-parse HEAD)" = "$SHA"
+BASH
+```
+
+## 2. 后台启动正式训练
+
+预检为全部8模型保守预留约17.6GiB新增可用空间，包含不可覆盖的1000-step恢复段。空间不足只返回错误，不删除旧证据。不要重装已验收环境，也不要同时启动其他GPU作业。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_1af6b2e
+export PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+test -x "$PY"
+test -s /root/autodl-tmp/pretrained/dinov3_vitl16/config.json
+test -s /root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth
+nvidia-smi
+df -h /root/autodl-tmp /dev/shm
+bash scripts/train_lora_core_l0.sh 1af6b2e91e54083be433341f9fc8958954536272
+BASH
+```
+
+这是长期后台正式训练；加载/权重摘要期间日志可能暂时没有新行。两个骨干按顺序自动执行，无须手动启动8次。中途普通进程中断后，可在确认旧进程已退出且没有数值/性能错误时，用同一启动命令恢复。禁止清空输出重训。`needs_performance_review`或数值失败先回传，不盲目重跑。已全部完成的输出不会再训练。
+
+## 3. 查看进度和最终摘要
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_1af6b2e
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e
+PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+"$PY" -m tools.train_lora_core_l0 --status --output "$OUT"
+tail -n 30 "$OUT/launcher.log"
+for B in dinov3_vitl16 dinov2_vitl14_hpi_p16; do
+  if [[ -f "$OUT/$B/worker.log" ]]; then
+    echo "$B"
+    tail -n 8 "$OUT/$B/worker.log"
+  fi
+done
+if [[ -f "$OUT/report.json" ]]; then
+  "$PY" - "$OUT/report.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1]))
+print({k:r.get(k) for k in ('ok','exit_code','git_sha','formal_optimizer_updates_total','expected_total_formal_optimizer_updates','target_data_accessed')})
+for name,v in r.get('backbones',{}).items():
+    print(name,{k:v.get(k) for k in ('status','ok','cursors','committed_cursors','base_unchanged','error')})
+    print('steady windows:',v.get('steady_windows'))
+if r.get('error'):print(r['error'])
+PY
+fi
+nvidia-smi
+BASH
+```
+
+进度中`cursors`是内存已完成更新，`committed_updates_total`/`committed_cursors`才是已落盘进度；每头最多相差不足1000次常规更新。最终成功要求两骨干均`ok=true`、8个committed cursor均40000、总320000且base不变。性能/环境/空间失败也保留并回传小包。长时间无进度时先查看worker.log和GPU进程，不重复启动。
+
+## 4. 运行结束后导出返回包
+
+检查点用于后续LoRA配对/源诊断/最终评估，必须留在实例。只回传JSON、JSONL、CSV、日志和完成标记；每次导出使用时间戳保留旧包。该命令检查运行锁，防止在作业仍运行时打包。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e
+test -d "$OUT"
+flock -n "$OUT/run.lock" true || { echo '作业仍运行，请等待或先查看进度'; exit 2; }
+test -f "$OUT/launcher.log"
+RETURN="${OUT}_return_$(date -u +%Y%m%dT%H%M%SZ).tar.gz"
+tar --exclude='*.pt' --exclude='*.pth' --exclude='*.partial' \
+  -czf "$RETURN" -C "$OUT" .
+sha256sum "$RETURN" | tee "$RETURN.sha256"
+ls -lh "$RETURN" "$RETURN.sha256"
+BASH
+```
+
+下载返回压缩包及`.sha256`，解压到本机`D:\CrossDomainProject\CausalQ_Project\phase41_export\`下独立子目录后告知我。即使提前停止也返回；本机将核验已提交更新和监测证据，再决定同阶段修复或进入Phase42，不能直接串跑其余阶段。
+
+---
+
+# Archive — Phase40 UA/B3 双骨干吞吐定标（已验收，勿重跑）
 
 已验收`phase40_resume_db4ed7f_return`：两个骨干各8次工程更新，连续4步与2+2恢复的model/optimizer最大误差均为0，四类RNG与真实输入张量哈希完全一致，原始权重不变。压缩包/解压文件/子报告/完成标记已核对；检查点留实例，本机未重放。旧失败只读诊断确认仅Python/NumPy不同，Torch/CUDA相同。验收见`experiments/LORA_CAUSALQ_1114/phase40_resume_acceptance.json`，旧失败记录保留。
 

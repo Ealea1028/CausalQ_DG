@@ -1,0 +1,11 @@
+{
+  "phase": 41,
+  "implementation_git_sha": "1af6b2e91e54083be433341f9fc8958954536272",
+  "frozen_git_blobs_verified": 85,
+  "sparse_export_contract_passed": true,
+  "sparse_export_cli_help_passed": true,
+  "sparse_export_empty_status_passed": true,
+  "autodl_command_blocks_bash_n_passed": 4,
+  "actual_autodl_commands_executed": false,
+  "actual_l0_gpu_training_executed_locally": false
+}
