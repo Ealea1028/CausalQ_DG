@@ -1,6 +1,6 @@
 # CausalQ-DG
 
-## Active — LoRA Phase40 source-only performance calibration
+## Active — LoRA Phase41 core L0 formal baselines
 
 Implementing [LoRA_CausalQ_1114_Plan.md](LoRA_CausalQ_1114_Plan.md), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
@@ -10,10 +10,15 @@ adapters, valid gradients, unchanged base weights and native Patch/CLS shapes.
 Phase40 recovery at db4ed7f is accepted: both backbones have zero model/optimizer
 error, exact input/RNG equality and unchanged base weights. The first failed run
 remains archived; its differences are confirmed to be Python/NumPy only.
-Now release bounded UA/B3 LoRA calibration with effective batch8, physical
-batch1/4/8 and one/two input slots, 12 workers, BF16 and HPI optimization.
-New routing preserves CLS metadata without changing historical frozen source.
-Performance requires AutoDL evidence; no formal training or target access.
+Phase40 performance at432ab4a is accepted from returned bytes and independently
+reduced telemetry: all four L1 UA/B3 workloads select micro4/accumulation2,
+two raw-input slots,12 workers; median GPU activity91–97%,p10 88–96%.
+Release only Phase41: D3 and D2 U0/UA/C0/CA L0, eight fresh seed0 heads,
+40000 updates each, effective source batch8, BF16 and unchanged HPI optimizer.
+Four independent heads share each frozen backbone's no-grad features. L1 never
+uses this cache. Immutable1000-update recovery skips already committed updates.
+Actual L0 activity is checked in120-second windows; an unmet target saves and
+stops for local review. Source mIoU/diagnostics wait forPhase45; target for46.
 See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.
 
 ## Completed — HPI DINOv2 study, Phase33–38

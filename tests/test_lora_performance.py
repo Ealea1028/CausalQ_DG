@@ -92,3 +92,10 @@ def test_telemetry_missing_and_nonfinite_samples_are_not_success(tmp_path):
     p.write_text('utilization_percent,memory_used_mib,power_w\n70,2,3\nN/A,N/A,N/A\nnan,nan,nan\n')
     result=telemetry(p)
     assert result['samples']==1 and result['median']==70 and result['power_w_mean']==3
+
+
+def test_steady_telemetry_excludes_only_checkpoint_pause(tmp_path):
+    p=tmp_path/'telemetry.csv'
+    p.write_text('elapsed_seconds,utilization_percent,memory_used_mib,power_w\n0,0,2,3\n1,70,2,3\n2,0,2,3\n3,90,2,3\n4,0,2,3\n')
+    r=telemetry(p,start=1,end=3,exclude_intervals=[(1.5,2.5)])
+    assert r['samples']==2 and r['median']==80 and r['p10']==72

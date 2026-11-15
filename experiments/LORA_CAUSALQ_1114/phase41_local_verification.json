@@ -1,0 +1,41 @@
+{
+  "phase": 41,
+  "action": "train-core-l0",
+  "full_suite": {
+    "passed": 780,
+    "skipped": 1,
+    "seconds": 226.47
+  },
+  "skip_reason": "Host does not permit unprivileged symlinks: tests/test_gta5_source_structure.py:114",
+  "focused": {
+    "passed": 20,
+    "seconds": 31.75
+  },
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "test_command": "python -m pytest -p no:cacheprovider --basetemp=.test-tmp-strict-dg-lora41-final",
+  "test_environment": {
+    "PYTHONPATH": ".test-deps-strict-dg",
+    "CUDA_VISIBLE_DEVICES": "",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "MKL_THREADING_LAYER": "SEQUENTIAL"
+  },
+  "coverage": [
+    "four-head frozen-feature update equality versus independent forwards",
+    "common seed0 head initialization and centered flags",
+    "skewed per-head committed recovery skips prior updates",
+    "cohort recovery complete RNG/model/optimizer equality",
+    "tainted partial update excluded from emergency checkpoint",
+    "frozen feature/input/version and LoRA guards",
+    "checkpoint-pause telemetry exclusion",
+    "LF-normalized frozen contract rejects content changes"
+  ],
+  "static_contract_files_verified": 85,
+  "bash_launcher_syntax_checked": true,
+  "cli_help_and_empty_status_passed": true,
+  "actual_l0_gpu_performance_measured": false,
+  "formal_updates_executed_locally": 0,
+  "real_weights_or_datasets_loaded_locally": false
+}

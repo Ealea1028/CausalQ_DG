@@ -1,0 +1,37 @@
+{
+  "study": "lora_causalq_1114",
+  "phase": 41,
+  "action": "train-core-l0",
+  "backbones": [
+    "dinov3_vitl16",
+    "dinov2_vitl14_hpi_p16"
+  ],
+  "variants": [
+    "U0",
+    "UA",
+    "C0",
+    "CA"
+  ],
+  "lora_enabled": false,
+  "formal_training_authorized": true,
+  "target_access_authorized": false,
+  "formal_steps_per_head": 40000,
+  "expected_total_formal_optimizer_updates": 320000,
+  "seed": 0,
+  "fresh_initialization": true,
+  "effective_source_batch": 8,
+  "physical_source_microbatch": 4,
+  "gradient_accumulation": 2,
+  "data_workers": 12,
+  "input_buffer_slots": 2,
+  "shared_features": "L0 only, same frozen backbone, one logical batch; four independent heads",
+  "source_diagnostics_phase": 45,
+  "target_evaluation_phase": 46,
+  "checkpoint_interval": 1000,
+  "freeze": "phase41_freeze.json",
+  "performance_acceptance": "phase40_performance_acceptance.json",
+  "recovery_acceptance": "phase40_resume_acceptance.json",
+  "execution_profile": "execution_profile.json",
+  "producer_identity": "exact running Git HEAD recorded in every checkpoint/report; pinned SHA in docs/AUTODL_NEXT.md",
+  "next": "AutoDL formal source-only training; stop on failed first/subsequent L0 activity window and return evidence"
+}

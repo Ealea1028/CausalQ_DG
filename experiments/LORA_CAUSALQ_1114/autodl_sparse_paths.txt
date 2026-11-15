@@ -5,6 +5,7 @@
 /manifests/gta5_source_train.txt
 /manifests/gta5_source_val.txt
 /experiments/LORA_CAUSALQ_1114/
+/configs/lora_causalq_1114/
 /README.md
 /AGENTS.md
 /docs/METHOD.md

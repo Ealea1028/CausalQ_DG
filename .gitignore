@@ -50,3 +50,4 @@ experiments/*/checkpoints/
 experiments/*/logs/
 /phase39_export/
 /phase40_export/
+/phase41_export/

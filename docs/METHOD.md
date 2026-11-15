@@ -1,6 +1,49 @@
 # Method contract
 
-## Active — Phase40 source-only UA/B3 performance calibration
+## Active — Phase41 core L0 formal source training
+
+Phase40 at432ab4a is accepted from archive/file byte equality, all12 candidate
+reports, independent raw telemetry reduction and predeclared selection. Its4063
+engineering updates remain disposable. Four workloads select micro4, effective8,
+accumulation2,two input slots,12 workers,packet8,prefetch2; GPU median91–97%,
+p10 88–96%,23.6064–27.1483 source images/s. These are L1 measurements, not L0 ETA.
+See experiments/LORA_CAUSALQ_1114/phase40_performance_acceptance.json.
+
+Only Phase41 is released: DINOv3-L/16 then DINOv2-L/14 HPI-p16, four independent
+fresh seed0 U0/UA/C0/CA L0 heads each,40000 optimizer updates/head,total320000.
+All original DINO parameters are frozen; no LoRA or router is instantiated.
+Common a/e initialization, static R2,alpha0,temperature.07,logsumexp and decoder
+256/dropout.1 remain unchanged. C0/CA center residuals; UA/CA add only Anchor CQE
+with detached original reference and coefficient1. Both views' CE are summed,
+then averaged across8 source images. HPI AdamW/poly/warmup/clipping are unchanged.
+
+Each cohort tick extracts16 image views in four physical-batch4 forwards under
+no-grad BF16, then reuses the exact features for four independently optimized
+heads. This L0-only cache rejects LoRA/trainable backbones or changed inputs or
+features; independent-forward CPU comparisons are exact. Four updates are counted
+per full cohort tick; actual backbone views16 versus logical model views64.
+Absolute-position per-view RNG and canonical source stream remain unchanged.
+CPU cohort recovery checks complete RNG, all head parameters and AdamW states.
+
+Immutable compact checkpoints every1000 updates include complete head/buffer,
+optimizer,RNG,source cursor, runtime/config/freeze/base identities and SHA256.
+Independent head commit markers tolerate skewed interruption; already committed
+updates are skipped on replay. A partially failed update's head is never saved.
+Logs distinguish in-memory updates from durable committed updates. Every worker
+attempt retains its own input-ID/CPU-metadata hash trace, telemetry and report.
+
+L0 activity was not measured in the L1 calibration. After20 real formal ticks,
+measure120 active wall seconds including input waits; exclude checkpoint pauses
+only. Require GPU median70,p10 60,at least100 samples,data wait<10%,reserved<=85%.
+Failure commits safe progress and stops for local review before the next backbone;
+no discarded pilot, score selection or automatic retry after that stop. Normal
+interruptions resume immutable markers under the same exact producer commit.
+Only GTA5 source22469 is trained. Source2497 mIoU, five-view anchor/residual
+variance and query responsibility wait forPhase45; target500 evaluation waits
+for46. Their current fields are null, not estimated. Freeze hashes normalize
+text CRLF toLF to bind identical Git content on Windows and Linux.
+
+## Archive — Phase40 source-only UA/B3 performance calibration (accepted)
 
 Recovery at db4ed7f is accepted from returned archive/JSON/marker/comparison
 bytes: both backbones model/AdamW max error0, all RNG and actual input tensor
@@ -32,7 +75,8 @@ checks; first-update trainable parameters still use1e-6/1e-5. No score-based
 profile selection. Require median GPU activity70,p10 60,data wait<10%,reserved
 <=85% actual memory and speed above batch1; select lower memory within5% speed
 tie. Sampled CUDA phase times, 1Hz activity/power and snapshot cost are separate.
-Returned measurements and profile acceptance are pending; no target access.
+Returned measurements and the selected profile are accepted; see the active
+Phase41 contract above. Target access remains forbidden.
 
 ## Archive — Phase40 fresh-process recovery (accepted at db4ed7f)
 

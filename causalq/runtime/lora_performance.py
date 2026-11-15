@@ -22,8 +22,12 @@ def percentile(values,q):
     return values[lo]+(values[hi]-values[lo])*(x-lo)
 
 
-def telemetry(path):
+def telemetry(path,*,start=None,end=None,exclude_intervals=()):
     with open(path) as stream: rows=list(csv.DictReader(stream))
+    if start is not None or end is not None or exclude_intervals:
+        rows=[r for r in rows if r.get('elapsed_seconds') and
+              (start is None or float(r['elapsed_seconds'])>=start) and (end is None or float(r['elapsed_seconds'])<=end)
+              and not any(a<=float(r['elapsed_seconds'])<=b for a,b in exclude_intervals)]
     valid=[]
     for r in rows:
         try:

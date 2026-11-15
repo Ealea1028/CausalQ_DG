@@ -1,6 +1,7 @@
-"""Phase40 reusable update/checkpoint primitives; formal training is unreleased."""
+"""LoRA study update/checkpoint primitives; Phase41 adds frozen L0 cohorts."""
 from contextlib import contextmanager
 from contextlib import nullcontext
+from dataclasses import dataclass
 import copy
 import hashlib
 import os
@@ -63,11 +64,55 @@ def sample_rng(index,view):
         yield
 
 
-def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='UA',timer=None,return_tensors=False,prevalidated_source=False):
+@dataclass
+class FrozenFeatureBatch:
+    """One logical batch shared by L0 heads only; bound to exact input objects."""
+    backbone: object
+    microbatch: int
+    source_identity: tuple
+    entries: dict
+    versions: tuple
+
+    @staticmethod
+    def source_signature(packets):
+        return tuple((s['metadata']['step_zero_based'],id(s['views']),s['views']._version,
+                      id(s['label']),s['label']._version) for s in packets)
+
+    def tensors(self):
+        return tuple(t for f in self.entries.values() for t in
+            (f.patch_map,f.patch_tokens,*f.intermediate_maps,f.cls_token,f.register_tokens) if t is not None)
+
+    def verify(self,model,packets,microbatch):
+        if model.backbone is not self.backbone or self.microbatch!=microbatch or self.source_signature(packets)!=self.source_identity:
+            raise ValueError('Frozen cache/input/backbone mismatch')
+        if any(p.requires_grad for p in model.backbone.parameters()) or getattr(model.backbone,'lora_enabled',False):
+            raise ValueError('Adapted/trainable backbone cannot use frozen cache')
+        if self.versions!=tuple(t._version for t in self.tensors()): raise ValueError('Frozen features mutated')
+
+    @classmethod
+    def extract(cls,backbone,packets,microbatch=4,amp=False):
+        if len(packets)!=8 or microbatch not in (1,2,4,8): raise ValueError('Invalid frozen batch')
+        if any(p.requires_grad for p in backbone.parameters()) or getattr(backbone,'lora_enabled',False):
+            raise ValueError('Frozen cache requires an unadapted frozen backbone')
+        device=next(backbone.parameters()).device
+        entries={}
+        backbone.eval()
+        with torch.no_grad(),torch.autocast(device.type,dtype=torch.bfloat16,enabled=amp):
+            for start in range(0,8,microbatch):
+                for view in (0,1):
+                    images=torch.stack([s['views'][view] for s in packets[start:start+microbatch]]).to(device,non_blocking=True)
+                    entries[start,view]=backbone(images)
+        cache=cls(backbone,microbatch,cls.source_signature(packets),entries,())
+        cache.versions=tuple(t._version for t in cache.tensors())
+        return cache
+
+
+def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='UA',timer=None,return_tensors=False,prevalidated_source=False,frozen_features=None):
     """Eight source images, two summed CE terms, detached original Anchor CQE."""
     if len(packets)!=8 or microbatch not in (1,2,4,8):
         raise ValueError('Effective source batch must be eight')
-    if variant not in ('UA','B3'): raise ValueError('Unreleased performance objective')
+    if variant not in ('U0','UA','C0','CA','B3'): raise ValueError('Unreleased objective')
+    if frozen_features is not None: frozen_features.verify(model,packets,microbatch)
     timed=timer if timer is not None else lambda name:nullcontext()
     if prevalidated_source:
         from causalq.losses.lora_source import source_ce_prevalidated as ce_fn,anchor_cqe_prevalidated as cqe_fn
@@ -79,15 +124,15 @@ def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='
     values=[]
     for start in range(0,8,microbatch):
         rows=packets[start:start+microbatch]
-        # Separate graphs per view; no stale frozen-feature cache.
+        # L1 builds a fresh graph for each view; only L0 may reuse no-grad inputs.
         refs=[]
         for view in (0,1):
-            images=torch.stack([s['views'][view] for s in rows]).to(device,non_blocking=True)
+            images=torch.stack([s['views'][view] for s in rows]).to(device,non_blocking=True) if frozen_features is None else None
             labels=torch.stack([s['label'] for s in rows]).to(device,non_blocking=True)
             terms=[]
             with torch.autocast(device.type,dtype=torch.bfloat16,enabled=amp):
                 with timed('backbone_forward'):
-                    features=model.backbone(images)
+                    features=model.backbone(images) if frozen_features is None else frozen_features.entries[start,view]
                 with timed('head_and_loss'):
                     for j,sample in enumerate(rows):
                         local=slice_features(features,j,j+1)
@@ -96,11 +141,13 @@ def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='
                                 out,route=model.forward_routed(local,labels.shape[-2:])
                             else:
                                 out=model.forward_features(local, labels.shape[-2:],
-                                    include_anchor=True,component_protocol='lora_causalq_1114')
+                                    include_anchor=variant in ('UA','CA'),component_protocol='lora_causalq_1114')
                         ce=ce_fn(out.logits,labels[j:j+1])
                         if variant=='B3':
                             from causalq.losses.hpi_localization import patch_localization_loss
                             loss=ce+.05*patch_localization_loss(route.match_logits,labels[j:j+1],local.patch_map.shape[-2:])
+                        elif variant in ('U0','C0'):
+                            loss=ce
                         elif view==0:
                             refs.append(out.anchor_scaled_delta_logits.detach().float())
                             loss=ce
@@ -116,6 +163,7 @@ def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='
         norm=torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad],1.,error_if_nonfinite=True)
         if not torch.isfinite(torch.stack(values)).all(): raise FloatingPointError('Nonfinite source objective')
         optimizer.step()
+    if frozen_features is not None: frozen_features.verify(model,packets,microbatch)
     if return_tensors:
         return torch.stack((torch.stack(values).sum()/8,norm.detach()))
     return {'loss':float(torch.stack(values).sum()/8),'gradient_norm':float(norm),'lr':learning_rate(step)}
