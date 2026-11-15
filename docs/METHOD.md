@@ -2,6 +2,22 @@
 
 ## Active — LoRA Phase40 source-only fresh-process recovery
 
+First attempt at2cfbb3b is NOT accepted: DINOv3 continuous/prefix/resume workers
+completed8 disposable updates, but the parent rejected final RNG equality;
+DINOv2 was never started. Returned actual input tensor hashes, per-step losses
+and base digests match. Checkpoints remain remote, so numeric state errors were
+not independently replayed locally. The original auditor reached the RNG guard
+after model/optimizer comparisons; their max errors were not exported.
+
+The configuration seeded Torch but omitted independent-process Python and
+NumPy initialization. Revision2 seeds Python/NumPy/Torch before data/model work
+and before any restore. Restore remains last and is never reseeded afterward.
+Strict RNG equality and numeric tolerances are unchanged. A read-only audit of
+old hash-verified checkpoint RNG components accompanies a new isolated run;
+exact old mismatching providers await that returned evidence. Full current
+model/optimizer/RNG comparisons are exported even if the RNG guard rejects.
+No failed test or evidence is removed. Phase40/throughput remain unaccepted.
+
 Phase39 is accepted from hash-verified returned report/log/archive bytes.
 Both DINO weight identities match history; all24 adapter matrix gradients per
 backbone are finite and positive. No local weight replay or mIoU inference.

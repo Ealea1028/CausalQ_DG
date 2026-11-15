@@ -15,6 +15,7 @@ if [[ -f "$OUT/report.json" ]]; then echo "Return existing $OUT/report.json befo
 export CUDA_VISIBLE_DEVICES=0 HF_HUB_OFFLINE=1 TRANSFORMERS_OFFLINE=1
 export CUBLAS_WORKSPACE_CONFIG=:4096:8 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1
 nohup flock -n "$OUT/run.lock" "$PY" -u -m tools.check_lora_resume --output "$OUT" \
+  --previous-output /root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_resume_2cfbb3b \
   >"$OUT/launcher.log" 2>&1 < /dev/null &
 echo $! > "$OUT/launcher.pid"
 echo "PID=$(cat "$OUT/launcher.pid") OUT=$OUT"

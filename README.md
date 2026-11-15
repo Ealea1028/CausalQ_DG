@@ -9,6 +9,10 @@ Phase39 returned evidence is accepted: exact initial outputs, both 98304-paramet
 adapters, valid gradients, unchanged base weights and native Patch/CLS shapes.
 Phase40 releases source-only fresh-process 4 versus2+2 recovery with effective
 batch8, HPI optimizer/schedule and complete LoRA+head/optimizer/RNG checkpoints.
+The first return failed final RNG equality on DINOv3; DINOv2 was not reached.
+Python/NumPy/Torch now share explicit seed0 initialization, with provider-level
+RNG diagnostics and a read-only audit of the old checkpoints. Revalidation is
+pending; the failed run is preserved in phase40_resume_failure_2cfbb3b.json.
 No formal training, target access or throughput acceptance. UA/B3 performance
 calibration remains a subsequent Phase40 action after recovery evidence returns.
 See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.

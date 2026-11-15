@@ -1,0 +1,24 @@
+{
+  "phase": 40,
+  "revision": 2,
+  "scope": "resume-check RNG initialization fix only",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "full_suite": {
+    "passed": 767,
+    "skipped": 1,
+    "seconds": 200.71
+  },
+  "focused": {
+    "passed": 7,
+    "seconds": 18.68
+  },
+  "independent_process_rng_regression_passed": true,
+  "old_checkpoint_read_only_audit_smoke_passed": true,
+  "old_autodl_run_accepted": false,
+  "new_autodl_resume_passed": null,
+  "formal_optimizer_updates": 0,
+  "tolerances_unchanged": true,
+  "next": "AutoDL same bounded recovery check with all-provider seed0 and old-state diagnostic"
+}

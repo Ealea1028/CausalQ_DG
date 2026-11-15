@@ -18,7 +18,8 @@ from causalq.runtime.hpi_prepare import configure
 from causalq.runtime.hpi_packets import packet_loader
 from causalq.runtime.input_stream import CanonicalInputStream
 from causalq.runtime.identity import write_json,file_sha,tree_digest
-from causalq.runtime.lora_training import (make_optimizer,update,save_checkpoint,restore_checkpoint,load_state_file,rng_digest)
+from causalq.runtime.lora_training import (make_optimizer,update,save_checkpoint,restore_checkpoint,load_state_file,rng_digest,seed_training_rng)
+from causalq.runtime.cohort_runner import capture_rng
 from tools.check_lora_backbones import frozen_digest
 
 ROOT=Path(__file__).resolve().parents[1]
@@ -45,6 +46,7 @@ def build(name,root):
 
 def worker(args):
     configure()
+    seed_training_rng(0)
     import transformers
     expected=json.loads(ACCEPTED.read_text())['environment']
     actual={'python':sys.version,'torch':str(torch.__version__),'transformers':transformers.__version__,
@@ -58,9 +60,11 @@ def worker(args):
               'phase39_report_sha256':file_sha(ACCEPTED),'source_manifests':MANIFEST_HASHES,
               'runtime':actual,'effective_source_batch':8,'microbatch':1,'seed':0,
               'optimizer_recipe':'hpi_40k_poly09_warm1500_ratio1e-6_wd1e-5_norm0_v1',
-              'source_stream':'hpi_step_sha256_v1','source_root':str(args.data_root.resolve())}
+              'source_stream':'hpi_step_sha256_v1','source_root':str(args.data_root.resolve()),
+              'rng_initialization':'python_numpy_torch_seed0_v1'}
     start=restore_checkpoint(args.output/'split2',model,optimizer,identity) if args.mode=='resume' else 0
     if start!=(2 if args.mode=='resume' else 0): raise ValueError('Unexpected resume cursor')
+    rng_at_start={key:rng_digest(value) for key,value in capture_rng().items()}
     stop=2 if args.mode=='prefix' else 4
     stream=CanonicalInputStream(train.pairs,start=start*8,stop=stop*8)
     loader,policy=packet_loader(stream,PROFILE)
@@ -80,6 +84,8 @@ def worker(args):
     save_checkpoint(args.output/target,model,optimizer,stop,identity)
     write_json(args.output/f'{args.mode}.json',{'ok':True,'identity':identity,'rows':rows,'loader_policy':policy,
         'engineering_updates':len(rows),'formal_optimizer_updates':0,'frozen_digest':before,
+        'rng_at_start_by_component':rng_at_start,
+        'rng_at_end_by_component':{key:rng_digest(value) for key,value in capture_rng().items()},
         'peak_allocated_bytes':torch.cuda.max_memory_allocated(),'peak_reserved_bytes':torch.cuda.max_memory_reserved()})
     del loader,model,optimizer
     gc.collect()
@@ -103,6 +109,32 @@ def compare(a,b):
     return max(errors,default=0.)
 
 
+def compare_rng(continuous,resumed):
+    if set(continuous)!=set(resumed): raise ValueError('RNG provider coverage differs')
+    return {key:{'equal':rng_digest(continuous[key])==rng_digest(resumed[key]),
+                 'continuous_digest':rng_digest(continuous[key]),'resumed_digest':rng_digest(resumed[key])}
+            for key in continuous}
+
+
+def diagnose_previous(directory):
+    """Read-only audit of old own hash-verified snapshots, never acceptance."""
+    directory=Path(directory)
+    result={'previous_accepted':False,'directory':str(directory),'models':[]}
+    for name in ('dinov3_vitl16','dinov2_vitl14_hpi_p16'):
+        values=[]
+        for tag in ('continuous4','resumed4'):
+            root=directory/name/tag
+            if not (root/'complete.json').exists(): break
+            marker=json.loads((root/'complete.json').read_text())
+            if marker['identity']['git_sha']!='2cfbb3b89d2761b576b688085ca4ba18adab5f8c':
+                raise ValueError('Unexpected previous producer')
+            if marker['sha256']!=file_sha(root/'state.pt'): raise ValueError('Previous checkpoint corrupted')
+            values.append(load_state_file(root/'state.pt')['rng'])
+        if len(values)==2:
+            result['models'].append({'model':name,'rng_by_component':compare_rng(*values)})
+    return result
+
+
 def run(args):
     if subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True).strip():
         raise ValueError('Tracked source must be clean')
@@ -115,6 +147,8 @@ def run(args):
     args.output.mkdir(parents=True,exist_ok=True)
     if (args.output/'report.json').exists(): raise ValueError('Existing report; return evidence before retry')
     try:
+        if args.previous_output is not None:
+            write_json(args.output/'previous_rng_audit.json',diagnose_previous(args.previous_output))
         if not json.loads((ACCEPTED.parent/'phase39_acceptance.json').read_text())['accepted']:
             raise ValueError('Phase39 not accepted')
         for name in ('dinov3_vitl16','dinov2_vitl14_hpi_p16'):
@@ -135,7 +169,10 @@ def run(args):
             if continuous['identity']!=resumed['identity']: raise ValueError('Run identities differ')
             model_error=compare(continuous['model'],resumed['model'])
             optimizer_error=compare(continuous['optimizer'],resumed['optimizer'])
-            if rng_digest(continuous['rng'])!=rng_digest(resumed['rng']): raise ValueError('Final RNG differs')
+            rng_comparison=compare_rng(continuous['rng'],resumed['rng'])
+            write_json(directory/'comparison.json',{'model_max_abs':model_error,'optimizer_max_abs':optimizer_error,
+                       'rng_by_component':rng_comparison})
+            if not all(row['equal'] for row in rng_comparison.values()): raise ValueError('Final RNG differs; see comparison.json')
             c,p,r=[json.loads((directory/f'{m}.json').read_text()) for m in ('continuous','prefix','resume')]
             if continuous['step']!=4 or resumed['step']!=4 or continuous['source_cursor']!=32 or resumed['source_cursor']!=32:
                 raise ValueError('Final recovery cursor mismatch')
@@ -165,6 +202,7 @@ def main():
     p.add_argument('--output',type=Path,required=True)
     p.add_argument('--data-root',type=Path,default=Path('/root/autodl-tmp/datasets'))
     p.add_argument('--pretrained-root',type=Path,default=Path('/root/autodl-tmp/pretrained'))
+    p.add_argument('--previous-output',type=Path)
     a=p.parse_args()
     if a.worker:
         if not a.model or not a.mode: p.error('Worker requires model and mode')

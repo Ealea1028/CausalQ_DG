@@ -16,6 +16,36 @@ from tools.accept_lora_phase39 import validate
 from tools.check_lora_resume import compare
 
 
+def test_rng_initialization_in_independent_processes():
+    import subprocess
+    import sys
+    probe='''
+import json,sys,random
+import numpy as np
+import torch
+from causalq.runtime.cohort_runner import capture_rng
+from causalq.runtime.lora_training import seed_training_rng,rng_digest
+random.seed(int(sys.argv[1])); np.random.seed(int(sys.argv[1])); torch.manual_seed(99)
+before={k:rng_digest(v) for k,v in capture_rng().items()}
+seed_training_rng(0)
+after={k:rng_digest(v) for k,v in capture_rng().items()}
+print(json.dumps({'before':before,'after':after}))
+'''
+    rows=[json.loads(subprocess.check_output([sys.executable,'-c',probe,str(seed)],text=True)) for seed in (111,222)]
+    assert rows[0]['before']['python']!=rows[1]['before']['python']
+    assert rows[0]['before']['numpy']!=rows[1]['before']['numpy']
+    assert rows[0]['after']==rows[1]['after']
+
+
+def test_rng_comparison_keeps_provider_failures_visible():
+    from tools.check_lora_resume import compare_rng
+    a=capture_rng(); b=copy.deepcopy(a)
+    b['numpy'][1][100]^=np.uint32(1)
+    result=compare_rng(a,b)
+    assert result['numpy']['equal'] is False
+    assert all(row['equal'] for key,row in result.items() if key!='numpy')
+
+
 def model():
     torch.manual_seed(11)
     m=QuerySegmentor(tiny_backbone(),decoder_channels=32,num_classes=3,queries_per_class=2,

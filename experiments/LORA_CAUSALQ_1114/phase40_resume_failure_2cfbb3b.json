@@ -1,0 +1,40 @@
+{
+  "accepted": false,
+  "phase": 40,
+  "action": "resume-check",
+  "producer_git_sha": "2cfbb3b89d2761b576b688085ca4ba18adab5f8c",
+  "failure": "Final RNG differs",
+  "completed_backbones": [
+    "dinov3_vitl16"
+  ],
+  "unattempted_backbones": [
+    "dinov2_vitl14_hpi_p16"
+  ],
+  "engineering_updates_completed": 8,
+  "formal_optimizer_updates": 0,
+  "target_data_accessed": false,
+  "archive_sha256": "50db7e3976a6b30bd22f89b285c332a0b70bde34d98884c7dd9dcbce81a8b930",
+  "returned_file_sha256": {
+    "launcher.log": "5a5c5db054ab8690a6fc7f5ee8dcf0072e69bffcf7db123c5dd19bd05a5f65ba",
+    "launcher.pid": "c1143111659ed15a5c84e536d9d1ff0c823f25fc9d0df29cfdf429fda107d6a9",
+    "report.json": "090af9c6aaeecbf84a06ff13b5535e5276e054892700bbaefa3bef621d037f19",
+    "run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/continuous.json": "af9846537f93dc543eff8d4952c26783c91ec7c924b6ff35837335bfc99b6caf",
+    "dinov3_vitl16/continuous.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/prefix.json": "0f393f4093ee1d46e9539f3710bcc89c20c4b870e2326eb926e88a52aedbbc88",
+    "dinov3_vitl16/prefix.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/resume.json": "daa74dcbcc04eb7d9a6149a8f85c715ec26aec29b0a590542bbbd61ab1f1c921",
+    "dinov3_vitl16/resume.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/continuous4/complete.json": "2bbd7f51f375687f31700e43a7ed318c5a3e9e0f6957751297065ea785541787",
+    "dinov3_vitl16/resumed4/complete.json": "eea1a00f4c5b91ba545a43fc52dcbfde6240303aa1a2064fd9c1e47f7183dc93",
+    "dinov3_vitl16/split2/complete.json": "36850db84663814ae7015daa72ef7ccc1af21e3102daf9eea40ca0897f1037be"
+  },
+  "archive_bytes_match_extracted": true,
+  "actual_input_tensors_equal": true,
+  "input_metadata_equal": true,
+  "loss_values_exactly_equal": true,
+  "base_digests_equal": true,
+  "model_optimizer_comparison": "Original auditor returned successfully before RNG exception; numeric max errors were not exported, no local checkpoint replay",
+  "diagnosis": "Torch was seeded, Python and NumPy were not initialized across processes. Add all-provider seeding before model/load; exact old mismatching providers await read-only AutoDL checkpoint audit.",
+  "next": "Independent-process CPU regression plus exact same AutoDL recovery test under new SHA, unchanged tolerances; preserve failed evidence"
+}

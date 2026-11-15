@@ -15,6 +15,15 @@ from causalq.runtime.feature_pipeline import slice_features
 from causalq.runtime.identity import file_sha, write_json
 
 
+def seed_training_rng(seed=0):
+    """Initialize every checkpointed RNG, including independent process defaults."""
+    import random
+    import numpy as np
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+
+
 def learning_rate(step):
     if not 0 <= step <= 40000:
         raise ValueError('Step outside HPI schedule')
