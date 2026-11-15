@@ -1,3 +1,161 @@
+# 当前操作 — LoRA Phase39 真实双骨干接入检查（2026-11-15）
+
+本机已实现 Q/V LoRA、可微骨干路径、Patch/CLS 返回和研究权限。下一步必须在 AutoDL 使用真实权重和 CUDA 验证；现在停止本机推进。只执行下列合成输入检查，不训练正式模型，不读取数据集或目标域。
+
+本机验证：760 passed、1 skipped（Windows符号链接权限），172.59秒；RNG调整后6项聚焦测试通过。启动器及6段Bash语法检查通过。
+
+运行 SHA：`68992d869509cbcc5ab4b824fcc3fe67f35f43f4`。分支：`codex/lora-causalq-1114`。本次不是 Phase40 吞吐定标；fresh-process 恢复、真实源域 batch8 定标和后续训练尚未发布。
+
+## 1. 检出精确代码
+
+在 AutoDL 终端执行：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=68992d869509cbcc5ab4b824fcc3fe67f35f43f4
+RELEASE_REF=codex/lora-causalq-1114
+CODE_DIR="/root/autodl-tmp/CausalQ_DG_lora1114_${EXPECTED_SHA:0:7}"
+if [[ ! -d "$CODE_DIR/.git" ]]; then
+  test ! -e "$CODE_DIR"
+  git clone --filter=blob:none --depth 1 --single-branch --branch "$RELEASE_REF" --no-checkout https://github.com/Ealea1028/CausalQ_DG.git "$CODE_DIR"
+else
+  test -z "$(git -C "$CODE_DIR" status --porcelain)"
+fi
+git -C "$CODE_DIR" fetch --depth 1 origin "$EXPECTED_SHA"
+git -C "$CODE_DIR" show "$EXPECTED_SHA:experiments/LORA_CAUSALQ_1114/autodl_sparse_paths.txt" | git -C "$CODE_DIR" sparse-checkout set --no-cone --stdin
+git -C "$CODE_DIR" checkout --detach "$EXPECTED_SHA"
+test "$(git -C "$CODE_DIR" rev-parse HEAD)" = "$EXPECTED_SHA"
+nvidia-smi
+df -h /root/autodl-tmp /dev/shm
+BASH
+```
+
+## 2. 准备独立环境
+
+复用已有 HPI 环境的包创建独立副本；若原环境不存在则安装新环境。缓存与环境均位于数据盘。不修改旧实验环境。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+export PIP_CACHE_DIR=/root/autodl-tmp/cache/pip
+ENV_DIR=/root/autodl-tmp/envs/causalq-lora1114
+mkdir -p /root/autodl-tmp/envs "$PIP_CACHE_DIR"
+if [[ ! -x "$ENV_DIR/bin/python" ]]; then
+  if [[ -x /root/autodl-tmp/envs/causalq-hpi/bin/python ]]; then
+    conda create -y --prefix "$ENV_DIR" --clone /root/autodl-tmp/envs/causalq-hpi
+  else
+    conda create -y --prefix "$ENV_DIR" python=3.12 pip
+    "$ENV_DIR/bin/python" -m pip install torch==2.7.0 torchvision==0.22.0 --index-url https://download.pytorch.org/whl/cu128
+  fi
+fi
+"$ENV_DIR/bin/python" -m pip install transformers==4.56.1 numpy==1.26.4 Pillow==11.1.0 PyYAML==6.0.2
+"$ENV_DIR/bin/python" -m pip check
+"$ENV_DIR/bin/python" -c 'import sys,torch,transformers; print(sys.version); print(torch.__version__,transformers.__version__); assert sys.version_info[:2] >= (3,12); assert torch.cuda.is_available(); print(torch.cuda.get_device_name(0))'
+BASH
+```
+
+## 3. 核对权重；缺少时补齐
+
+需要两处：D3 的 Hugging Face 原始模型目录 `/root/autodl-tmp/pretrained/dinov3_vitl16`（config.json 和完整 safetensors）；D2 已转换文件 `/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth`。不传训练检查点，不迁移数据集。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+ls -lh /root/autodl-tmp/pretrained/dinov3_vitl16/config.json
+find /root/autodl-tmp/pretrained/dinov3_vitl16 -maxdepth 1 -name '*.safetensors' -printf '%f %s bytes\n'
+ls -lh /root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth
+sha256sum /root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth
+BASH
+```
+
+D2 转换文件预期 SHA256 为 `054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af`。D3 的具体权重文件摘要由检查报告记录，回传后与历史身份核对。
+
+若 D3 缺少且保存在旧实例，启动旧实例，在当前 AutoDL 终端运行以下迁移（提示时填旧实例 SSH 命令；源路径需为项目约定的 pretrained 路径）：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+read -r -a OLD_CMD -p "旧实例SSH命令（ssh -p 端口 root@主机）：" </dev/tty
+[[ ${#OLD_CMD[@]} -eq 4 && "${OLD_CMD[0]}" == ssh && "${OLD_CMD[1]}" == -p ]]
+OLD_PORT="${OLD_CMD[2]}"; OLD_SSH="${OLD_CMD[3]}"
+[[ "$OLD_PORT" =~ ^[0-9]+$ && "$OLD_SSH" =~ ^root@[A-Za-z0-9.-]+$ ]]
+mkdir -p /root/autodl-tmp/pretrained/dinov3_vitl16
+rsync -a --partial --info=progress2 -e "ssh -p $OLD_PORT" "$OLD_SSH:/root/autodl-tmp/pretrained/dinov3_vitl16/" /root/autodl-tmp/pretrained/dinov3_vitl16/
+BASH
+```
+
+若 D2 转换文件缺失，但已有官方原始 `dinov2_vitl14_pretrain.pth`，在第1步目录执行：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_68992d8
+PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+RAW=/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_pretrain.pth
+# 只校验并转换已有权重，不覆盖已存在的转换文件。
+"$PY" - <<'PY'
+from pathlib import Path
+import hashlib
+import torch
+from causalq.models.dinov2_wrapper import convert_hpi_state
+root=Path('/root/autodl-tmp/pretrained/dinov2_vitl14')
+src=root/'dinov2_vitl14_pretrain.pth'; dst=root/'dinov2_vitl14_hpi_p16.pth'
+assert src.is_file(), '请从旧实例迁移官方原始D2权重后再执行'
+assert not dst.exists(), '已有转换文件，请直接核对并复用'
+d=hashlib.sha256()
+with src.open('rb') as f:
+    for chunk in iter(lambda:f.read(1<<20),b''): d.update(chunk)
+assert d.hexdigest()=='d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428'
+torch.save(convert_hpi_state(torch.load(src,map_location='cpu',weights_only=True)),dst)
+print(dst)
+PY
+BASH
+```
+
+重新序列化的文件 SHA 可能不同；必须保留原始文件校验和固定转换配方，回传实际新文件 SHA，不能伪称旧文件哈希。若权重位于其他路径或两份都不在实例，先返回路径情况，不能用随机权重替代。
+
+## 4. 后台启动一次检查
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+EXPECTED_SHA=68992d869509cbcc5ab4b824fcc3fe67f35f43f4
+cd "/root/autodl-tmp/CausalQ_DG_lora1114_${EXPECTED_SHA:0:7}"
+export PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+test -s /root/autodl-tmp/pretrained/dinov3_vitl16/config.json
+test -s /root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth
+bash scripts/check_lora_backbones.sh "$EXPECTED_SHA"
+BASH
+```
+
+每个骨干只进行3次可丢弃 CE+Anchor-CQE 工程更新，正式更新数为0。还检查零增量输出、原始权重冻结、A/B梯度、注入RNG与随机原生尺寸输出。不会测源/目标mIoU，不会达到正式训练GPU利用率验收。已有报告时入口不会重复执行；失败请先回传日志，不删报告盲目重跑。
+
+## 5. 查看结果并回传
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase39_68992d8
+tail -n 80 "$OUT/launcher.log"
+if [[ -f "$OUT/report.json" ]]; then
+  /root/autodl-tmp/envs/causalq-lora1114/bin/python - "$OUT/report.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1])); print({k:r.get(k) for k in ('ok','exit_code','git_sha','formal_optimizer_updates','dataset_accessed','target_data_accessed','error')})
+PY
+  tar -czf "$OUT/return.tar.gz" -C "$OUT" report.json launcher.log
+  sha256sum "$OUT/return.tar.gz"
+  ls -lh "$OUT/return.tar.gz"
+fi
+BASH
+```
+
+完成标志：`report.json` 中 `ok=true`、`exit_code=0`、两个模型、各3次工程更新、98304个LoRA参数，`formal_optimizer_updates=0`、数据与目标访问均为false。下载此目录的 `return.tar.gz` 回传本机；也可把 `report.json` 放到项目的 `phase39_export/`，并告知我。失败时回传完整 `report.json`（若已生成）和 `launcher.log`。
+
+验收后继续Phase40恢复与真实源数据吞吐定标，届时另给命令。本阶段不启动28模型矩阵。
+
+---
+
 # 项目已结项 — Phase38 完成
 
 七组 seed0 模型各完成 40000 次更新，共 280000 次。Phase37 主 ZIP 和 15 个文件已核验，七份 19×19 整数混淆矩阵独立重算，七组各覆盖冻结的 Cityscapes val500。本阶段新增更新为 0。
