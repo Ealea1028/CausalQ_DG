@@ -1,0 +1,65 @@
+{
+  "accepted": true,
+  "producer_git_sha": "db4ed7f8d391a2039024d140e83b8deeceb8eaa1",
+  "formal_optimizer_updates": 0,
+  "engineering_updates": 16,
+  "target_data_accessed": false,
+  "models": [
+    {
+      "model": "dinov3_vitl16",
+      "continuous_vs_resumed_model_max_abs": 0.0,
+      "optimizer_max_abs": 0.0,
+      "rng_equal": true,
+      "inputs_equal": true,
+      "base_unchanged": true,
+      "checkpoint_sha256": {
+        "continuous4": "f09fac02e24b77f17f96f8e3fdf2bf15ccafe85b0d499256e9d5ee588063123c",
+        "split2": "db404482f6ff8925fc60bab06ee28bd6925c650152e1d3e316bcdb753b1057d9",
+        "resumed4": "5d6202dd2a620e918a64557cb0a48e75022757d5a970934cafefaeba45cd7a5d"
+      }
+    },
+    {
+      "model": "dinov2_vitl14_hpi_p16",
+      "continuous_vs_resumed_model_max_abs": 0.0,
+      "optimizer_max_abs": 0.0,
+      "rng_equal": true,
+      "inputs_equal": true,
+      "base_unchanged": true,
+      "checkpoint_sha256": {
+        "continuous4": "831c8e61eed8416dbe91a4bc04746dd1d0496cbb5904628fa30ab840a94afbf2",
+        "split2": "030cdedd8c30ecfe349956046687b12fb094516c291cb0c3eafa713a63a8481d",
+        "resumed4": "40f921d5f31ea7c6c3df6581051a2d6110932a13da54a3f7c7b62226627f1a6e"
+      }
+    }
+  ],
+  "received_archive_sha256": "0580cf20d944263cd6b4ac9fa13aafe5c686fdc1e47fd5ece45cacb1e5d184e6",
+  "received_file_sha256": {
+    "launcher.log": "b36e3cee56432e1dbead84711d821debecbbac51867c46852001adaa764136bf",
+    "launcher.pid": "bf050dceffbd1ceb93b7028785276a916fbc2f7a9d1135bfab07973bb548895c",
+    "previous_rng_audit.json": "e4e89616e06538fb12e6dc64407b5c3c62d9be62221015604bd222f93929d143",
+    "report.json": "1032f27d9ec53149e31ad3ab5e8caa2e31eda75e175782b63798d190d256807b",
+    "run.lock": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov2_vitl14_hpi_p16/comparison.json": "765ef952c0acdcb5ff661deb5f90860b87362b6e072a93c43f5441cc347cdc35",
+    "dinov2_vitl14_hpi_p16/continuous.json": "939600603f9ae3fe122ac0d80ff7beb1fed96d425388cf96f90aaadaeabdd68a",
+    "dinov2_vitl14_hpi_p16/continuous.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov2_vitl14_hpi_p16/prefix.json": "dd594b424b95f06ce8f1f47eaf2f5992f78dd908b33a2b4d755befeb35ee6ec8",
+    "dinov2_vitl14_hpi_p16/prefix.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov2_vitl14_hpi_p16/resume.json": "b1a985b9f09be40fd53ebf6fad2ed0507db571ae4b5b250d3084cda2e6a8c2a3",
+    "dinov2_vitl14_hpi_p16/resume.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov2_vitl14_hpi_p16/continuous4/complete.json": "c75a7d4e8448b835006d15d5eb6179e17c71573635c985580660bc795c87b8d2",
+    "dinov2_vitl14_hpi_p16/resumed4/complete.json": "523cabc60b3002c755be89c9503e47fcc34c2078c0151612ad8543e39f57f6cf",
+    "dinov2_vitl14_hpi_p16/split2/complete.json": "24504a53466c34102e5ce4eb6485086f8de80b4cc0860075f1091924b8594ccc",
+    "dinov3_vitl16/comparison.json": "10c7757ed1943b998e3fb8e85e3115f7f135ba49455fefb42aba6b5348e39aa5",
+    "dinov3_vitl16/continuous.json": "61edf67a4a12530da481df534ca22417663cc6a83559172f989a416ade741d68",
+    "dinov3_vitl16/continuous.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/prefix.json": "4e338f80f13798a6e75452e74f5e4610a6c97ea9ee52bdcd4b4c57eb63febc2c",
+    "dinov3_vitl16/prefix.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/resume.json": "290fc3abbb34242a6ccee64faf039821aa3b6e8afb1fa41c040e1ab0dda66043",
+    "dinov3_vitl16/resume.log": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "dinov3_vitl16/continuous4/complete.json": "29bc0cef844c426df1d3c360d4a7510918e63c24e07021ef12ee51eebad55a85",
+    "dinov3_vitl16/resumed4/complete.json": "2f3846dd1a6f64cad9061703dad1876d11aa7a7edac0a11ac4ff4808112bc97a",
+    "dinov3_vitl16/split2/complete.json": "18554f50ad8067e525b8002bf7fcf5b490111071720fd492fb7766a11b1f3541"
+  },
+  "local_validation": "archive bytes and all exported comparisons/coverage/identities; remote checkpoints not replayed locally",
+  "performance_profile_frozen": false
+}

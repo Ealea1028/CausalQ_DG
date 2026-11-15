@@ -1,20 +1,19 @@
 # CausalQ-DG
 
-## Active — LoRA Phase40 source-only recovery
+## Active — LoRA Phase40 source-only performance calibration
 
 Implementing [LoRA_CausalQ_1114_Plan.md](LoRA_CausalQ_1114_Plan.md), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
 objectives; both wrappers now expose CLS separately from Patch/register tokens.
 Phase39 returned evidence is accepted: exact initial outputs, both 98304-parameter
 adapters, valid gradients, unchanged base weights and native Patch/CLS shapes.
-Phase40 releases source-only fresh-process 4 versus2+2 recovery with effective
-batch8, HPI optimizer/schedule and complete LoRA+head/optimizer/RNG checkpoints.
-The first return failed final RNG equality on DINOv3; DINOv2 was not reached.
-Python/NumPy/Torch now share explicit seed0 initialization, with provider-level
-RNG diagnostics and a read-only audit of the old checkpoints. Revalidation is
-pending; the failed run is preserved in phase40_resume_failure_2cfbb3b.json.
-No formal training, target access or throughput acceptance. UA/B3 performance
-calibration remains a subsequent Phase40 action after recovery evidence returns.
+Phase40 recovery at db4ed7f is accepted: both backbones have zero model/optimizer
+error, exact input/RNG equality and unchanged base weights. The first failed run
+remains archived; its differences are confirmed to be Python/NumPy only.
+Now release bounded UA/B3 LoRA calibration with effective batch8, physical
+batch1/4/8 and one/two input slots, 12 workers, BF16 and HPI optimization.
+New routing preserves CLS metadata without changing historical frozen source.
+Performance requires AutoDL evidence; no formal training or target access.
 See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.
 
 ## Completed — HPI DINOv2 study, Phase33–38

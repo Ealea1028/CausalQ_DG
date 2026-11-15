@@ -28,7 +28,7 @@ PROFILE={'data_workers':12,'prefetch_factor':2,'loader_packet_samples':8,'backbo
          'pin_memory':True,'pinned_memory_budget_gib':8,'host_pipeline_budget_gib':32}
 
 
-def build(name,root):
+def build(name,root,*,head_type=QuerySegmentor):
     kwargs={} if name.startswith('dinov2') else {'intermediate_indices':(6,12,18,24)}
     weights=root/'dinov2_vitl14/dinov2_vitl14_hpi_p16.pth' if name.startswith('dinov2') else root/'dinov3_vitl16'
     accepted=next(m for m in json.loads(ACCEPTED.read_text())['models'] if m['model']==name)
@@ -38,7 +38,7 @@ def build(name,root):
     b=build_backbone(name,weights=weights,dtype=torch.bfloat16,**kwargs).cuda()
     with torch.random.fork_rng(devices=[]):
         torch.random.default_generator.manual_seed(0)
-        model=QuerySegmentor(b,queries_per_class=2,interaction='static',cross_attention_layers=0,
+        model=head_type(b,queries_per_class=2,interaction='static',cross_attention_layers=0,
                              decoder_channels=256,dropout=.1,num_classes=19).cuda()
     inject_dino_lora(b)
     return model

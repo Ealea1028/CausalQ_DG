@@ -1,0 +1,63 @@
+{
+  "study": "lora_causalq_1114",
+  "phase": 40,
+  "action": "performance-check",
+  "formal_training_authorized": false,
+  "formal_optimizer_updates": 0,
+  "source_data_access_authorized": true,
+  "target_access_authorized": false,
+  "resume_acceptance": "phase40_resume_acceptance.json",
+  "backbones": [
+    "dinov3_vitl16",
+    "dinov2_vitl14_hpi_p16"
+  ],
+  "variants": [
+    "UA",
+    "B3"
+  ],
+  "effective_source_batch": 8,
+  "candidates": [
+    {
+      "name": "micro1_serial",
+      "microbatch": 1,
+      "buffer_slots": 1
+    },
+    {
+      "name": "micro4_double",
+      "microbatch": 4,
+      "buffer_slots": 2
+    },
+    {
+      "name": "micro8_double",
+      "microbatch": 8,
+      "buffer_slots": 2
+    }
+  ],
+  "data_workers": 12,
+  "prefetch_factor": 2,
+  "loader_packet_samples": 8,
+  "warmup_updates": 20,
+  "steady_seconds_min": 120,
+  "hard_cap_seconds_per_candidate": 300,
+  "max_updates_per_candidate": 4096,
+  "maximum_engineering_updates": 49152,
+  "timing_every_updates": 10,
+  "gpu_telemetry_interval_seconds": 1,
+  "batch_numerical_tolerances": {
+    "atol": 0.1,
+    "rtol": 0.05,
+    "relative_l2": 0.02
+  },
+  "zero_delta_exact_and_resume_tolerances_unchanged": true,
+  "source_loss_backend": "canonical_cpu_validated_fp32_static_reduction_v1",
+  "original_loss_apis_unchanged": true,
+  "gpu_utilization_targets": {
+    "median_min": 70,
+    "p10_min": 60
+  },
+  "data_wait_fraction_max": 0.1,
+  "reserved_fraction_max": 0.85,
+  "tie_band": 0.05,
+  "profile_frozen": false,
+  "next": "AutoDL bounded calibration then local acceptance; Phase41 not released"
+}

@@ -1,0 +1,29 @@
+{
+  "phase": 40,
+  "action": "performance-check",
+  "full_suite": {
+    "passed": 773,
+    "skipped": 1,
+    "seconds": 197.3
+  },
+  "focused": {
+    "passed": 13,
+    "seconds": 22.43
+  },
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "legacy_routing_file_unchanged": true,
+  "coverage": [
+    "source loss value/gradient/detach equivalence",
+    "legacy/new B3 routing equality and CLS propagation",
+    "B3 LoRA microbatch and optimizer equality",
+    "input order/buffer bounds",
+    "performance eligibility/tie selection",
+    "invalid telemetry handling"
+  ],
+  "bash_launcher_syntax_checked": true,
+  "actual_gpu_performance_measured": false,
+  "profile_frozen": false,
+  "first_update_snapshot_hash_and_gradient_smoke_passed": true
+}

@@ -1,5 +1,6 @@
 """Phase40 reusable update/checkpoint primitives; formal training is unreleased."""
 from contextlib import contextmanager
+from contextlib import nullcontext
 import copy
 import hashlib
 import os
@@ -62,10 +63,16 @@ def sample_rng(index,view):
         yield
 
 
-def update(model, optimizer, packets, step, *, microbatch=1, amp=False):
+def update(model, optimizer, packets, step, *, microbatch=1, amp=False,variant='UA',timer=None,return_tensors=False,prevalidated_source=False):
     """Eight source images, two summed CE terms, detached original Anchor CQE."""
     if len(packets)!=8 or microbatch not in (1,2,4,8):
         raise ValueError('Effective source batch must be eight')
+    if variant not in ('UA','B3'): raise ValueError('Unreleased performance objective')
+    timed=timer if timer is not None else lambda name:nullcontext()
+    if prevalidated_source:
+        from causalq.losses.lora_source import source_ce_prevalidated as ce_fn,anchor_cqe_prevalidated as cqe_fn
+    else:
+        ce_fn,cqe_fn=deterministic_source_ce,causal_query_effect_loss
     for group in optimizer.param_groups: group['lr']=learning_rate(step)
     device=next(model.parameters()).device
     model.train(); optimizer.zero_grad(set_to_none=True)
@@ -79,25 +86,38 @@ def update(model, optimizer, packets, step, *, microbatch=1, amp=False):
             labels=torch.stack([s['label'] for s in rows]).to(device,non_blocking=True)
             terms=[]
             with torch.autocast(device.type,dtype=torch.bfloat16,enabled=amp):
-                features=model.backbone(images)
-                for j,sample in enumerate(rows):
-                    with sample_rng(sample['metadata']['step_zero_based'],view):
-                        out=model.forward_features(slice_features(features,j,j+1), labels.shape[-2:],
-                            include_anchor=True,component_protocol='lora_causalq_1114')
-                    ce=deterministic_source_ce(out.logits,labels[j:j+1])
-                    if view==0:
-                        refs.append(out.anchor_scaled_delta_logits.detach().float())
-                        loss=ce
-                    else:
-                        loss=ce+causal_query_effect_loss(out.anchor_scaled_delta_logits.float(),refs[j],labels[j:j+1])
-                    terms.append(loss)
-                    values.append(loss.detach())
+                with timed('backbone_forward'):
+                    features=model.backbone(images)
+                with timed('head_and_loss'):
+                    for j,sample in enumerate(rows):
+                        local=slice_features(features,j,j+1)
+                        with sample_rng(sample['metadata']['step_zero_based'],view):
+                            if variant=='B3':
+                                out,route=model.forward_routed(local,labels.shape[-2:])
+                            else:
+                                out=model.forward_features(local, labels.shape[-2:],
+                                    include_anchor=True,component_protocol='lora_causalq_1114')
+                        ce=ce_fn(out.logits,labels[j:j+1])
+                        if variant=='B3':
+                            from causalq.losses.hpi_localization import patch_localization_loss
+                            loss=ce+.05*patch_localization_loss(route.match_logits,labels[j:j+1],local.patch_map.shape[-2:])
+                        elif view==0:
+                            refs.append(out.anchor_scaled_delta_logits.detach().float())
+                            loss=ce
+                        else:
+                            loss=ce+cqe_fn(out.anchor_scaled_delta_logits.float(),refs[j],labels[j:j+1])
+                        terms.append(loss)
+                        values.append(loss.detach())
                 total=torch.stack(terms).sum()/8
-            total.backward()
+            with timed('backward'):
+                total.backward()
             del out,terms,total,features,images,labels
-    norm=torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad],1.,error_if_nonfinite=True)
-    if not torch.isfinite(torch.stack(values)).all(): raise FloatingPointError('Nonfinite source objective')
-    optimizer.step()
+    with timed('clip_and_optimizer'):
+        norm=torch.nn.utils.clip_grad_norm_([p for p in model.parameters() if p.requires_grad],1.,error_if_nonfinite=True)
+        if not torch.isfinite(torch.stack(values)).all(): raise FloatingPointError('Nonfinite source objective')
+        optimizer.step()
+    if return_tensors:
+        return torch.stack((torch.stack(values).sum()/8,norm.detach()))
     return {'loss':float(torch.stack(values).sum()/8),'gradient_norm':float(norm),'lr':learning_rate(step)}
 
 

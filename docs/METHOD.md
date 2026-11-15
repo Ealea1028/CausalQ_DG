@@ -1,6 +1,42 @@
 # Method contract
 
-## Active — LoRA Phase40 source-only fresh-process recovery
+## Active — Phase40 source-only UA/B3 performance calibration
+
+Recovery at db4ed7f is accepted from returned archive/JSON/marker/comparison
+bytes: both backbones model/AdamW max error0, all RNG and actual input tensor
+hashes identical, base digests unchanged. Local checkpoints were not replayed.
+The old D3 failure is confirmed Python/NumPy-only; Torch/CUDA matched.
+See phase40_resume_acceptance.json; prior failed records remain unaccepted.
+
+Release only bounded performance-check:2 backbones x UA/B3 x3 candidates,
+microbatch1 serial, microbatch4/8 double input prefetch, effective source batch8.
+12 workers, prefetch2, packet8; shared-memory-limited hosts use the existing
+bounded thread fallback. No adapted features/graphs are shared or cached.
+Each candidate has20 warmup updates, at least120 seconds steady measurement,
+a300-second isolated process-group cap and4096-update ceiling. All heads and
+engineering updates are disposable; formal training remains unreleased.
+
+LoRA-specific B3 routing reuses the existing A-transpose(AV), gate/gamma and
+0.05 localization term on each view. It retains CLS/register metadata through
+dataclass replacement; historical frozen routing file bytes remain unchanged.
+Default UA update and strict loss APIs retain their prior behavior. The
+performance-only source path uses equivalent FP32 CE/CQE static reductions
+after CanonicalInputStream CPU checks valid trainIds/nonempty crops, avoiding
+per-image GPU boolean/dynamic-selection synchronization. CPU value/gradient
+and microbatch tests cover these execution changes. No new scientific loss.
+
+BF16 physical-batch feature and first-update clipped-gradient drift use
+predeclared Phase33 engineering tolerances(atol.1,rtol.05,relativeL2.02).
+These are batch-migration tolerances, not weakened zero-adapter or recovery
+checks; first-update trainable parameters still use1e-6/1e-5. No score-based
+profile selection. Require median GPU activity70,p10 60,data wait<10%,reserved
+<=85% actual memory and speed above batch1; select lower memory within5% speed
+tie. Sampled CUDA phase times, 1Hz activity/power and snapshot cost are separate.
+Returned measurements and profile acceptance are pending; no target access.
+
+## Archive — Phase40 fresh-process recovery (accepted at db4ed7f)
+
+### Original recovery contract and initial failure
 
 First attempt at2cfbb3b is NOT accepted: DINOv3 continuous/prefix/resume workers
 completed8 disposable updates, but the parent rejected final RNG equality;
