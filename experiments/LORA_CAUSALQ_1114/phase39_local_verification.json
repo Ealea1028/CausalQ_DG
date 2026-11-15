@@ -1,0 +1,21 @@
+{
+  "phase": 39,
+  "date": "2026-11-15",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "pytest": "8.4.2",
+  "cpu_only": true,
+  "full_suite": {
+    "passed": 760,
+    "skipped": 1,
+    "seconds": 172.59,
+    "skip_reason": "Windows unprivileged symlink unavailable"
+  },
+  "post_rng_change_focused_passed": 6,
+  "bash_blocks_checked": 6,
+  "launcher_bash_syntax_checked": true,
+  "real_weights_loaded": false,
+  "cuda_gate_passed": null,
+  "historical_frozen_route_unchanged": true,
+  "scope": "LoRA/feature compatibility and first real-weight gate only; Phase40 recovery/performance remain unreleased"
+}

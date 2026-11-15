@@ -24,11 +24,13 @@ DINOV3_MODEL_SPECS = {
 
 @dataclass(frozen=True)
 class DINOv3Features:
-    """Dense patch features returned without CLS or register tokens."""
+    """Dense features; prefix tokens are separate from the Patch grid."""
 
     patch_map: Tensor
     patch_tokens: Tensor
     intermediate_maps: tuple[Tensor, ...] = ()
+    cls_token: Tensor | None = None
+    register_tokens: Tensor | None = None
 
 
 def _pair(value: int | Sequence[int]) -> tuple[int, int]:
@@ -161,7 +163,7 @@ class DINOv3Backbone(nn.Module):
                 f"patch size {self.patch_size}"
             )
         grid_size = image_height // patch_height, image_width // patch_width
-        context = torch.no_grad() if self.freeze else nullcontext()
+        context = torch.no_grad() if self.freeze and not getattr(self, 'lora_enabled', False) else nullcontext()
         with context:
             outputs = self.model(
                 pixel_values=images,
@@ -182,4 +184,6 @@ class DINOv3Backbone(nn.Module):
             patch_map=patch_map,
             patch_tokens=patch_tokens,
             intermediate_maps=tuple(intermediate_maps),
+            cls_token=outputs.last_hidden_state[:, 0, :],
+            register_tokens=outputs.last_hidden_state[:, 1:self.num_prefix_tokens, :],
         )

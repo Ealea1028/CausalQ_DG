@@ -110,9 +110,11 @@ class DinoVisionTransformer(nn.Module):
             if i in indices:
                 maps.append(x[:, 1:].transpose(1, 2).reshape(x.shape[0], self.dim,
                             h // self.patch_size, w // self.patch_size).contiguous())
-        tokens = self.norm(x)[:, 1:]
+        normalized = self.norm(x)
+        tokens = normalized[:, 1:]
         return DINOv3Features(tokens.transpose(1, 2).reshape(x.shape[0], self.dim,
-                              h // self.patch_size, w // self.patch_size).contiguous(), tokens, tuple(maps))
+                              h // self.patch_size, w // self.patch_size).contiguous(), tokens, tuple(maps),
+                              normalized[:, 0], normalized[:, 1:1])
 
 
 def convert_hpi_state(state, *, dim=1024, original_grid=37, target_grid=32, patch_size=16):
@@ -164,5 +166,5 @@ class DINOv2Backbone(nn.Module):
         if images.ndim != 4 or images.shape[1] != 3 or any(
                 s % p for s, p in zip(images.shape[-2:], self.patch_size)):
             raise ValueError('Expected BCHW RGB images divisible by patch16')
-        with torch.no_grad() if self.freeze else nullcontext():
+        with torch.no_grad() if self.freeze and not getattr(self, 'lora_enabled', False) else nullcontext():
             return self.model(images, self.intermediate_indices)

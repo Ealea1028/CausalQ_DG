@@ -117,7 +117,9 @@ def candidate_run(name,profile,options,pairs,backbone,out,initial_rng,initial_sh
                     # A small CPU reference cannot keep an old GPU slot alive.
                     from causalq.models.dinov3_wrapper import DINOv3Features
                     values=[t.detach().cpu() for t in feature_tensors(actual)]
-                    sample=DINOv3Features(values[0],values[1],tuple(values[2:]))
+                    sample=DINOv3Features(values[0],values[1],tuple(values[2:]),
+                        actual.cls_token.detach().cpu() if actual.cls_token is not None else None,
+                        actual.register_tokens.detach().cpu() if actual.register_tokens is not None else None)
                     errors=feature_error(reference,sample,profile) if reference is not None else None
                     if reference is None:reference=sample
                     del actual

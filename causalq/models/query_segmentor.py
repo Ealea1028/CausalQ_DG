@@ -570,9 +570,9 @@ class QuerySegmentor(nn.Module):
         return self.query_bank.query_residuals
 
     def _require_anchor_mode(self, component_protocol: str | None = None) -> None:
-        if component_protocol not in (None, "diagnostic_20261020", "hpi_dinov2_20261031"):
+        if component_protocol not in (None, "diagnostic_20261020", "hpi_dinov2_20261031", "lora_causalq_1114"):
             raise ValueError("Unknown component protocol")
-        allow_uncentered = component_protocol in ("diagnostic_20261020", "hpi_dinov2_20261031")
+        allow_uncentered = component_protocol in ("diagnostic_20261020", "hpi_dinov2_20261031", "lora_causalq_1114")
         if self.interaction != "static" or (not self.query_bank.centered_residuals and not allow_uncentered) or self.learned_null:
             raise ValueError("Anchor-only scope requires centered Static queries without learned-null")
 

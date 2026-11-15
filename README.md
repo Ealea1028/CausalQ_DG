@@ -1,5 +1,14 @@
 # CausalQ-DG
 
+## Active — LoRA dual-backbone Phase39
+
+Implementing [LoRA_CausalQ_1114_Plan.md](LoRA_CausalQ_1114_Plan.md), one phase at a time.
+Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
+objectives; both wrappers now expose CLS separately from Patch/register tokens.
+Only the real-weight synthetic `backbone-gate` is released. No formal training,
+dataset access or performance claim. AutoDL evidence is required before Phase40.
+See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.
+
 ## Completed — HPI DINOv2 study, Phase33–38
 
 All seven seed0 models completed 40000 updates each. The seven fixed-final

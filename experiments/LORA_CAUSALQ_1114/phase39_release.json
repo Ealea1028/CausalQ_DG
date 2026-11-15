@@ -1,0 +1,15 @@
+{
+  "study": "lora_causalq_1114",
+  "phase": 39,
+  "action": "backbone-gate",
+  "status": "local_implementation_pending_real_weight_gate",
+  "formal_training_authorized": false,
+  "formal_optimizer_updates": 0,
+  "engineering_updates_per_backbone": 3,
+  "data_access_authorized": false,
+  "target_access_authorized": false,
+  "gpu_gate_passed": null,
+  "phase40_performance_profile": null,
+  "lora": {"blocks_zero_based": [18,19,20,21,22,23], "projections": ["Q","V"], "rank": 4, "alpha": 4, "parameters_per_backbone": 98304},
+  "next": "AutoDL real-weight integration only; return report before Phase40 performance calibration"
+}

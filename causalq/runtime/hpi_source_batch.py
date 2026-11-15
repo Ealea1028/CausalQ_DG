@@ -38,7 +38,9 @@ def main_path_rows(model, features, factual_logits, label, offset, chunk):
         batch = pairs[start:start + chunk]
         category, view = torch.tensor(batch, device=label.device).unbind(1)
         picked = [tensor.index_select(0, view + offset) for tensor in feature_tensors(features)]
-        local_features = DINOv3Features(picked[0], picked[1], tuple(picked[2:]))
+        local_features = DINOv3Features(picked[0], picked[1], tuple(picked[2:]),
+            features.cls_token.index_select(0, view + offset) if features.cls_token is not None else None,
+            features.register_tokens.index_select(0, view + offset) if features.register_tokens is not None else None)
         alternative = model.closed_class_logits(local_features, label.shape, category).float().softmax(1)
         index = torch.arange(len(batch), device=label.device)
         mask = label == category[:, None, None]

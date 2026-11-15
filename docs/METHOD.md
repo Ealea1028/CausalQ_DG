@@ -1,5 +1,26 @@
 # Method contract
 
+## Active — LoRA dual-backbone Phase39, 2026-11-15
+
+Authority: LoRA_CausalQ_1114_Plan.md and user's implementation request.
+Only Q/V rank4 alpha4 adapters in zero-based blocks18–23 are added; all original
+DINO weights remain frozen. Adapted wrappers retain autograd despite base freeze,
+with deterministic backbone eval. Patch/CLS/register outputs are distinct;
+the existing three-field feature constructor remains supported.
+CausalQ formulas, alpha0, static R2, centered/uncentered parameterization and
+Anchor CQE remain unchanged. The new study protocol permits existing component
+access without weakening legacy guards. Historical frozen routing source stays
+byte-identical; LoRA-specific routing integration is deferred to Phase44.
+
+The first AutoDL boundary is a Phase39 synthetic real-weight integration gate:
+strict D2 converted checkpoint loading, HF D3 loading, exact zero-delta features,
+three disposable CE+Anchor-CQE updates per backbone, gradient/base-weight audit
+and random native1024x2048 Patch/CLS output. No dataset, target image/label,
+formal optimizer update, source mIoU or throughput acceptance is authorized.
+Engineering AdamW steps do not constitute the future HPI formal scheduler.
+Fresh-process recovery, real-source effective batch8 and steady GPU calibration
+remain Phase40 work after this gate. Do not run any Phase41–46 training yet.
+
 ## Completed — HPI DINOv2 study, Phase33–38
 
 All seven seed0 models completed 40000 updates each. The seven fixed-final

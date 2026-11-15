@@ -8,12 +8,15 @@ from causalq.models.dinov3_wrapper import DINOv3Features
 
 
 def feature_tensors(features):
+    # Legacy consumers reconstruct the first two tensors + four maps positionally.
     return (features.patch_map, features.patch_tokens, *features.intermediate_maps)
 
 
 def slice_features(features, start, stop):
     return DINOv3Features(features.patch_map[start:stop], features.patch_tokens[start:stop],
-                          tuple(x[start:stop] for x in features.intermediate_maps))
+                          tuple(x[start:stop] for x in features.intermediate_maps),
+                          features.cls_token[start:stop] if features.cls_token is not None else None,
+                          features.register_tokens[start:stop] if features.register_tokens is not None else None)
 
 
 @dataclass
