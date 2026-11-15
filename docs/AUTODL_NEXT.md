@@ -1,4 +1,114 @@
-# 当前操作 — Phase40 RNG初始化修复后复验
+# 当前操作 — Phase40 UA/B3 双骨干吞吐定标
+
+已验收`phase40_resume_db4ed7f_return`：两个骨干各8次工程更新，连续4步与2+2恢复的model/optimizer最大误差均为0，四类RNG与真实输入张量哈希完全一致，原始权重不变。压缩包/解压文件/子报告/完成标记已核对；检查点留实例，本机未重放。旧失败只读诊断确认仅Python/NumPy不同，Torch/CUDA相同。验收见`experiments/LORA_CAUSALQ_1114/phase40_resume_acceptance.json`，旧失败记录保留。
+
+本机完成性能工具及CPU验证：773 passed、1 skipped（Windows符号链接权限），197.30秒；13项聚焦测试通过。覆盖B3历史/新路由等价、CLS保留、LoRA更新/物理batch一致性、源损失值和梯度等价、输入队列顺序/上界、遥测异常及配置选择；首步快照序列化/哈希/梯度比较smoke通过。
+
+下一步需要真实GPU和源数据测量，因此本机在此停止。运行SHA：`432ab4a2eb83e8632d716b392a7a690af1f5aaf0`。分支`codex/lora-causalq-1114`。
+
+## 本次固定范围
+
+- 2种骨干 × UA/B3 × 3候选，共12个独立工程worker，按顺序执行。
+- 有效源batch固定8；候选为micro1/累积8/单输入槽，micro4/累积2/双输入槽，micro8/累积1/双输入槽。
+- 原图与photo各建独立可微骨干图；只预取输入，不共享/缓存适配后特征。12 workers、packet8、prefetch2；共享内存不足时有界线程回退，实际策略写报告。
+- 每候选暖机20更新，再至少120秒连续稳态；进程组硬上限300秒、最多4096工程更新。正常稳态共约24分钟，另有加载/数值检查开销；最坏12候选上限约60分钟，超时失败会返回未知工程更新计数，不能伪填0。
+- 所有头、LoRA和optimizer状态均为可丢弃工程状态，不作正式初始化。正式更新0，不计算源/目标mIoU，不读取Cityscapes。
+- 记录每秒GPU活动/功耗、端到端images/s、输入等待、H2D、每10更新采样CUDA分项、checkpoint成本和峰值显存。稳态包括输入等待；冷启动与保存成本另报。
+- 目标：活动中位数≥70%、p10≥60%、数据等待<10%、reserved≤实际可见显存85%，吞吐高于micro1。吞吐差≤5%优先低显存。尚未实测，不保证已达标。
+
+## 执行优化与数值边界
+
+原公开严格CE/CQE接口和默认UA更新保持不变。仅对CanonicalInputStream已在CPU验证trainIds和非空裁剪的路径，使用等价FP32静态归约，避免每图重复GPU布尔检查/动态mask选择同步。CPU测试证明值、梯度和reference detach等价。B3保持每视图CE+.05定位，无Anchor CQE；历史冻结路由源码不修改。
+
+每候选在计时前比较同源8图的物理batch特征；micro4/8还比较首更新的输入哈希、FP32可训练参数及完整裁剪梯度。BF16物理batch沿用Phase33工程阈值atol0.1、rtol0.05、relativeL2≤0.02，原零增量精确检查及恢复1e-6/1e-5阈值不变。数值或内存不合格的候选不能被选中，不根据mIoU选策略。
+
+## 1. 拉取精确代码
+
+复用现有环境、权重及GTA5数据；定标期间请让该GPU只运行本任务。
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+SHA=432ab4a2eb83e8632d716b392a7a690af1f5aaf0
+DIR=/root/autodl-tmp/CausalQ_DG_lora1114_432ab4a
+if [[ ! -d "$DIR/.git" ]]; then
+  test ! -e "$DIR"
+  git clone --filter=blob:none --depth 1 --single-branch \
+    --branch codex/lora-causalq-1114 --no-checkout \
+    https://github.com/Ealea1028/CausalQ_DG.git "$DIR"
+else
+  test -z "$(git -C "$DIR" status --porcelain)"
+fi
+git -C "$DIR" fetch --depth 1 origin "$SHA"
+git -C "$DIR" show "$SHA:experiments/LORA_CAUSALQ_1114/autodl_sparse_paths.txt" | \
+  git -C "$DIR" sparse-checkout set --no-cone --stdin
+git -C "$DIR" checkout --detach "$SHA"
+test "$(git -C "$DIR" rev-parse HEAD)" = "$SHA"
+BASH
+```
+
+## 2. 后台启动一次定标
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+cd /root/autodl-tmp/CausalQ_DG_lora1114_432ab4a
+export PY=/root/autodl-tmp/envs/causalq-lora1114/bin/python
+nvidia-smi
+df -h /root/autodl-tmp /dev/shm
+bash scripts/check_lora_performance.sh 432ab4a2eb83e8632d716b392a7a690af1f5aaf0
+BASH
+```
+
+不要重跑Phase39/恢复检查、重新安装环境或在运行中切换源码。本次每候选会重建独立模型以保证新鲜初始化，加载期间主日志可能没有新行；已经完成的候选记录可复用，但现有最终report会阻止盲目重跑。失败先回传，不删除完成标记。
+
+## 3. 查看主进度、子日志和最终摘要
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_perf_432ab4a
+tail -n 60 "$OUT/launcher.log"
+find "$OUT" -name worker.log -print -exec tail -n 3 {} \;
+if [[ -f "$OUT/launcher.pid" ]]; then ps -p "$(cat "$OUT/launcher.pid")" -o pid,etime,args || true; fi
+if [[ -f "$OUT/report.json" ]]; then
+  /root/autodl-tmp/envs/causalq-lora1114/bin/python - "$OUT/report.json" <<'PY'
+import json,sys
+r=json.load(open(sys.argv[1]))
+print({k:r.get(k) for k in ('ok','exit_code','performance_target_met','engineering_updates','formal_optimizer_updates','target_data_accessed')})
+for w in r.get('workloads',[]):
+    print(w['model'],w['variant'],w['selection'])
+    for c in w['candidates']:
+        print(c['name'],{'ok':c['ok'],'source_images_s':c.get('source_images_per_second'),'utilization':c.get('telemetry'),'error':c.get('error')})
+if r.get('error'): print(r['error'])
+PY
+fi
+BASH
+```
+
+`ok`表示存在合格候选，`performance_target_met`才表示全部四种负载达到工程目标；两者均不等于已经授权正式训练。`performance_profile_frozen`仍为false，等待本机验收。
+
+## 4. 导出小型返回包
+
+父进程结束且report.json生成后执行。模型、首步梯度参考、优化器checkpoint留在实例，只回传JSON、CSV、日志和完成标记：
+
+```bash
+bash <<'BASH'
+set -euo pipefail
+OUT=/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase40_perf_432ab4a
+test -f "$OUT/report.json" || { echo '最终报告尚未生成，请先查看进度'; exit 2; }
+tar --exclude='*.pt' --exclude='*.pth' --exclude='*.partial' \
+  -czf "$OUT/../phase40_perf_432ab4a_return.tar.gz" -C "$OUT" .
+sha256sum "$OUT/../phase40_perf_432ab4a_return.tar.gz"
+ls -lh "$OUT/../phase40_perf_432ab4a_return.tar.gz"
+BASH
+```
+
+下载并解压到本机`phase40_export/phase40_perf_432ab4a_return/`后告知我，保留旧返回目录。即使目标未达成或候选失败，也返回完整小包；不要用未验收策略启动28模型矩阵。
+
+---
+
+# Archive — Phase40 RNG复验（已通过，勿重跑）
 
 收到`phase40_export/phase40_resume_2cfbb3b_return/`并核对压缩包与解压文件字节一致。原运行**未通过**：DINOv3的连续4步/前缀2步/恢复2步均已完成，最终随机状态比较失败；DINOv2尚未开始。原始报告、日志、检查点全部保留，失败摘要在`experiments/LORA_CAUSALQ_1114/phase40_resume_failure_2cfbb3b.json`。
 
