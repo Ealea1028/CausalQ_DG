@@ -1,0 +1,24 @@
+{
+  "phase": 41,
+  "action": "stopped-inventory",
+  "full_suite": {
+    "passed": 788,
+    "skipped": 2,
+    "seconds": 237.18
+  },
+  "focused": {
+    "passed": 8,
+    "skipped": 1,
+    "seconds": 16.8
+  },
+  "skip_reason": "Windows unprivileged symlink creation not permitted",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "synthetic_end_to_end_inventory_passed": true,
+  "synthetic_original_files_byte_identical_after_audit": true,
+  "real_checkpoints_loaded_locally": false,
+  "cuda_rng_replay_verified": false,
+  "formal_updates_performed_locally": 0,
+  "payloads_deleted": 0
+}

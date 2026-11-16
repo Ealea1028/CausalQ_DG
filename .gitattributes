@@ -86,3 +86,5 @@ configs/lora_causalq_1114/*.json text eol=lf
 experiments/LORA_CAUSALQ_1114/execution_profile.json text eol=lf
 experiments/LORA_CAUSALQ_1114/phase40_performance_acceptance.json text eol=lf
 experiments/LORA_CAUSALQ_1114/phase41*.json text eol=lf
+tools/audit_lora_stopped.py text eol=lf
+tests/test_lora_stop_inventory.py text eol=lf

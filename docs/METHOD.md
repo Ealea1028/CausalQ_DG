@@ -1,6 +1,26 @@
 # Method contract
 
-## Active — Phase41 core L0 formal source training
+## Active amendment — Phase41 stopped-run inventory, 2026-11-16
+
+The user stopped the original Phase41 run before requesting execution changes.
+Only a read-only AutoDL inventory is released now. It locks the original run and
+GPU coordination lock, rejects active original training processes and redirected
+paths, verifies every complete marker/payload SHA before loading our own trusted
+schema1 checkpoint on CPU, and reconstructs only the head schema without DINO.
+Validate producer1af6b2e/config/profile/freeze, full head keys/shapes/finite state,
+AdamW group coverage/moments/absolute steps/LR, all RNG providers and source cursor.
+CUDA RNG is checked structurally and hashed, not restored or replayed on GPU.
+Archive actual per-head committed steps, latest two/common/final protections,
+partial/orphan files and existing reports; all payloads remain pinned. Missing
+run directories fail; absence of a complete checkpoint means zero verified
+committed updates, never recovery of unsaved in-memory progress. Corrupt latest
+segments remain errors even when older states validate; no silent fallback.
+No batch migration, throughput claim, cleanup apply or renewed formal training
+is authorized by this inventory release. Their implementation follows returned
+inventory review under the revised local plan8.4/8.5 and11.3/11.4. Historical
+Phase39/40 acceptance and the original frozen Phase41 implementation remain intact.
+
+## Original frozen Phase41 core L0 formal source training (stopped)
 
 Phase40 at432ab4a is accepted from archive/file byte equality, all12 candidate
 reports, independent raw telemetry reduction and predeclared selection. Its4063

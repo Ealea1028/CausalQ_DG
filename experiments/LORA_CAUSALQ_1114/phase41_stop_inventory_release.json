@@ -1,0 +1,15 @@
+{
+  "phase": 41,
+  "action": "stopped-inventory",
+  "original_producer_git_sha": "1af6b2e91e54083be433341f9fc8958954536272",
+  "authorized_run_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e",
+  "source_weights_or_datasets_opened": false,
+  "formal_updates_authorized": false,
+  "migration_authorized": false,
+  "cleanup_apply_authorized": false,
+  "all_payloads_pinned": true,
+  "gpu_training_authorized": false,
+  "checkpoint_validation": "SHA before CPU deserialization; head schema, full AdamW, RNG structure/digest, source cursor and original identity",
+  "cuda_rng_replay_verified": false,
+  "next": "AutoDL read-only inventory; return report and logs for local review before batched migration implementation"
+}

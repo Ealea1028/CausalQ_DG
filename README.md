@@ -4,6 +4,13 @@ Experiment plans, project/agent instructions and AutoDL operating handoffs are k
 
 ## Active — LoRA Phase41 core L0 formal baselines
 
+2026-11-16: user stopped the original run and revised the local plan to require
+batched-head migration and checkpoint retention. The next released action is
+read-only `tools.audit_lora_stopped`, using the original run/producer identity.
+Return verified per-head cursors and payload/RNG/AdamW identities before any
+batched migration or cleanup. Original profile and formal launcher stay frozen;
+no new formal training or payload deletion is released in this revision.
+
 Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
 objectives; both wrappers now expose CLS separately from Patch/register tokens.
