@@ -10,8 +10,5 @@
 /pyproject.toml
 /.gitattributes
 /.gitignore
-/AGENTS.md
 /README.md
 /docs/METHOD.md
-/docs/AUTODL_NEXT.md
-/20261031_CausalQ_HPI_DINOv2_Plan.md

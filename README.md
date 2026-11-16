@@ -1,8 +1,10 @@
 # CausalQ-DG
 
+Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
+
 ## Active — LoRA Phase41 core L0 formal baselines
 
-Implementing [LoRA_CausalQ_1114_Plan.md](LoRA_CausalQ_1114_Plan.md), one phase at a time.
+Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
 objectives; both wrappers now expose CLS separately from Patch/register tokens.
 Phase39 returned evidence is accepted: exact initial outputs, both 98304-parameter
@@ -19,7 +21,7 @@ Four independent heads share each frozen backbone's no-grad features. L1 never
 uses this cache. Immutable1000-update recovery skips already committed updates.
 Actual L0 activity is checked in120-second windows; an unmet target saves and
 stops for local review. Source mIoU/diagnostics wait forPhase45; target for46.
-See [exact handoff](docs/AUTODL_NEXT.md). Phase33–38 remain closed.
+See exact handoff (local-only document). Phase33–38 remain closed.
 
 ## Completed — HPI DINOv2 study, Phase33–38
 
@@ -31,7 +33,7 @@ the [final report](analysis/hpi_dinov2_final/REPORT.md). This exploratory single
 
 ## Archive — Phase37 fixed-final target evaluation
 
-Phase36 B4/B5 are accepted at source mIoU 72.4607% and 72.4340%. All seven heads completed 40000 updates each. Phase37 evaluates the seven frozen finals on Cityscapes val500 at native 1024×2048 with BF16 and shared backbone batch2. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+Phase36 B4/B5 are accepted at source mIoU 72.4607% and 72.4340%. All seven heads completed 40000 updates each. Phase37 evaluates the seven frozen finals on Cityscapes val500 at native 1024×2048 with BF16 and shared backbone batch2. See AutoDL handoff (local-only document).
 
 ## Archive — Phase36 B4/B5
 
@@ -40,15 +42,15 @@ and the 2497-image source diagnostics. Source mIoU was 72.4013%, 72.4495% and
 72.4771%, respectively. Phase36 trains two fresh seed0 heads, each for 40000
 updates, with the frozen v3 execution profile. B4 adds prediction-effect
 invariance. B5 also adds the signed positive-contribution margin. Both run
-joint source-only diagnostics. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+joint source-only diagnostics. See AutoDL handoff (local-only document).
 
 ## Archive — Phase35 B1/B2/B3 — 2026-11-05
 
-Phase34 v3 performance evidence accepted. Select double-buffer32 within the5% tie band,12 workers and8-sample packets. Measured gain7.85%, below the10% target. Phase35 runs fresh B1/B2/B3,40000 updates each, then joint source2497 diagnostics. See [AutoDL handoff](docs/AUTODL_NEXT.md).
+Phase34 v3 performance evidence accepted. Select double-buffer32 within the5% tie band,12 workers and8-sample packets. Measured gain7.85%, below the10% target. Phase35 runs fresh B1/B2/B3,40000 updates each, then joint source2497 diagnostics. See AutoDL handoff (local-only document).
 
 ## Archive — Phase34 v3 performance check — 2026-11-05
 
-Phase34 v2 accepted: U0/UA each40000 updates and2497-image source diagnostics. Source mIoU72.4142/72.3767%; target untouched. One bounded v3 `performance-check` now compares complete execution paths with disposable heads and zero formal updates. No baseline retraining. See [AutoDL commands](docs/AUTODL_NEXT.md).
+Phase34 v2 accepted: U0/UA each40000 updates and2497-image source diagnostics. Source mIoU72.4142/72.3767%; target untouched. One bounded v3 `performance-check` now compares complete execution paths with disposable heads and zero formal updates. No baseline retraining. See AutoDL commands (local-only document).
 
 ## Archive — Phase34 throughput plan v3 — 2026-11-05
 
@@ -58,8 +60,8 @@ cohort throughput/GPU-activity acceptance. Effective training batch=1 and 40000
 updates per model remain fixed by the user's choice. Phase33 evidence is reused;
 the v3 execution changes and performance-check action are planned, not released.
 The existing Phase34 SHA still denotes its frozen v2 execution. See
-[plan section5.7](20261031_CausalQ_HPI_DINOv2_Plan.md)
-and [current handoff boundary](docs/AUTODL_NEXT.md).
+plan section5.7 (local-only document)
+and current handoff boundary (local-only document).
 
 ## Published — Phase34 paired HPI DINOv2 baselines — 2026-11-04
 
@@ -69,17 +71,17 @@ RTX6000D runtime/weight identities. U0/UA now train fresh seed0/40000 updates
 each in one shared-backbone cohort,total80000 updates,1000-step recovery.
 Joint five-view source2497 diagnostics reuse original predictions for mIoU.
 Only source data is accessed; target evaluation and B1–B5 remain later phases.
-See [AutoDL handoff](docs/AUTODL_NEXT.md).
+See AutoDL handoff (local-only document).
 
 ## Archive — Phase33 HPI DINOv2 patch16 preparation — 2026-11-01
 
-Execute [the new plan](20261031_CausalQ_HPI_DINOv2_Plan.md) one phase at a time.
+Execute the new plan (local-only document) one phase at a time.
 Local implementation adds a frozen state-compatible DINOv2-L/16 adapter,
 canonical paired input, bounded shared features and independent head recovery.
 Only prepare/status/package are released. Next: one AutoDL source-only CUDA
 prepare and bounded throughput calibration, zero formal updates and no target
 access. Weight/runtime/hardware identities await returned measurements.
-See [current AutoDL commands](docs/AUTODL_NEXT.md) and
+See current AutoDL commands (local-only document) and
 [implementation map](experiments/HPI_DINOV2_20261031/implementation_map.md).
 Historical studies below stay closed; their target scores are not new baselines.
 
@@ -107,7 +109,7 @@ see [source analysis](docs/DIAGNOSTIC_PHASE31_RESULTS.md).
 Next:evaluate UP/UF/UA/UR/CA/CR on the frozen Cityscapes500,native1024x2048
 whole-image BF16. Reuse old U0/C0/CP/CF target results,report all ten and the
 predeclared comparisons. No extra training,pilot,model selection or tuning.
-[AutoDL commands](docs/AUTODL_NEXT.md).
+AutoDL commands (local-only document).
 
 ## Archive — Phase31 final source diagnostics — 2026-10-24（completed2026-10-28）
 
@@ -119,7 +121,7 @@ Phase30 files verified;source confusion independently reduced. See
 Next:source-only diagnostics of UP/UF/UA/UR/CA/CR final checkpoints,all2497
 images per model,identical Phase28 measurements. Reuse U0/C0/CP/CF summaries
 and three intervention example groups. Zero new updates,no pilot,ranking
-gate,baseline replay or target access. [AutoDL commands](docs/AUTODL_NEXT.md).
+gate,baseline replay or target access. AutoDL commands (local-only document).
 
 ## Archive — Phase30 centered matching controls — 2026-10-24
 
@@ -131,7 +133,7 @@ reduced. No new target scores or stability/gain conclusion. See
 Next:preplanned CA/CR,each fresh matched seed0/40000 updates,centered queries,
 Anchor/Residual consistency weight1;all other recipes match UA/UR. Reuse
 1000-step recovery and final-only source validation. No new pilot,ranking
-gate,target access or repeated baseline diagnostics. [AutoDL commands](docs/AUTODL_NEXT.md).
+gate,target access or repeated baseline diagnostics. AutoDL commands (local-only document).
 
 ## Archive — Phase29 uncentered formal ablations — 2026-10-23
 
@@ -142,19 +144,19 @@ Phase29 releases UP/UF/UA/UR,each fresh seed0/40000 updates,uncentered residuals
 two-view CE plus exactly one prediction/Full/Anchor/Residual consistency loss.
 Reuse the1000-step recovery runner and final-only source validation. No pilot,
 raw-stability ranking gate,baseline replay or target access. CA/CR follow in
-Phase30 under the original six-run budget. [AutoDL commands](docs/AUTODL_NEXT.md).
+Phase30 under the original six-run budget. AutoDL commands (local-only document).
 
 ## Archive — Phase28 selective-stability baseline diagnostics — 2026-10-20
 
-Execute [20261020_Diagnostic_Plan.md](20261020_Diagnostic_Plan.md) as a new
+Execute 20261020_Diagnostic_Plan.md (local-only document) as a new
 exploratory study after the old target results were seen. Reuse U0=M0,C0=M1,
 CP=P1,CF=M2 final40000 checkpoints;one source-only diagnostic job covers
 amplitude/raw+normalized variance,correlation/cancellation,Query/direct-anchor
 gradients and responsibility,plus three frozen intervention example groups.
 No repeated training,pilot or raw-variance ranking gate. Next phase is formal
 UP/UF/UA/UR;this release performs diagnostics only and never reads target data.
-See [AutoDL handoff](docs/AUTODL_NEXT.md) and
-[disk cleanup advice](docs/AUTODL_DISK_CLEANUP_20261020.md).
+See AutoDL handoff (local-only document) and
+disk cleanup advice (local-only document).
 
 ## Archive — Phase27 complete — final comparison and hypothesis stop — 2026-10-19
 
@@ -293,11 +295,7 @@ Old launchers read Cityscapes during development
 and must not be used for new M0–M4/P1 experiments. Static R=2's 65.2849% remains
 a historical reference. Phase 16 remains closed.
 The historical status and working-directory narrative below is retained for
-provenance; the active action is exclusively [`docs/AUTODL_NEXT.md`](docs/AUTODL_NEXT.md).
-
-New contributors should begin with the standalone Chinese project guide:
-[`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md). It separates the implemented
-method and verified results from the proposed next-generation theory roadmap.
+provenance; the active action is exclusively `docs/AUTODL_NEXT.md` (local-only document).
 
 Counterfactual Query Effect Distillation for domain-generalized semantic segmentation.
 
