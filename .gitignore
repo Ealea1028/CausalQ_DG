@@ -35,3 +35,14 @@ analysis/style_examples/
 # Keep small experiment summaries only
 experiments/*/checkpoints/
 experiments/*/logs/
+
+# Local-only experiment plans and project/agent/AutoDL operating guides
+*[Pp][Ll][Aa][Nn].md
+*[Pp][Ll][Aa][Nn]_*.md
+AGENTS.md
+AGENTS.override.md
+PROJECT_GUIDE.md
+CODEX_CURRENT_STATE.md
+AUTODL_NEXT.md
+AUTODL_DISK_CLEANUP_*.md
+*[Hh][Aa][Nn][Dd][Oo][Ff][Ff]*.md

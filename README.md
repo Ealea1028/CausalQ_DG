@@ -1,8 +1,6 @@
 # CausalQ-DG
 
-New contributors should begin with the standalone Chinese project guide:
-[`docs/PROJECT_GUIDE.md`](docs/PROJECT_GUIDE.md). It separates the implemented
-method and verified results from the proposed next-generation theory roadmap.
+Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
 Counterfactual Query Effect Distillation for domain-generalized semantic segmentation.
 
