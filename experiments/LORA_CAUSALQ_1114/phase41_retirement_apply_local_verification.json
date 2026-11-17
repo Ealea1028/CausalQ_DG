@@ -1,0 +1,40 @@
+{
+  "phase": 41,
+  "action": "reviewed-retirement-apply-release",
+  "date": "2026-11-17",
+  "python_executable": "E:/Anaconda/envs/pytorch/python.exe",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "pytest": "8.4.2",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "PYTHONPATH": "D:/CrossDomainProject/CausalQ_Project/.test-deps-strict-dg",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "MKL_THREADING_LAYER": "SEQUENTIAL"
+  },
+  "archive_review": "outer SHA, all five archive/extracted members, exit code, producer, 268 unique checkpoint identities/steps/payload SHA/bytes versus prior accepted inventory, one protected final",
+  "approved_preview_sha256": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
+  "tool_source_unchanged_from": "8b43af2dfe4bc6a62bcf593fbc49a8d458d4b8bf",
+  "tool_source_sha256": "d8299ce2c319a548cca55524d47c17c25e5013df0042f73eb0336388c584cdb1",
+  "initial_full": {
+    "passed": 844,
+    "failed": 1,
+    "skipped": 2,
+    "seconds": 284.71,
+    "failure": "New static allowlist test compared a POSIX remote run path with str(WindowsPath). Corrected to RUN.as_posix(); no production deletion code change and no test removed."
+  },
+  "corrected_focused": {"passed": 1, "seconds": 0.43},
+  "final_full": {
+    "passed": 845,
+    "skipped": 2,
+    "seconds": 283.48,
+    "command": "python -m pytest -q -p no:cacheprovider --basetemp=.test-tmp-strict-dg-retire-apply-full-fixed"
+  },
+  "skip_reasons": ["test_gta5_source_structure: host does not permit unprivileged symlinks", "test_lora_stop_inventory: host does not permit unprivileged symlinks"],
+  "handoff_bash_syntax": "passed",
+  "real_weights_or_checkpoints_loaded_locally": false,
+  "remote_deletions_performed_by_local_agent": 0,
+  "training_authorized_in_this_action": false,
+  "next": "AutoDL exact approved cleanup apply and return result, then local acceptance before Phase42"
+}

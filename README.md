@@ -7,11 +7,13 @@ Experiment plans, project/agent instructions and AutoDL operating handoffs are k
 The user cancels further L0 training and confirms all seven U0/UA/C0/CA/B1/B2/B3
 variants with LoRA on both DINO backbones:14 fresh models,40000 steps each.
 Keep only the accepted D3 U0 L0 final payload and all lightweight evidence.
-The current phase releases a CPU-only stopped-run cleanup preview on AutoDL;
-review the returned manifest before applying deletions or releasing Phase42.
-No formal training or target access is part of this action. The existing accepted
-inventory suggests267 removable payloads/11.35GiB; actual stopped-state counts
-must be measured. Datasets, pretrained weights and environments remain intact.
+Returned preview8b43af2 is accepted after archive/member hash checks and exact
+comparison of all268 records with the previous accepted inventory. Release only
+the reviewed267-file allowlist/12183196383 bytes for CPU-only AutoDL cleanup.
+Preserve the byte-exact accepted D3 U0 final and all lightweight evidence.
+No formal training or target access is part of this action. Apply revalidates
+every candidate under the original locks; return its report before Phase42.
+Datasets, pretrained weights and environments remain intact.
 See [active scope](experiments/LORA_CAUSALQ_1114/lora_only_scope_20261117.json).
 Only D3 U0 retains a paired L0/L1 comparison; the other removed L0 contrasts
 become unavailable. Original-backbone PCA still uses pretrained weights directly.

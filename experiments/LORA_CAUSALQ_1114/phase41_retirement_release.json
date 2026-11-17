@@ -1,8 +1,10 @@
 {
   "phase": 41,
-  "action": "retire-cancelled-l0-preview",
-  "entrypoint": "python -m tools.retire_lora_l0 --output <fresh-path>/preview.json",
-  "released_mode": "preview only, then return manifest for local dependency review before apply",
+  "action": "retire-cancelled-l0-apply-reviewed-preview",
+  "entrypoint": "python -m tools.retire_lora_l0 --apply-plan <reviewed-preview> --approved-plan-sha256 <frozen-sha> --output <fresh-path>/apply.json",
+  "released_mode": "apply only the exact returned and locally accepted preview; return deletion report before Phase42",
+  "reviewed_freeze": "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_freeze.json",
+  "approved_preview_sha256": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
   "policy": "cancel-l0-keep-accepted-d3-u0-final-v1",
   "exact_run_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e",
   "protected_final": "dinov3_vitl16/checkpoints/U0/00040000/state.pt",

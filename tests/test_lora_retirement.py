@@ -158,3 +158,28 @@ def test_revised_scope_is_fourteen_fresh_l1_models_with_one_l0_reference():
     assert scope['retained_l0_reference']['relative_payload'] == cleanup.PIN
     for phase in ('42', '43', '44'):
         assert scope['phases'][phase]['lora'] == 1
+
+
+def test_reviewed_deletion_allowlist_matches_exact_cancelled_models_and_steps():
+    folder = cleanup.ROOT/'experiments/LORA_CAUSALQ_1114'
+    freeze = json.loads((folder/'phase41_retirement_apply_freeze.json').read_text())
+    accepted = json.loads((folder/'phase41_retirement_preview_acceptance.json').read_text())
+    expected = set()
+    for backbone, limit in [('dinov3_vitl16', 40000), ('dinov2_vitl14_hpi_p16', 27000)]:
+        for variant in ('U0', 'UA', 'C0', 'CA'):
+            for step in range(1000, limit+1, 1000):
+                relative = f'{backbone}/checkpoints/{variant}/{step:08d}/state.pt'
+                if relative != cleanup.PIN:
+                    expected.add(relative)
+    rows = freeze['candidates']
+    assert len(rows) == len({row['path'] for row in rows}) == freeze['candidate_count'] == 267
+    assert {row['path'] for row in rows} == expected
+    assert sum(row['bytes'] for row in rows) == freeze['candidate_apparent_bytes'] == 12183196383
+    assert len(freeze['protected']) == 1 and freeze['protected'][0]['path'] == cleanup.PIN
+    assert freeze['protected'][0]['sha256'] == accepted['protected_final_sha256']
+    assert freeze['approved_preview_sha256'] == accepted['preview_sha256']
+    assert freeze['policy'] == cleanup.POLICY and freeze['run_root'] == cleanup.RUN.as_posix()
+    for row in rows:
+        assert row['path'] != cleanup.PIN and row['bytes'] == 45629949
+        assert all(len(row[key]) == 64 and set(row[key]) <= set('0123456789abcdef')
+                   for key in ('sha256', 'marker_sha256'))

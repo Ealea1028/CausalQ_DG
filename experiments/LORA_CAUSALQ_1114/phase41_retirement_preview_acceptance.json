@@ -1,0 +1,31 @@
+{
+  "phase": 41,
+  "action": "retirement-preview-acceptance",
+  "accepted": true,
+  "archive_sha256": "499eda6043b363d65ca458dd2fa36c40b567c7d2dd833decf2685a6052a14f50",
+  "preview_sha256": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
+  "member_sha256": {
+    "code_root.txt": "a53c87122ab284fc9ebb6126e33885aaf644b00ba0c9d9ca94511974a8d62f5b",
+    "tool_git_sha.txt": "c4f667edb44214008d3a8c1591c121ed352a844bdda637911e5387a903ad9694",
+    "preview.log": "42a3fcc62a4168d9eb3931e7762eb8f1f72f9751eef50c42425a79a6b6f604b1",
+    "preview.json": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
+    "exit_code.txt": "0f2bce4834fa16fb17b6fd553a693f798dd118ac2738e2b22255f2ab6f62fffb"
+  },
+  "preview_tool_git_sha": "8b43af2dfe4bc6a62bcf593fbc49a8d458d4b8bf",
+  "environment": {
+    "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+    "executable": "/root/autodl-tmp/envs/causalq-lora1114/bin/python",
+    "cuda_visible_devices": ""
+  },
+  "candidate_count": 267,
+  "candidate_apparent_bytes": 12183196383,
+  "protected_final_sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
+  "protected_final_bytes": 45629949,
+  "metadata_files_preserved": 18,
+  "all_268_records_match_previous_accepted_inventory": true,
+  "payloads_deleted_so_far": 0,
+  "free_bytes_at_preview": 28366094336,
+  "real_checkpoint_or_weight_loading_locally": false,
+  "current_phase": "41 exact cleanup apply; Phase42 not yet released",
+  "next": "AutoDL apply exact reviewed preview, return final hash and durable deletion report"
+}

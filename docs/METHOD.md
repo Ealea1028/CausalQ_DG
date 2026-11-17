@@ -10,6 +10,16 @@ Preserve all metadata and historical negative results. Retire the other L0
 payloads only after the stopped-run preview is returned and reviewed locally.
 The current action performs zero updates, no inference and no target access.
 
+Preview8b43af2 is now accepted: archive499eda6043b363d65ca458dd2fa36c40b567c7d2dd833decf2685a6052a14f50,
+preview2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c.
+All268 records match the prior accepted inventory exactly; D2 stays27000 and
+D3 stays40000. Freeze267 explicit payload paths, bytes, payload/marker hashes
+in phase41_retirement_apply_freeze.json. Only that reviewed preview is released
+for apply; its total is12183196383 bytes. The accepted D3 U0 final remains
+45629949 bytes at SHA4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34.
+No L1 runner is released in this cleanup phase; require the apply report and
+protected-final recheck before starting Phase42 implementation/execution.
+
 tools.retire_lora_l0 checks original run/GPU locks and live L0 controllers/workers,
 canonical paths/no redirects or hard links, every marker identity and payload
 hash, and the accepted byte-exact protected D3 U0 final. Preview changes no run

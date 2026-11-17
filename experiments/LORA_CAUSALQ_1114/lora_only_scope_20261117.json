@@ -18,7 +18,7 @@
     "sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
     "bytes": 45629949
   },
-  "phase41_status": "L0 continuation cancelled; checkpoint retirement preview pending on AutoDL",
+  "phase41_status": "L0 continuation cancelled; returned preview accepted and exact267-file apply released, awaiting AutoDL deletion report",
   "phases": {
     "42": {"backbone": "dinov3_vitl16", "variants": ["U0", "UA", "C0", "CA"], "lora": 1},
     "43": {"backbone": "dinov2_vitl14_hpi_p16", "variants": ["U0", "UA", "C0", "CA"], "lora": 1},

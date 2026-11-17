@@ -1,0 +1,2449 @@
+{
+  "schema": 1,
+  "phase": 41,
+  "action": "retire-cancelled-l0-apply",
+  "policy": "cancel-l0-keep-accepted-d3-u0-final-v1",
+  "run_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e",
+  "approved_preview_sha256": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
+  "preview_bytes": 995104,
+  "preview_remote_path": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_retire_8b43af2_8bo2R6/preview.json",
+  "preview_tool_git_sha": "8b43af2dfe4bc6a62bcf593fbc49a8d458d4b8bf",
+  "candidate_count": 267,
+  "candidate_apparent_bytes": 12183196383,
+  "protected": [
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00040000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 40000,
+      "bytes": 45629949,
+      "sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
+      "marker_sha256": "f3ccd69cb0ebddcb12ad3c72e46f1787a3b75f5765aad4bb666dfed4e1c7b697"
+    }
+  ],
+  "candidates": [
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00001000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "98f6a48c0941ec96c4954b5e72f8a1b8d90f7c3bf4deabc7c0c36e53aaa65cfd",
+      "marker_sha256": "4e56ea0d938b09fcffe7de206248dc10f004301a495f8692010904878dae9ef0"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00002000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "8fba42d6f4803b84ed056a13483d58beb885e79c554f4b3de056e125ae8057ff",
+      "marker_sha256": "77938bb3aabec65f1c1686736f417409fdda0d1b88e939a7641bdb3e176b5a8e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00003000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "8f63c13a0fdc824bf07389b6699826827d36e0015ba4593e7bab0bace83d6073",
+      "marker_sha256": "c52d1879b850fbc728862f8830398033118cacb45af9e68c8ea375a529b03edf"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00004000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "ab44157b39cd6b269c8cf743a4acbba2d480ff1e1cc8ee92542791fe2e2bdb34",
+      "marker_sha256": "b2df94b30b7fe4fab5d621ff54f838cce6ebe609d91f9207569f804dc0281eb3"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00005000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "14229041ac0d8a9f3032dc2b84a5b89dfc8201fa32ecea83f1ae17671c2c6b03",
+      "marker_sha256": "f528febed3331327f81a75fac3ba5612e0485541ba60daebe31925b2ab25e4bc"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00006000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "f690b2c5736b32de0185d4a88c65e0ae60d513eec9e02553328a31d123269255",
+      "marker_sha256": "c4dc2a47b7ec86c555736e43e0b450a61940de81d32be5f49c05eef264db3798"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00007000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "40fd7859845e812c80300837abf95eee6841034cbc366ae4ffc0d17dafe2a1de",
+      "marker_sha256": "a5986d89dc56b55bfac0f22e78ed7cf0ac47f09620d17dc87289f9584eca36d8"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00008000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "95ad09bde906535e8daf3e05437d4645459ebdb812c2db76d0328b5e4f0835b4",
+      "marker_sha256": "655f150943a9320749ed8f0a4dc800dc515434f54e671e87db538c997931389c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00009000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "08461805438b50ad9ca06a9fc8e5f09bb0ca8a454fd21035c6245e6a1742cc0a",
+      "marker_sha256": "82a0f38e4ad4e5f641f95699324272368df2504b3322147043b567fb40e22d86"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00010000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "6fa5f48d07974249f45a8d09875291e36240cad3c6d24bf03ad5cd1e5c7166a6",
+      "marker_sha256": "c6c12ea63d9230aaf9734db612097b9b2acdad059acf28eb5acf07fa1fe8bba9"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00011000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "b6e77cba317d0fda43ca57f3e0187c516a7150f827982485eddd053909aab0fc",
+      "marker_sha256": "59e3334d8f95f82206382af33ac8c3be55e3b7e586de4bc26ba9e0a14e7b21d4"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00012000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "3e2afab3fd199763b0f10e2ecf61b737bc95eb79bf6e83927a50832ee184c3f8",
+      "marker_sha256": "27ed8ddba7e1567bb35758d4081ebbf49b9e42cf28d54284a12e299aa44a6e8d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00013000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "283a0520bae0278f495d5b94bc7b4452bf7330e1f58f0b67989c8cba73f2f880",
+      "marker_sha256": "fb8edb37ae4fdbf459e5e36b07b93b36fd1d5898f7d8cd381c3b7514e8187972"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00014000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "14288847395409d3efa67d5ef7f86566d1f85cb408f97d62698e83ec3e0e4d14",
+      "marker_sha256": "7308d0c9a2740b4e827002658bdbf8dfd353a75a637c5557f13e21820323c191"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00015000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "f3534dbe731afa6366d4ba28f346b4e3cab6c00c902a5b69e4089263a215af3f",
+      "marker_sha256": "68345963a4a4297086d2a683bae2b9b15c7b6b5cefb57ba0cd11d178447251a1"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00016000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "241bfe1c5614267cbc30258ba46771974061f16ca53787b2e24e8675fc9188e8",
+      "marker_sha256": "19166d13dc79df8fc67fbde6a49b49fe8eb660989b77fc7a49de4f53406b4301"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00017000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "32630037073976c7e75257712c4622592a16b681ab97f56eeeb8fd1dc7e96d32",
+      "marker_sha256": "644def72dfa1b2625e7ae8a654955c3ce49c918c81cf641ea303cf6a514bec27"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00018000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "7345bc118708eb421517cb722d7a9b62862e4f756ce53090b7756c10f60f8b45",
+      "marker_sha256": "5f6b91608b37e25cc2c1aa789cbade1668988a5b012d1ee6a206cb4c657683d2"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00019000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "84c14ad0bcb630ebcec4720faa19771ff96976d96203f11afc926ef9e6ad428e",
+      "marker_sha256": "a04d09fdbd459b2202655f6fb85aa8e5f09ec7c0a2cfcbc47d98c592bd122035"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00020000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "3ee0c69a51a026784f322b417d17e12f8c4a2d10d08c07f5161e1113f31b0373",
+      "marker_sha256": "b78631da326de26efac322bebbca626fe7434fa93373012982a1bf5cf1959857"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00021000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "cd2c4205fdd12263ff8fe9dff151c3cc76a0211f42e29b89f5bee795eaa8d84d",
+      "marker_sha256": "5657b59224b4556d85c2761076f2b688bbf71ba165cfb36eb6d291735ad2f995"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00022000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "7f0dbcf8e9fc8b233b439a6821f301b41a91fbb785e37dc6bf5d848baf306ae3",
+      "marker_sha256": "637fa370157bb49b984e5d5bbe7067e01dc977d0af1ba54ff3d41e41013f6d94"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00023000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "ea6c58e12b6133d6cee6215de22a3720c63434e83288317db69a765e14507d73",
+      "marker_sha256": "871a933c2af3960706d1a4ea707be7d19faa2fcf6f4e0c9d9d9da140eb704f1c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00024000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "09f593bb409bbc2ea4cc3edd3e9942b37e996a1d7180f6996941cc8e63dcae42",
+      "marker_sha256": "d4f86f009fca28c8f9cc7c5bcffa43e38dd8b25490eece38974eafdc0bf6e2a7"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00025000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "deee276da24f9b46198626a4ce9beb2382f620acf2b2e36973078d4402776aad",
+      "marker_sha256": "63946694c2ffd93e2a442c2afb097d9150ddef8d9e70c97157331b732046fb20"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00026000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "011a788c46746db82c766dbddb60c18345f5102c30af4369e970bd288670701b",
+      "marker_sha256": "a36fe170aee287553d8156a53a4665aebe1d42269135b530615d18f80227042a"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/C0/00027000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "C0",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "1205ff69d5ac48929826782404b2a53484d1bd79a7c0c613d28e6ef0d0a62b18",
+      "marker_sha256": "41c91252c7c58abafbd83e9291f9374fa3bcb1a07e20892ea78842e7ee4bd2a8"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00001000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "a153b4fe793c49b46811d084654ef4fd8c00bcc7d4fdd72faa9a7c7e0bbac1ef",
+      "marker_sha256": "ae17a5d0ced1d9d174700c1b6417a9457b422e09c215505ea29db484889f1ac5"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00002000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "10204253a9da1acd92c1a3f0eb9f7cf25906c2d7d17368d7f88d963d86e029d1",
+      "marker_sha256": "5ecaa1a4132d8258583c1a31481ceafc6228421cc3f83bd6ecb8d6702cc2cefc"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00003000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "1aa684509d0b62967465a1669f78c006dc11ea940f090d82fae869b08820e812",
+      "marker_sha256": "1c21546ef8d66bc9fa650c577a570239a53eef6f9c4fddcc4ad6966dc64e404d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00004000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "bbf0aa93f0d4ad9590605afcd15132589ebb3c761d862aee1715da1d48193faa",
+      "marker_sha256": "533cb7de4fce99bfd6c525dbeb88189aae6992217883d31ff1913e1dc9682159"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00005000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "a3689b4f7773dc692b518844484461292963ade83ccdc74c5dca21a871b8ae3c",
+      "marker_sha256": "1e4022ba9b4ac86d6653795e5aee57dd86d16e78bef8b287187f7cf91af8a70d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00006000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "398b38a231ab7aa5f00cd27f1a8bfcd8310c70edb9edd649324f43f0acfae510",
+      "marker_sha256": "d1b8447ba18e101212ee778af7581ec531ca731c2f0f5cbd2bc047771b349256"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00007000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "4c561fefb9572733a54505ada4dd1351e9192b8df258bc55fc808a384a56e9f9",
+      "marker_sha256": "c095aef3fe05697cb2ae466a9462c0b93f468544204d22a4f6a75d74118d795d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00008000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "7c745a0c73a7aadba76324fc81450a1f0d62cbdc7ad1289c8c2bf52dcf4bd7a7",
+      "marker_sha256": "fca2bf417db0143baf56f86cc019833e4550a83b6b2a44f5c342ef53c8c5c3a7"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00009000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "362d569321efc97bd343cf06fb9e89c582894e59e188fca663893d7639378a62",
+      "marker_sha256": "000314c3c9a9fe116bc274aad83f23eadba59435a12a6a431dec4263148c726e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00010000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "c3a52f4bd2a41d7c6262c1814cbd8c520c7b70ed770159e660eae446bfbeebdc",
+      "marker_sha256": "bb28f9d1e9ba2c554c23d7bada0a2b410164114c9192a3ffd9adf7e03b2f52c2"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00011000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "45faa8706793047d7818fa9b345d752008b3e13f6518e23d21ce387a67ef6a3d",
+      "marker_sha256": "ab15aaa4aa3dd2e3962a88e8635e8faa5a1f153c86efc552de8daea1c4ffd829"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00012000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "62e62bc1a17c4638092086b4589260a5585f7fc223e0c5050f63ef62b4894733",
+      "marker_sha256": "cd63bed5e4708cbdf9f60551069223061c7f944e38f785be0457488d78aca943"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00013000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "37698966684abb3c7325cc902fbbb30eea06bd6f8f097af63cad7f5a782c72e7",
+      "marker_sha256": "3d0d579985bcd8dc0f3ad5e1b8550c155eaf1d40bf9d1d119a045ec1b3e6af6c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00014000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "00645c2e4357d2241ad55644b5a85b0c95b8fafd38adaefea81e07f2583cd4ac",
+      "marker_sha256": "3b9d0a3da06a5e36a5719333cb465a97fbaf814a6e26ff8601c213e6b1b3320a"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00015000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "45746836375af9c6147af6819ab2487ef6ae60fa7b5fc646a820485fcde7a674",
+      "marker_sha256": "5bd40a00bdf159eefe1b1fec6e66e049111e9033d6ec17d58364ef70cb939234"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00016000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "113c69e80aafc56af524f5fa7d7d901fefb99e265ebbe4fed0f7d436ca7154d2",
+      "marker_sha256": "19be62fb0dfe706c21d1985c081406213edae3fc84146a85af8899aa8893affe"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00017000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "aa8980621912306895ec7bb59abef6d5e68a89fe0e2c88fc84853197334387e7",
+      "marker_sha256": "1ce61c4fb9466002b27ae246932414841ef150b7b9b03784142c1e5c3f593d1b"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00018000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "9d1728c14bebd97a1264109cedf297a2a1c95006174d476bbaab7560da9473df",
+      "marker_sha256": "e26aa74b31ea44223ff7167801653b22b3043a06f66f6e96ccfa23740778f833"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00019000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "e9454ee39eeb560a1efb006486b6231c288ade156915f29847f2838068c1ec57",
+      "marker_sha256": "fe57cf76ea8197fddab607fa200cd3a3ac9ecf249e9601e844688adc4bd18fab"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00020000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "23107fa6effa6f360ad66a0068bed7ef657abdfa6a7dbdba1ba962dd19712d50",
+      "marker_sha256": "cc67321f15c9dd688a955b182e2ae347c4daccef87c1d254c37f2887192ae848"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00021000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "405c7dc98952cd65532d87d7064c5ab97234bf2b9eb742c6749b3eb65d1b539a",
+      "marker_sha256": "15d18451bc46f467d5f346056619f1335a0e1f74f8504dbbef5745286f5b8c82"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00022000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "3c8db2086654276fe209e6a5989f4ee02885d3a41a1d607a8d06515a9dff6d93",
+      "marker_sha256": "a08b745932e8935734d6fca4d08cf91eea0b0823f528a6ee75f468465c8c2a40"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00023000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "bb9910d2e2ab5dc33a1644be4b148f4e058e747b3b06c6ac6854a7cc59c5cd11",
+      "marker_sha256": "922c8a99e135a143eee5f2b63f1cc7ce49c0565cba9f8e4892fb8282beae9af3"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00024000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "3588e5f88db17eee39b22fd2324352a4f49711566f935f7905c745b7ae6cf5f2",
+      "marker_sha256": "97ece25e20fdd4286eac4d95b12873477e17345334cd6936c055642f59932a36"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00025000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "81bfc526a8aeea0fc9ba9a63a8adc63a192d6d00ec9dfb48e69e714f5e7a252e",
+      "marker_sha256": "cb7b433acd0123b13c65c35509c4a957be1c464f3acb67703218eca0b09bea7d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00026000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "c233ab341b48b418e833aa7b0f117a563f0f2df66ed22b87a0741720911a05ca",
+      "marker_sha256": "616558fe3bf0004d2b34777bae2c528c4e2ce4ea664127d42f1131cc3d884889"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/CA/00027000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "CA",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "f0d9163d6d690b8ef30711f57f6028fda70330cefd596fcf89866221bbb504ae",
+      "marker_sha256": "648052bfa48634a4763adcaf60041e60bfb5133cb9e2f7b401bd2a3d9f09f24f"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00001000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "069cec1d64fbbe1246a076dc553f21d4ebe3ae72f53c78d414c8afb5c8417369",
+      "marker_sha256": "43af3e065a7dd62ada8aa1383caf9b7f3d79f71837d623b51945b7efc1012eee"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00002000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "f5277c8af75f794fce412a06018bae452496a4e04a8b0e3df8370216394ce993",
+      "marker_sha256": "0a0ca37a99accd4df700286599636c74e531ec1b555a82d7e3e0721e96a1c30c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00003000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "9f233a1819b02ee70f9dded7362a153d8d725d0b21879a6e5c81dd7d3200df23",
+      "marker_sha256": "555124d371cf632213a5afc09c83127aadd34cdaf1427f49a1ba834f0cf879ba"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00004000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "93ea7af2d0354261a17922d9d0280c4e7089d9507236117220e4f484ecec82f0",
+      "marker_sha256": "cd2828d876b2fce4bbffb55e96af977b8944907eaf28b919a77c8aaea1b3ee51"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00005000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "c607f49009f3dd4dd489d330c81c68485709131fdc29325c2b2e0c866c90ebc8",
+      "marker_sha256": "a8383f24387f96d6ab453ec403b7994a25f08504ac655d528a1fa1af9c4b9207"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00006000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "ff6879401f2619c124e7cc0c6f643b6732a43a7075c88dc17ffe05cfd1d2689f",
+      "marker_sha256": "677b2cd3251c5d788eceaace36583c969c04e12636d5ece14ba8ffa77c03e551"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00007000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "2829a9bb315523e355fc76a8ac03fda3a0a692095f0b248af10ce5a7b24c6d1c",
+      "marker_sha256": "ec33135e1c312fd13387fb9d1657b09f05bc720a8cc92ecd1038a6904efd2eea"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00008000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "bc5255e6ca18ea8113b999d6ab41720e8304dc121bb25a46a9fc2c660b6181e9",
+      "marker_sha256": "cca9370f740c182158a601336d6c352de9217869a5a3f3b9275a28c1ae23b95e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00009000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "a97f59aa15f936b6980030587b97fc04a8b34f3ea76740b06bda019dd8288cce",
+      "marker_sha256": "63f1d0131a34978361de13708c8cfbed9a93502c90a8d68e08ba79c3591eb99c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00010000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "41f887f065bb6cd52f312c222f60890b2e2cf80f5cdbfef7928727c2d9442092",
+      "marker_sha256": "6d2783039edf7188d0e6a5ae992d4950dd25092959f0ef71b48f359ece7a7a56"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00011000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "a59f5e114aaec5b2c5fc021f8ee109294cd03ec66ec2f0848c4d85caacf2c7dd",
+      "marker_sha256": "a3233162bfae81441eb902bf05d92db8b7206a95b57e9a53f542908b1e17c827"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00012000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "aecd2f411779bdd81402dfe1ab2bf40cde86873b93aca411a6b9dcb33589ebd3",
+      "marker_sha256": "4d31ac3e52d7024028c1a1a5cafe15a795597d52656cb555589625b2e79be994"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00013000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "9bcb1879bc90fe18f51c5c811734eff3646b2c6abdf81563abfeec5517acbe07",
+      "marker_sha256": "004bb179ee7a49f870b3583c4fb97800a26a2dafbad57596567a45188b91d0ba"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00014000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "8d590226b51a85c4692657789d6effbf9d18d87e272053e34f1be8c379f029c1",
+      "marker_sha256": "2de55f58fb981f10f3838a85a6663b276e01b0b63562f237b9eacec797d2c119"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00015000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "f2e0e919a587996905f1b49916bc12180da87c5d667386675f9f6dc00ccfbf42",
+      "marker_sha256": "1f3d343cedd94e28221addac0d632a0e045485a447783e5e1f19df733aa39682"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00016000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "991182044f552a9fd5174dda00116a640bbcfa0e60e60cb5c9321d5e77569b9b",
+      "marker_sha256": "c0b5604262d6682349f393b469837ae7b8e3c5c2f72dc79695a4e70cd08d2db7"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00017000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "1a26861b9e8302342694d9a23862cf7da5dbc26915cb94706c5f45fac110313c",
+      "marker_sha256": "a2a68a5921a2ec6e55cf4fae0775ff8c1198651e9f02771565fb9ff5b54c2f85"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00018000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "fd2645ccd53fea2cefae7f90a49c0f1756aab16abccc63796bdf024e64eba2b2",
+      "marker_sha256": "01f722b4163dd6c12001a358ed7f6e8a474bd667c279afbe0363775486cba52f"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00019000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "781611f5a2aae1675e4f8966fbad8393b338c42690f0b031fc9b1d347d8d7642",
+      "marker_sha256": "ba77cbe3f1894b89f40f2468a57384a0192edb29b3faec66276d4c44899d69b9"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00020000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "e55af86ff37b76f27454ff2ab22ee1448bb3e23ae63b8c431d1795299b19aae3",
+      "marker_sha256": "130753e656de8a54176252183be56701327617b39e76480b1751534544e11fac"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00021000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "42827369d0a2191cd11ba108caae9c88f74aed8219871174f478f1726488fbae",
+      "marker_sha256": "9fec9518a359f021c73fef7d67e3119328e49cca29ffc81f87e4672105e91412"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00022000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "4ac9558e03dd8c7b1cd419b9cbc5fd20e4d7fbc9d4fcda4c450f02ab3787a7b5",
+      "marker_sha256": "2c6c6162e52b2ab01cf8631e3fd54f1f9174b8c113af7569d0a7d1dd31b57d0b"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00023000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "ceccf8d38bcebddf8c9c51970b6b6f064bc2a4019de0d12e3b6d5967b9b10d9c",
+      "marker_sha256": "cd9ce9fa9ff201e669112bd09c12df2850bc3d21cf6257845318dd5001d343ec"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00024000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "ebc0ec7126cf225bbbc0e35998264839a434bb34fa527f34553d6ae8ed9853bb",
+      "marker_sha256": "3410aaeeda500b02bcfe4069b6bb3c10fc8c0889d1f01c1d3bae03c0c1502191"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00025000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "8b7d31b26be1ff28721d4bad856bdd7b9d3694097b9817e835f6d6f2d93dc986",
+      "marker_sha256": "0ef8ebe4c69495a89222af324a02be83d1b20a6fc0172e8a44fcd19472e187d1"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00026000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "9adc78853ba37745bdf4406c6a2bf1b0dc8508fe524ad56088209dc5617aec55",
+      "marker_sha256": "7254239026947311ebcf9261a33c81412ce469e04d3bf5d3ed88b2888497ee6e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/U0/00027000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "U0",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "e39093a449e8640c1d9aa3ef9cec697f69d8419edbe9579feb6f5e0edee08615",
+      "marker_sha256": "74e6e951415caa6b4471390adee49b7ce41419c88957ca8b2dde0ecc637f6f94"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00001000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "bdd93588a0bb0cd0f1a2194d33fbb31e2c46a2824149831a2658931b49cc57d3",
+      "marker_sha256": "447655bb71e16fe5ba0f97f51c06518f2a371cf5526f6e35ab3169602d32bd6b"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00002000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "185cf83fc18d61d26deb601404a7dcab975cba7b1b27493c698805503340e220",
+      "marker_sha256": "3c81c0a88b7c82a6bd3780a183cb7c0041e3214cbcfe44959c9c8d80a976cd37"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00003000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "9a76c24e9c867118162e9168cfd63d45190e1083cbf72b38c29765a21e9a16c6",
+      "marker_sha256": "f58a9ed7caf9116ae1dfda641ba45338763756a80f84841b87cfaa78f6fd893d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00004000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "427679c3e3112f97fff000acf3558805fbd2902c2b5664eb47e08318a9c1bc84",
+      "marker_sha256": "0d4fce8ea5ecd90bc82086e05d1e65e4036fe01e99dc0a3805782d4298e60355"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00005000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "08c024397943f162e6620c40a2289b49c4b31ed04f426ba4e780cb5e8fb51896",
+      "marker_sha256": "ab494cf49dd126649ab76132b540d6416b6fa7692a595a18c209a835bc00f32d"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00006000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "a715eee579d94b2a991c309e24edfc3ffa5d6b6b2109ffa48956de92e027c4e4",
+      "marker_sha256": "8322faeb7b2e31e55b79c49c61f20d90c4bd774f5c9bf9a765f023fbba85fedd"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00007000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "b1fd1279f792781cdebd5304ce83e2054a66422313a0131f8c5c43c08650ebae",
+      "marker_sha256": "822253442c446c9e1fb3bc846f1b7e6ca01cd66b15a2087a91beaada2b46b97b"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00008000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "81622ac141bc3d97840183304cbcafd4082e80dfdeb04ba9206b38ab88be2fa0",
+      "marker_sha256": "004eee57aa315882d926f99c5d04532785240e88da434fa1317cc0e531e5a275"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00009000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "cfd450db454562c600a5297101ef0b113449799ceb03a0095de41e21e2fdda39",
+      "marker_sha256": "a0a502367acbbfc1668949c3580b0c4534c7e57f5ade21f1c9de848acc115aa2"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00010000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "57f68e4d0c1050bff71588ee46244b8c1a36651a74c3c174a736f09d777dbfd4",
+      "marker_sha256": "9df39b22e7244bf2adf8788f42045e1c509e416903536e50ee668f8c653cb497"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00011000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "664979f536d56e00bdd688cbb3706d38b3bba82f5d535239442275ed4cf79816",
+      "marker_sha256": "69170adb57313a2198324006c0b309cfef8609e272d7b442f3f9d0323bb2c0c6"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00012000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "07e64df9c97c3358bd9e9e5e68880b19721cf90b38130f8dcab241921a8b973a",
+      "marker_sha256": "e8c2ec8f10847b6f27855c32af7a9da1a735426636282c9725fcb631e7ef61e6"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00013000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "f0338c160f55faefd7f86c1de2721507e72d782ebd34ca58de84aeab4b91f4d9",
+      "marker_sha256": "ac0721eddc6b514332167ecb275147ff24e4db1a7eacdbcdf95fa03a5f59feda"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00014000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "333a3872a0801783bc4e30eeec756439917e91c444f540c7ccdfe54a791a14bf",
+      "marker_sha256": "147ef42aceb04360f7cbd1b6af38f3766a8b4d2655c11db81cda53a3458c0695"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00015000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "72e245cafc9c2038eaf2d9516e7a51c2e4ebc37c57c536789f507a213369468e",
+      "marker_sha256": "83163584b61346b05fa3e8de4ef779dbd3b46e3787b9c94e1b0f20176adbbb44"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00016000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "2f7e9472dfb638c558e8c5b3f433454bb17dd102d3700278f3606e12cc2e5f75",
+      "marker_sha256": "fad48b400d90fb47021abc331ec5667e4ec5833380476fe26eb7c8d381b536de"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00017000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "ae7bfcc43960b1db3f0e522385a480e6ed231729b8037716abb8f9760962dd72",
+      "marker_sha256": "985b1e2f9808549bbd2139d36f942318cb9b75eaf0b2044921b6422582dbc41e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00018000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "190a153e5b297b1a873f1cdae03072209afb26b2f332e65e9483473aae4d4ab3",
+      "marker_sha256": "87081dc472c1b68fc699d118012fdbe2c6fe14f1c1d20d22b455755956a71836"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00019000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "7e7aa5eb8bd61f8c83481c9074223d7b738e2915a22ec6ae53fa15f5bb15353a",
+      "marker_sha256": "e846034dc8701d841aa888fdeb52c36fbdace721f19826d6cb330e2f7b0df181"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00020000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "70287a54e3ce7834d98f0f3d28f655fda2b9ba3c96915a9168aeb7736863c234",
+      "marker_sha256": "97bdf54a0934e3ae7fb22a8610304d7bf13370ad7f81ccfa8162c34c8937f65f"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00021000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "d7b08255e06b7a5a969aee6b7a91b834085a30e26b607b7fdb2a9c390dd60d34",
+      "marker_sha256": "e73056fd68d8f53f7e7fe3cc9f93ed2e0377d0ca10a04865ea70ea0603093c39"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00022000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "c802d97e7697eb3b6459e9a6610e8f175309a6a92cfe9732760b347f5b7cfca3",
+      "marker_sha256": "6fb03e967429336d8789f714f53c346d1b39fbeecacd138b33087e9a1a24331a"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00023000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "05ecf7c851d39372ef9c21ba4362b0cf4de88e48185d9ec443d42e64a39ec6aa",
+      "marker_sha256": "cdb2f6ad179b41269201b977451d5872d970ac98b7eddf3e53ecd8bf0d0f8f05"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00024000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "6d8df21a149e1380837d8f8c4f920fe5698271faf26d14e00475f847e8d218c1",
+      "marker_sha256": "3a6197df069e9e4dcd929c43d8e945161185402ecffe7178733ba61108c7ac1c"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00025000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "67232bb13e070063a793f05f6a14f0d17db28e651ff323e0c70b3ee6718b126d",
+      "marker_sha256": "97349be444bdf5868bc5224fd7de54f91b9ec4512f0cc580ca14f3aeadaef51e"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00026000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "9e6f6eee342a8d29720d18ee63d1ffbd1ff891f30b9d2b45ab2a784ddf928485",
+      "marker_sha256": "18be650417c21a13b465fe63473dfa4a6aa9cba43a7a297037a85348c85e8374"
+    },
+    {
+      "path": "dinov2_vitl14_hpi_p16/checkpoints/UA/00027000/state.pt",
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "variant": "UA",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "946eead7e34a8c1809767256c84340f5ce00ad5f3c5f7720570c5f2cef51e123",
+      "marker_sha256": "2b853503d8975a660c94dd2c9d82c31f290a823a01d8d6d13f8c1e8ab6e1c0e1"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00001000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "4ddafeb2f9d6987c61068f796ea2098bc419a78074dcfd4081d15544f3589ac2",
+      "marker_sha256": "eeb5860374a63652f775c1a08d90edfd2b0341d4439b119b9d73a3c2807e4320"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00002000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "25182ae9db349b94d9fd7a2b33fe75c28489a122a62a620c58a55954f618f2c5",
+      "marker_sha256": "27ddf7800362fe1b9dfd99e4558784bc57937aaabbfa81286b6c41224db196d2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00003000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "c55548976c5d00b5ba9f810d1855dfb12c29ace9b74c7ea66a8e6418d7256688",
+      "marker_sha256": "0ec94ff179d4b1bad4146e33ba57753e968eb14acef67f57548e1d0b1d576d4c"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00004000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "0feb2a45c31ef3139285e2bd7975cdc974e6f9ee31e05de01258bb164eb556a9",
+      "marker_sha256": "8b538c34d7ec9bc7204c36ed70bda57183719cdfd95bd4a6dbca3ed4dd45d087"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00005000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "d20a432538704aa1a7a7bc9dcda6c05b5bba101ccc9f39db89ac5d1afb99ef8d",
+      "marker_sha256": "e0370308185b96e8af458b8ddf12124d0940ef3654d269fac3b4c1b7df141b78"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00006000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "c5cef9080f74bf8b8b2b078fc576b63bf301fe503d5f301f642e2f54d439866d",
+      "marker_sha256": "750fc1f3f228ee25cee7807f4f90aa64ff349ec26e31e5cf58dbcbc2e8f9dbf4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00007000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "b20d2f5a5bc72f14fff87f8f06027a81a83d8931bbced47d22858d992632a5d0",
+      "marker_sha256": "cc62f583238d9cce5d59a11261595f8b52814026605d176e44a2679512cd3dcd"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00008000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "7a53ed7586dd951f9c8914e9e350110c0dca7ba486a01e8f7857e2a331ea210e",
+      "marker_sha256": "78550f1eb4a85d9f7722317ce5d7231d98c2f929ba11598757a045d99f462f32"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00009000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "19e638ed6e99ce4d9e96c90f6ea35d679833d9c81aea7677d352daea54ac20d9",
+      "marker_sha256": "1a34a6f33d412090fe20bcbd03d4a19612b64e3cb07a4b7a8676dbbd1a60f5c4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00010000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "af33e3821fefa8bac67af706c3068a41056ae1e1953c373dbdc6f15a4e7d0960",
+      "marker_sha256": "cff86bd25a9563839615827f6cd34b0ec0f9581a78d7182d9167433008b5af36"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00011000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "a14868ce28d3caa007469935bdcc75a63bfaa5907084e1d5b0277d3ce62e1b8d",
+      "marker_sha256": "eb08108b7955125e2de17c6e9ac13b3962f0fd82719e1f028efbbb367114d5d6"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00012000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "986cb842569e92da610b292ac00e9c54efe3120cc12436f704ec329910ae5f92",
+      "marker_sha256": "4466cdb3357be7335125879390f3dbdc30a88bdd1fe4f9e63b07b85e3312f25e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00013000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "c80b1bb152b596b8e4394b6a934b1311197c05322e50db6e561da285536b6736",
+      "marker_sha256": "6a0f885060bb57bc2335c47752c92df1c9688855b90272a586db5d51c4ee664a"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00014000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "7ba2ebdccee8e82626a810ac0430a351e2bbf13c483b391917bd75c9a4f19e6d",
+      "marker_sha256": "cff0302ee3bd25288d79191cf27ea5edce99854ee46955150b5f6e357a884170"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00015000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "b419f689daaf2f851424d9aa12f0854fba0efa07ddec84585c59d08cbe2e53df",
+      "marker_sha256": "aca5a0bff72901fe9c11eb74e8e302d94f30ffe1de3a913dfa8116d91a6d47d0"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00016000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "7254125c15795014b6f9ee406c5fff786665fb19fb13f7e1bd2ec811120d2834",
+      "marker_sha256": "760e18b69b91aa01da07375988a5a62b9e0c0e9c8e7fd3932787598b7fc72f94"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00017000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "fc337c6eeaa8521e6b1346a57ec562282615f82d1dea203124839993fc16d5f1",
+      "marker_sha256": "a395c5034e650f26d72e5b12f0d1fe5c061a802f4e06b68a409208c9991306b7"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00018000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "1e63314130a930dcb7f38c57de86280f4b91053f903ff886aa91953ad579b468",
+      "marker_sha256": "c79e4a242c1e9c8fc53c8c86e9279af81611a914a01bfb097542c2e8db535c41"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00019000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "0a6b71329fec5c6c824318df8cbae05c6720138ceb527c7272d5442bbdd617b7",
+      "marker_sha256": "5165fff66cd236f23d9c8742d5469d595766368b51b962ac67099162d475df7c"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00020000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "229cfd2a4e8e98952d89bd58a152b2bec778209115d25ed0cef1393dfd434841",
+      "marker_sha256": "f62e5dbcecd7e6924cf9710dae87e0292ecc99983982bb918e14c1ca88e97066"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00021000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "25c21ca78d4cf8da3dc865e33d200485eeaf78e567a6f40629b8c0d47a174708",
+      "marker_sha256": "10a8eb9c6f72c2c7df4ce907e2157369dbd037bd39fc42ba6087a54176eb59d9"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00022000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "9c5793314b5c479fe211d2d430a30199f7c0ce34c22bfae294d69fa39b4af382",
+      "marker_sha256": "cb18dd87d3d3f58b717fb5004bf6c64387a278b695b713d363a6b8eeb86ffaa5"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00023000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "3920a6b23ac42dc123738d47d6c549cfc67dac8ef25bd4bf740fe048d17e43f4",
+      "marker_sha256": "a7a645cb1c445c341b6ae41fa042c3c746a59f2ca66088b065bf116165257ff2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00024000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "85bd05fa7edd0d977a8fa79a7cc9ca4b282d38238171da293bfa8ff001d6ac95",
+      "marker_sha256": "f27bd26c5fca670fa41dc0c7988ff07e8f47afceec7a3b50b2774abf0ca4f752"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00025000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "78e644560dd22eff201a9ec2d26deebc503fed7e02546b60fbf4d2b2f6103a25",
+      "marker_sha256": "76c33bb796c0b672128901c5831ed381d004c0119328856d78c90aac21649648"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00026000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "b34c1f7be65f7d7a06246f447cd13e6dfcd4f29fc3b4ee9ccc96ed0afc3959db",
+      "marker_sha256": "3fc253d6cff2145fd92450efc8721fbb365c7af32734c1299c2024c35f3e02e1"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00027000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "a4575d0d708c11371a59c87225f2dda5f9f229dde07600885aa0a6fa23de2296",
+      "marker_sha256": "88ce58806b9680c79b9d3b9136d9c30c9a7eb90427f826e337e21b1822506f41"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00028000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 28000,
+      "bytes": 45629949,
+      "sha256": "091e17cfae6876e2c56eb0f49f62595b2bf526dd56a48b8fb0285379bab0b6db",
+      "marker_sha256": "9503ca096a1981fc4a58a52e90dd47860f305edba16eef6be16bdc2aaf787b94"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00029000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 29000,
+      "bytes": 45629949,
+      "sha256": "01b41570f2e005d8ad116925ffc4d91d0fb578836ac3f440c0af80d00e185ffe",
+      "marker_sha256": "56e0dcd4ed2ef67ee96cdfe9a2ec75ce274bfc5bebef085c1169eb7eb05de2c4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00030000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 30000,
+      "bytes": 45629949,
+      "sha256": "aca64b8740f47c558dc9b11a0234085f48dcdb4258ff7e4d9620d439ac562506",
+      "marker_sha256": "9196dce450247680673ce79fbef591490512fc96e5b09edd3ed82f674b0c96fa"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00031000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 31000,
+      "bytes": 45629949,
+      "sha256": "0a2f4ea6f6e5f18f194f38c1669191ea130e9f0f387224767dd09b068c90549f",
+      "marker_sha256": "e92646afce02ea93abfaaa67d2aaf64c1ed258a53ebc71d906fb2ae3de8f6311"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00032000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 32000,
+      "bytes": 45629949,
+      "sha256": "db11ee1a036ef20dbe61157b526b4dfca7c9fa5808e0c8a111829cb6fbb38e9e",
+      "marker_sha256": "c09bfb874577156c115278ce467925db9530bae74d2aa0ac5faad955017e3ce4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00033000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 33000,
+      "bytes": 45629949,
+      "sha256": "5b7e2bfd9d6bdc67e44075699f6405196a782897e3db6af1074fc468f1c153ab",
+      "marker_sha256": "bb65ccd571adb239afdaf7c7f8a1e158af2ee6e41b58a63aade76ebf7852e984"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00034000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 34000,
+      "bytes": 45629949,
+      "sha256": "7ffe0ef313492af5e588aa6e0cff6b34a2b3c2ac47481bf6458fbd583e6b8620",
+      "marker_sha256": "f94c21a39c697780602178edb3bd81556b59eb473f59a9adbe858235947d3594"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00035000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 35000,
+      "bytes": 45629949,
+      "sha256": "4994a795da45536d2ca797a5a4ce2c53b2188d39e3c480f45cf707a12195a91d",
+      "marker_sha256": "4655fa91833c1b850f9376bc87d3c3c6148cf13ed452e91b77b3e301a967cbb2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00036000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 36000,
+      "bytes": 45629949,
+      "sha256": "3de80da1910248ab0d8bc87ff5b8f251d51a2206cb15c8c363eb2b6903332378",
+      "marker_sha256": "c82f2fc4ac3a4ec62bb07d454fd060fc784d62b3541d7f90593e9ff6ba86f49c"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00037000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 37000,
+      "bytes": 45629949,
+      "sha256": "e3faa7eda74b92d402c2a0dd68c03ecac240e816ee218f79b70930fd70e3b52a",
+      "marker_sha256": "58bf5e6e2cff35e593fbb2b60616484d760ebd98b3a5d263a168ffb68d85ae29"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00038000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 38000,
+      "bytes": 45629949,
+      "sha256": "a87da6306e5e1c44ff2ffdd178c714f49174d3168e1665ad7f4f26fb23eb6b4c",
+      "marker_sha256": "b2ee7dcaf436b434100d8a66f0bb11ce42a075d0eefc0cb67ce1157c72d81fcf"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00039000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 39000,
+      "bytes": 45629949,
+      "sha256": "95110b22097ac1f0d7b090212823c4aa890651250bb6e6923962bcd5754164d5",
+      "marker_sha256": "672cb40555d4a68dd1f577e0dd5002c97eda06d92a3299e9c69c9379f06554bb"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/C0/00040000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "C0",
+      "step": 40000,
+      "bytes": 45629949,
+      "sha256": "56e4a4cef402df05087e2172a4ff63ec859502eb3488679c2dc004fc99663591",
+      "marker_sha256": "446242c0ea4f8ebc7e4ac0b72273c8bfc3292eb116b1590010b53b834135fe15"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00001000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "474e4cb41fc090b016063c70815eef9b3240a782753c1ae7839450a0b37f7ecd",
+      "marker_sha256": "6031730111f4b0a26042bbf9a75d019b8400d8ca76a1e05009f0ba06f356f2d1"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00002000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "c8d58fa3ff0b05c764a43af8059fa9422e6d37f9746a69b5a85163e5439e0775",
+      "marker_sha256": "fc2dcf946d61009c1f3f6d5673f0e5106802b36b0fb924d86b1dbc344fcaf015"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00003000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "5421d65b00bc87c77e130b402efd48ae05749d9f458b2a57b78b49c94e6c016b",
+      "marker_sha256": "58bf0c794ffb80d8a8517e7c9ef33302027f5f424a87704b26ba0cf528c6a111"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00004000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "eca094794588c36a67884d97a4846e22199ab572046a7e7cc8700bfa7f9cf875",
+      "marker_sha256": "e3eab2f5c04e315a6642b7cb886e18a3b8267b7dc27fd9150ecd28d615f582da"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00005000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "30bcf89fd4a37864432026dbeb298aba6a252d019a6a0490f7e3cf15807d683f",
+      "marker_sha256": "92d1118dd25d4aa40d43d96cc703106bec5ce47164e17d15274ae89162153242"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00006000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "b2aa15431a92c558d372b9bc45a755d6d5e7194005130cd30a5c04be70d37c46",
+      "marker_sha256": "cd3b757b4e5a22d3e498997b5541a59ff9876c05bb635fb2ab87b7a8cef4d899"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00007000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "792c8ce6a076923062fe16e530155871bc1f92889620886e4fe5e6deec5b0a75",
+      "marker_sha256": "230012070beca75ee34df4746580d4f159a1d286751926af2808b384598c9ce5"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00008000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "de49f2e0974c1d2bcaf4f976925e891d466c0df16ad6c5615244419496cd62cc",
+      "marker_sha256": "9fd18b9edcb820c784158201ccb8f48a0673ef86ef9d5132cf972256174c1f8d"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00009000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "207ea857362fb167c79b4cb93222750ec809e1f697b76b054bd19bd5bfccc2ad",
+      "marker_sha256": "d20d6524da26ce47f32b58f0c7bbeafddba5ad0dba1bc64e5caa300885b567bb"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00010000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "4c4156a65041ac7a96489147274695fbd0ff5e9600af4ae5587b1b0dc4cb7f40",
+      "marker_sha256": "68c0afb12bbb46c417321aec0cd82c713492a2ffd0644aaa0f487ea800262b32"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00011000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "4e2b078767dcc3f72b1accdf15977c0d571759f5af3c4389d575eb44420d9014",
+      "marker_sha256": "8c69445ac27f83905dd4668ffe98aaaf0798eb40d9e97b144776149f493084a9"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00012000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "abf188348b4cc2e7a0895b86f9b4df3497952eddbcebf986b620a91461b96874",
+      "marker_sha256": "93d0fbbd786204c05525b912aab09f96888a356f7f760ac06ddca64cbec4a273"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00013000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "ffcfe0c98e084d242c8c6629037a4b60c1f216e1c4aac0b0400f51fa98f82ce1",
+      "marker_sha256": "652594884c93c52c3e94364d06644b4f95531bfea8171f1f67c00240395a87f4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00014000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "ef8764314a63819428f63088abfa8e6defc38ec07d69508c595b3e75dbb91918",
+      "marker_sha256": "c162af4b64a7fe775a2eeab5479aacf58f99534be6f2a5ab6da7853d53423266"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00015000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "46a1a89fbcf0659e3d99a91ed668bb83d2ca4276a7001e9b6208bde628c12f04",
+      "marker_sha256": "a2688962a1eb7098c360a9a431a41792ef9db808f3f55fb475e9cf2b893e0fd0"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00016000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "2c492f63bb0f6efb48b153d36b634c9bf6a6adae2d08033eacd85fe1264bc162",
+      "marker_sha256": "f479a7998880362b2c4edfc2e13adde4ec981dfda2c6b4fbda25916bee76fb55"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00017000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "aa89d5a23c8146b24c3bed4a27441245dc69977f517b2c1c32650b155de25e85",
+      "marker_sha256": "1ae87a6a3923a01bac8710a0cbcdc5eda93f7cd7a572db6b05f51578f3034955"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00018000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "45ad82df92682964d5101f70c55059fb68d61bab101e708e50485568916bf722",
+      "marker_sha256": "044e839f0ab250800103250d18560b7982da4b4664a54c741e5a9804a7d48605"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00019000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "98eba39c7269c3974ba94e1693015ab20661754adbbcfbc76eb79acff08c015b",
+      "marker_sha256": "f3ff400899a479bc9a4bde53886199d5b32b73f5b4f5da97388a2a873a4e3b82"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00020000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "5fe3f425adc7a8146fd9ac92e1736f1e27c09d7a1d5126b726124a9026a401ad",
+      "marker_sha256": "2ad636b3c56ca4a8cc5466d8cb637eb053167cd9a8d6e952b889a3417fcd4471"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00021000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "f694059eaad4c5bacbdf6d6a6e21cb805f8c87566e310432adda7703b0af4399",
+      "marker_sha256": "2051123160c78e5d01276bde436206b19e53317ba7367236652836b89d37b2d8"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00022000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "1d9b18dd6fbfaaad3d22775a6d9e29dcefe8bea20c306c70882e991f6f905f81",
+      "marker_sha256": "562a936cdae2a28d14b0abe7b4af7d6702bfc6cf9bb5b5236d6b14b4e3f152ca"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00023000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "76e9f52f94407cbc3112076443fddfedea9024f92e9296e35cdcf17489a8182f",
+      "marker_sha256": "fd1e34288d090564fa4524535aacf0e6c51f634ce9adb83da8410b6b3a0a4873"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00024000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "03d5d286bba12bffe98504134f421a3da431634f0523ece39dd01390eb2e1c14",
+      "marker_sha256": "f385ffd6793fbdc4da8fa04d5b3602e63c1e96d2f88d33a25639a8dfb00bf60e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00025000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "7ca305c1dab33352380845d12a6c40294d2579c81c3c91bad47b7f1a8ea52acd",
+      "marker_sha256": "8017b6da0926a860850c2ec0abb22970234f1a4ef0b4532bd9b516b6d3399240"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00026000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "27473d94b7d5aca7e7d01615e84f6ae862db3997fc2a45a7b87beb85d488b97a",
+      "marker_sha256": "4779bd890e3691a581442e6a3c2bb85eba09b9f98f7dd0c3d2621baaa68872e2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00027000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "454d688ef648a904f2acc6f1538cb0dd13130bf6c70d1019d5cf8bc318cf740a",
+      "marker_sha256": "bfb8471cb4203518019bf52815e94eec3dd9f3c8940bb679a8547938df5052fc"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00028000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 28000,
+      "bytes": 45629949,
+      "sha256": "4da5322e6f12c362d0633427f1d3154e0a383fa429f1c4754bc115820bd72541",
+      "marker_sha256": "c0a38a19d9f1faea83533537ab72cea5e5b74e31941df93377b42b728f502cd5"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00029000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 29000,
+      "bytes": 45629949,
+      "sha256": "915a6db2ae86306fde0eb0993d6cc1115bc7d269d3fbb964d3ec74650228026a",
+      "marker_sha256": "d95a021cf90ea03363d5786620be9b34d33357587c4456a495e5fdc9188f07bf"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00030000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 30000,
+      "bytes": 45629949,
+      "sha256": "4057531545753d58a25d87bb06cc8470cd5f37c8e28d026880fdca90b2f6cba7",
+      "marker_sha256": "f997721a0c3485b912d3627cd81dda22d4773c5ff480943429616f7de09f407e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00031000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 31000,
+      "bytes": 45629949,
+      "sha256": "1e87972ff1b63940bd55daa8c2e517d96908d4b652962b819184a159cfb4e690",
+      "marker_sha256": "76221930d992216c019272104a34442b3ae9d530954e9584f6e6f981d42bf9f7"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00032000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 32000,
+      "bytes": 45629949,
+      "sha256": "ae5babe4b64841a58f11f2083c0217063da738170fb270ac108a2a7ef363c503",
+      "marker_sha256": "4504e4b74ad3ca0afa0a30b52dedddbf9a726f208070304eaab14551fbcc17b3"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00033000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 33000,
+      "bytes": 45629949,
+      "sha256": "301df74196c6de7590abe30169823f7d8ea993efeeba614bebc9875379bdae18",
+      "marker_sha256": "a9cfc850085dfd4f74ff0738ab2a545fbf937ea25362431c4f11e4032b52b4bb"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00034000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 34000,
+      "bytes": 45629949,
+      "sha256": "4770385b86117d51f31a23d6499e1c790b77d06b8dc69d5dcf385c8d35ca82a3",
+      "marker_sha256": "c171d801286e330b19a9e2f8930a005d2a5cbb3e0093b4f4a8abfc82fe0cf1d4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00035000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 35000,
+      "bytes": 45629949,
+      "sha256": "df7e8a4447cd8516506e0396ffc636afa9131279bf36daa9d39b0396f0d1ece3",
+      "marker_sha256": "ba7fc7f1b14e0de97c2e25d74f5acbce3533295eeac3644c8f817c199edcbc17"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00036000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 36000,
+      "bytes": 45629949,
+      "sha256": "e81766deaa8b25e9841cd6c1947a1985a3d953f7636476c1cf0d945696bca864",
+      "marker_sha256": "f2e2a9edc4ffb63c61e182467eaa5dca8efb558f7f95a9e161274876c4604c2f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00037000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 37000,
+      "bytes": 45629949,
+      "sha256": "d6650712c53f427af5b5cb28dce2bcfa22f4c64214147d64e677d2d0cf9c6df0",
+      "marker_sha256": "f413f7ced07b30d297624f8db7332b68b2b0d9bfaaa84f332478df14d7e9b2f8"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00038000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 38000,
+      "bytes": 45629949,
+      "sha256": "2d821cca56f7f8ebc19e8557bf54ca83616379002799536a2dc71a81d6996755",
+      "marker_sha256": "ca87bcb151aa661ae6bdac9a239a8d6707c517b3bac23e6dd0827884b4ac3950"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00039000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 39000,
+      "bytes": 45629949,
+      "sha256": "02d560e84f470d40b55d6283501199302e52a6280d6556833d3c62ebdbd32685",
+      "marker_sha256": "0de05b7e0288d556e89cbcb2a83f336ebfd07721e9af59161a1e349863ce96be"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/CA/00040000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "CA",
+      "step": 40000,
+      "bytes": 45629949,
+      "sha256": "87c8a1fc2735eef86263d7794c4257faf1db61c9ecc50932c652957f827ba5a6",
+      "marker_sha256": "b7586edd3732e5539e06b192a2df03127bb5ec6e985b98c03f8b57f146c967ba"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00001000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "244620cd5041d45eec50e5e683d8642c8a703462f1ada301afd68bb20c816bb1",
+      "marker_sha256": "8183ce5f4de5b698322f27e9a53c6fdb917fea33cc06d80195e56fd2ed84ec79"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00002000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "5c35b4259f9d190c3ac13679b20cf8fe9ea9ae33f13d3f314224e6fa438873de",
+      "marker_sha256": "ee24f68b82ec4f6f485e1e4f57c65b52ff299cd20ba8f0630ad30fd2c8255794"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00003000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "1d80e0a9b74f3e16daf774167313e8551115242f95a26f4869627654093600d7",
+      "marker_sha256": "34aad5905018d577e4588c665fd34ed56c33dd154f986b87606b7d2753f86dfa"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00004000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "494e86db788509991ff033b0fbe333ea553d2793df82fa9c6a3da5e0f3c53e26",
+      "marker_sha256": "d09e5edd7e58dc7e4534fd37c7ee133173d21a357abb93df412fd2e62c35d2a7"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00005000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "9ef38fe173cd3b88476ec36e5cd8b69e07316b7242106c92e06aabaa25f9daca",
+      "marker_sha256": "599741689a2ae310253e4665c5a5104713df900c6317562d9eab6a37fadc1066"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00006000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "6042cf4fcf52647b5bd3d5ee950fce06048d1bd63e0b9fb82890c6f241c80f4a",
+      "marker_sha256": "80218003c09ad505a38daed0919fca61be4f1989b3638c91b69d3ce33489c466"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00007000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "0e2c28239fab330a3ec1d537a885e5e254cc0a145c2e2a67b2dbd96c75d425da",
+      "marker_sha256": "ac16805f5cb3b8aabb51eda3f617a5e90518cd890e0c70ed8f1f1fe6614c861c"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00008000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "9fc6604f085371bac19b99ef9972140b971d79a029cf6372326cc761d1672e51",
+      "marker_sha256": "3cd5cf0341d225c48e52d999ade839dcbc9002f590d072de08d845d798fd2853"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00009000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "1efe29cff24887720aa277e0ef004589fd28c7e4f88e8417e244e29b8e3b03d2",
+      "marker_sha256": "5385e3ce0d8945ff74b967169f1d3246332b55368eab5851b9e9231d6ad3f76e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00010000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "2971e28e306319a4aa921455b33d6623947dd744f8aba732ad98a12d63befdb8",
+      "marker_sha256": "c5d2ac73cb3031bc9b647b55c98938832e08a8ac4901114959740e405aeea3ef"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00011000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "2bc02bea6f68e6cc1de57e94d2a61e417f3ebb20571a11f0cb4039869348b57e",
+      "marker_sha256": "0fe4366e4bb840365dc868459929191a4be7b3061375568209842bc7563c29c6"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00012000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "66aed99650d8245dcb75ff737da7b2d705ea004cf21f13ca17c88811b0f5f418",
+      "marker_sha256": "1dd66217994ec97ca847fe7836891d356a6a8939c732ef568f904b683e9fe414"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00013000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "af499b5fe25935e4a63b1a7119bd93bd86e8b8c30fb626b33648d5c8864e478a",
+      "marker_sha256": "17e3893a67e1ed8a30e34f1d66027b75ea32bbdcb59e32436641bb4a86baf852"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00014000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "552e7336cc3e33968684fc533eecf0c29d32990ae8dfb80d2f1180ba72ee635c",
+      "marker_sha256": "90bce7ecee170f5bcd96a623b50723e97318188bbbfd8e0f0e47050616d39710"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00015000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "42f079f8502f28df8a7599b0d1fbdf7894f267384f019fd0368ea80cd2030b8a",
+      "marker_sha256": "b47f6692c7812a25a5a0888638610acdcdac42669ed0804e8bed074d2f15ce71"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00016000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "d4e308a1d03fb3af72c05988ad8fd3a00254755c601d0d38b2a452458feda632",
+      "marker_sha256": "19d41ee7179dbd2fa7303207a5357e23edef40135ea87edb40b97e9e90f7cae2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00017000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "e1590bed1ef6b12e05140f3075b49beff2bf6bce4d7506fb5c3df674b96bdf0a",
+      "marker_sha256": "ac3641b41a342a4d7bbae214271dadaced30de9eb44e3a99f9553100e0196728"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00018000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "cfa57f058ba3d2f6bf8cc39baacf5bfa32ceadd4075702c9a61f2eada474b660",
+      "marker_sha256": "edae7a720b72133cabc40f26cf4a77b773e25faae14f95fe001070e09457e50a"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00019000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "41d957fa06367a4a2691baee4cf91ed3734f568c79f5d6cf171562dac8ad8534",
+      "marker_sha256": "ea9b33e33971cb3d42f53ee7609f4ff1df6b6aafd8b16d9a4427f649d5fb3eb2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00020000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "1e31aea79c5e9b7543622a6d8cd605a7f828518df804eff969b2d0a574b484e5",
+      "marker_sha256": "461425faa58900ebf8fd65af36469ec79f0c9787ae33965789ff809808f0ae5b"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00021000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "1af5c8bd30d19546cbb2524e365b899fc9fa3d4cd492ea8a3cc57f64a3bff2b6",
+      "marker_sha256": "7e0fc678749058eaa64a48b6e3e79ef0b54e672f6120ff8a152807d080a48d31"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00022000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "ca9bfb11b42eb16bcc72f665efa20f6a812f1200327d77a7feab2357ea88cfed",
+      "marker_sha256": "a6ba760ed6a9b97cdd14e77b72cee4d91ef5898eaa86f91b36f9f984df767b4f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00023000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "2b148b45536b9fc95e40388de4be0a93da8455f5bc0395b8ac9a87c6094e2e13",
+      "marker_sha256": "01b21acc3f5eb80d8f06b87326b88f211db1db7d21170914f143d8b75e19693e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00024000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "f1a4ead0552ff5aaa98d22f3a438e9c5d41d261614a361e0b291df81b9f125b6",
+      "marker_sha256": "9b5bbd72d3bff238823dd824dbe7424c39a5b448c400f5a1d1da2e028ff15d91"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00025000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "c0d0a428fec696bf0954d4f46e535a3aff8c0f44d63d0b5768d078488e4c5175",
+      "marker_sha256": "4574a208d8d88c41c49ff77c8588d5598d7c3c2a5499a286387f06ff76330c1d"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00026000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "bde9a56677358b7e553b2146a43261fbad97b0461fd7ec5c6bff6df2f1fe66eb",
+      "marker_sha256": "6164513911b4ddb8480fd705600ac04d38a490961a59f187c1d73649b64e5a52"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00027000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "3dc06276a2af4fd6c96518c8651a7214f8986a5c3bfa132602b82eac84614234",
+      "marker_sha256": "a7615dcabb48e331c6e618ca351bcabde76281d3673bcc3f690e80ee4e967f24"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00028000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 28000,
+      "bytes": 45629949,
+      "sha256": "b4ec9410a616bc60af4911889a0830ef11d6e081382df70b6fd65f7f223807d6",
+      "marker_sha256": "499a813b4ba5f9a6e455d023e91435e5dde9544a23afcb9d01104295e85fd951"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00029000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 29000,
+      "bytes": 45629949,
+      "sha256": "daf6fb612acc7aa801fd2399e1651e2b8e33859fcc6930ed5dc4d32982c6ce51",
+      "marker_sha256": "41aeeaacd73d2600ce94b2a3d855e28f832348964086e9e3bb125e4fe2a6bf98"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00030000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 30000,
+      "bytes": 45629949,
+      "sha256": "da033da6a3929a5c0f97f242b8e7dde6b8d0eb5b43fc03014814c1d284927f81",
+      "marker_sha256": "f40259ea52797e500bb8f7d035e6f6f7ba68748c72c2821d5f56e2a88b2add1d"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00031000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 31000,
+      "bytes": 45629949,
+      "sha256": "6d33064bef9abd14ffec51cd8f6db0c4fa03048a2515af80c546939385536dfb",
+      "marker_sha256": "05608cac219ad2762b0d27a921b87f6596a249d5683ed85c9cdc6eb972eaaab3"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00032000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 32000,
+      "bytes": 45629949,
+      "sha256": "0a6a0816fc165e3e5c503215cb44a2dd20d227b159508dcc7da96c0b912d7a8c",
+      "marker_sha256": "743f08f301f52cc6b4be39cf3f635a7b311687b0a7da185fabd9cc71895c5f0c"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00033000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 33000,
+      "bytes": 45629949,
+      "sha256": "0d21286bbbd219e18dfabba87cc7c95a6638a58694c36eb2f7e7bf19a1bedef7",
+      "marker_sha256": "19e6e672f1c80c36107a1aeec035c0fae904bb0d3dbb44c3a998fcbf23c3db12"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00034000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 34000,
+      "bytes": 45629949,
+      "sha256": "13955822d9a1f360d8c3c0007f547b4869ca227f3c039cc15229455f0e42043a",
+      "marker_sha256": "47f647cdbdcc574774dc6fdaacf834dcf0b7e7e20d4ebdfe09229d23b5425bd8"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00035000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 35000,
+      "bytes": 45629949,
+      "sha256": "a8d1961ff37eae282e37dcaffb12b0da49ed3409bf80887ae72af2e4d5d42ccb",
+      "marker_sha256": "d484d3a0632b8e9f643890d66e18af4a4022455c455b219de7ee419f10b8211e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00036000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 36000,
+      "bytes": 45629949,
+      "sha256": "24f2cdb162dd648e16e49cff442150bfbd8900392bca235b94334a5c83f29393",
+      "marker_sha256": "84db53548320985593205df98752d0771deb11e4fd1aa19da4199808ff6309f4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00037000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 37000,
+      "bytes": 45629949,
+      "sha256": "a0258a7014c022e5de019ea5cb2bc271e5a62fa886101a0fc00b3f0e308b85aa",
+      "marker_sha256": "dbb15a5049460ba86ad57cf3bb92de713ed74357d6b9ebfc39cd06be613ceeb5"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00038000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 38000,
+      "bytes": 45629949,
+      "sha256": "558930ce136e228e975c32f82145d90005c71c2e6cd52cc24717a6fc40e9279c",
+      "marker_sha256": "08e96b38b6e0aff27e263e13381f4b3eb9268b50fe08de5267b2d6f4c410e44a"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/U0/00039000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "U0",
+      "step": 39000,
+      "bytes": 45629949,
+      "sha256": "a7c4f88d32f6a7debc930d60614b1f27a6841c88ab0e9e2b3de212dfc6d22d50",
+      "marker_sha256": "7077a25b10190e231708919432a75e826136a37e5b4b4401ee79ee9cc12275ea"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00001000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 1000,
+      "bytes": 45629949,
+      "sha256": "0f0fbec2e419c4c8fa08d30a0e492cedcf0291d98a48d8ed7bbc67a1176c0b1c",
+      "marker_sha256": "67f532b47ce1652659783529e75d63f31d0c01121a020f9dfc215dc06dd87cb5"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00002000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 2000,
+      "bytes": 45629949,
+      "sha256": "9ba32b5c9b2f16ebe5935c691c07072f63f5a5622664c779a99739e9e4e1d917",
+      "marker_sha256": "f19fea774f905760efd4f20bc55e9c8c1a84ecb6cc4a159e90baef398e641187"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00003000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 3000,
+      "bytes": 45629949,
+      "sha256": "9c6344d9fd9a7c03e68501dea445c8214381b24715a51148941d396efec0ce0c",
+      "marker_sha256": "ba1cde480652e2fb4d75c69572bac70792ec0f959c9a8952c32132d508299790"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00004000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 4000,
+      "bytes": 45629949,
+      "sha256": "0635e05e33f3a86bd908f141580375800c43c8d7193864424b1a646334249e4c",
+      "marker_sha256": "beefafc7f8ec2d723942753775aff9412cf1baefb9132d7058a30ba213b00e5e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00005000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 5000,
+      "bytes": 45629949,
+      "sha256": "c8b8ba8beaa278538f166734c55f112610752256e502ac8186b8dbef1243ee8c",
+      "marker_sha256": "d94c5abec5493723de7692342fb420260b1acc33155efcc481bb48db3c041b5f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00006000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 6000,
+      "bytes": 45629949,
+      "sha256": "9ca07a39b1d64238084dd22bccb431275126d9f4697bdd345e765366f742efd6",
+      "marker_sha256": "45e5a601023bd79bff854c9807d5360dc7e2761024d010fa67aebf019caebc68"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00007000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 7000,
+      "bytes": 45629949,
+      "sha256": "61199cf358fa3690f0a22e39b38dbba109c9b0eec0e08192a7cf3dd3bba56dd6",
+      "marker_sha256": "b7a1ba139c20ebb2bc79ded7f5be12ee2383e3514ec486bcfc343ee97bf50fde"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00008000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 8000,
+      "bytes": 45629949,
+      "sha256": "5214dd19e2227c3d551f72b25e03d62647ddf5a9e50beb5a8140e7ec21263986",
+      "marker_sha256": "9d54536c3b9e9082e366c6919945b6246689c15d320392b5d7d19f90adeb758f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00009000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 9000,
+      "bytes": 45629949,
+      "sha256": "4602f907d887a3fd8f21b1d9e028e46c85e8f1d4e6056542c77a9e18d2983a33",
+      "marker_sha256": "cf1083d2757973d65d030bc60f11ed02f85cf4aee4dc1b49d47a087f8b603c5e"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00010000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 10000,
+      "bytes": 45629949,
+      "sha256": "d8060532e42b7a9d5e940de6cc901a3487a229bca1bce42b4c4d2783c5ca201c",
+      "marker_sha256": "819e2e0181c95281c8da12c653566068382485da726548e26d1005fb9a318f47"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00011000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 11000,
+      "bytes": 45629949,
+      "sha256": "715e8de16012d86a673b0a08233492f1c1247326e2036d8cc1d2e12f4c792cd0",
+      "marker_sha256": "9824d0ae41deb5df0bfe26987e4b6ad1cabf312913477afd335405ee0e370566"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00012000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 12000,
+      "bytes": 45629949,
+      "sha256": "fb806ee95e7bc07daf63f25510b4dbf6e426d1e6c43e435a6dffc00913711afd",
+      "marker_sha256": "0b8ae68c563a080ae89986dd44623fc7c367c266c0dd42925fe8ee51dcae8e7b"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00013000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 13000,
+      "bytes": 45629949,
+      "sha256": "02bf3dfca8f42ec0230da48a4a864f7daef28fe5cf601debd9468a957465a218",
+      "marker_sha256": "1d9f833a469517d27398aca9f4ff4867e42c38c38b5568b388e43418ca598700"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00014000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 14000,
+      "bytes": 45629949,
+      "sha256": "b32687d036451f6c6a959e5034a2edc2978b57caa05b35d12e09be68cbadd66f",
+      "marker_sha256": "608d778a50567eea67eb3474152ad12e6a7cafbac81274b97b69f64e1e48c76b"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00015000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 15000,
+      "bytes": 45629949,
+      "sha256": "695db376c91135cd41de9aba9c0c6f9f98408833e4426cb9e3caf4edbe2a9f76",
+      "marker_sha256": "7b5782a3a5c95c70f5652aba2305b2a92be5bfa938bcf73917e0a6a71532c29d"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00016000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 16000,
+      "bytes": 45629949,
+      "sha256": "2b277238500d252057a3fa52dcee50783aa3a9d66faa5d009b93c1734154d8cf",
+      "marker_sha256": "06325bb2944317225593ccca5fbbc202f344e7f96ae7117760eded4d60f0bd74"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00017000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 17000,
+      "bytes": 45629949,
+      "sha256": "c26ef3a2bd7d9ec28ffc7f692cf85204d119ec1dc86ae82a767b5e38fb5732b0",
+      "marker_sha256": "d9d223e0f1f3ac3030288d26bbcbe9cf9a64050859ddc883a250cddd8fa590a6"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00018000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 18000,
+      "bytes": 45629949,
+      "sha256": "ebcebc5846c14bf84c628430c28fd64f4eb282ca2ceb10976e95afae8220d660",
+      "marker_sha256": "168ac8cb1d7c5d04a6569be048143b0d531abd00e45fc7cceedab6fb63de85f0"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00019000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 19000,
+      "bytes": 45629949,
+      "sha256": "8e21b57e7723d6374b416b00832a18693e71cfc67054fb57520dd07204aaf281",
+      "marker_sha256": "ff5d4bcdc079cd0b7a91757f0cc9d7dffe834254488887ea63599c2d7187acb6"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00020000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 20000,
+      "bytes": 45629949,
+      "sha256": "c63a3484c115e03a887b288edba43268b066812929fed0381d1c4af48c8cb07a",
+      "marker_sha256": "30fa45f2c43dadd7d348460801d2d4cb601b8a093442a165e5d5910bd0880060"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00021000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 21000,
+      "bytes": 45629949,
+      "sha256": "43f8a8c353d5482298e7d96c2d5716f07a22aa7f64f9effee52a1a8dc069021d",
+      "marker_sha256": "c5ab79dbbee847e91b3aa9884322c5bfb25372797f42c241bf5b3bcfa4643bcc"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00022000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 22000,
+      "bytes": 45629949,
+      "sha256": "ae038218b221aad90cb5d5a020182874c55e1230b64862a92e98ddbed96e6bfa",
+      "marker_sha256": "7a4a17bb0e11677904f781e52f6fa606699dff5933735bda9ea348192741d59b"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00023000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 23000,
+      "bytes": 45629949,
+      "sha256": "ec4e64f0d88681cfa4f0eb101c0f3c068ad2780c3bc074660c176bbdaaf08655",
+      "marker_sha256": "64743ae03f952bc44fcfe316c52e1c3f4bdffa12de82fe472e3f80207a96c0a1"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00024000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 24000,
+      "bytes": 45629949,
+      "sha256": "1742d599f98dd52537b4de03ce89034ac87bcca4ee8251547b2be0a3dd76c59f",
+      "marker_sha256": "d0a5da92ce89c1ffb6d0f5405747e0c37a0884099b5cfa5ab3fcdccf30c43b39"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00025000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 25000,
+      "bytes": 45629949,
+      "sha256": "ebd07db551b1ef0f5d76b7e99872d20af862e5c955b5f0ed784273cba780af82",
+      "marker_sha256": "0fd3b82b49e4284f3d32ce4baef51872ef92cea2f52b1d7b089bb179b3fef5e6"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00026000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 26000,
+      "bytes": 45629949,
+      "sha256": "6ceca73a48d8ce99e7b6490b7309ee77b946e3deb23a7a9a2e06d19dbcfe7157",
+      "marker_sha256": "2d5fdc06cf1520a2b0b659d2e63cfe5a5f55366525d14a12cb23286bc04a6dc2"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00027000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 27000,
+      "bytes": 45629949,
+      "sha256": "6cb723b44d9965872839f372fabcc60b19f3e4b581116a73696b09f0390f98cc",
+      "marker_sha256": "4a8db03c9f877ec463fcc88600bbef6c5373b718d69300e3472cfbf17d390195"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00028000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 28000,
+      "bytes": 45629949,
+      "sha256": "ebf970047b62cdd8fa4a3e3fa36b73d644d8f796f7b134b8f12444993d3fb6f3",
+      "marker_sha256": "7d90db0a9b42468d48d4d96e76c228f00f7034126f14afaf3e97885acdb8d5d4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00029000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 29000,
+      "bytes": 45629949,
+      "sha256": "6f94702513b5fea7c6c5b4c84cca326cbebc7ecae86dfd2f94423dfadad7c9fb",
+      "marker_sha256": "0c40389dcd45940c230790dd2102abdbe73a02d845dddf22a5f6f26e2deb16a3"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00030000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 30000,
+      "bytes": 45629949,
+      "sha256": "deb1784166581e53852124c5afafc2437c5c10d45be3ad14d18b6a458e90bb7c",
+      "marker_sha256": "5d3739ac8e34dd9380ee218c1fb52bd5a51ac0ce4f9f9bec2af71690b82aa6c0"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00031000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 31000,
+      "bytes": 45629949,
+      "sha256": "8ee5d0f9cff64cfb6e3a8302a66d786e7f05e6b5e9a0213afd4161a3e760f252",
+      "marker_sha256": "be54b409972356a67da2f1fd7272590e5eb2072717b012d37a46c60638e1ea69"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00032000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 32000,
+      "bytes": 45629949,
+      "sha256": "5c16b46419602d77e4257d9a837a36734f9afd9a8daea7602013375e3d1395c7",
+      "marker_sha256": "31e6dde0ab2803aa75082db20010d50cdcb4a720c62edf68242bd56024e0aef8"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00033000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 33000,
+      "bytes": 45629949,
+      "sha256": "badc6bfa8133cbcd02c10597b433e06e98063fb10aac6f7c38b77d83c3ca2610",
+      "marker_sha256": "cf181da5427f45ce83ce8482f16a57a3137fc29bbbccc9626d785f5179bff56b"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00034000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 34000,
+      "bytes": 45629949,
+      "sha256": "65ce0d657315ee6cd19f7033411aabd108892de59db93d9f45588695e96e2041",
+      "marker_sha256": "e3f46c959cf38db4432aa87db62bca109184d2daa3c31baea806554344ab474f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00035000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 35000,
+      "bytes": 45629949,
+      "sha256": "1a0b265bd35bd3d297249cd8091b3e78c42abbe7f6bc4042e3aa6976953e5a4b",
+      "marker_sha256": "d7156b19c1d3778c76d3bcad05f13fcd22fdf1d3b9ce2ac15193a72ab4a601f4"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00036000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 36000,
+      "bytes": 45629949,
+      "sha256": "43484b515496ce9709355310df045efa159a0ff1337de6838b9ed64ffe5fb9ba",
+      "marker_sha256": "c98cfbca0b6edb50e3a43620799eff7a81a812a5a84c5f40c615154bb93e0433"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00037000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 37000,
+      "bytes": 45629949,
+      "sha256": "1b8729dfe4ff4d0c9ebf36222740363b7f8f2434fcc9a82ce771193e4117addf",
+      "marker_sha256": "326122f4021d895629a7952c889d4297be1d07fcb931d575463b0e51b5b75dea"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00038000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 38000,
+      "bytes": 45629949,
+      "sha256": "3783b27653c1e7fa68c3623dbf0c330f6d6640dfdbdd878fdcb6624dd8cf5245",
+      "marker_sha256": "ea49ebab4767247bda7746aff847775d813563373e0f015519e492b6b07cae2f"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00039000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 39000,
+      "bytes": 45629949,
+      "sha256": "fccc407aabdd8c92431d9138bdfc5fd2ff6504762503b3ed1c0aaadfe9325c5a",
+      "marker_sha256": "6a5f4da35f5dfd8cc46bc6cc1a13566c2f02ed557b314730e83fbc8767148eda"
+    },
+    {
+      "path": "dinov3_vitl16/checkpoints/UA/00040000/state.pt",
+      "backbone": "dinov3_vitl16",
+      "variant": "UA",
+      "step": 40000,
+      "bytes": 45629949,
+      "sha256": "72d37e25a69a52b4b5edfda3059ee1a48b39c641881593b9dd970462e2b6db1d",
+      "marker_sha256": "437286f209943dc99128bfc2cf3bf6369b6dd0b0026ba0892d3ef0c606f69107"
+    }
+  ],
+  "preserve": [
+    "all complete markers",
+    "JSON/CSV/JSONL/log/text evidence",
+    "unknown/engineering files",
+    "datasets",
+    "pretrained weights and D2 conversion",
+    "environments",
+    "other studies"
+  ],
+  "formal_updates_authorized": 0,
+  "target_access_authorized": false,
+  "dependency_review": {
+    "user_cancelled_all_other_l0_models": true,
+    "all_268_records_match_previous_accepted_inventory": true,
+    "no_new_or_reidentified_checkpoints": true,
+    "only_d3_u0_l0_l1_contrast_retained": true,
+    "l1_initialization": "fresh seed0, never an L0-trained head",
+    "pca_reference": "original pretrained backbone; no discarded L0 head needed",
+    "engineering_negative_results": "archived; engineering run payloads not deleted in this action"
+  }
+}
