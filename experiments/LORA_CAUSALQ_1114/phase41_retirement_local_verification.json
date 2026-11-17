@@ -1,0 +1,26 @@
+{
+  "phase": 41,
+  "action": "cancelled-l0-retirement-tool-local-verification",
+  "date": "2026-11-17",
+  "python_executable": "E:/Anaconda/envs/pytorch/python.exe",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "pytest": "8.4.2",
+  "cuda_visible_devices": "",
+  "environment": {
+    "PYTHONPATH": "D:/CrossDomainProject/CausalQ_Project/.test-deps-strict-dg",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "MKL_THREADING_LAYER": "SEQUENTIAL"
+  },
+  "focused": {"passed": 26, "seconds": 47.78, "files": ["tests/test_lora_retirement.py", "tests/test_lora_baseline_resume.py"], "note": "Before the final declarative scope test was added; that test is included in the full run"},
+  "full": {"passed": 844, "skipped": 2, "seconds": 284.50, "command": "python -m pytest -q -p no:cacheprovider --basetemp=.test-tmp-strict-dg-retire-full"},
+  "skip_reasons": ["test_gta5_source_structure: host does not permit unprivileged symlinks", "test_lora_stop_inventory: host does not permit unprivileged symlinks"],
+  "covered": ["preview mutates no run bytes", "only accepted D3 U0 final retained", "per-payload hash and marker checks", "wrong producer/variant/step refusal", "missing/orphan/partial refusal", "changed final prevents any deletion", "new checkpoint and tampered-plan refusal", "links/path guards", "active controller/worker detection", "durable journal and metadata preservation", "partial apply and idempotent retry", "retirement disables baseline resume", "fourteen fresh L1 scope"],
+  "cli_help": "passed",
+  "real_weights_loaded_locally": false,
+  "real_checkpoints_loaded_locally": false,
+  "remote_files_deleted": 0,
+  "gpu_validation_performed": false,
+  "next": "AutoDL stop and read-only retirement preview, then local dependency/allowlist review; no formal training in this action"
+}

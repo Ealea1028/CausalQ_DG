@@ -96,3 +96,7 @@ tests/test_lora_conv_reduction.py text eol=lf
 tests/test_lora_comparison_completion.py text eol=lf
 tools/resume_lora_baseline.py text eol=lf
 tests/test_lora_baseline_resume.py text eol=lf
+
+tools/retire_lora_l0.py text eol=lf
+tests/test_lora_retirement.py text eol=lf
+experiments/LORA_CAUSALQ_1114/lora_only_scope_20261117.json text eol=lf

@@ -1,6 +1,38 @@
 # Method contract
 
-## Active — Phase41 original-producer baseline continuation
+## Active — Phase41 L0 retirement and revised LoRA-only study
+
+User instruction on2026-11-17 supersedes the prior28-model budget and all further
+L0 training/retention requirements. Train14 fresh seed0 L1 models: both backbones
+times U0/UA/C0/CA/B1/B2/B3,40000 updates each. Keep the accepted D3 U0 L0 final
+at40000 and its complete identity; do not initialize L1 from that trained head.
+Preserve all metadata and historical negative results. Retire the other L0
+payloads only after the stopped-run preview is returned and reviewed locally.
+The current action performs zero updates, no inference and no target access.
+
+tools.retire_lora_l0 checks original run/GPU locks and live L0 controllers/workers,
+canonical paths/no redirects or hard links, every marker identity and payload
+hash, and the accepted byte-exact protected D3 U0 final. Preview changes no run
+files. Apply needs the reviewed preview SHA; it rechecks the complete candidate
+set before deleting individual state.pt files. Preserve complete markers and
+archive their content in the manifest; write retirement tombstones and durable
+per-file journal. Partial failure is retryable against the same approved plan.
+L0_RETIRED.json disables the new baseline-resume controller; all old L0 launch
+instructions are inactive. Do not launch the old frozen trainer after retirement.
+Unknown/engineering files, datasets, pretrained weights, converted D2 weights,
+environments and historical studies are outside this cleanup's deletion scope.
+
+Phase42 remains D3 core L1,43 D2 core L1,44 B1/B2/B3 L1 only,45 source diagnostics
+and joint PCA,46 fixed-final target evaluation. Phase45/46 cover14 L1 models and
+the one retained L0 reference. HPI settings,effective batch8,LoRA injection,
+CausalQ/CQE and original Patch/CLS semantics are unchanged. L1 needs independent
+adapted backbone graphs and cannot reuse the L0 no-grad feature cache. Only D3
+U0 has a matching trained L0/L1 contrast; other missing contrasts are N/A,never
+replaced with historical scores. Within-L1 U0/UA/C0/CA/B1/B2/B3 contrasts remain.
+Original-versus-adapted PCA uses the unchanged pretrained backbone itself, so
+deleting other L0 heads does not remove its original-feature reference.
+
+## Archive — Phase41 original-producer baseline continuation (cancelled)
 
 31615a8 archive/members/child reports and raw baseline CSV verified. Baseline
 1.1284314 cohort ticks/s,GPU median82,p10 75,111 samples,wait.0001047,

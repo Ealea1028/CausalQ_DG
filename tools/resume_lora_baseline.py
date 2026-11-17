@@ -45,6 +45,8 @@ def selected_states(folder,identity,model,floor):
 
 
 def preflight(code):
+    if (RUN/'L0_RETIRED.json').exists():
+        raise ValueError('L0 study retired by user; baseline continuation is disabled')
     code=safe(code,code)
     sha=subprocess.check_output(['git','-C',str(code),'rev-parse','HEAD'],text=True).strip()
     if sha!=TRAIN_SHA or subprocess.check_output(['git','-C',str(code),'status','--porcelain','--untracked-files=no'],text=True).strip():

@@ -1,0 +1,22 @@
+{
+  "phase": 41,
+  "action": "retire-cancelled-l0-preview",
+  "entrypoint": "python -m tools.retire_lora_l0 --output <fresh-path>/preview.json",
+  "released_mode": "preview only, then return manifest for local dependency review before apply",
+  "policy": "cancel-l0-keep-accepted-d3-u0-final-v1",
+  "exact_run_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af6b2e",
+  "protected_final": "dinov3_vitl16/checkpoints/U0/00040000/state.pt",
+  "protected_final_sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
+  "protected_bytes": 45629949,
+  "last_accepted_inventory": {
+    "payloads": 268,
+    "proposed_deletions": 267,
+    "proposed_reclaim_bytes": 12183196383,
+    "not_a_current_disk_measurement": true
+  },
+  "safety": ["original run and GPU locks", "active controller/worker rejection", "accepted protected-final hash", "every marker identity and payload hash", "canonical path and link checks", "orphan/partial rejection", "reviewed preview hash", "all-candidate validation before deletion", "per-file durable journal and tombstones", "idempotent retry"],
+  "preserve": ["all JSON/CSV/JSONL/log/text evidence", "original complete markers", "unknown files", "engineering run directories pending separate inventory", "datasets", "pretrained weights including converted D2", "environments", "other studies"],
+  "formal_updates_authorized_in_this_action": 0,
+  "gpu_or_model_loading_required": false,
+  "target_data_access_authorized": false
+}

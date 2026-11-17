@@ -1,0 +1,38 @@
+{
+  "study": "lora_causalq_1114",
+  "revision_date": "2026-11-17",
+  "authority": "User cancels further frozen-backbone L0 training and confirms all seven L1 variants on both backbones",
+  "backbones": ["dinov3_vitl16", "dinov2_vitl14_hpi_p16"],
+  "variants": ["U0", "UA", "C0", "CA", "B1", "B2", "B3"],
+  "train_lora_states": [1],
+  "fresh_l1_models": 14,
+  "steps_per_model": 40000,
+  "additional_formal_updates": 560000,
+  "seed": 0,
+  "retained_l0_reference": {
+    "backbone": "dinov3_vitl16",
+    "variant": "U0",
+    "step": 40000,
+    "producer_git_sha": "1af6b2e91e54083be433341f9fc8958954536272",
+    "relative_payload": "dinov3_vitl16/checkpoints/U0/00040000/state.pt",
+    "sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
+    "bytes": 45629949
+  },
+  "phase41_status": "L0 continuation cancelled; checkpoint retirement preview pending on AutoDL",
+  "phases": {
+    "42": {"backbone": "dinov3_vitl16", "variants": ["U0", "UA", "C0", "CA"], "lora": 1},
+    "43": {"backbone": "dinov2_vitl14_hpi_p16", "variants": ["U0", "UA", "C0", "CA"], "lora": 1},
+    "44": {"backbones": ["dinov3_vitl16", "dinov2_vitl14_hpi_p16"], "variants": ["B1", "B2", "B3"], "lora": 1},
+    "45": {"action": "source diagnostics and joint PCA", "models": 15, "source_images": 2497},
+    "46": {"action": "fixed-final target evaluation", "models": 15, "target_images": 500}
+  },
+  "initialization": "Fresh common seed0 head and zero-delta LoRA initialization; never fine-tune an L0 trained head",
+  "unchanged": ["HPI AdamW/poly/warmup", "effective source batch8", "CausalQ formulas and CQE", "rank4 alpha4 Q/V blocks18-23", "Patch/CLS forward contract"],
+  "comparison_limits": [
+    "Only D3 U0 retains a matching L0 model for a trained L0/L1 comparison",
+    "Other missing L0/L1 contrasts must be N/A, never replaced by historical target scores",
+    "All within-L1 variant contrasts remain available",
+    "PCA original backbone features use preserved pretrained weights directly and require no L0 segmentation checkpoint"
+  ],
+  "old_releases": "Immutable historical contracts; active scope above supersedes their further-training and retention requirements"
+}
