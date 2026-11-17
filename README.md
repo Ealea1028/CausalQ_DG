@@ -2,7 +2,24 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase42 DINOv3 core LoRA training
+## Active — Phase42 parallel restart on RTX6000D
+
+User authorizes a fresh parallel restart and preserves the old0277d1e outputs.
+U0/UA/C0/CA remain independent seed0/40000-step LoRA models,total160000 updates.
+Start up to4 concurrent workers,attempt a private MPS daemon,and budget loaders
+from actual CPU affinity/quota,host memory/cgroup limits and shared memory.
+Each job keeps micro4/effective8; no head,adapter,optimizer,RNG or adapted features
+are shared. All measured optimization steps count as formal training.
+One whole-GPU monitor measures aggregate updates/s,activity,wait and memory.
+If a120-second formal window fails or CUDA OOM occurs,save full states and retry
+at2 then1 concurrent jobs under the same SHA. Compare aggregate speed against
+the accepted UA23.6064 source images/s baseline with a5% noise margin.
+No extra short-run ranking. Real parallel benefit is not yet GPU-verified.
+Per-user testing preference: focused resource/scheduling/MPS tests and syntax
+only; do not repeat the old866-test local suite for this orchestration revision.
+See local AutoDL handoff for exact-SHA tmux launch and evidence export.
+
+## Archive — Phase42 initial serial release (superseded before restart)
 
 Phase41 requested cleanup is accepted:267 payloads deleted,12183196383 apparent
 bytes,zero remaining candidates; D3 U0 final SHA is unchanged. All journal

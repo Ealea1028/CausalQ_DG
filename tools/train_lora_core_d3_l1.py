@@ -80,9 +80,11 @@ def adapter_gradients(model):
     return dict(zip((name for name, _ in pairs), values))
 
 
-def worker(args):
+def worker(args, *, execution=None):
     config, _ = load_contract()
-    profile = json.loads((DIRECTORY/'execution_profile.json').read_text())
+    parallel = execution is not None
+    if parallel: config = json.loads((ROOT/execution['config_path']).read_text())
+    profile = execution['profile'] if parallel else json.loads((DIRECTORY/'execution_profile.json').read_text())
     folder = args.output/args.variant
     folder.mkdir(parents=True, exist_ok=True)
     attempt = folder/'attempts'/uuid.uuid4().hex
@@ -101,6 +103,7 @@ def worker(args):
     if hasattr(signal, 'SIGHUP'): signal.signal(signal.SIGHUP, request_stop)
     try:
         configure(); seed_training_rng(0)
+        if parallel: torch.set_num_threads(1)
         environment = runtime()
         accepted = json.loads((DIRECTORY/'phase39_report.json').read_text())['environment']
         for key in ('python', 'torch', 'cuda', 'transformers', 'gpu', 'visible_memory_bytes'):
@@ -116,6 +119,12 @@ def worker(args):
             raise ValueError('Expected exactly98304 LoRA parameters')
         trainer = L1Trainer(model, args.variant)
         identity = identity_for(trainer, args, environment); report['identity'] = identity
+        if parallel:
+            identity['config_sha256'] = file_sha(ROOT/execution['config_path'])
+            identity['freeze_sha256'] = file_sha(DIRECTORY/'phase42_parallel_freeze.json')
+            identity['parallel_policy_sha256'] = execution['policy_sha256']
+            identity['performance_scope'] = 'whole_gpu_cohort'
+            report['resolved_execution'] = execution
         previous = folder/'training_report.json'
         if previous.exists():
             old = json.loads(previous.read_text())
@@ -137,7 +146,10 @@ def worker(args):
             loader, policy = packet_loader(stream, profile); report['loader_policy'] = policy
             pipeline = InputPrefetch(loader, 'cuda', profile['buffer_slots']); iterator = iter(pipeline)
             trace = (attempt/'input_trace.jsonl').open('w')
-            with Telemetry(attempt/'telemetry.csv', 1) as monitor:
+            from contextlib import nullcontext
+            from types import SimpleNamespace
+            monitoring = nullcontext(SimpleNamespace(started=time.monotonic())) if parallel else Telemetry(attempt/'telemetry.csv', 1)
+            with monitoring as monitor:
                 while trainer.step < 40000 and not stop['requested']:
                     if os.getppid() != args.parent_pid:
                         stop['requested'] = True; break
@@ -151,6 +163,12 @@ def worker(args):
                         separators=(',', ':'))+'\n')
                     recent.append(values.detach())
                     samples.clear(); del samples, data, values
+                    if parallel:
+                        write_json(folder/'execution_progress.json', {'step': trainer.step,
+                            'pid': os.getpid(),
+                            'initial_step': initial, 'ready': ticks >= 20, 'monotonic': time.monotonic(),
+                            'data_wait_seconds': pipeline.total_data_wait_seconds,
+                            'checkpoint_seconds': checkpoint_seconds, 'attempt_directory': str(attempt)})
                     if ticks in (1, 20):
                         grads = adapter_gradients(model)
                         report[f'gradient_probe_tick_{ticks}'] = grads
@@ -171,7 +189,7 @@ def worker(args):
                         print(NAME, args.variant, 'step', trainer.step, 'committed', record['step'] if record else 0, flush=True)
                     end = time.monotonic()-monitor.started
                     active = end-window_start-sum(b-a for a, b in pauses) if window_start is not None else 0.
-                    if window_start is not None and active >= profile['steady_seconds']:
+                    if not parallel and window_start is not None and active >= profile['steady_seconds']:
                         util = telemetry(attempt/'telemetry.csv', start=window_start, end=end, exclude_intervals=pauses)
                         wait = (pipeline.total_data_wait_seconds-wait_start)/active
                         reserved = torch.cuda.max_memory_reserved()/environment['visible_memory_bytes']
@@ -203,9 +221,10 @@ def worker(args):
         report['adapter_sha256'] = tree_digest(adapters)
         report['adapter_changed'] = report['adapter_sha256'] != trainer.initial_adapter_sha256
         report['base_unchanged'] = True
-        report['performance_target_met'] = bool(history+windows) and all(w['target_met'] for w in history+windows)
+        report['performance_target_met'] = None if parallel else bool(history+windows) and all(w['target_met'] for w in history+windows)
+        report['performance_scope'] = 'whole_gpu_cohort' if parallel else 'single_model'
         report['ok'] = (trainer.step == 40000 and record is not None and record['step'] == 40000
-                        and report['adapter_changed'] and report['performance_target_met'])
+                        and report['adapter_changed'] and (parallel or report['performance_target_met']))
         report['status'] = 'complete' if report['ok'] else report.get('status', 'incomplete')
         if stop['requested'] and not report['ok']: report['status'] = 'interrupted'
         if report['status'] == 'starting': report['status'] = 'incomplete'
@@ -226,7 +245,9 @@ def worker(args):
         report['step_in_memory'] = trainer.step if trainer is not None else 0
         report['committed_step'] = record['step'] if record else 0
         report['formal_optimizer_updates_this_invocation'] = max(0, report['committed_step']-initial)
-        report['actual_backbone_image_views_this_invocation'] = max(0, report['step_in_memory']-initial)*16
+        report['successful_update_image_views_lower_bound'] = max(0, report['step_in_memory']-initial)*16
+        report['actual_backbone_image_views_this_invocation'] = (None if trainer is not None and trainer.tainted
+                                                               else report['successful_update_image_views_lower_bound'])
         report['tainted_update'] = trainer.tainted if trainer is not None else False
         report['peak_allocated_bytes'] = torch.cuda.max_memory_allocated() if torch.cuda.is_initialized() else 0
         report['peak_reserved_bytes'] = torch.cuda.max_memory_reserved() if torch.cuda.is_initialized() else 0

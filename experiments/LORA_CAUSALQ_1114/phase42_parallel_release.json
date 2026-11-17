@@ -1,0 +1,22 @@
+{
+  "phase": 42,
+  "revision": "parallel_fresh_restart",
+  "entrypoint": "python -m tools.train_lora_phase42_parallel",
+  "launcher": "scripts/train_lora_phase42_parallel.sh",
+  "user_authorized_fresh_restart": true,
+  "supersedes_serial_sha": "0277d1eaaa2d6cd14b57c2310e20238cec9167ce",
+  "old_serial_outputs": "preserved, never deleted or migrated",
+  "preferred_jobs": 4,
+  "fallback_jobs": [2, 1],
+  "mps": "private auto with ordinary CUDA fallback; no compute-mode changes",
+  "scientific_models": ["U0", "UA", "C0", "CA"],
+  "backbone": "dinov3_vitl16",
+  "steps_per_model": 40000,
+  "formal_update_total": 160000,
+  "unchanged": ["micro4", "effective source batch8", "rank4 alpha4 QV blocks18-23", "HPI optimizer/LR", "CausalQ/CQE", "Patch/CLS outputs", "seed0", "checkpoint contents"],
+  "no_disposable_pilots": true,
+  "local_tests": "necessary parallel orchestration/resource/contract checks only; full old suite deliberately not repeated per user request",
+  "target_access_authorized": false,
+  "parallel_speedup_measured": false,
+  "next": "AutoDL exact-SHA tmux formal parallel training and cohort telemetry"
+}

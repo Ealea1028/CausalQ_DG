@@ -105,3 +105,7 @@ tools/train_lora_core_d3_l1.py text eol=lf
 scripts/train_lora_core_d3_l1.sh text eol=lf
 tests/test_lora_l1_formal.py text eol=lf
 experiments/LORA_CAUSALQ_1114/phase42*.json text eol=lf
+
+tools/train_lora_phase42_parallel.py text eol=lf
+scripts/train_lora_phase42_parallel.sh text eol=lf
+tests/test_lora_parallel.py text eol=lf

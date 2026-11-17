@@ -1,0 +1,22 @@
+{
+  "phase": 42,
+  "revision": "parallel_fresh_restart",
+  "date": "2026-11-17",
+  "python_executable": "E:/Anaconda/envs/pytorch/python.exe",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "pytest": "8.4.2",
+  "cuda_visible_devices": "",
+  "OMP_NUM_THREADS": "1",
+  "MKL_NUM_THREADS": "1",
+  "MKL_THREADING_LAYER": "SEQUENTIAL",
+  "focused": {"passed": 12, "seconds": 3.96, "command": "python -m pytest tests/test_lora_parallel.py tests/test_lora_l1_formal.py::test_exact_contract_and_source_only_phase -q -p no:cacheprovider --basetemp=.test-tmp-strict-dg-parallel-release-check"},
+  "full_suite_repeated": false,
+  "reason": "User explicitly requests only necessary local tests; unchanged LoRA/loss/optimizer/feature math already tested",
+  "coverage": ["CPU/RAM input budgets", "host-memory rejection/downshift", "aggregate updates/s and GPU memory criteria", "private MPS lifecycle and no global daemon operations", "MPS-unavailable fallback", "four workers launched before waiting", "failure stops owned peers", "inherited run/GPU lock descriptors", "frozen scientific contract"],
+  "real_weights_or_source_images_loaded_locally": false,
+  "parallel_speedup_or_gpu_memory_measured_locally": false,
+  "scientific_recipe_unchanged": true,
+  "old_serial_progress": "User authorizes new run; preserve old output without migration",
+  "next": "AutoDL private-MPS/ordinary-CUDA parallel formal execution,cohort telemetry and result return"
+}

@@ -1,6 +1,51 @@
 # Method contract
 
-## Active — Phase42 DINOv3 core L1 formal source training
+## Active — Phase42 parallel execution revision
+
+User requests maximizing the RTX6000D84GB instance and authorizes fresh restart
+instead of migrating the old0277d1e progress. Preserve that old run and all L0
+reference/evidence; write a new SHA-specific parallel output. Four independently
+adapted D3 core models retain the exact40000-step,HPI,CausalQ/CQE,micro4/effective8
+recipe. Only scheduling/input resources/observability change. No LoRA/head/math
+module or optimizer/loss implementation is changed.
+
+New tools.train_lora_phase42_parallel owns one GPU/run lock and launches up to4
+workers before waiting. Workers inherit lock descriptors and own process groups;
+stop peers on any failure,checkpoint only full untainted updates,and retain the
+same absolute source cursor/RNG on restart. The optional worker execution
+argument preserves the default serial API; parallel identities bind the parallel
+config,policy and source freeze. Resource allocation and concurrency can change
+under this same policy/SHA without altering training semantics or restarting LR.
+
+Discover actual affinity and cgroup v1/v2 CPU/RAM limits; cap loaders at12/job,
+input host budget64GiB total,pinned16GiB total,leaving runtime/model-loading RAM.
+Reduce workers or preflight concurrency when host budgets cannot fit. All jobs
+keep two raw-input slots and independent adapted graphs. Private MPS is attempted
+with a short /tmp control path and run-owned logs; never change compute mode or
+stop an external MPS server. Unavailable/failed MPS falls back to ordinary CUDA
+processes and is reported. Source/runtime/base/LoRA validation remains active.
+
+Monitor whole-GPU activity and memory once/second,not separately per worker.
+After active jobs each complete20 real formal updates,start120-second windows;
+use aggregate model updates/s and compare source images/s with the accepted
+single-UA23.6063896381 baseline (minimum95% to allow timing noise). Require
+median>=70,p10>=60,>=100 samples,mean worker wait<10%,GPU memory<=85%.
+Failed windows or reported CUDA OOM save all valid progress,then reduce4->2->1;
+at1 failure stops for review. Other failures stop immediately. This is bounded
+adaptation during formal training,not disposable pilots. Failed faster-width
+records remain in cohort_attempts; no updates from them are double-counted.
+Interruption keeps chosen concurrency and successful windows for same-SHA resume.
+Completed models require exact final hashes and matching reports before skipping.
+Final acceptance requires four numerical/base/LoRA passes,40000 each,and an
+accepted cohort window. No measured acceleration is claimed locally.
+
+User explicitly requests avoiding unnecessary local tests: run only focused
+resource budgeting,concurrent launch/failure handling,MPS ownership,cohort metrics
+and frozen-contract checks plus syntax. The already-tested image-level update,
+LoRA wrappers and checkpoint math remain unchanged; do not repeat old full suite.
+Phase43–46 and the14-model scientific scope remain unchanged.
+
+## Archive — Phase42 initial serial formal release
 
 Phase41 cleanup is accepted from archive3c4ee2c98e11abd3923a092f32473b14572129a530c965798a1acb0f90cc4d94:
 all9 members match extracted bytes;267 intent/deletion pairs match the frozen

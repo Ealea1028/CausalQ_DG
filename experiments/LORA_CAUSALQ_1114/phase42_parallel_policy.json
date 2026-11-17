@@ -1,0 +1,23 @@
+{
+  "phase": 42,
+  "default_jobs": 4,
+  "allowed_jobs": [
+    4,
+    2,
+    1
+  ],
+  "mps": "owned private auto, ordinary CUDA fallback",
+  "single_ua_source_images_per_second": 23.606389638098957,
+  "minimum_baseline_fraction": 0.95,
+  "visible_memory_bytes": 89173131264,
+  "maximum_workers_per_job": 12,
+  "maximum_host_pipeline_gib": 64,
+  "maximum_total_pinned_gib": 16,
+  "same_microbatch": 4,
+  "same_effective_source_batch": 8,
+  "fallback": "4->2->1 only if real formal cohort window fails or CUDA OOM; all complete state retained",
+  "scope": "all optimization updates are formal; no short-run ranking or throwaway checkpoints",
+  "fresh_restart_from_serial_sha": "0277d1eaaa2d6cd14b57c2310e20238cec9167ce",
+  "old_serial_outputs": "preserve untouched; do not migrate or delete",
+  "user_testing_override": "only focused parallel-resource/scheduling checks and syntax; no repeated full local suite"
+}
