@@ -2,15 +2,16 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase41 batch8 mismatch diagnosis
+## Active — Phase41 conv-gradient reduction repair
 
-D3 finals remain40000; D2 formal cursors remain27000. Returned ee70c3e
-comparison failed the original old/new AdamW gate; no migration is accepted.
-Baseline GPU median79/p10 70 and self-recovery are valid; batch8 self-recovery
-and features passed, but old/new optimizer comparison failed. Combined16 was
-not started. Release only CPU read-only analysis of existing engineering prefixes
-and their protected formal27000 origins. No new updates, deletion or tolerance
-changes. Return complete per-parameter moment diagnostics before a repair.
+D3 finals remain40000; D2 formal cursors remain27000. ff9ce07 diagnosis
+confirms matching inputs/RNG and small model drift, but decoder convolution
+first moments exceed the frozen old/new gate. CPU native AMP tests identify
+the legacy four-image autocast cast-cache reduction boundary. Opt-in repair
+retains batched forward and native backward/casts within those groups; same
+three bounded engineering paths are checked with no tolerance changes.
+No formal migration or cleanup apply is released. Native VJP recomputation
+cost is included in measured throughput; increased GPU activity alone is insufficient.
 
 Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ

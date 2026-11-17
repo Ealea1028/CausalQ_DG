@@ -1,0 +1,63 @@
+{
+  "phase": 41,
+  "accepted_for_diagnosis": true,
+  "migration_accepted": false,
+  "archive_sha256": "657633711d76be92d620df4992dc7e9d944a42c09ec13d9caee85f18a3e02fad",
+  "report_sha256": "cd5a137fe08f1a7e1412bc35d4ea16cf5922de193f0de194f75813a45ce70b91",
+  "producer_git_sha": "ff9ce07210068f3faace84aed12ec503698b77de",
+  "heads": {
+    "U0": {
+      "rng_equal": true,
+      "source_cursor_equal": true,
+      "model_allclose": true,
+      "optimizer_allclose": false,
+      "max_parameter_abs": 2.2351741790771484e-07,
+      "failing_moment_names": [
+        "decoder.fuse.0.weight",
+        "decoder.fuse.3.weight",
+        "decoder.classifier.weight",
+        "decoder.classifier.bias"
+      ]
+    },
+    "UA": {
+      "rng_equal": true,
+      "source_cursor_equal": true,
+      "model_allclose": true,
+      "optimizer_allclose": false,
+      "max_parameter_abs": 2.1979212760925293e-07,
+      "failing_moment_names": [
+        "decoder.fuse.0.weight",
+        "decoder.fuse.3.weight",
+        "decoder.classifier.weight",
+        "decoder.classifier.bias"
+      ]
+    },
+    "C0": {
+      "rng_equal": true,
+      "source_cursor_equal": true,
+      "model_allclose": true,
+      "optimizer_allclose": false,
+      "max_parameter_abs": 6.94766640663147e-07,
+      "failing_moment_names": [
+        "decoder.fuse.0.weight",
+        "decoder.fuse.3.weight",
+        "decoder.classifier.weight",
+        "decoder.classifier.bias"
+      ]
+    },
+    "CA": {
+      "rng_equal": true,
+      "source_cursor_equal": true,
+      "model_allclose": true,
+      "optimizer_allclose": false,
+      "max_parameter_abs": 2.0489096641540527e-07,
+      "failing_moment_names": [
+        "decoder.fuse.0.weight",
+        "decoder.fuse.3.weight",
+        "decoder.classifier.weight",
+        "decoder.classifier.bias"
+      ]
+    }
+  },
+  "interpretation": "Decoder conv first-moment differences, paired inputs/RNG. Consistent with changed BF16 gradient reduction; not proof of causality. CPU controlled tests must preserve legacy autocast cached-cast groups4."
+}

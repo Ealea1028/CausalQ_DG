@@ -1,0 +1,32 @@
+{
+  "phase": 41,
+  "action": "bounded-same-candidates-conv-reduction-repair",
+  "formal_updates_authorized": false,
+  "migration_accepted": false,
+  "cleanup_apply_authorized": false,
+  "entrypoint": "tools.check_lora_l0_batching --repair-conv-reduction",
+  "base_contract": "phase41_batch_release.json",
+  "backbone": "dinov2_vitl14_hpi_p16",
+  "protected_formal_step": 27000,
+  "effective_source_batch": 8,
+  "candidate_count": 3,
+  "baseline_unchanged": true,
+  "head_batch": 8,
+  "backbone_batches": [
+    8,
+    16
+  ],
+  "legacy_autocast_cast_cache_group": 4,
+  "fix": "Batched native conv forward; native per-image backward VJPs summed within original BF16 groups4 before casting to FP32 parameter accumulators. Bias included. Input gradient preserves dtype.",
+  "native_vjp_recomputes_convolution": "Included in full training wall time, not hidden or counted as a speedup. If no stable throughput benefit, reject migration. No idle/artificial GPU work.",
+  "precision_changed": false,
+  "optimizer_or_objective_changed": false,
+  "tolerances_changed": false,
+  "formal_snapshots_or_previous_failures_deleted": false,
+  "max_process_seconds": 300,
+  "max_cohort_ticks_including_correctness": 4096,
+  "warmup_ticks": 20,
+  "steady_seconds": 120,
+  "comparison_failure_exports_all_heads": true,
+  "next": "AutoDL bounded correctness/recovery and steady checks with engineering copies; local acceptance before formal migration"
+}

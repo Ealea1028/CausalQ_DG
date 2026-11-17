@@ -1,6 +1,35 @@
 # Method contract
 
-## Active — Phase41 read-only engineering-state diagnosis
+## Active — Phase41 native convolution-gradient reduction repair
+
+Hash-verified ff9ce07 report: all four RNG/source cursors match; one-step model
+max abs<=6.9477e-7, but conv exp_avg differs up to6.5081e-5. Norm/query tensors
+and second moments pass the original allclose. This localizes the observed
+failure to decoder conv first moments, consistent with BF16 gradient-reduction
+rounding; moment-derived gradients alone are not causal proof.
+
+Controlled native CPU AMP tests reject per-image FP32 summation: legacy
+single-image forwards share an autocast parameter cast across a four-image
+backward graph. Preserve per-image native VJPs, sum in the original low dtype
+within groups4, then cast to FP32 parameter accumulators; include bias and
+preserve input-gradient dtype. Batch8 forward, GroupNorm, dropout, per-image
+loss, source pairing, clip/LR/AdamW and frozen backbone stay unchanged.
+The optional --repair-conv-reduction flag applies only to new batch8/combined16
+paths; default APIs and the baseline retain previous execution. No LoRA/L1 use.
+
+Native VJPs rebuild each single-image convolution graph during backward. This
+is a correctness-preserving computation tradeoff, not dummy load; all its cost
+is included in steady end-to-end timing. No throughput improvement is assumed.
+Reuse the same three candidate definitions and original numeric/performance
+thresholds under one bounded repaired check. Max300s/process and4096 total
+engineering cohort ticks each;20 warmup then120s steady. Preserve every failed
+attempt, original27000 states and D3 finals. No formal progress or GC apply.
+Comparators now retain complete per-head numeric metrics on failure without
+weakening allclose, hard max-abs or clipped-gradient bounds. Real GPU validation
+and local acceptance remain mandatory before any migration.
+
+
+## Archive — Phase41 read-only state diagnosis (accepted for analysis)
 
 Returned ee70c3e archive/extracted bytes, child/parent JSON and raw baseline
 telemetry independently checked. Baseline131 timed ticks/120.3609 seconds,

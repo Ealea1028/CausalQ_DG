@@ -1,0 +1,32 @@
+{
+  "phase": 41,
+  "action": "conv-reduction-repair",
+  "full_suite": {
+    "passed": 812,
+    "skipped": 2,
+    "seconds": 262.65
+  },
+  "focused": {
+    "passed": 11,
+    "seconds": 11.99
+  },
+  "skip_reason": "Windows unprivileged symlink creation unavailable",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "historical_frozen_file_identities_unchanged": 85,
+  "coverage": [
+    "native AMP/non-AMP convolution VJPs, group4/group8, bias/no bias",
+    "cached-cast BF16 groups4 accumulated before FP32 parameter gradients",
+    "frozen input and context restoration",
+    "full repaired FP32 head/AdamW equivalence",
+    "all four head numerical failure metrics preserved"
+  ],
+  "development_failure_preserved": "Initial per-image FP32 accumulation failed native BF16 reference VJP tests (max abs0.125/0.15625). Legacy shared autocast cast nodes sum per group4 in low precision; corrected implementation preserves that boundary. Test thresholds unchanged.",
+  "gpu_validation_passed": false,
+  "formal_updates": 0,
+  "original_formal_payloads_loaded_locally": false,
+  "precision_or_tolerances_changed": false,
+  "native_vjp_recomputation_cost_included_in_end_to_end_timing": true,
+  "bash_handoff_syntax_checked": true
+}

@@ -40,13 +40,13 @@ def load(base,rows):
     return c
 
 
-def tick(c,packets,step,mode):
+def tick(c,packets,step,mode,repair=False):
     if mode=='baseline':return c.tick(packets,amp=True)
     f=features(c.backbone,packets,8 if mode=='batch8' else 16,True)
     out={}
     for n in VARIANTS:
         if c.cursors[n]!=step:raise ValueError('Engineering cursor mismatch')
-        out[n]=update_batched(c.heads[n],c.optimizers[n],packets,step,n,f,amp=True)
+        out[n]=update_batched(c.heads[n],c.optimizers[n],packets,step,n,f,amp=True,preserve_conv_reduction=repair)
         c.cursors[n]+=1
     return out
 
@@ -63,18 +63,47 @@ def snapshot(c):
             for n,m in c.heads.items()}
 
 
+class ComparisonFailure(ValueError):
+    def __init__(self,rows):
+        self.rows=rows
+        super().__init__('Numerical comparison failed; complete per-head metrics preserved')
+
+
+def state_metrics(a,b,path=''):
+    failures=[];maximum=0.
+    def visit(x,y,key):
+        nonlocal maximum
+        if isinstance(x,torch.Tensor):
+            if x.shape!=y.shape or x.dtype!=y.dtype or not torch.isfinite(x).all() or not torch.isfinite(y).all():
+                raise ValueError('Invalid state tensor: '+key)
+            error=float((x.double()-y.double()).abs().max()) if x.numel() else 0.;maximum=max(maximum,error)
+            if not torch.allclose(x,y,atol=1e-6,rtol=1e-5):failures.append({'path':key,'max_abs':error})
+        elif isinstance(x,dict):
+            if set(x)!=set(y):raise ValueError('State keys differ: '+key)
+            for k in x:visit(x[k],y[k],key+'/'+str(k))
+        elif isinstance(x,(list,tuple)):
+            if type(x)!=type(y) or len(x)!=len(y):raise ValueError('State sequence differs')
+            for j,(xx,yy) in enumerate(zip(x,y)):visit(xx,yy,key+'/'+str(j))
+        elif x!=y:failures.append({'path':key,'scalar_differs':True})
+    visit(a,b,path)
+    return maximum,failures
+
+
 def errors(ref,actual):
     rows={}
     for n in VARIANTS:
-        model=compare(ref[n]['model'],actual[n]['model']);opt=compare(ref[n]['optimizer'],actual[n]['optimizer'])
+        model,mfail=state_metrics(ref[n]['model'],actual[n]['model'],'model')
+        opt,ofail=state_metrics(ref[n]['optimizer'],actual[n]['optimizer'],'optimizer')
         a,b=ref[n]['gradients'],actual[n]['gradients']
         if set(a)!=set(b):raise ValueError('Gradient coverage changed')
         energy=sum(float(v.double().square().sum()) for v in a.values())
         delta=sum(float((v.double()-b[k].double()).square().sum()) for k,v in a.items())
         rel=(delta/max(energy,1e-24))**.5
-        if model>1e-6 or opt>1e-6 or rel>.02:raise ValueError(f'Numerical mismatch {n}: {model} {opt} {rel}')
-        for k,v in a.items():torch.testing.assert_close(v,b[k],atol=.1,rtol=.05)
-        rows[n]={'model_max_abs':model,'optimizer_max_abs':opt,'clipped_gradient_relative_l2':rel}
+        gradient_ok=all(torch.allclose(v,b[k],atol=.1,rtol=.05) for k,v in a.items())
+        ok=not mfail and not ofail and model<=1e-6 and opt<=1e-6 and rel<=.02 and gradient_ok
+        rows[n]={'model_max_abs':model,'optimizer_max_abs':opt,'clipped_gradient_relative_l2':rel,
+            'model_failed_tensors':mfail,'optimizer_failed_tensors':ofail,'gradient_allclose':gradient_ok,'ok':ok}
+    if not all(r['ok'] for r in rows.values()):raise ComparisonFailure(rows)
     return rows
 
 
@@ -101,7 +130,7 @@ def worker(a):
     worker_started=time.monotonic()
     configure();seed_training_rng(0);a.output.mkdir(parents=True,exist_ok=True)
     r={'ok':False,'mode':a.mode,'formal_updates':0,'engineering_completed_head_updates':0,'engineering_ticks':0,
-       'errors':[],'old_run_readonly':True,'selection_authorized':False}
+       'errors':[],'old_run_readonly':True,'selection_authorized':False,'samplewise_conv_gradient_repair':a.repair_conv_reduction and a.mode!='baseline'}
     try:
         acceptance=json.loads((DIRECTORY/'phase41_stop_acceptance.json').read_text());rows=acceptance['latest'][NAME]
         if any(row['step']!=27000 for row in rows.values()):raise ValueError('Expected protected common27000')
@@ -125,7 +154,7 @@ def worker(a):
         r['input_sha256']=tree_digest([(p['views'],p['label'],p['metadata']) for batch in first for p in batch])
         def step(c,p,index):
             # Persist observed completed engineering work; hard-killed work remains unknown in parent.
-            result=tick(c,p,index,a.mode);r['engineering_ticks']+=1;r['engineering_completed_head_updates']+=4
+            result=tick(c,p,index,a.mode,a.repair_conv_reduction);r['engineering_ticks']+=1;r['engineering_completed_head_updates']+=4
             return result
         c=load(base,rows);step(c,first[0],27000);step(c,first[1],27001)
         ref=snapshot(c);rng=rng_digest(capture_rng());del c
@@ -173,13 +202,15 @@ def worker(a):
             if file_sha(RUN/NAME/'checkpoints'/n/'00027000/state.pt')!=row['sha256']:raise ValueError('Original payload mutated')
         r['ok']=True
     except Exception:
+        exc=sys.exc_info()[1]
+        if isinstance(exc,ComparisonFailure):r['failed_comparison_metrics']=exc.rows
         r['errors'].append(traceback.format_exc());r['engineering_counts_are_completed_tick_lower_bounds']=True
     write_json(a.output/'report.json',r);return 0 if r['ok'] else 2
 
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True)
-    p.add_argument('--mode',choices=MODES);a=p.parse_args()
+    p.add_argument('--mode',choices=MODES);p.add_argument('--repair-conv-reduction',action='store_true');a=p.parse_args()
     if a.mode:return worker(a)
     if subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True).strip():raise ValueError('Tracked code modified')
     if a.output.exists():raise ValueError('Fresh engineering output required')
@@ -194,7 +225,7 @@ def main():
             out=a.output/mode;out.mkdir()
             process_started=time.monotonic()
             with (out/'worker.log').open('w') as log:
-                proc=subprocess.Popen([sys.executable,'-u','-m','tools.check_lora_l0_batching','--mode',mode,'--output',str(out)],stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+                proc=subprocess.Popen([sys.executable,'-u','-m','tools.check_lora_l0_batching','--mode',mode,'--output',str(out),*(['--repair-conv-reduction'] if a.repair_conv_reduction else [])],stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
                 try:proc.wait(timeout=300)
                 except subprocess.TimeoutExpired:os.killpg(proc.pid,signal.SIGKILL);proc.wait()
                 finally:
@@ -205,7 +236,7 @@ def main():
             if not row['ok']:break
     write_json(a.output/'report.json',{'phase':41,'formal_updates':0,'migration_accepted':False,'candidates':reports,
         'ok':len(reports)==3 and all(r['ok'] for r in reports),
-        'git_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
+        'samplewise_conv_gradient_repair':a.repair_conv_reduction,'git_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         'selection':'await local numerical/telemetry/throughput review; do not resume formal training'})
     return 0 if len(reports)==3 and all(r['ok'] for r in reports) else 2
 
