@@ -1,0 +1,29 @@
+{
+  "phase": 41,
+  "action": "resume-original-baseline",
+  "full_suite": {
+    "passed": 824,
+    "skipped": 2,
+    "seconds": 247.03
+  },
+  "focused": {
+    "passed": 7,
+    "seconds": 17.43
+  },
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "skip_reason": "Windows unprivileged symlinks unavailable",
+  "training_git_sha": "1af6b2e91e54083be433341f9fc8958954536272",
+  "coverage": [
+    "latest two complete boundaries validated without mutation",
+    "refuse corrupt/missing/identity-mismatched/regressed/orphan state",
+    "detect existing original worker",
+    "original code and exact environment checked before owned training process starts"
+  ],
+  "local_formal_updates": 0,
+  "real_payloads_loaded_locally": false,
+  "cross_sha_state_migration": false,
+  "cleanup_apply": false,
+  "bash_command_blocks_syntax_checked": 3
+}

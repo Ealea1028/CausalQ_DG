@@ -2,14 +2,15 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase41 original candidate-set completion
+## Active — Phase41 original baseline continuation
 
-27ab906 repaired batch8 still fails original model/AdamW gates. All failure
-metrics remain archived; its source and thresholds are unchanged. Baseline
-GPU median83/p10 77 passes. Finish only the originally declared combined16,
-with a contemporaneous unchanged baseline reference. No fourth strategy,
-new reduction mechanism, tolerance relaxation or formal migration is released.
-D3 finals remain40000; D2 formal cursors27000; all payloads stay pinned.
+All declared execution candidates have been evaluated. Batch8/combined16 fail
+frozen numeric gates; retain their negative results. Baseline GPU median82,
+p10 75 passes; select original micro4/head1/accumulation2 execution.
+Resume D2 from verified27000 to40000, four heads,52000 remaining updates.
+D3 finals stay40000. A new controller verifies checkpoints/source/environment,
+then runs the original1af6b2e producer unchanged. No cross-SHA state migration,
+new mechanism or cleanup apply. All source/target diagnostics remain later phases.
 
 Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ

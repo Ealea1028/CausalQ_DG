@@ -1,6 +1,37 @@
 # Method contract
 
-## Active — Phase41 original candidate-set completion
+## Active — Phase41 original-producer baseline continuation
+
+31615a8 archive/members/child reports and raw baseline CSV verified. Baseline
+1.1284314 cohort ticks/s,GPU median82,p10 75,111 samples,wait.0001047,
+reserved2.5816GB,unchangedW0 and exact recovery. Combined16 has the same failed
+old/new state metrics as batch8, including C0 max model1.7751e-6 and optimizer
+max1.6807e-5. No threshold changed; all new head8 paths rejected. Completed656
+engineering head updates,zero formal updates. Original candidate set is closed.
+
+Select only the qualified original execution profile. Resume the original exact
+training commit1af6b2e against the existing run and immutable states; D3 finals
+are skipped by the original coordinator. D2 each27000->40000,52000 new formal
+updates,320000 cumulative at completion. No new initialization, scheduler warmup,
+engineering-state reuse or cross-SHA checkpoint identity rewrite.
+
+New tools.resume_lora_baseline is orchestration only. It holds original GPU/run
+locks, rejects live original workers and validates clean original producer plus
+85 frozen source identities. Check all marker identities and the latest two
+payloads/head (SHA,schema,head/AdamW/RNG/source cursor); refuse missing/corrupt,
+regressed or orphan states. Permit only same-identity already-advanced progress,
+never retrain D3 finals. Require conservative space with all payloads retained.
+Inspect the exact old runtime in a disposable process, then launch the original
+coordinator in its own process group. Controller SHA and training producer SHA
+are separate metadata. Interruption terminates only that owned process group;
+resume uses real committed boundaries. A stale final report cannot certify
+completion. Record per-controller committed delta from initial/final totals,
+not stale reused per-invocation fields from the completed D3 report.
+No data/weights/GPU training locally; source2497 diagnostics and PCA stayPhase45,
+target500 stays46. No cleanup apply or assumed disk-saving budget is introduced.
+
+
+## Archive — Phase41 original candidate-set completion (negative new paths)
 
 Returned27ab906 archive/extracted bytes, child/parent reports and raw baseline
 telemetry independently checked. Baseline1.1431547 cohort ticks/s,median83,p10 77,

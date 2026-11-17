@@ -1,0 +1,164 @@
+{
+  "phase": 41,
+  "action": "select-original-baseline",
+  "producer_git_sha": "31615a8c3b8462d7bc9928695603d1d7d929a467",
+  "archive_sha256": "dfa91b6440b19b2dc38774642eb6085cfec007b241bd82060f682133a1fda79f",
+  "report_sha256": "2a85ad389ee42bff5dc308bcbaedb87eeecc378e434a4a58667dd4d1f28f3317",
+  "selected_mode": "baseline",
+  "batch8_rejected": true,
+  "combined16_rejected": true,
+  "combined16_metrics": {
+    "U0": {
+      "model_max_abs": 3.0407682061195374e-07,
+      "optimizer_max_abs": 1.3478100299835205e-05,
+      "clipped_gradient_relative_l2": 0.0008803961959139369,
+      "model_failed_tensors": [],
+      "optimizer_failed_tensors": [
+        {
+          "path": "optimizer/state/4/exp_avg",
+          "max_abs": 1.3478100299835205e-05
+        },
+        {
+          "path": "optimizer/state/5/exp_avg",
+          "max_abs": 1.927943230839446e-06
+        },
+        {
+          "path": "optimizer/state/6/exp_avg",
+          "max_abs": 8.517177775502205e-06
+        }
+      ],
+      "gradient_allclose": true,
+      "ok": false
+    },
+    "UA": {
+      "model_max_abs": 3.523891791701317e-07,
+      "optimizer_max_abs": 1.627439633011818e-05,
+      "clipped_gradient_relative_l2": 0.0008585977859197065,
+      "model_failed_tensors": [],
+      "optimizer_failed_tensors": [
+        {
+          "path": "optimizer/state/4/exp_avg",
+          "max_abs": 1.627439633011818e-05
+        },
+        {
+          "path": "optimizer/state/5/exp_avg",
+          "max_abs": 1.067441189661622e-06
+        },
+        {
+          "path": "optimizer/state/6/exp_avg",
+          "max_abs": 4.0780287235975266e-06
+        }
+      ],
+      "gradient_allclose": true,
+      "ok": false
+    },
+    "C0": {
+      "model_max_abs": 1.775100827217102e-06,
+      "optimizer_max_abs": 1.6806763596832752e-05,
+      "clipped_gradient_relative_l2": 0.0008771797696971045,
+      "model_failed_tensors": [
+        {
+          "path": "model/query_bank.query_residuals",
+          "max_abs": 1.775100827217102e-06
+        }
+      ],
+      "optimizer_failed_tensors": [
+        {
+          "path": "optimizer/state/4/exp_avg",
+          "max_abs": 1.6806763596832752e-05
+        },
+        {
+          "path": "optimizer/state/5/exp_avg",
+          "max_abs": 1.7096754163503647e-06
+        },
+        {
+          "path": "optimizer/state/6/exp_avg",
+          "max_abs": 3.2990938052535057e-06
+        },
+        {
+          "path": "optimizer/state/10/exp_avg",
+          "max_abs": 1.3328390195965767e-06
+        }
+      ],
+      "gradient_allclose": true,
+      "ok": false
+    },
+    "CA": {
+      "model_max_abs": 3.0640512704849243e-07,
+      "optimizer_max_abs": 1.5555648133158684e-05,
+      "clipped_gradient_relative_l2": 0.0009700036711353313,
+      "model_failed_tensors": [],
+      "optimizer_failed_tensors": [
+        {
+          "path": "optimizer/state/4/exp_avg",
+          "max_abs": 1.5555648133158684e-05
+        },
+        {
+          "path": "optimizer/state/5/exp_avg",
+          "max_abs": 1.6012927517294884e-06
+        },
+        {
+          "path": "optimizer/state/6/exp_avg",
+          "max_abs": 7.896684110164642e-06
+        },
+        {
+          "path": "optimizer/state/10/exp_avg",
+          "max_abs": 4.746951162815094e-06
+        }
+      ],
+      "gradient_allclose": true,
+      "ok": false
+    }
+  },
+  "baseline": {
+    "cohort_ticks_per_second": 1.1284313885147257,
+    "telemetry": {
+      "samples": 111,
+      "mean": 83.03603603603604,
+      "median": 82.0,
+      "p10": 75.0,
+      "p90": 97.0,
+      "fraction_ge60": 1.0,
+      "fraction_ge70": 1.0,
+      "power_w_mean": 199.3481081081081,
+      "memory_used_mib_mean": 3193.0
+    },
+    "subwindows": [
+      {
+        "samples": 55,
+        "mean": 83.74545454545455,
+        "median": 82.0,
+        "p10": 76.0,
+        "p90": 94.60000000000001,
+        "fraction_ge60": 1.0,
+        "fraction_ge70": 1.0,
+        "power_w_mean": 200.7598181818182,
+        "memory_used_mib_mean": 3193.0
+      },
+      {
+        "samples": 56,
+        "mean": 82.33928571428571,
+        "median": 80.0,
+        "p10": 73.0,
+        "p90": 98.0,
+        "fraction_ge60": 1.0,
+        "fraction_ge70": 1.0,
+        "power_w_mean": 197.96160714285713,
+        "memory_used_mib_mean": 3193.0
+      }
+    ],
+    "data_wait_fraction": 0.00010465478327285366,
+    "peak_reserved_bytes": 2581594112,
+    "visible_memory_bytes": 89173131264,
+    "base_unchanged": true,
+    "self_recovery_rng_equal": true
+  },
+  "formal_updates_in_comparison": 0,
+  "completed_engineering_head_updates": 656,
+  "training_git_sha": "1af6b2e91e54083be433341f9fc8958954536272",
+  "profile_change": false,
+  "cross_sha_state_migration": false,
+  "expected_initial_committed_updates": 268000,
+  "expected_remaining_formal_updates": 52000,
+  "next": "Resume original exact producer/profile after protected-state preflight. Keep all checkpoints; no cleanup apply."
+}
