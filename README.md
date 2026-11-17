@@ -2,7 +2,26 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase41 L0 retirement; subsequent training is LoRA only
+## Active — Phase42 DINOv3 core LoRA training
+
+Phase41 requested cleanup is accepted:267 payloads deleted,12183196383 apparent
+bytes,zero remaining candidates; D3 U0 final SHA is unchanged. All journal
+intents/deletions match the Git allowlist. Observed free space is40543326208 bytes.
+
+Release D3 U0/UA/C0/CA L1 only: four independent fresh seed0 models,40000 steps
+each,total160000 updates. Run sequentially inside tmux, each with its own DINO
+adapters/head/AdamW state. Preserve original CausalQ/CQE and HPI settings; never
+initialize from the trained L0 reference. Reuse accepted micro4/effective batch8,
+12 workers and two raw-input slots. No adapted features or gradients are shared.
+Save full head/LoRA/optimizer/RNG/source cursor every1000 updates; same-SHA
+recovery skips committed work and verified finals. Retain all L1 segments under
+a conservative full-history disk budget. Record real formal steady windows;
+median<70/p10<60 or other performance failures save and stop for local review.
+Next boundary is AutoDL real-weight/source GPU training. Local tests use tiny
+synthetic models only. Source mIoU,variance,responsibility and PCA wait for45;
+target evaluation waits for46. D2 and B1/B2/B3 LoRA remain subsequent phases.
+
+## Completed — Phase41 L0 retirement; subsequent training is LoRA only
 
 The user cancels further L0 training and confirms all seven U0/UA/C0/CA/B1/B2/B3
 variants with LoRA on both DINO backbones:14 fresh models,40000 steps each.

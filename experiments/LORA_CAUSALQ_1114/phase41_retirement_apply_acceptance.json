@@ -1,0 +1,30 @@
+{
+  "phase": 41,
+  "action": "retirement-apply-acceptance",
+  "accepted": true,
+  "archive_sha256": "3c4ee2c98e11abd3923a092f32473b14572129a530c965798a1acb0f90cc4d94",
+  "member_sha256": {
+    "code_root.txt": "a4c9b99d315a35b2c3f151e72dc69bcdbf773bcd339b0e97487be303241103bb",
+    "tool_git_sha.txt": "407e9aef071b32476ac3ee94f007b332c495bace49a31945407498f527b63db8",
+    "reviewed_preview_path.txt": "f1b6ec6806651ac69ddc104fdbafa486537516db7acdaaec403245c32db19194",
+    "approved_preview_sha256.txt": "a8ef702d9994326b6fb8414431c041fdac939bacdb46ae29650c5cb556ba025f",
+    "apply.log": "5783965dba88f7d8acaa6e0f78de43a675e0e9b42fb8d062de5f75c4dc828b13",
+    "apply.jsonl": "22676e48a3442d0659a1b1f731eb45753291dbd35b43874666f8b2b83d52d37d",
+    "apply.json": "82572efcae91808f2c3699cbe50e6558f0c92734babcd7a1f937b60228c34df7",
+    "exit_code.txt": "15e8f6742587fb99fd6f76dbe6ff1c9bfc69bd75ac9bd01bc6e7da64e423b004",
+    "disk_after.txt": "ea20202136d024b1225a4507d91f75a32df209e88de22bea0e5a3c3d0c01f648"
+  },
+  "tool_git_sha": "ad91266346efeefe1723dc493e2296b69f1a475b",
+  "approved_preview_sha256": "2e936258e214ca8cc65342397913d4eccf3ec4396fd554f5bcf8145b342f940c",
+  "deleted_count": 267,
+  "deleted_apparent_bytes": 12183196383,
+  "remaining_candidate_bytes": 0,
+  "protected_final_sha256": "4277325e6bc61a9174d9bcdafeb8272db1a541d1500bfd3231b08922c85a6e34",
+  "protected_final_bytes": 45629949,
+  "free_bytes_before": 28361318400,
+  "free_bytes_after": 40543326208,
+  "journal_all_267_intents_and_deletions_match_frozen_allowlist": true,
+  "real_checkpoint_loading_locally": false,
+  "phase41_status": "cancelled L0 continuation; requested cleanup complete",
+  "next_phase": 42
+}

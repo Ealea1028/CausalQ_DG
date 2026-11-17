@@ -1,0 +1,46 @@
+{
+  "phase": 42,
+  "action": "core-d3-l1-formal-release-local-verification",
+  "date": "2026-11-17",
+  "python_executable": "E:/Anaconda/envs/pytorch/python.exe",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "pytest": "8.4.2",
+  "environment": {
+    "CUDA_VISIBLE_DEVICES": "",
+    "PYTHONPATH": "D:/CrossDomainProject/CausalQ_Project/.test-deps-strict-dg",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "MKL_THREADING_LAYER": "SEQUENTIAL"
+  },
+  "focused_final": {"passed": 21, "seconds": 16.76, "file": "tests/test_lora_l1_formal.py"},
+  "full_final": {
+    "passed": 866,
+    "skipped": 2,
+    "seconds": 331.23,
+    "command": "python -m pytest -q -p no:cacheprovider --basetemp=.test-tmp-strict-dg-phase42-full-final"
+  },
+  "skip_reasons": ["test_gta5_source_structure: host does not permit unprivileged symlinks", "test_lora_stop_inventory: host does not permit unprivileged symlinks"],
+  "covered": [
+    "independent D2/D3-shaped synthetic adapters and common head initialization",
+    "all four variants exact continuous versus restored model,AdamW and RNG at micro4",
+    "complete LoRA checkpoint coverage and no original-base tensors",
+    "tainted partial optimizer update cannot commit",
+    "wrong identity,cursor,LoRA coverage,optimizer,RNG,hash and partial checkpoint rejection",
+    "frozen base mutation and source cursor rejection",
+    "Patch/CLS shape record holds no activation tensors",
+    "exact Phase42 frozen source and source-only contract",
+    "metadata export excludes checkpoint tensors and complete raw input traces",
+    "completed final hash checks,skip without recounting old invocation updates",
+    "stale worker report cannot certify a new failed attempt",
+    "owned worker process session and inherited lock descriptors are requested"
+  ],
+  "cli_help": "passed",
+  "bash_launcher_and_four_handoff_blocks": "syntax passed",
+  "frozen_source_files": 95,
+  "real_weights_or_checkpoints_loaded_locally": false,
+  "real_source_images_loaded_locally": false,
+  "gpu_memory_or_utilization_measured_locally": false,
+  "new_experiment_mechanisms": "none; formal execution of already accepted core LoRA/CausalQ recipe",
+  "next": "AutoDL exact-SHA tmux formal D3 U0/UA/C0/CA L1 training; return lightweight package before Phase43"
+}

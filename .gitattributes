@@ -100,3 +100,8 @@ tests/test_lora_baseline_resume.py text eol=lf
 tools/retire_lora_l0.py text eol=lf
 tests/test_lora_retirement.py text eol=lf
 experiments/LORA_CAUSALQ_1114/lora_only_scope_20261117.json text eol=lf
+
+tools/train_lora_core_d3_l1.py text eol=lf
+scripts/train_lora_core_d3_l1.sh text eol=lf
+tests/test_lora_l1_formal.py text eol=lf
+experiments/LORA_CAUSALQ_1114/phase42*.json text eol=lf

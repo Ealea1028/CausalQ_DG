@@ -1,6 +1,55 @@
 # Method contract
 
-## Active — Phase41 L0 retirement and revised LoRA-only study
+## Active — Phase42 DINOv3 core L1 formal source training
+
+Phase41 cleanup is accepted from archive3c4ee2c98e11abd3923a092f32473b14572129a530c965798a1acb0f90cc4d94:
+all9 members match extracted bytes;267 intent/deletion pairs match the frozen
+allowlist exactly,remaining payload bytes0,protected D3 U0 final unchanged.
+Free space40543326208 bytes; apparent deleted bytes12183196383. L0 continuation
+is cancelled,not a completed320000-update cohort. Never resurrect retired states.
+
+Only D3 U0/UA/C0/CA L1 is released now: each fresh seed0/40000 updates,total160000.
+Sequential worker processes own independent original DINO bases,rank4/alpha4 Q/V
+blocks18–23 adapters(98304 parameters),heads and optimizers. Static R2/alpha0,
+centered C0/CA,detached original Anchor CQE only UA/CA,two summed CE views and
+HPI AdamW/poly/warmup/clip remain unchanged. Never reuse a trained L0 head.
+The accepted image-level update function and DINO wrappers are unchanged.
+DINO remains the feature extractor; first real formal forward records Patch/CLS/
+register/intermediate shapes without retaining tensors; Patch autograd must exist.
+First and20th actual updates probe LoRA gradients without extra pilot updates.
+Zero-initialized B permits first-step zero A; later A/B require learning signals.
+Original DINO parameter versions/grad absence are checked each step and full base
+hash before/after training. A failed base invariant blocks automatic recovery.
+
+Use frozen micro4/effective source batch8/accumulation2,BF16,12 workers,two raw
+input slots. Each original/photo view creates a fresh adapted graph; L0 no-grad
+feature cache is forbidden. No new batched-head/migration strategy is used.
+First20 formal updates warm execution,then120-second activity windows require
+median>=70,p10>=60,>=100 samples,wait<.1,reserved<=85%. Save at a full optimizer
+boundary and stop all remaining models on failure; no target/accuracy selection.
+Checkpoint I/O is excluded from steady windows but recorded in job wall time.
+
+Schema1 compact recovery contains all head/buffers and all LoRA tensors,AdamW,
+Python/NumPy/Torch/CUDA RNG,absolute step/source cursor and next LR. Validate full
+model/optimizer coverage and latest two checkpoint hashes before restoring.
+Never save a tainted partial optimizer update; existing immutable paths cannot
+be overwritten. No cross-SHA identity migration is released. All1000-step L1
+segments remain under a full-history50MiB/segment+2GiB budget (about10GiB for
+four fresh models); do not assume future rolling-GC savings. Keep complete finals.
+Coordinator owns GPU/run locks; workers are in owned process groups. Ctrl+C
+requests the active worker to stop at a full step; a60-second fallback kills only
+its owned group. Workers inherit lock descriptors and stop at a full update if
+the coordinator exits, preventing an orphan from racing a replacement writer.
+Verified completed finals are skipped without recounting prior invocation
+updates. Package includes lightweight JSON/CSV/TXT/log tails and SHA
+references to raw input traces; no checkpoint tensors enter Git/export bundles.
+Exact complete runtime is checked against the accepted original environment.
+
+The revised14-model scope remains. Phase43=D2 core L1,44=both backbones B1/B2/B3
+L1,45=14 L1 plus retained D3 U0 L0 source2497 diagnostics and joint PCA,46=final
+target500 evaluation. No scientific metrics or GPU pass is claimed locally.
+
+## Completed — Phase41 L0 retirement and revised LoRA-only study
 
 User instruction on2026-11-17 supersedes the prior28-model budget and all further
 L0 training/retention requirements. Train14 fresh seed0 L1 models: both backbones
