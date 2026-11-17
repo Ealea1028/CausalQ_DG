@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — Phase41 D2 L0 execution comparison, 2026-11-17
+## Active — Phase41 read-only engineering-state diagnosis
+
+Returned ee70c3e archive/extracted bytes, child/parent JSON and raw baseline
+telemetry independently checked. Baseline131 timed ticks/120.3609 seconds,
+1.08839 cohort ticks/s, GPU median79/p10 70. Baseline and batch8 self recovery
+are exact for every head/RNG; input hashes match; batch8 features relativeL2=0.
+The old/new comparison stops at U0 AdamW: reported greatest difference
+5.942303687334061e-05 exceeds frozen atol1e-6/rtol1e-5. Full old/new metrics for
+all heads were not exported. Combined16 not run;620+16=636 completed engineering
+head updates,zero formal updates. No inference of successful migration or new
+speedup. The original strict gate remains unchanged.
+
+Release only tools.diagnose_lora_batch_states, CPU-only read-only existing
+baseline/batch8 one-step prefix27001 analysis versus pinned formal27000. Verify
+returned marker identities and SHA before loading own state; validate head/AdamW
+coverage/schema/cursor/LR, then report all named parameter and moment differences
+without aborting at the first non-close tensor. Report RNG/source pairing and
+first-moment-inferred clipped-gradient differences. The latter are approximate
+reconstructions from rounded state, not saved gradients or causal proof. No
+forward, optimizer step, GPU replay, precision change, threshold relaxation or
+cleanup. Original states stay pinned; diagnose before choosing an execution fix.
+
+
+## Archive — Phase41 D2 L0 execution comparison (failed migration gate)
 
 Returned archive/extracted bytes and full inventory accepted: D3 four heads40000,
 D2 four heads27000,total268000 committed updates; no local payload replay.

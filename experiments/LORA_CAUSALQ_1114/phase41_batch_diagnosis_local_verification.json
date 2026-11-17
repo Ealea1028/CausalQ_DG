@@ -1,0 +1,30 @@
+{
+  "phase": 41,
+  "action": "read-only-prefix-diagnosis",
+  "full_suite": {
+    "passed": 801,
+    "skipped": 2,
+    "seconds": 226.66
+  },
+  "focused": {
+    "passed": 6,
+    "seconds": 15.66
+  },
+  "skip_reason": "Windows unprivileged symlinks unavailable",
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "real_state_payloads_loaded_locally": false,
+  "formal_updates": 0,
+  "engineering_updates": 0,
+  "tolerances_changed": false,
+  "coverage": [
+    "complete named parameter/moment differences without first-failure abort",
+    "first moment inferred difference explicitly approximate",
+    "original model/optimizer/RNG state not mutated",
+    "scalar/empty tensor handling",
+    "reject nonfinite/shape/dtype mismatch",
+    "reject mismatched optimizer groups and cursor trajectory"
+  ],
+  "command_syntax_checked": true
+}

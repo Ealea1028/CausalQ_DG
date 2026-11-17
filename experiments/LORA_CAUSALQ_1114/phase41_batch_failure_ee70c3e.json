@@ -1,0 +1,110 @@
+{
+  "phase": 41,
+  "accepted_for_migration": false,
+  "producer_git_sha": "ee70c3eeb752ec998ddee8609890a51874b67e76",
+  "archive_sha256": "ec07189c1de0c305611b0380e4883e99d5f6b9178bad17d1b18abf74e262f0bf",
+  "report_sha256": "1ad269c473567be6b69441828e8844c2dbf636fd6719d77ef13e61c2a3a96df0",
+  "formal_updates": 0,
+  "completed_engineering_head_updates": 636,
+  "baseline": {
+    "cohort_ticks_per_second": 1.0883931498394737,
+    "telemetry": {
+      "samples": 111,
+      "mean": 79.37837837837837,
+      "median": 79.0,
+      "p10": 70.0,
+      "p90": 96.0,
+      "fraction_ge60": 0.972972972972973,
+      "fraction_ge70": 0.9369369369369369,
+      "power_w_mean": 195.32153153153152,
+      "memory_used_mib_mean": 3193.0
+    },
+    "base_unchanged": true,
+    "process_wall_seconds": 195.533812828362
+  },
+  "failure": "batch8 old/new AdamW allclose failed; greatest abs difference reported 5.942303687334061e-05; no tolerance change",
+  "combined16_started": false,
+  "self_recovery_all_heads_exact": true,
+  "input_sha256_equal": true,
+  "all_feature_relative_l2_zero": true,
+  "remote_engineering_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_batch_ee70c3e_JZ2yd6/run",
+  "prefix_markers": {
+    "baseline": {
+      "U0": {
+        "sha256": "ceec10cc8390945f91a4bc6c218d8459e4f14e51c7cc9881533b3e4ce861e0da",
+        "identity": {
+          "engineering_only": true,
+          "mode": "baseline",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "UA": {
+        "sha256": "ca22131ec58911385adec87be77a5deeb6e41f26c37b809bfaccca586055ebb7",
+        "identity": {
+          "engineering_only": true,
+          "mode": "baseline",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "C0": {
+        "sha256": "b98d0e50b06d4505bff8e0a7c0c9da569246352f0bb5b4dae39943a3bac10bd9",
+        "identity": {
+          "engineering_only": true,
+          "mode": "baseline",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "CA": {
+        "sha256": "5b9f707c2c76537f1e53aa77748478f2726fa53ea95ea46c5dad126532ae8149",
+        "identity": {
+          "engineering_only": true,
+          "mode": "baseline",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      }
+    },
+    "batch8": {
+      "U0": {
+        "sha256": "1a1c3efcd02df2fe32e3cd581466eb637d63bdd1e4708221f3f8d90ea3726253",
+        "identity": {
+          "engineering_only": true,
+          "mode": "batch8",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "UA": {
+        "sha256": "448893001dee8bbea6a6f44c3b247bc681e87c1dcfb741992e6819c5faef74a9",
+        "identity": {
+          "engineering_only": true,
+          "mode": "batch8",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "C0": {
+        "sha256": "5a5ab3dc82a74309ddabefb5069446020970d1e63f5e3552d88da078d7075f8a",
+        "identity": {
+          "engineering_only": true,
+          "mode": "batch8",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      },
+      "CA": {
+        "sha256": "cb63865b510ed60c0acf04fc22ae77c70cfe7713d8995a8a798b79626c160b3b",
+        "identity": {
+          "engineering_only": true,
+          "mode": "batch8",
+          "source_producer": "1af6b2e91e54083be433341f9fc8958954536272"
+        },
+        "step": 27001
+      }
+    }
+  },
+  "next": "CPU-only read-only existing-prefix diagnosis; no new optimizer updates or precision/tolerance changes"
+}

@@ -2,13 +2,15 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase41 D2 L0 batching comparison
+## Active — Phase41 batch8 mismatch diagnosis
 
-Stopped inventory accepted: D3 four heads40000, D2 four heads27000,
-268000 committed updates. Originals stay pinned; D3 finals are retained.
-Release only tools.check_lora_l0_batching: three bounded source-only D2
-engineering candidates from common27000, with no formal cursor changes.
-Local review precedes formal migration or cleanup apply.
+D3 finals remain40000; D2 formal cursors remain27000. Returned ee70c3e
+comparison failed the original old/new AdamW gate; no migration is accepted.
+Baseline GPU median79/p10 70 and self-recovery are valid; batch8 self-recovery
+and features passed, but old/new optimizer comparison failed. Combined16 was
+not started. Release only CPU read-only analysis of existing engineering prefixes
+and their protected formal27000 origins. No new updates, deletion or tolerance
+changes. Return complete per-parameter moment diagnostics before a repair.
 
 Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
