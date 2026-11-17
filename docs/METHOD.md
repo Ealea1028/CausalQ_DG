@@ -1,6 +1,36 @@
 # Method contract
 
-## Active amendment — Phase41 stopped-run inventory, 2026-11-16
+## Active — Phase41 D2 L0 execution comparison, 2026-11-17
+
+Returned archive/extracted bytes and full inventory accepted: D3 four heads40000,
+D2 four heads27000,total268000 committed updates; no local payload replay.
+Originals remain pinned. Only D2 engineering comparison is released; no formal
+cursor advancement, migration apply or cleanup. D3 finals are not retrained.
+
+Three paths: old backbone4/head1/accumulation2; backbone8/head8/accumulation1;
+view-major frozen backbone16/head8/accumulation1. CPU head4 isolates correctness.
+New module preserves existing public APIs/frozen source. CE averages each image's
+valid pixels; CQE averages GT-present classes per image; two CE views sum then
+average8 images. Reuse native Dropout2d per-image under original absolute-position
+and view RNG. Independent optimizers, centering, original reference detach and
+one clip/step remain unchanged. No L1 or B-series mechanism changes.
+
+Each candidate loads protected27000 states, compares2 continuous versus1+1
+recovery, with4 engineering cohort ticks/16 head updates. Baseline records model,
+AdamW and clipped-gradient snapshot; new paths compare the same two-step endpoint,
+exact input/RNG and all Patch/CLS/register/four-layer feature metadata. Thresholds
+are predeclared in phase41_batch_release.json. Engineering checkpoints use separate
+identity/output; no formal migration guard is bypassed. Reload protected states
+fresh before20 warmup ticks and120-second steady measurement. Total<=4096 cohort
+ticks including correctness work,<=300-second complete worker process-group cap.
+Unknown interrupted work stays unknown/lower bound. Record two non-overlapping
+steady subwindows, utilization, data wait, visible/reserved memory and four-head
+throughput. Local review must confirm numeric/recovery/W0 invariants, median70,
+p10 60,samples100,wait<10%,reserved<=85% and nonregressing throughput before any
+formal profile migration. The original effective source batch8/40k schedule stays.
+
+
+## Archive — Phase41 stopped-run inventory (accepted)
 
 The user stopped the original Phase41 run before requesting execution changes.
 Only a read-only AutoDL inventory is released now. It locks the original run and

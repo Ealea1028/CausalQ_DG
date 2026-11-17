@@ -1,0 +1,31 @@
+{
+  "phase": 41,
+  "action": "bounded-l0-batching-check",
+  "full_suite": {
+    "passed": 795,
+    "skipped": 2,
+    "seconds": 241.83
+  },
+  "focused": {
+    "passed": 7,
+    "seconds": 13.33
+  },
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "original_frozen_files_unchanged": 85,
+  "original_formal_payloads_replayed_locally": false,
+  "gpu_performance_measured_locally": false,
+  "formal_updates_locally": 0,
+  "coverage": [
+    "unequal per-image valid pixel/class loss weighting and detach gradients",
+    "original per-sample native Dropout2d pairing",
+    "head4/head8 and backbone8/16 update/gradient/AdamW comparison",
+    "real CLS ordering on synthetic backbone",
+    "batched checkpoint resume and complete RNG equality",
+    "independent CPU snapshot tensors",
+    "dropout override restored on exceptions"
+  ],
+  "development_observation": "Unseeded toy backbone depended on preceding test RNG and exposed near-zero first-step AdamW sensitivity; fixtures now use the study seed0 explicitly. No comparison tolerance was relaxed. Real27000 GPU comparison remains mandatory.",
+  "bash_handoff_syntax_checked": true
+}

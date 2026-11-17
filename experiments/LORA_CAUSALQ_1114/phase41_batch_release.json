@@ -1,0 +1,62 @@
+{
+  "phase": 41,
+  "action": "bounded-l0-batching-check",
+  "formal_updates_authorized": false,
+  "cleanup_apply_authorized": false,
+  "migration_apply_authorized": false,
+  "backbone": "dinov2_vitl14_hpi_p16",
+  "protected_step": 27000,
+  "d3_completed_models_retrained": false,
+  "effective_source_batch": 8,
+  "candidates": [
+    {
+      "name": "baseline",
+      "head_microbatch_source": 1,
+      "backbone_forward_images": 4,
+      "gradient_accumulation": 2
+    },
+    {
+      "name": "batch8",
+      "head_microbatch_source": 8,
+      "backbone_forward_images": 8,
+      "gradient_accumulation": 1
+    },
+    {
+      "name": "combined16",
+      "head_microbatch_source": 8,
+      "backbone_forward_images": 16,
+      "gradient_accumulation": 1
+    }
+  ],
+  "head_batch4": "CPU isolation only",
+  "max_process_seconds_per_candidate": 300,
+  "warmup_ticks": 20,
+  "warmup_head_updates": 80,
+  "steady_seconds": 120,
+  "max_ticks_per_candidate": 4096,
+  "engineering_check_ticks_per_candidate": 4,
+  "max_head_updates_per_candidate_including_checks": 16384,
+  "numerical": {
+    "model_and_optimizer_max_abs": 1e-06,
+    "model_optimizer_rtol": 1e-05,
+    "clipped_gradient_relative_l2_max": 0.02,
+    "clipped_gradient_atol": 0.1,
+    "clipped_gradient_rtol": 0.05,
+    "feature_relative_l2_max": 0.02,
+    "feature_atol": 0.1,
+    "feature_rtol": 0.05,
+    "self_recovery_rng_exact": true,
+    "source_input_hash_exact": true
+  },
+  "performance": {
+    "median_gpu_min": 70,
+    "p10_gpu_min": 60,
+    "samples_min": 100,
+    "data_wait_fraction_max": 0.1,
+    "reserved_fraction_max": 0.85,
+    "subwindows": 2,
+    "throughput_must_not_regress": true,
+    "clear_speedup_min": 0.05
+  },
+  "next": "AutoDL source-only numerical/recovery/feature and steady comparison; local acceptance before formal migration or retention apply"
+}

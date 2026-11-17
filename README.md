@@ -2,14 +2,13 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — LoRA Phase41 core L0 formal baselines
+## Active — Phase41 D2 L0 batching comparison
 
-2026-11-16: user stopped the original run and revised the local plan to require
-batched-head migration and checkpoint retention. The next released action is
-read-only `tools.audit_lora_stopped`, using the original run/producer identity.
-Return verified per-head cursors and payload/RNG/AdamW identities before any
-batched migration or cleanup. Original profile and formal launcher stay frozen;
-no new formal training or payload deletion is released in this revision.
+Stopped inventory accepted: D3 four heads40000, D2 four heads27000,
+268000 committed updates. Originals stay pinned; D3 finals are retained.
+Release only tools.check_lora_l0_batching: three bounded source-only D2
+engineering candidates from common27000, with no formal cursor changes.
+Local review precedes formal migration or cleanup apply.
 
 Implementing LoRA_CausalQ_1114_Plan.md (local-only document), one phase at a time.
 Opt-in rank4 Q/V adapters preserve the frozen DINO base and existing CausalQ
@@ -22,7 +21,7 @@ remains archived; its differences are confirmed to be Python/NumPy only.
 Phase40 performance at432ab4a is accepted from returned bytes and independently
 reduced telemetry: all four L1 UA/B3 workloads select micro4/accumulation2,
 two raw-input slots,12 workers; median GPU activity91–97%,p10 88–96%.
-Release only Phase41: D3 and D2 U0/UA/C0/CA L0, eight fresh seed0 heads,
+Original Phase41 contract: D3/D2 U0/UA/C0/CA L0, eight fresh seed0 heads,
 40000 updates each, effective source batch8, BF16 and unchanged HPI optimizer.
 Four independent heads share each frozen backbone's no-grad features. L1 never
 uses this cache. Immutable1000-update recovery skips already committed updates.

@@ -88,3 +88,5 @@ experiments/LORA_CAUSALQ_1114/phase40_performance_acceptance.json text eol=lf
 experiments/LORA_CAUSALQ_1114/phase41*.json text eol=lf
 tools/audit_lora_stopped.py text eol=lf
 tests/test_lora_stop_inventory.py text eol=lf
+tools/check_lora_l0_batching.py text eol=lf
+tests/test_lora_batched.py text eol=lf
