@@ -1,0 +1,29 @@
+{
+  "phase": 41,
+  "action": "complete-original-comparison",
+  "full_suite": {
+    "passed": 817,
+    "skipped": 2,
+    "seconds": 231.33
+  },
+  "focused": {
+    "passed": 5,
+    "seconds": 4.26
+  },
+  "python": "3.10.20",
+  "torch": "2.10.0+cu128",
+  "cpu_only": true,
+  "original_frozen_identities_unchanged": 85,
+  "repair_source_matches_exact27ab906_git_blob": true,
+  "numeric_or_performance_tolerances_changed": false,
+  "requested_modes": [
+    "baseline",
+    "combined16"
+  ],
+  "prior_rejected_mode": "batch8",
+  "new_execution_mechanisms": 0,
+  "formal_updates": 0,
+  "gpu_checks_executed_locally": false,
+  "bash_commands_syntax_checked": true,
+  "skip_reason": "Windows unprivileged symlink creation unavailable"
+}

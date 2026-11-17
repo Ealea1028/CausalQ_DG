@@ -31,6 +31,17 @@ RUN=Path('/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase41_core_1af
 MODES=('baseline','batch8','combined16')
 
 
+def comparison_modes(complete_original=False):
+    """Finish the original matrix; no fourth strategy or threshold revision."""
+    if not complete_original:return MODES
+    evidence=json.loads((DIRECTORY/'phase41_conv_failure_27ab906.json').read_text())
+    if (evidence['rejected_mode']!='batch8' or evidence['migration_accepted'] is not False
+        or evidence['pending_original_candidate']!='combined16'
+        or file_sha(ROOT/'causalq/runtime/lora_batched.py')!=evidence['repair_source_sha256']):
+        raise ValueError('Original rejected candidate or fixed repair source changed')
+    return ('baseline','combined16')
+
+
 def load(base,rows):
     c=FormalCohort(base,{n:core_head(base,n) for n in VARIANTS})
     for n,row in rows.items():
@@ -210,10 +221,14 @@ def worker(a):
 
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('--output',type=Path,required=True)
-    p.add_argument('--mode',choices=MODES);p.add_argument('--repair-conv-reduction',action='store_true');a=p.parse_args()
+    p.add_argument('--mode',choices=MODES);p.add_argument('--repair-conv-reduction',action='store_true')
+    p.add_argument('--complete-original-comparison',action='store_true');a=p.parse_args()
+    if a.complete_original_comparison and (not a.repair_conv_reduction or a.mode):
+        p.error('Completion uses the coordinator and the unchanged repaired execution')
     if a.mode:return worker(a)
     if subprocess.check_output(['git','status','--porcelain','--untracked-files=no'],text=True).strip():raise ValueError('Tracked code modified')
     if a.output.exists():raise ValueError('Fresh engineering output required')
+    modes=comparison_modes(a.complete_original_comparison)
     a.output.mkdir(parents=True);reports=[]
     import fcntl
     with ExitStack() as locks:
@@ -221,7 +236,7 @@ def main():
             f=locks.enter_context(path.open('r+'));fcntl.flock(f,fcntl.LOCK_EX|fcntl.LOCK_NB)
         # Measure availability before any engineering updates; no replacement utilization claims.
         subprocess.run(['nvidia-smi','--query-gpu=utilization.gpu','--format=csv,noheader,nounits'],check=True,capture_output=True,text=True,timeout=10)
-        for mode in MODES:
+        for mode in modes:
             out=a.output/mode;out.mkdir()
             process_started=time.monotonic()
             with (out/'worker.log').open('w') as log:
@@ -235,10 +250,11 @@ def main():
             reports.append(row)
             if not row['ok']:break
     write_json(a.output/'report.json',{'phase':41,'formal_updates':0,'migration_accepted':False,'candidates':reports,
-        'ok':len(reports)==3 and all(r['ok'] for r in reports),
+        'ok':len(reports)==len(modes) and all(r['ok'] for r in reports),
+        'requested_modes':list(modes),'prior_rejected_modes':['batch8'] if a.complete_original_comparison else [],
         'samplewise_conv_gradient_repair':a.repair_conv_reduction,'git_sha':subprocess.check_output(['git','rev-parse','HEAD'],text=True).strip(),
         'selection':'await local numerical/telemetry/throughput review; do not resume formal training'})
-    return 0 if len(reports)==3 and all(r['ok'] for r in reports) else 2
+    return 0 if len(reports)==len(modes) and all(r['ok'] for r in reports) else 2
 
 
 if __name__=='__main__':raise SystemExit(main())

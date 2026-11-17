@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — Phase41 native convolution-gradient reduction repair
+## Active — Phase41 original candidate-set completion
+
+Returned27ab906 archive/extracted bytes, child/parent reports and raw baseline
+telemetry independently checked. Baseline1.1431547 cohort ticks/s,median83,p10 77,
+112 samples; both halves meet activity targets. Repair batch8 self-recovery and
+input/feature checks pass, but all heads fail old/new AdamW max-abs; C0 also
+fails model state at1.7751e-6. Gradient relativeL2=.0008586–.0009700 is within
+its separate engineering bound and does not override the stricter state gate.
+664 completed engineering head updates,zero formal updates. No migration accepted.
+
+Stop adding reduction mechanisms. Only finish the original three-strategy set:
+unchanged baseline and the pending combined16, skipping already rejected batch8.
+--complete-original-comparison requires --repair-conv-reduction, coordinator mode,
+and an exact hash match of the existing repaired module. The normal full-matrix
+entrypoint is preserved. A contemporaneous baseline creates the same-input/state
+reference and timing control; the pending candidate keeps the identical head8,
+frozen backbone16 and native VJP code. Original numeric/performance thresholds,
+300-second process cap and4096-tick bound remain unchanged; no extra strategy.
+Any failure still stops the remaining run; local review must decide whether the
+only eligible original baseline should complete the remaining formal training.
+No automatic formal resume or cleanup apply is included in this check.
+
+
+## Archive — Phase41 convolution reduction repair (migration gate failed)
 
 Hash-verified ff9ce07 report: all four RNG/source cursors match; one-step model
 max abs<=6.9477e-7, but conv exp_avg differs up to6.5081e-5. Norm/query tensors

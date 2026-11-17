@@ -93,3 +93,4 @@ tests/test_lora_batched.py text eol=lf
 tools/diagnose_lora_batch_states.py text eol=lf
 tests/test_lora_batch_diagnosis.py text eol=lf
 tests/test_lora_conv_reduction.py text eol=lf
+tests/test_lora_comparison_completion.py text eol=lf
