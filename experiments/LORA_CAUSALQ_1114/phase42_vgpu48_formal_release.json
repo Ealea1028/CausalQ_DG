@@ -1,0 +1,43 @@
+{
+  "phase": 42,
+  "mode": "accepted_original_donors_vgpu48_formal_continuation",
+  "entrypoint": "python -m tools.resume_lora_phase42_vgpu48",
+  "launcher": "scripts/train_lora_phase42_vgpu48.sh",
+  "accepted_gate_archive_sha256": "36e54ac3b781172f2cc4bd18262231427f29850e912a62a0ddafba6ec16a5c16",
+  "donor_steps": {
+    "U0": 868,
+    "UA": 753,
+    "C0": 866,
+    "CA": 751
+  },
+  "preserved_formal_updates": 3238,
+  "formal_horizon_per_model": 40000,
+  "expected_formal_total": 160000,
+  "remaining_formal_updates": 156762,
+  "migration_optimizer_updates": 0,
+  "engineering_states_used": false,
+  "original_donor_mutation_allowed": false,
+  "same_gpu_calibration": "UA first120s steady window; all updates count, saved then parallel",
+  "parallel_jobs": [
+    4,
+    2,
+    1
+  ],
+  "target_access_allowed": false,
+  "next_phase_automatic": false,
+  "new_gpu_formal_training_verified": false,
+  "parallel_acceleration_claimed": false,
+  "local_tests": {
+    "passed": 18,
+    "seconds": 6.42,
+    "full_suite_repeated": false,
+    "command": "python -m pytest tests/test_lora_vgpu48_continuation.py tests/test_lora_parallel.py -q -p no:cacheprovider"
+  },
+  "local_environment": {
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "pytest": "8.4.2",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "next": "AutoDL exact-SHA tmux formal continuation; return checkpoint-free evidence"
+}

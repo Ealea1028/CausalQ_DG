@@ -94,7 +94,7 @@
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_acceptance.json": "ef3091fe21e66fc5ba9b60827ad0eb163577abb0e6fbc0d658bbfc20fb271acf",
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_freeze.json": "a4239e2f7956fd35cd44d549e8fd8fc75b86555d8c7bb45c80212db3109ea435",
     "experiments/LORA_CAUSALQ_1114/phase41_stop_acceptance.json": "a74964c4d4bf6475f6ad8c0d039c888f7fef60b967980576742a81198934f3a0",
-    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "25888acf164ef5659ed07bc99d72c368bd41e4fce41ce4b87f3fc2ede9ce3960",
+    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "76a21c993c174dcdc9cec628a69c3ecabac434671b13fe3c66f5dc40e9e47370",
     "experiments/LORA_CAUSALQ_1114/phase42_parallel_policy.json": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
     "manifests/gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
     "manifests/gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb",
@@ -103,8 +103,8 @@
     "scripts/train_lora_phase42_parallel.sh": "db8f1c573007b1d670c4276812ec374abfc823db04d5a9cc8b736586282713a1",
     "tools/check_lora_backbones.py": "84f79f4b65e886627cbe6e3be7f43378f43110bd1223d2f698a3499154e67592",
     "tools/retire_lora_l0.py": "d8299ce2c319a548cca55524d47c17c25e5013df0042f73eb0336388c584cdb1",
-    "tools/train_lora_core_d3_l1.py": "a4cd6b76f7341a1ecfe48d161c0022b7fe182b387ce67936a596646c21ad0adf",
+    "tools/train_lora_core_d3_l1.py": "cd33233594ac86f54d78f83a2848628ecc880ad714a909bfaeab7b4640e71415",
     "tools/train_lora_core_l0.py": "4b9c6157b46f482e7c6b619397c0232e88c33e8455e0fa2bc7cfb052046a992d",
-    "tools/train_lora_phase42_parallel.py": "e747e72baf19dd62fc79904d1847fbc0663c9a02e939be4b13a0bcd0dd90ff95"
+    "tools/train_lora_phase42_parallel.py": "f502531ef2670ea9896ed9f7e13ff0736d105ca8e1ad233a4cbd37482139b00e"
   }
 }

@@ -40,7 +40,7 @@ def verified_final(output, variant, args):
     if not report.get('ok'): return None
     identity = report['identity']
     if (identity.get('training_producer_git_sha') != args.expected_sha or identity.get('variant') != variant
-            or identity.get('parallel_policy_sha256') != file_sha(POLICY)
+            or identity.get('parallel_policy_sha256') != file_sha(getattr(args, 'policy_path', POLICY))
             or identity.get('data_root') != str(args.data_root.resolve())
             or identity.get('pretrained_root') != str(args.pretrained_root.resolve())
             or not report.get('base_unchanged') or not report.get('adapter_changed')):
@@ -86,7 +86,7 @@ def terminate_owned(active, stop_time):
 def pool(args, execution, environment, leg, policy):
     active = {}; pending = []; models = {}; stop = {'at': None, 'reason': None}
     result = {'status': 'running', 'windows': [], 'models': models, 'execution': execution}
-    for variant in VARIANTS:
+    for variant in execution.get('variants', VARIANTS):
         existing = verified_final(args.output, variant, args)
         if existing is not None: models[variant] = existing
         else: pending.append(variant)
@@ -106,7 +106,7 @@ def pool(args, execution, environment, leg, policy):
                     progress = folder/'training_report.json'
                     stamp = progress.stat().st_mtime_ns if progress.exists() else -1
                     log = (folder/'worker.log').open('a')
-                    command = [sys.executable, '-u', '-m', 'tools.train_lora_phase42_parallel', '--worker',
+                    command = [sys.executable, '-u', '-m', getattr(args, 'worker_module', 'tools.train_lora_phase42_parallel'), '--worker',
                                '--variant', variant, '--parent-pid', str(os.getpid()), '--output', str(args.output),
                                '--expected-sha', args.expected_sha, '--data-root', str(args.data_root),
                                '--pretrained-root', str(args.pretrained_root)]
@@ -146,10 +146,26 @@ def pool(args, execution, environment, leg, policy):
                         total_memory = policy['visible_memory_bytes']
                         window = measured_window(rows, start_rows, now-window_start, util,
                                                  max(memory, default=total_memory)/total_memory, baseline, policy)
+                        if execution.get('baseline_calibration'):
+                            # A single job may leave spare GPU capacity: its speed is the comparison,
+                            # while activity/wait targets apply to the subsequent concurrent cohort.
+                            import math
+                            window['calibration_valid'] = (util['samples'] >= 100
+                                and math.isfinite(window['aggregate_source_images_per_second'])
+                                and window['aggregate_source_images_per_second'] > 0
+                                and window['memory_fraction'] <= .85)
+                            window['target_met'] = False
                         result['windows'].append(window); write_json(leg/'cohort.json', result)
-                        print('Cohort:', execution['jobs'], 'jobs', window['aggregate_source_images_per_second'],
-                              'source images/s; GPU', util['median'], 'target', window['target_met'], flush=True)
-                        if not window['target_met']:
+                        if execution.get('baseline_calibration'):
+                            print('Single-UA baseline:', window['aggregate_source_images_per_second'],
+                                  'source images/s; valid', window['calibration_valid'], flush=True)
+                        else:
+                            print('Cohort:', execution['jobs'], 'jobs', window['aggregate_source_images_per_second'],
+                                  'source images/s; GPU', util['median'], 'target', window['target_met'], flush=True)
+                        if execution.get('baseline_calibration'):
+                            stop.update(at=time.monotonic(), reason='baseline_complete' if window['calibration_valid']
+                                        else 'needs_performance_review')
+                        elif not window['target_met']:
                             stop.update(at=time.monotonic(), reason='needs_performance_review')
                         start_rows = rows; window_start = now
                 if time.monotonic()-previous_progress > 10:

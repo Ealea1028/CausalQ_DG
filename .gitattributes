@@ -113,3 +113,7 @@ tests/test_lora_parallel.py text eol=lf
 tools/check_lora_vgpu48_resume.py text eol=lf
 tests/test_lora_vgpu48_gate.py text eol=lf
 scripts/check_lora_vgpu48_resume.sh text eol=lf
+causalq/runtime/lora_migration.py text eol=lf
+tools/resume_lora_phase42_vgpu48.py text eol=lf
+scripts/train_lora_phase42_vgpu48.sh text eol=lf
+tests/test_lora_vgpu48_continuation.py text eol=lf

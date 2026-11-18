@@ -1,6 +1,47 @@
 # Method contract
 
-## Active — Phase42 RTX4090/48GB migration verification
+## Active — Phase42 accepted original-state continuation on48GB
+
+Recovery gate04c1d2f passes,archive SHA256
+36e54ac3b781172f2cc4bd18262231427f29850e912a62a0ddafba6ec16a5c16.
+All four model/AdamW/RNG transfers are equal. CA2 versus1+1 has max absolute
+model/optimizer differences0,exact inputs/loss rows/RNG,and unchanged W0 and
+donor payloads. Its4 engineering updates are excluded from formal training.
+
+Use only the accepted original fa9a7b2 states868/753/866/751. Acquire GPU,new
+run,and original donor run locks; workers inherit all three descriptors.
+Restore the original immutable identity first,check initial-head/adapter digests,
+model/AdamW/RNG equality and the absolute cursor,then write a native checkpoint
+with new producer/runtime and nested original identity/hash/cursor provenance.
+This migration has0 optimizer updates. Reject engineering donors,identity
+mismatches,newer unreviewed source markers and regressed migrated cursors.
+On same-release restart restore the new identity directly. Failed state validation
+must not trigger an emergency commit under the new identity. Retain all original
+and new LoRA states plus the protected D3 U0 L0 reference; no deletion is released.
+Runtime must equal the full accepted new-GPU record,including driver/pip; require
+capability8.9/SM128/BF16. Old historical runtime metadata remains unchanged.
+
+The baseline is the first120-second same-GPU single-UA formal window after20
+warm formal updates. Save at a full boundary and reuse this record on restart.
+All baseline updates count toward UA40000. A single job need not saturate the GPU
+to establish a speed reference; require>=100 telemetry samples,positive finite
+rate and<=85% whole-GPU memory. The concurrent cohort must also meet original
+median>=70/p10>=60,mean wait<10%,and>=95% of the measured new-GPU UA speed.
+Do not apply old RTX6000D23.6064 images/s to the new GPU. Private MPS and actual
+CPU/RAM/shm budgeting are reused. Prefer4,save then2 then1 on OOM/performance
+failure; other errors stop for review. At12 CPU cores four jobs use8 loaders.
+Independent model/adapter/head/optimizer/RNG instances remain mandatory.
+
+The mathematical update,LoRA modules,CQE,HPI schedule and native feature forward
+are unchanged. Physical4/effective8 and absolute40000 per model remain fixed.
+Progress totals include original3238 once;156762 remain,engineering/migration
+updates contribute0. Source/target metrics,PCA and subsequent D2/B-series stay
+in their prescribed later phases. Phase42 completion requires four verified
+40000-step numerical finals plus an accepted whole-GPU cohort window. The
+AutoDL performance claim remains pending. Local verification:18 focused tests
+(6.42s),CPU synthetic only,no repeated full suite. Stop locally for GPU execution.
+
+## Archive — Phase42 RTX4090/48GB migration verification
 
 Audit2c870469f336064795c901cc4a818a86e6377c1920d29a57a2d64565f1b43d10
 and its extracted/nested evidence are accepted. CUDA reports RTX4090/47.37GiB,

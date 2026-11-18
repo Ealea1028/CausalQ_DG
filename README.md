@@ -2,7 +2,29 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase42 new48GB GPU recovery gate
+## Active — Phase42 accepted48GB formal continuation
+
+New-GPU gate archive36e54ac3b781172f2cc4bd18262231427f29850e912a62a0ddafba6ec16a5c16
+is accepted: all four state transfers are exact; CA continuous2 versus1+1
+recovery has zero model/optimizer difference and exact inputs/RNG. Four probe
+updates remain engineering-only and their states never become formal donors.
+
+Continue original U0/UA/C0/CA LoRA states868/753/866/751,total3238,under explicit
+new-SHA/runtime provenance in a separate output root. Original payloads and
+markers stay byte-exact under the donor lock. No optimizer update,source cursor,
+HPI warmup or learning-rate reset occurs during migration. Same-release restart
+restores the newest migrated state rather than importing the donor again.
+
+On the accepted RTX4090/50866487296-byte device,measure single-UA speed from
+retained formal updates,then prefer4 independent jobs with private MPS and
+actual CPU/RAM loader budgets. At12 CPU cores the4-way plan gives2 loaders/job.
+Use the same-GPU UA baseline,never the old84GB speed floor. Full states survive
+4->2->1 fallback. LoRA/CausalQ math,micro4/effective8,Patch/CLS and40000-step
+horizons are unchanged. Remaining156762 updates end this phase; do not launch
+Phase43 automatically. Formal48GB parallel performance awaits AutoDL evidence.
+Only18 focused local tests passed; no old full-suite rerun or real local weights.
+
+## Archive — Phase42 new48GB GPU recovery gate
 
 Returned audit is accepted: CUDA reports RTX4090,50866487296 memory bytes,
 12 CPU cores,BF16 supported. Four cloned checkpoints at868/753/866/751 are

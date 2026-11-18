@@ -1,0 +1,32 @@
+{
+  "phase": 42,
+  "revision": "original_donor_continuation_vgpu48",
+  "default_jobs": 4,
+  "allowed_jobs": [
+    4,
+    2,
+    1
+  ],
+  "source_producer": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+  "source_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase42_parallel_d3_l1_fa9a7b2",
+  "visible_memory_bytes": 50866487296,
+  "minimum_baseline_fraction": 0.95,
+  "baseline": "single UA on this exact GPU/runtime/MPS; first 120s window after20 formal warm updates; all updates retained",
+  "calibration_activity_gate": false,
+  "cohort_gpu_median_min": 70,
+  "cohort_gpu_p10_min": 60,
+  "steady_window_seconds": 120,
+  "minimum_telemetry_samples": 100,
+  "maximum_memory_fraction": 0.85,
+  "maximum_mean_data_wait_fraction": 0.1,
+  "same_microbatch": 4,
+  "same_effective_source_batch": 8,
+  "fallback": "save complete state then4->2->1; stop at failed1; preserve absolute HPI schedule/optimizer/RNG/source cursor",
+  "checkpoint_retention": "all original and migrated LoRA segments; never remove donors or retained D3 U0 L0",
+  "formal_updates_total": 160000,
+  "preserved_updates": 3238,
+  "remaining_updates_at_release": 156762,
+  "engineering_states_eligible": false,
+  "old_84gb_speed_floor_used": false,
+  "next_phase_automatic": false
+}

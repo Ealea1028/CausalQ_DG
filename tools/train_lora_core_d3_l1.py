@@ -94,7 +94,7 @@ def worker(args, *, execution=None):
               'lora_enabled': True, 'target_data_accessed': False, 'source_miou': None, 'target_miou': None,
               'source_diagnostics_deferred_to_phase45': True, 'attempt_directory': str(attempt),
               'formal_optimizer_updates_this_invocation': 0, 'checkpoint_retention': 'all segments; conservative full-history budget'}
-    trainer = None; trace = None; iterator = None; hook = None
+    trainer = None; trace = None; iterator = None; hook = None; checkpoint_ready = False
     initial = 0; record = None; windows = []; history = []; checkpoint_seconds = 0.
     started = time.monotonic(); stop = {'requested': False}
     def request_stop(signum, frame): stop['requested'] = True
@@ -105,12 +105,17 @@ def worker(args, *, execution=None):
         configure(); seed_training_rng(0)
         if parallel: torch.set_num_threads(1)
         environment = runtime()
-        accepted = json.loads((DIRECTORY/'phase39_report.json').read_text())['environment']
-        for key in ('python', 'torch', 'cuda', 'transformers', 'gpu', 'visible_memory_bytes'):
-            if environment[key] != accepted[key]: raise ValueError('Accepted runtime changed: '+key)
-        original_runtime = json.loads((DIRECTORY/'phase41_stop_acceptance.json').read_text())['latest'][NAME]['U0']['identity']['runtime']
-        if environment != original_runtime:
-            raise ValueError('Full recorded runtime changed: '+repr([k for k in environment if environment[k] != original_runtime.get(k)]))
+        migration = parallel and execution.get('original_donor_migration', False)
+        if migration:
+            from causalq.runtime.lora_migration import check_runtime
+            check_runtime(environment)
+        else:
+            accepted = json.loads((DIRECTORY/'phase39_report.json').read_text())['environment']
+            for key in ('python', 'torch', 'cuda', 'transformers', 'gpu', 'visible_memory_bytes'):
+                if environment[key] != accepted[key]: raise ValueError('Accepted runtime changed: '+key)
+            original_runtime = json.loads((DIRECTORY/'phase41_stop_acceptance.json').read_text())['latest'][NAME]['U0']['identity']['runtime']
+            if environment != original_runtime:
+                raise ValueError('Full recorded runtime changed: '+repr([k for k in environment if environment[k] != original_runtime.get(k)]))
         report['runtime'] = environment
         train, _ = build_source_datasets(args.data_root/'gta5', TrainTransform((512, 512)), SourceEvalTransform())
         backbone = build_backbone(NAME, args.pretrained_root)
@@ -121,10 +126,14 @@ def worker(args, *, execution=None):
         identity = identity_for(trainer, args, environment); report['identity'] = identity
         if parallel:
             identity['config_sha256'] = file_sha(ROOT/execution['config_path'])
-            identity['freeze_sha256'] = file_sha(DIRECTORY/'phase42_parallel_freeze.json')
+            identity['freeze_sha256'] = file_sha(ROOT/execution.get('freeze_path',
+                'experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json'))
             identity['parallel_policy_sha256'] = execution['policy_sha256']
             identity['performance_scope'] = 'whole_gpu_cohort'
             report['resolved_execution'] = execution
+        if migration:
+            from causalq.runtime.lora_migration import provenance, restore_or_migrate
+            identity['continuation_from'] = provenance(args.variant)
         previous = folder/'training_report.json'
         if previous.exists():
             old = json.loads(previous.read_text())
@@ -132,7 +141,11 @@ def worker(args, *, execution=None):
             if old.get('recovery_blocked'): raise ValueError('Return the failed invariant check for local review')
             if old.get('status') == 'needs_performance_review': raise ValueError('Return existing performance stop before retry')
             history = old.get('steady_window_history', []) + old.get('steady_windows', [])
-        initial = trainer.restore(folder/'checkpoints', identity)
+        if migration:
+            initial, report['state_transfer'] = restore_or_migrate(trainer, folder/'checkpoints', identity, args.variant)
+        else:
+            initial = trainer.restore(folder/'checkpoints', identity)
+        checkpoint_ready = True
         report['restored_step'] = initial
         if initial: record = trainer.commit(folder/'checkpoints', identity)
         write_json(folder/'resolved_config.json', {'config': config, 'identity': identity, 'execution_profile': profile})
@@ -230,7 +243,7 @@ def worker(args, *, execution=None):
         if report['status'] == 'starting': report['status'] = 'incomplete'
     except BaseException:
         report['error'] = traceback.format_exc(); report['status'] = 'failed'
-        if trainer is not None and 'identity' in report:
+        if trainer is not None and checkpoint_ready and 'identity' in report:
             try: record = trainer.commit(folder/'checkpoints', report['identity']) or record
             except Exception: report['checkpoint_error'] = traceback.format_exc()
     finally:
