@@ -1,0 +1,22 @@
+{
+  "phase": 42,
+  "mode": "new-hardware-recovery-gate",
+  "entrypoint": "python -m tools.check_lora_vgpu48_resume",
+  "formal_updates": 0,
+  "engineering_updates": 4,
+  "inventory_variants": ["U0", "UA", "C0", "CA"],
+  "recovery_variant": "CA",
+  "donor_committed_total": 3238,
+  "max_worker_seconds": 600,
+  "model_optimizer_atol": 0.000001,
+  "model_optimizer_rtol": 0.00001,
+  "input_rng": "exact",
+  "donor_mutation_allowed": false,
+  "engineering_state_eligible_for_formal": false,
+  "old_to_new_gpu_bitwise_claimed": false,
+  "formal_migration_released": false,
+  "target_access_allowed": false,
+  "local_tests": {"passed": 3, "seconds": 5.12, "full_suite_repeated": false},
+  "local_environment": {"python": "3.10.20", "torch": "2.10.0+cu128", "CUDA_VISIBLE_DEVICES": ""},
+  "next": "AutoDL disposable full-state restore and fresh-process recovery; return lightweight evidence"
+}

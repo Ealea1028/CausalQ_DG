@@ -1,6 +1,34 @@
 # Method contract
 
-## Active — Phase42 parallel execution revision
+## Active — Phase42 RTX4090/48GB migration verification
+
+Audit2c870469f336064795c901cc4a818a86e6377c1920d29a57a2d64565f1b43d10
+and its extracted/nested evidence are accepted. CUDA reports RTX4090/47.37GiB,
+SM128,capability8.9,BF16; CPU quota12. The four old payloads868/753/866/751
+match markers and original interrupted reports,base unchanged/adapters changed,
+untainted full updates,total3238. New failed reports stop at GPU identity check
+before model restoration/optimization. Old4-way execution had six accepted
+120-second windows at roughly33.4–33.55 source images/s and GPU median100;
+the new-GPU failure is not evidence of numerical corruption or a parallel failure.
+
+Only tools.check_lora_vgpu48_resume is released. Keep donor files/identities
+unchanged and hold original run/GPU locks. Allow exactly the audited GPU/memory
+and capability; require unchanged Python,Torch,CUDA,Transformers and full pip
+freeze. Record new full runtime and require it stable across probe processes.
+Strictly validate all four restored model/AdamW/RNG tensors and initial seed
+identities. On CA alone compare two continuous with one+one resumed updates,
+physical4/effective8,BF16,same absolute source inputs and40000-step HPI LR.
+Existing schema validators and mathematical update functions are reused.
+Tolerance remains atol1e-6/rtol1e-5 for model/optimizer/loss,native RNG and inputs
+must match exactly. Original W0 hashes must remain unchanged. Probe weights
+are never eligible for formal continuation; original3238 progress stays fixed.
+This gate executes4 engineering updates and zero formal updates,with a600s cap
+per process. No source/target metrics or target-data access occurs. No local
+real weights/checkpoints/images are loaded. Formal cross-SHA/runtime provenance
+and same48GB speed acceptance are released only after this GPU evidence returns;
+do not relabel donor runtime or apply the84GB throughput floor to the new GPU.
+
+## Archive — Phase42 parallel execution revision
 
 User requests maximizing the RTX6000D84GB instance and authorizes fresh restart
 instead of migrating the old0277d1e progress. Preserve that old run and all L0

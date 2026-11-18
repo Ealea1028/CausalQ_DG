@@ -2,7 +2,23 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase42 parallel restart on RTX6000D
+## Active — Phase42 new48GB GPU recovery gate
+
+Returned audit is accepted: CUDA reports RTX4090,50866487296 memory bytes,
+12 CPU cores,BF16 supported. Four cloned checkpoints at868/753/866/751 are
+hash-valid (3238 total); original interrupted reports confirm unchanged base
+and changed LoRA. The new-instance failure is the old strict GPU identity gate,
+before any new optimization. Preserve all donor files and their old identities.
+
+Release only a bounded new-GPU recovery check: validate/load all four states,
+then CA two continuous versus1+1 fresh-process updates on temporary copies.
+Four engineering updates,zero formal updates; no new-GPU numerical equivalence
+with the old GPU is claimed. Software/Python/Torch/CUDA/Transformers/pip remain
+locked while the exact audited GPU is explicitly permitted. Return evidence
+before formal migration and a new48GB throughput policy. Per user preference,
+only necessary focused local tests; no repeated full suite or local DINO loads.
+
+## Archive — Phase42 parallel restart on RTX6000D
 
 User authorizes a fresh parallel restart and preserves the old0277d1e outputs.
 U0/UA/C0/CA remain independent seed0/40000-step LoRA models,total160000 updates.

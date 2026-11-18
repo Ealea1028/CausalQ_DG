@@ -51,6 +51,7 @@ experiments/*/logs/
 /phase39_export/
 /phase40_export/
 /phase41_export/
+/phase42_export/
 
 # Local-only experiment plans and project/agent/AutoDL operating guides
 *[Pp][Ll][Aa][Nn].md

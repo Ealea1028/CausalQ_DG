@@ -1,0 +1,780 @@
+{
+  "phase": 42,
+  "action": "vgpu48-recovery-gate",
+  "audit_accepted": true,
+  "archive_sha256": "2c870469f336064795c901cc4a818a86e6377c1920d29a57a2d64565f1b43d10",
+  "audit_sha256": "5a472cf5c52373d880c316816e89c324b69401521aab45cfafe6cb600107c68c",
+  "evidence_sha256": "51aeffa7790353bfed8d4095d170e4a8e54d87c6104d726104253d8e42778355",
+  "source_producer": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+  "source_root": "/root/autodl-tmp/outputs/CausalQ_DG/lora_causalq_1114/phase42_parallel_d3_l1_fa9a7b2",
+  "target_gpu": {
+    "name": "NVIDIA GeForce RTX 4090",
+    "memory_bytes": 50866487296,
+    "capability": [
+      8,
+      9
+    ],
+    "sm_count": 128,
+    "bf16_supported": true,
+    "free_total_bytes": [
+      50452168704,
+      50866487296
+    ]
+  },
+  "target_host": {
+    "cpu_budget": 12,
+    "available_host_bytes": 96037306368,
+    "dev_shm_free_bytes": 48318382080
+  },
+  "target_python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+  "target_torch": "2.7.0+cu128",
+  "target_cuda_build": "12.8",
+  "donors": {
+    "U0": {
+      "step": 868,
+      "identity": {
+        "study": "lora_causalq_1114",
+        "phase": 42,
+        "backbone": "dinov3_vitl16",
+        "variant": "U0",
+        "lora_enabled": true,
+        "lora": {
+          "blocks_zero_based": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "rank": 4,
+          "alpha_lora": 4.0,
+          "targets": [
+            {
+              "path": "model.layer.18.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.18.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            }
+          ],
+          "trainable_parameters": 98304
+        },
+        "centered": false,
+        "anchor_cqe": false,
+        "training_producer_git_sha": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+        "freeze_sha256": "2ae7d1b81485ce3b8a93d18db49af1476c1c90170c266c8bdeea57939bfaece5",
+        "config_sha256": "5f897163dfc0b51de320deead7fbb133172cb60d5f9bef424b5a0db71d864afb",
+        "execution_profile_sha256": "79d32124459f9ee6e0b373171fb7b9047f16f545c8410e5e7afddf5045bd27c1",
+        "phase39_report_sha256": "a3f034fdacfb48abba95b2f28b5dac20535cd646fc974926b6307afd27954a0d",
+        "source_manifests": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "source_stream": "hpi_step_sha256_v1",
+        "data_root": "/root/autodl-tmp/datasets",
+        "pretrained_root": "/root/autodl-tmp/pretrained",
+        "runtime": {
+          "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+          "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu128",
+          "cuda": "12.8",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA RTX 6000D",
+          "visible_memory_bytes": 89173131264,
+          "driver": "595.71.05",
+          "pip_freeze": [
+            "certifi==2026.10.23",
+            "charset-normalizer==3.5.2",
+            "filelock==4.2.4",
+            "fsspec==2026.9.0",
+            "hf-xet==1.8.0",
+            "huggingface_hub==0.36.2",
+            "idna==3.20",
+            "Jinja2==3.1.6",
+            "MarkupSafe==3.0.3",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==1.26.4",
+            "nvidia-cublas-cu12==12.8.3.14",
+            "nvidia-cuda-cupti-cu12==12.8.57",
+            "nvidia-cuda-nvrtc-cu12==12.8.61",
+            "nvidia-cuda-runtime-cu12==12.8.57",
+            "nvidia-cudnn-cu12==9.7.1.26",
+            "nvidia-cufft-cu12==11.3.3.41",
+            "nvidia-cufile-cu12==1.13.0.11",
+            "nvidia-curand-cu12==10.3.9.55",
+            "nvidia-cusolver-cu12==11.7.2.55",
+            "nvidia-cusparse-cu12==12.5.7.53",
+            "nvidia-cusparselt-cu12==0.6.3",
+            "nvidia-nccl-cu12==2.26.2",
+            "nvidia-nvjitlink-cu12==12.8.61",
+            "nvidia-nvtx-cu12==12.8.55",
+            "packaging==26.3",
+            "pillow==11.1.0",
+            "py-spy==0.4.3",
+            "PyYAML==6.0.2",
+            "regex==2026.11.9",
+            "requests==2.34.2",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.7.0+cu128",
+            "torchvision==0.22.0+cu128",
+            "tqdm==4.70.1",
+            "transformers==4.56.1",
+            "triton==3.3.0",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "wheel==0.48.0"
+          ]
+        },
+        "seed": 0,
+        "effective_source_batch": 8,
+        "microbatch": 4,
+        "horizon": 40000,
+        "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+        "initial_adapter_sha256": "98345b9400fa5ffc95c2887ded402e5c12beafc2b1a7b9169d31c0158be3f6cc",
+        "rng_initialization": "python_numpy_torch_seed0_v1",
+        "optimizer_recipe": "hpi_40k_poly09_warm1500_ratio1e-6_wd1e-5_norm0_v1",
+        "parallel_policy_sha256": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
+        "performance_scope": "whole_gpu_cohort"
+      },
+      "expected_sha256": "33c950f904ee8079d2df370bfc958af8a9b70297aa97bd55b2c9d5fd2907d9b6",
+      "hash_ok": true,
+      "bytes": 46839215
+    },
+    "UA": {
+      "step": 753,
+      "identity": {
+        "study": "lora_causalq_1114",
+        "phase": 42,
+        "backbone": "dinov3_vitl16",
+        "variant": "UA",
+        "lora_enabled": true,
+        "lora": {
+          "blocks_zero_based": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "rank": 4,
+          "alpha_lora": 4.0,
+          "targets": [
+            {
+              "path": "model.layer.18.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.18.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            }
+          ],
+          "trainable_parameters": 98304
+        },
+        "centered": false,
+        "anchor_cqe": true,
+        "training_producer_git_sha": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+        "freeze_sha256": "2ae7d1b81485ce3b8a93d18db49af1476c1c90170c266c8bdeea57939bfaece5",
+        "config_sha256": "5f897163dfc0b51de320deead7fbb133172cb60d5f9bef424b5a0db71d864afb",
+        "execution_profile_sha256": "79d32124459f9ee6e0b373171fb7b9047f16f545c8410e5e7afddf5045bd27c1",
+        "phase39_report_sha256": "a3f034fdacfb48abba95b2f28b5dac20535cd646fc974926b6307afd27954a0d",
+        "source_manifests": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "source_stream": "hpi_step_sha256_v1",
+        "data_root": "/root/autodl-tmp/datasets",
+        "pretrained_root": "/root/autodl-tmp/pretrained",
+        "runtime": {
+          "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+          "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu128",
+          "cuda": "12.8",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA RTX 6000D",
+          "visible_memory_bytes": 89173131264,
+          "driver": "595.71.05",
+          "pip_freeze": [
+            "certifi==2026.10.23",
+            "charset-normalizer==3.5.2",
+            "filelock==4.2.4",
+            "fsspec==2026.9.0",
+            "hf-xet==1.8.0",
+            "huggingface_hub==0.36.2",
+            "idna==3.20",
+            "Jinja2==3.1.6",
+            "MarkupSafe==3.0.3",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==1.26.4",
+            "nvidia-cublas-cu12==12.8.3.14",
+            "nvidia-cuda-cupti-cu12==12.8.57",
+            "nvidia-cuda-nvrtc-cu12==12.8.61",
+            "nvidia-cuda-runtime-cu12==12.8.57",
+            "nvidia-cudnn-cu12==9.7.1.26",
+            "nvidia-cufft-cu12==11.3.3.41",
+            "nvidia-cufile-cu12==1.13.0.11",
+            "nvidia-curand-cu12==10.3.9.55",
+            "nvidia-cusolver-cu12==11.7.2.55",
+            "nvidia-cusparse-cu12==12.5.7.53",
+            "nvidia-cusparselt-cu12==0.6.3",
+            "nvidia-nccl-cu12==2.26.2",
+            "nvidia-nvjitlink-cu12==12.8.61",
+            "nvidia-nvtx-cu12==12.8.55",
+            "packaging==26.3",
+            "pillow==11.1.0",
+            "py-spy==0.4.3",
+            "PyYAML==6.0.2",
+            "regex==2026.11.9",
+            "requests==2.34.2",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.7.0+cu128",
+            "torchvision==0.22.0+cu128",
+            "tqdm==4.70.1",
+            "transformers==4.56.1",
+            "triton==3.3.0",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "wheel==0.48.0"
+          ]
+        },
+        "seed": 0,
+        "effective_source_batch": 8,
+        "microbatch": 4,
+        "horizon": 40000,
+        "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+        "initial_adapter_sha256": "98345b9400fa5ffc95c2887ded402e5c12beafc2b1a7b9169d31c0158be3f6cc",
+        "rng_initialization": "python_numpy_torch_seed0_v1",
+        "optimizer_recipe": "hpi_40k_poly09_warm1500_ratio1e-6_wd1e-5_norm0_v1",
+        "parallel_policy_sha256": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
+        "performance_scope": "whole_gpu_cohort"
+      },
+      "expected_sha256": "34c171da93f0334d8f0f4ff3844c540e9636f66da15b0f9fcfece37ad4cae066",
+      "hash_ok": true,
+      "bytes": 46839215
+    },
+    "C0": {
+      "step": 866,
+      "identity": {
+        "study": "lora_causalq_1114",
+        "phase": 42,
+        "backbone": "dinov3_vitl16",
+        "variant": "C0",
+        "lora_enabled": true,
+        "lora": {
+          "blocks_zero_based": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "rank": 4,
+          "alpha_lora": 4.0,
+          "targets": [
+            {
+              "path": "model.layer.18.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.18.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            }
+          ],
+          "trainable_parameters": 98304
+        },
+        "centered": true,
+        "anchor_cqe": false,
+        "training_producer_git_sha": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+        "freeze_sha256": "2ae7d1b81485ce3b8a93d18db49af1476c1c90170c266c8bdeea57939bfaece5",
+        "config_sha256": "5f897163dfc0b51de320deead7fbb133172cb60d5f9bef424b5a0db71d864afb",
+        "execution_profile_sha256": "79d32124459f9ee6e0b373171fb7b9047f16f545c8410e5e7afddf5045bd27c1",
+        "phase39_report_sha256": "a3f034fdacfb48abba95b2f28b5dac20535cd646fc974926b6307afd27954a0d",
+        "source_manifests": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "source_stream": "hpi_step_sha256_v1",
+        "data_root": "/root/autodl-tmp/datasets",
+        "pretrained_root": "/root/autodl-tmp/pretrained",
+        "runtime": {
+          "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+          "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu128",
+          "cuda": "12.8",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA RTX 6000D",
+          "visible_memory_bytes": 89173131264,
+          "driver": "595.71.05",
+          "pip_freeze": [
+            "certifi==2026.10.23",
+            "charset-normalizer==3.5.2",
+            "filelock==4.2.4",
+            "fsspec==2026.9.0",
+            "hf-xet==1.8.0",
+            "huggingface_hub==0.36.2",
+            "idna==3.20",
+            "Jinja2==3.1.6",
+            "MarkupSafe==3.0.3",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==1.26.4",
+            "nvidia-cublas-cu12==12.8.3.14",
+            "nvidia-cuda-cupti-cu12==12.8.57",
+            "nvidia-cuda-nvrtc-cu12==12.8.61",
+            "nvidia-cuda-runtime-cu12==12.8.57",
+            "nvidia-cudnn-cu12==9.7.1.26",
+            "nvidia-cufft-cu12==11.3.3.41",
+            "nvidia-cufile-cu12==1.13.0.11",
+            "nvidia-curand-cu12==10.3.9.55",
+            "nvidia-cusolver-cu12==11.7.2.55",
+            "nvidia-cusparse-cu12==12.5.7.53",
+            "nvidia-cusparselt-cu12==0.6.3",
+            "nvidia-nccl-cu12==2.26.2",
+            "nvidia-nvjitlink-cu12==12.8.61",
+            "nvidia-nvtx-cu12==12.8.55",
+            "packaging==26.3",
+            "pillow==11.1.0",
+            "py-spy==0.4.3",
+            "PyYAML==6.0.2",
+            "regex==2026.11.9",
+            "requests==2.34.2",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.7.0+cu128",
+            "torchvision==0.22.0+cu128",
+            "tqdm==4.70.1",
+            "transformers==4.56.1",
+            "triton==3.3.0",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "wheel==0.48.0"
+          ]
+        },
+        "seed": 0,
+        "effective_source_batch": 8,
+        "microbatch": 4,
+        "horizon": 40000,
+        "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+        "initial_adapter_sha256": "98345b9400fa5ffc95c2887ded402e5c12beafc2b1a7b9169d31c0158be3f6cc",
+        "rng_initialization": "python_numpy_torch_seed0_v1",
+        "optimizer_recipe": "hpi_40k_poly09_warm1500_ratio1e-6_wd1e-5_norm0_v1",
+        "parallel_policy_sha256": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
+        "performance_scope": "whole_gpu_cohort"
+      },
+      "expected_sha256": "1f0c15ab8a42e4453d5a92119ecc980dc0c52f8a85e6cf3245539557953647eb",
+      "hash_ok": true,
+      "bytes": 46839215
+    },
+    "CA": {
+      "step": 751,
+      "identity": {
+        "study": "lora_causalq_1114",
+        "phase": 42,
+        "backbone": "dinov3_vitl16",
+        "variant": "CA",
+        "lora_enabled": true,
+        "lora": {
+          "blocks_zero_based": [
+            18,
+            19,
+            20,
+            21,
+            22,
+            23
+          ],
+          "rank": 4,
+          "alpha_lora": 4.0,
+          "targets": [
+            {
+              "path": "model.layer.18.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.18.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.19.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.20.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.21.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.22.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.q_proj",
+              "components": [
+                "q"
+              ]
+            },
+            {
+              "path": "model.layer.23.attention.v_proj",
+              "components": [
+                "v"
+              ]
+            }
+          ],
+          "trainable_parameters": 98304
+        },
+        "centered": true,
+        "anchor_cqe": true,
+        "training_producer_git_sha": "fa9a7b2c56558fc1bb1e71c558ea9f01fb8aeedd",
+        "freeze_sha256": "2ae7d1b81485ce3b8a93d18db49af1476c1c90170c266c8bdeea57939bfaece5",
+        "config_sha256": "5f897163dfc0b51de320deead7fbb133172cb60d5f9bef424b5a0db71d864afb",
+        "execution_profile_sha256": "79d32124459f9ee6e0b373171fb7b9047f16f545c8410e5e7afddf5045bd27c1",
+        "phase39_report_sha256": "a3f034fdacfb48abba95b2f28b5dac20535cd646fc974926b6307afd27954a0d",
+        "source_manifests": {
+          "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+          "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+        },
+        "source_stream": "hpi_step_sha256_v1",
+        "data_root": "/root/autodl-tmp/datasets",
+        "pretrained_root": "/root/autodl-tmp/pretrained",
+        "runtime": {
+          "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+          "platform": "Linux-5.15.0-78-generic-x86_64-with-glibc2.35",
+          "torch": "2.7.0+cu128",
+          "cuda": "12.8",
+          "transformers": "4.56.1",
+          "gpu": "NVIDIA RTX 6000D",
+          "visible_memory_bytes": 89173131264,
+          "driver": "595.71.05",
+          "pip_freeze": [
+            "certifi==2026.10.23",
+            "charset-normalizer==3.5.2",
+            "filelock==4.2.4",
+            "fsspec==2026.9.0",
+            "hf-xet==1.8.0",
+            "huggingface_hub==0.36.2",
+            "idna==3.20",
+            "Jinja2==3.1.6",
+            "MarkupSafe==3.0.3",
+            "mpmath==1.3.0",
+            "networkx==3.7",
+            "numpy==1.26.4",
+            "nvidia-cublas-cu12==12.8.3.14",
+            "nvidia-cuda-cupti-cu12==12.8.57",
+            "nvidia-cuda-nvrtc-cu12==12.8.61",
+            "nvidia-cuda-runtime-cu12==12.8.57",
+            "nvidia-cudnn-cu12==9.7.1.26",
+            "nvidia-cufft-cu12==11.3.3.41",
+            "nvidia-cufile-cu12==1.13.0.11",
+            "nvidia-curand-cu12==10.3.9.55",
+            "nvidia-cusolver-cu12==11.7.2.55",
+            "nvidia-cusparse-cu12==12.5.7.53",
+            "nvidia-cusparselt-cu12==0.6.3",
+            "nvidia-nccl-cu12==2.26.2",
+            "nvidia-nvjitlink-cu12==12.8.61",
+            "nvidia-nvtx-cu12==12.8.55",
+            "packaging==26.3",
+            "pillow==11.1.0",
+            "py-spy==0.4.3",
+            "PyYAML==6.0.2",
+            "regex==2026.11.9",
+            "requests==2.34.2",
+            "safetensors==0.8.0",
+            "setuptools==84.2.1",
+            "sympy==1.14.0",
+            "tokenizers==0.22.2",
+            "torch==2.7.0+cu128",
+            "torchvision==0.22.0+cu128",
+            "tqdm==4.70.1",
+            "transformers==4.56.1",
+            "triton==3.3.0",
+            "typing_extensions==4.16.0",
+            "urllib3==2.8.0",
+            "wheel==0.48.0"
+          ]
+        },
+        "seed": 0,
+        "effective_source_batch": 8,
+        "microbatch": 4,
+        "horizon": 40000,
+        "initial_head_sha256": "f95c6100d57a9161a6c05ffc76914b3f6602fab11634d61081f74783ae5274d6",
+        "initial_adapter_sha256": "98345b9400fa5ffc95c2887ded402e5c12beafc2b1a7b9169d31c0158be3f6cc",
+        "rng_initialization": "python_numpy_torch_seed0_v1",
+        "optimizer_recipe": "hpi_40k_poly09_warm1500_ratio1e-6_wd1e-5_norm0_v1",
+        "parallel_policy_sha256": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
+        "performance_scope": "whole_gpu_cohort"
+      },
+      "expected_sha256": "15c6f7432f2e342e376f62e13e6e0d99b1df02f2b60c1106835b68114c01539c",
+      "hash_ok": true,
+      "bytes": 46839215
+    }
+  },
+  "committed_total": 3238,
+  "confirmed_failure": "strict GPU identity mismatch before any new-instance optimization",
+  "original_good_parallel_windows": 6,
+  "old_parallel_source_images_per_second": [
+    33.54656570422599,
+    33.54914326816492,
+    33.539869160585845,
+    33.40842827094549,
+    33.4963865096079,
+    33.5325551914383
+  ],
+  "gate": {
+    "variant": "CA",
+    "continuous_updates": 2,
+    "prefix_updates": 1,
+    "resume_updates": 1,
+    "atol": 1e-06,
+    "rtol": 1e-05,
+    "formal_updates": 0,
+    "disposable_state_never_formal": true
+  },
+  "limitations": [
+    "new GPU does not imply bitwise continuation of old GPU kernels",
+    "do not use original84GB speed threshold on the new GPU",
+    "formal migration remains pending GPU recovery evidence"
+  ]
+}
