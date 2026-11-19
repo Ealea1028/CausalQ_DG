@@ -1,6 +1,55 @@
 # Method contract
 
-## Active — Phase42 accepted original-state continuation on48GB
+## Active — Phase43 DINOv2 core LoRA on accepted48GB GPU
+
+Phase42 completion is accepted by outer/member/201 included-metadata hashes,
+six nonoverlapping attempt cursor intervals,final40000 markers/reports and their
+original-donor lineage. Producer isf2ecf467f6b2f61a668e3eac4039b10753532a99;
+archivead9e3cbcbb94eff994eac9a908c35359e631c4af086c3f9aaccf5b3320212bb7.
+The156762 new updates plus3238 preserved steps equal160000. No tensor payload
+is downloaded or loaded locally; its SHA and saved identity are pinned from
+producer-validated native checkpoints. Metrics are still deferred,not invented.
+Four-way-labelled median throughput24.2859 images/s versus UA21.8958 gives
+1.1092 ratio;GPU median100%,lowest window p1089%,memory max0.27570. There are
+428 good windows and one late failed window. Atfallback onlyCA39945 remains;
+55 final updates finish without an additional120-second window. Retain that
+failed performance record and the full-state continuation; no retraining is needed.
+
+The sole active phase becomes43: DINOv2 ViT-L/14 using its accepted HPI-p16
+conversion,independent fresh U0/UA/C0/CA LoRA models,seed0,40000 each,total160000.
+Use the same original weight SHA from Phase39,the same98304 rank4/alpha4 Q/V
+parameters in blocks18-23,and the identical CausalQ/CQE/HPI recipe. No D3/L0
+trained head or adapter is an initializer. Check common initial head/adapter
+digests across all four finals. D2 Patch/CLS/4maps use the existing wrapper;
+its native forward and optimization functions remain unchanged. First formal
+forward records Patch[4,1024,1024]/CLS[4,1024],A/B gradient checks at1/20,
+unchanged frozen-base digest and changed final adapter are required.
+
+Reuse the accepted independent-worker coordinator with explicit phase/backbone
+namespaces. Existing Phase42 APIs/defaults remain42/D3. Phase43 checkpoint
+identities,progress hints,completed-model skipping and packages bind43/D2 and
+the exact new producer/config/freeze/policy. A foreign phase/backbone is rejected.
+Only same-release Phase43 checkpoints resume; fresh starts have no donor import.
+Hold GPU,new run and accepted D3 reference run locks; hash all four D3 finals
+before and after D2 training,never load those trained heads into D2. Preserve
+all L1 states,original donors and the retained D3 U0 L0 final.
+
+Require the full accepted Phase42 software/driver/runtime and audited CUDA
+cap8.9/SM128/BF16. Reuse physical4/effective8,raw-input two-slot prefetch and
+cgroup/CPU/RAM/shm budgets. On12 cores four jobs use2 loaders/job. Measure a
+new D2 single-UA120-second window after20 retained formal updates,then prefer4
+with private MPS. Never use the D3 speed as D2's performance floor. Same targets:
+>=95% same-D2-UA speed,GPU median>=70/p10>=60,>=100 samples,mean wait<10%,
+whole-GPU memory<=85%. Save complete states before4->2->1 fallback on OOM or
+performance failure; stop on other errors. No throwaway pilot or L0 training.
+
+Local verification passes24 focused CPU synthetic namespace/checkpoint/reference/
+scheduling checks in11.95s; the old full suite is not repeated. Next verification is AutoDL real D2 LoRA forward/backward,training
+and performance inside the formal run. No local CUDA/real-weight/data work.
+Phase44 B-series,45 source mIoU/variance/responsibility/joint PCA and46 target
+metrics remain later phases and cannot be automatically chained by this launcher.
+
+## Completed — Phase42 accepted original-state continuation on48GB
 
 Recovery gate04c1d2f passes,archive SHA256
 36e54ac3b781172f2cc4bd18262231427f29850e912a62a0ddafba6ec16a5c16.

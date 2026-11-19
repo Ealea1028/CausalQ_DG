@@ -73,7 +73,8 @@ def baseline_record(args, result, mps_enabled):
             or not model.get('base_unchanged') or model.get('tainted_update')
             or model['committed_step'] <= model['restored_step']):
         raise ValueError('UA calibration did not save a valid full-update boundary')
-    return {'git_sha': args.expected_sha, 'policy_sha256': file_sha(POLICY),
+    return {'git_sha': args.expected_sha, 'policy_sha256': file_sha(getattr(args, 'policy_path', POLICY)),
+            'phase': getattr(args, 'phase', 42), 'backbone': getattr(args, 'backbone_name', 'dinov3_vitl16'),
             'runtime': model['runtime'], 'mps_enabled': mps_enabled, 'variant': 'UA',
             'window': window, 'source_images_per_second': window['aggregate_source_images_per_second'],
             'initial_step': model['restored_step'], 'committed_step': model['committed_step'],
@@ -84,7 +85,9 @@ def load_baseline(path, args, mps_enabled):
     if not path.exists(): return None
     record = json.loads(path.read_text())
     rate = record['source_images_per_second']
-    if (record['git_sha'] != args.expected_sha or record['policy_sha256'] != file_sha(POLICY)
+    if (record['git_sha'] != args.expected_sha or record['policy_sha256'] != file_sha(getattr(args, 'policy_path', POLICY))
+            or record.get('phase', 42) != getattr(args, 'phase', 42)
+            or record.get('backbone', 'dinov3_vitl16') != getattr(args, 'backbone_name', 'dinov3_vitl16')
             or record['mps_enabled'] != mps_enabled or not record['all_updates_formal']
             or not math.isfinite(rate) or rate <= 0):
         raise ValueError('Stored single-UA calibration identity changed')

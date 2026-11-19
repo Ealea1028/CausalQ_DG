@@ -1,0 +1,37 @@
+{
+  "phase": 43,
+  "backbone": "dinov2_vitl14",
+  "default_jobs": 4,
+  "allowed_jobs": [
+    4,
+    2,
+    1
+  ],
+  "visible_memory_bytes": 50866487296,
+  "minimum_baseline_fraction": 0.95,
+  "baseline": "DINOv2 UA on this GPU/runtime/MPS; first120s after20 formal updates; all updates retained",
+  "d3_baseline_reused": false,
+  "fresh_initialization": true,
+  "trained_l0_or_d3_initialization": false,
+  "same_microbatch": 4,
+  "same_effective_source_batch": 8,
+  "gpu_median_min": 70,
+  "gpu_p10_min": 60,
+  "telemetry_samples_min": 100,
+  "maximum_memory_fraction": 0.85,
+  "maximum_mean_data_wait_fraction": 0.1,
+  "fallback": "save complete native state then4->2->1 only on OOM/performance failure; preserve LR/AdamW/RNG/cursor",
+  "formal_updates_total": 160000,
+  "steps_per_model": 40000,
+  "variants": [
+    "U0",
+    "UA",
+    "C0",
+    "CA"
+  ],
+  "reference_policy": "hash-pin and preserve four accepted Phase42 finals; never load their trained heads into D2",
+  "checkpoint_retention": "retain all L1 segments and protected D3 U0 L0 reference",
+  "diagnostics_phase": 45,
+  "target_evaluation_phase": 46,
+  "next_phase_automatic": false
+}

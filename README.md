@@ -2,7 +2,29 @@
 
 Experiment plans, project/agent instructions and AutoDL operating handoffs are kept locally and excluded from Git. Source code, configurations, method definitions and experiment evidence remain versioned.
 
-## Active — Phase42 accepted48GB formal continuation
+## Active — Phase43 fresh DINOv2 core LoRA training
+
+Phase42 is accepted from archive
+ad9e3cbcbb94eff994eac9a908c35359e631c4af086c3f9aaccf5b3320212bb7:
+four D3 finals40000 each,total160000;156762 new updates plus3238 original.
+All final reports/markers/provenance agree,base unchanged,adapters changed,
+Patch/CLS intact,no target access. Four-way median24.2859 source images/s is
+1.1092 times the same-GPU UA21.8958 baseline,GPU median100%,memory max27.57%.
+428/429 four-job-labelled windows pass; the final failed window triggers saved
+fallback atCA39945,then its remaining55 updates complete. This is not a claim
+that the final short tail obtained another120-second performance measurement.
+
+Only Phase43 is released next: fresh seed0 DINOv2 HPI-p16 U0/UA/C0/CA LoRA,
+40000 updates each. Reuse the accepted LoRA/CausalQ/HPI/micro4/effective8 math;
+never initialize from a trained D3 or retired L0 head. Hash-pin and preserve
+all four D3 finals under their run lock. Measure a new D2 UA formal baseline
+on the accepted48GB GPU,then prefer4 jobs with private MPS,actual loader budgets
+and saved4->2->1 fallback. All calibration updates count toward the model horizon.
+Record D2 Patch/CLS,gradient probes,frozen W0,adapter change and full recovery
+states during formal training. No local real weights/data or disposable pilot.
+Source diagnostics/PCA wait for45,target evaluation46; do not start44 automatically.
+
+## Completed — Phase42 accepted48GB formal continuation
 
 New-GPU gate archive36e54ac3b781172f2cc4bd18262231427f29850e912a62a0ddafba6ec16a5c16
 is accepted: all four state transfers are exact; CA continuous2 versus1+1

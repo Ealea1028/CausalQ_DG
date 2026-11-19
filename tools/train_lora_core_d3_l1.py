@@ -39,13 +39,21 @@ def git_sha():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'], text=True).strip()
 
 
-def identity_for(trainer, args, environment):
-    return {'study': 'lora_causalq_1114', 'phase': 42, 'backbone': NAME, 'variant': args.variant,
+def identity_for(trainer, args, environment, *, phase=42, backbone_name=NAME):
+    freeze = DIRECTORY/'phase42_freeze.json'
+    config = ROOT/'configs/lora_causalq_1114/phase42_core_d3_l1.json'
+    if phase == 43:
+        from causalq.runtime.lora_phase43 import FREEZE, CONFIG, NAME as D2_NAME
+        if backbone_name != D2_NAME: raise ValueError('Phase43 identity requires DINOv2')
+        freeze, config = FREEZE, ROOT/CONFIG
+    elif phase != 42 or backbone_name != NAME:
+        raise ValueError('Unknown core identity phase/backbone')
+    return {'study': 'lora_causalq_1114', 'phase': phase, 'backbone': backbone_name, 'variant': args.variant,
             'lora_enabled': True, 'lora': trainer.model.backbone.lora_manifest,
             'centered': args.variant in ('C0', 'CA'), 'anchor_cqe': args.variant in ('UA', 'CA'),
             'training_producer_git_sha': args.expected_sha,
-            'freeze_sha256': file_sha(DIRECTORY/'phase42_freeze.json'),
-            'config_sha256': file_sha(ROOT/'configs/lora_causalq_1114/phase42_core_d3_l1.json'),
+            'freeze_sha256': file_sha(freeze),
+            'config_sha256': file_sha(config),
             'execution_profile_sha256': file_sha(DIRECTORY/'execution_profile.json'),
             'phase39_report_sha256': file_sha(DIRECTORY/'phase39_report.json'),
             'source_manifests': MANIFEST_HASHES, 'source_stream': 'hpi_step_sha256_v1',
@@ -81,16 +89,25 @@ def adapter_gradients(model):
 
 
 def worker(args, *, execution=None):
-    config, _ = load_contract()
     parallel = execution is not None
+    phase = execution.get('phase', 42) if parallel else 42
+    backbone_name = execution.get('backbone', NAME) if parallel else NAME
+    if phase == 43:
+        from causalq.runtime.lora_phase43 import load_contract as d2_contract, NAME as D2_NAME
+        if backbone_name != D2_NAME or execution.get('original_donor_migration'):
+            raise ValueError('Phase43 requires fresh DINOv2 models')
+        config, _ = d2_contract()
+    else:
+        if phase != 42 or backbone_name != NAME: raise ValueError('Unknown core execution')
+        config, _ = load_contract()
     if parallel: config = json.loads((ROOT/execution['config_path']).read_text())
     profile = execution['profile'] if parallel else json.loads((DIRECTORY/'execution_profile.json').read_text())
     folder = args.output/args.variant
     folder.mkdir(parents=True, exist_ok=True)
     attempt = folder/'attempts'/uuid.uuid4().hex
     attempt.mkdir(parents=True)
-    report = {'study': 'lora_causalq_1114', 'phase': 42, 'git_sha': args.expected_sha,
-              'variant': args.variant, 'backbone': NAME, 'ok': False, 'status': 'starting',
+    report = {'study': 'lora_causalq_1114', 'phase': phase, 'git_sha': args.expected_sha,
+              'variant': args.variant, 'backbone': backbone_name, 'ok': False, 'status': 'starting',
               'lora_enabled': True, 'target_data_accessed': False, 'source_miou': None, 'target_miou': None,
               'source_diagnostics_deferred_to_phase45': True, 'attempt_directory': str(attempt),
               'formal_optimizer_updates_this_invocation': 0, 'checkpoint_retention': 'all segments; conservative full-history budget'}
@@ -106,7 +123,10 @@ def worker(args, *, execution=None):
         if parallel: torch.set_num_threads(1)
         environment = runtime()
         migration = parallel and execution.get('original_donor_migration', False)
-        if migration:
+        if phase == 43:
+            from causalq.runtime.lora_phase43 import check_runtime
+            check_runtime(environment)
+        elif migration:
             from causalq.runtime.lora_migration import check_runtime
             check_runtime(environment)
         else:
@@ -118,12 +138,13 @@ def worker(args, *, execution=None):
                 raise ValueError('Full recorded runtime changed: '+repr([k for k in environment if environment[k] != original_runtime.get(k)]))
         report['runtime'] = environment
         train, _ = build_source_datasets(args.data_root/'gta5', TrainTransform((512, 512)), SourceEvalTransform())
-        backbone = build_backbone(NAME, args.pretrained_root)
+        backbone = build_backbone(backbone_name, args.pretrained_root)
         model = core_l1_head(backbone, args.variant)
         if backbone.lora_manifest['trainable_parameters'] != 98304:
             raise ValueError('Expected exactly98304 LoRA parameters')
         trainer = L1Trainer(model, args.variant)
-        identity = identity_for(trainer, args, environment); report['identity'] = identity
+        identity = identity_for(trainer, args, environment, phase=phase, backbone_name=backbone_name)
+        report['identity'] = identity
         if parallel:
             identity['config_sha256'] = file_sha(ROOT/execution['config_path'])
             identity['freeze_sha256'] = file_sha(ROOT/execution.get('freeze_path',
@@ -134,6 +155,10 @@ def worker(args, *, execution=None):
         if migration:
             from causalq.runtime.lora_migration import provenance, restore_or_migrate
             identity['continuation_from'] = provenance(args.variant)
+        if phase == 43:
+            identity['initialization'] = 'fresh_common_seed0_head_and_zero_delta_lora'
+            identity['phase42_acceptance_sha256'] = file_sha(DIRECTORY/'phase42_completion_acceptance.json')
+            identity['trained_l0_or_d3_initialization'] = False
         previous = folder/'training_report.json'
         if previous.exists():
             old = json.loads(previous.read_text())
@@ -194,12 +219,12 @@ def worker(args, *, execution=None):
                         wait_start = pipeline.total_data_wait_seconds
                     if ticks % 50 == 0:
                         summary = torch.stack(recent).float().mean(0).cpu().tolist(); recent.clear()
-                        write_json(folder/'progress.json', {'phase': 42, 'variant': args.variant, 'status': 'running',
+                        write_json(folder/'progress.json', {'phase': phase, 'variant': args.variant, 'status': 'running',
                             'git_sha': args.expected_sha, 'step_in_memory': trainer.step,
                             'committed_step': record['step'] if record else 0,
                             'loss_and_gradient_norm_mean': summary, 'attempt_directory': str(attempt),
                             'seconds': time.monotonic()-started})
-                        print(NAME, args.variant, 'step', trainer.step, 'committed', record['step'] if record else 0, flush=True)
+                        print(backbone_name, args.variant, 'step', trainer.step, 'committed', record['step'] if record else 0, flush=True)
                     end = time.monotonic()-monitor.started
                     active = end-window_start-sum(b-a for a, b in pauses) if window_start is not None else 0.
                     if not parallel and window_start is not None and active >= profile['steady_seconds']:
@@ -269,16 +294,16 @@ def worker(args, *, execution=None):
     return report['exit_code']
 
 
-def hints(output, sha):
+def hints(output, sha, *, phase=42, backbone=NAME):
     cursors = {}
     for variant in VARIANTS:
         steps = []
         for path in (output/variant/'checkpoints').glob('*/complete.json'):
             marker = json.loads(path.read_text()); identity = marker['identity']; step = marker['step']
-            if (identity.get('training_producer_git_sha') != sha or identity.get('phase') != 42
-                    or identity.get('variant') != variant or identity.get('backbone') != NAME
+            if (identity.get('training_producer_git_sha') != sha or identity.get('phase') != phase
+                    or identity.get('variant') != variant or identity.get('backbone') != backbone
                     or identity.get('lora_enabled') is not True or type(step) is not int or not 0 < step <= 40000):
-                raise ValueError('Unexpected existing Phase42 checkpoint')
+                raise ValueError(f'Unexpected existing Phase{phase} checkpoint')
             steps.append(step)
         cursors[variant] = max(steps, default=0)
     return cursors
@@ -421,12 +446,12 @@ def package(output, archive):
     print('Archive:', archive, 'SHA256:', file_sha(archive))
 
 
-def status(output, sha):
+def status(output, sha, *, phase=42, backbone=NAME):
     path = output/'report.json'
     report = json.loads(path.read_text()) if path.exists() else {'status': 'not_started'}
     result = {k: report[k] for k in ('status', 'ok', 'git_sha', 'active_variant',
                                     'formal_optimizer_updates_total', 'error') if k in report}
-    result['committed_steps'] = hints(output, sha)
+    result['committed_steps'] = hints(output, sha, phase=phase, backbone=backbone)
     result['models'] = {}
     for variant in VARIANTS:
         candidates = [p for p in (output/variant/'progress.json', output/variant/'training_report.json') if p.exists()]

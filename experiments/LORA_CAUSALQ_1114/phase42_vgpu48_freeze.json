@@ -97,8 +97,8 @@
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_acceptance.json": "ef3091fe21e66fc5ba9b60827ad0eb163577abb0e6fbc0d658bbfc20fb271acf",
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_freeze.json": "a4239e2f7956fd35cd44d549e8fd8fc75b86555d8c7bb45c80212db3109ea435",
     "experiments/LORA_CAUSALQ_1114/phase41_stop_acceptance.json": "a74964c4d4bf6475f6ad8c0d039c888f7fef60b967980576742a81198934f3a0",
-    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "76a21c993c174dcdc9cec628a69c3ecabac434671b13fe3c66f5dc40e9e47370",
-    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "6593e8ad2213843ba9b16cf8f3bcf05c63649c21ae81b552c41c7dd6998a673a",
+    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "ebb46549b2b3daae9b67e26c8a91071f87622a505b1cac79aa87ebdee6898d96",
+    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "e97936acfd44353a52cd71950c5e767cc1d73b263524992d3c2ad46f3f29fa03",
     "experiments/LORA_CAUSALQ_1114/phase42_parallel_policy.json": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_audit_acceptance.json": "2ba1d62fca0d7442c81b33fb6dad9856f8e0751a40a519e0beb45e65eabcd467",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_policy.json": "2c9db1f016a6128d2dc7ffeed1f3b0aacbeae6577414c244e81de13bfcca6b6a",
@@ -112,10 +112,10 @@
     "tools/check_lora_backbones.py": "84f79f4b65e886627cbe6e3be7f43378f43110bd1223d2f698a3499154e67592",
     "tools/check_lora_resume.py": "7ee231c90974d632b0d4f6ad60a7e0fc45b7b3b66996bb027c79a16344febed1",
     "tools/check_lora_vgpu48_resume.py": "c3f0f128eb2b2f85957f1cb12d434bb292fd04c45f9ed9d39abd3b483760fcb9",
-    "tools/resume_lora_phase42_vgpu48.py": "2b6bdfaac31dc10a8dfb35b431788904835df8d649ec0c82ffffb3b4e19bec86",
+    "tools/resume_lora_phase42_vgpu48.py": "3a0de03459717b0bfc09a80a6174d48088172c00fe96cccd1509fb672fa6d2b9",
     "tools/retire_lora_l0.py": "d8299ce2c319a548cca55524d47c17c25e5013df0042f73eb0336388c584cdb1",
-    "tools/train_lora_core_d3_l1.py": "cd33233594ac86f54d78f83a2848628ecc880ad714a909bfaeab7b4640e71415",
+    "tools/train_lora_core_d3_l1.py": "9d5fc6d6e90085fcb81d813c8c8422f20a7824497383e12794daf8d2ac55de37",
     "tools/train_lora_core_l0.py": "4b9c6157b46f482e7c6b619397c0232e88c33e8455e0fa2bc7cfb052046a992d",
-    "tools/train_lora_phase42_parallel.py": "f502531ef2670ea9896ed9f7e13ff0736d105ca8e1ad233a4cbd37482139b00e"
+    "tools/train_lora_phase42_parallel.py": "73c1a7f1b88e376b7fe7b79bf1df0e3b4321270c45962f3bb969fa55dd7c3101"
   }
 }

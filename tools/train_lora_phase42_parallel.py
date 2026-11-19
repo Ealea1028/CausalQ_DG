@@ -15,7 +15,7 @@ import uuid
 
 from causalq.runtime.hpi_prepare import Telemetry
 from causalq.runtime.identity import file_sha, write_json
-from causalq.runtime.lora_l1_formal import ROOT, DIRECTORY, VARIANTS, checkpoint_rows
+from causalq.runtime.lora_l1_formal import ROOT, DIRECTORY, NAME, VARIANTS, checkpoint_rows
 from causalq.runtime.lora_parallel import hardware, resource_plan, MPS
 from causalq.runtime.lora_performance import telemetry
 from tools.retire_lora_l0 import safe
@@ -40,6 +40,8 @@ def verified_final(output, variant, args):
     if not report.get('ok'): return None
     identity = report['identity']
     if (identity.get('training_producer_git_sha') != args.expected_sha or identity.get('variant') != variant
+            or identity.get('phase') != getattr(args, 'phase', 42)
+            or identity.get('backbone') != getattr(args, 'backbone_name', NAME)
             or identity.get('parallel_policy_sha256') != file_sha(getattr(args, 'policy_path', POLICY))
             or identity.get('data_root') != str(args.data_root.resolve())
             or identity.get('pretrained_root') != str(args.pretrained_root.resolve())
@@ -58,6 +60,12 @@ def read_progress(folder, pid):
     if not path.exists(): return None
     row = json.loads(path.read_text())
     return row if row.get('pid') == pid else None
+
+
+def committed_progress(args):
+    if getattr(args, 'phase', 42) == 42 and getattr(args, 'backbone_name', NAME) == NAME:
+        return hints(args.output, args.expected_sha)
+    return hints(args.output, args.expected_sha, phase=args.phase, backbone=args.backbone_name)
 
 
 def measured_window(rows, start_rows, seconds, util, memory_fraction, baseline, policy):
@@ -171,7 +179,7 @@ def pool(args, execution, environment, leg, policy):
                 if time.monotonic()-previous_progress > 10:
                     write_json(args.output/'parallel_progress.json', {'active_variants': list(active),
                         'jobs': execution['jobs'], 'steps': {n: r['step'] for n, r in rows.items() if r},
-                        'committed_steps': hints(args.output, args.expected_sha)})
+                        'committed_steps': committed_progress(args)})
                     previous_progress = time.monotonic()
                 if not active and stop['at'] is not None: break
                 time.sleep(.25)
@@ -184,7 +192,7 @@ def pool(args, execution, environment, leg, policy):
                 terminate_owned(active, when); time.sleep(.25)
             for item in active.values(): item['log'].close()
         result['status'] = stop['reason'] or 'complete'
-        result['committed_steps'] = hints(args.output, args.expected_sha)
+        result['committed_steps'] = committed_progress(args)
         write_json(leg/'cohort.json', result)
     return result
 

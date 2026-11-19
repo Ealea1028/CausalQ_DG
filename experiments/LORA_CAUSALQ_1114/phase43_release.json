@@ -1,0 +1,47 @@
+{
+  "phase": 43,
+  "backbone": "dinov2_vitl14",
+  "entrypoint": "python -m tools.train_lora_phase43_parallel",
+  "launcher": "scripts/train_lora_phase43_parallel.sh",
+  "prerequisite": "phase42_completion_acceptance.json",
+  "variants": [
+    "U0",
+    "UA",
+    "C0",
+    "CA"
+  ],
+  "initialization": "fresh_common_seed0_head_and_zero_delta_lora",
+  "trained_l0_or_d3_initialization": false,
+  "formal_steps_per_model": 40000,
+  "formal_updates_total": 160000,
+  "physical_source_batch": 4,
+  "effective_source_batch": 8,
+  "lora_parameters": 98304,
+  "baseline": "new D2 UA120s window after20 formal updates; all calibration updates count",
+  "parallel_jobs": [
+    4,
+    2,
+    1
+  ],
+  "expected_loaders_for12cores": {
+    "jobs": 4,
+    "workers_per_job": 2
+  },
+  "phase42_finals_preserved": true,
+  "target_data_access_allowed": false,
+  "next_phase_automatic": false,
+  "diagnostics_phase": 45,
+  "target_evaluation_phase": 46,
+  "real_d2_training_on_new_gpu_verified": false,
+  "local_verification": {
+    "focused_tests_passed": 24,
+    "seconds": 11.95,
+    "full_suite_repeated": false,
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "pytest": "8.4.2",
+    "CUDA_VISIBLE_DEVICES": "",
+    "coverage": "D2 native synthetic checkpoint/cursor, identity namespace, read-only D3 pins, runtime, D2-only baseline, loader budgets and concurrent dispatch"
+  },
+  "next": "AutoDL exact-SHA tmux formal D2 training and whole-GPU measurements; return lightweight evidence"
+}
