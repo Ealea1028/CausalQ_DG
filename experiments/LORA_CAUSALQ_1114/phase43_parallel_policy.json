@@ -1,6 +1,6 @@
 {
   "phase": 43,
-  "backbone": "dinov2_vitl14",
+  "backbone": "dinov2_vitl14_hpi_p16",
   "default_jobs": 4,
   "allowed_jobs": [
     4,

@@ -1,0 +1,22 @@
+{
+  "phase": 43,
+  "producer": "017700656e8160aa5ffa57278f9afe2ca12a9967",
+  "evidence": "user-pasted controller and worker report",
+  "pasted_text_sha256": "36c8f72304ed62cb8fd7238c1e1dfe86fe37fd2632fac09ab72ca27cac8a65db",
+  "reported_archive_sha256": "9d94ee55ac9205294c6c0e0a9b878dc04c390131901f25baf55c0b7df5333e38",
+  "archive_independently_verified": false,
+  "committed_steps": {
+    "U0": 0,
+    "UA": 0,
+    "C0": 0,
+    "CA": 0
+  },
+  "formal_updates": 0,
+  "weights_loaded": false,
+  "peak_allocated_bytes": 0,
+  "phase42_finals_unchanged": true,
+  "cause": "Phase43 used dinov2_vitl14; Phase39 acceptance and backbone factory require dinov2_vitl14_hpi_p16",
+  "traceback": "Traceback (most recent call last):\n  File \"/root/autodl-tmp/CausalQ_DG_p43_0177006_JKFoG8/tools/train_lora_core_d3_l1.py\", line 141, in worker\n    backbone = build_backbone(backbone_name, args.pretrained_root)\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/root/autodl-tmp/CausalQ_DG_p43_0177006_JKFoG8/causalq/runtime/lora_formal.py\", line 48, in build_backbone\n    row=next(m for m in accepted['models'] if m['model']==name)\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nStopIteration\n",
+  "fix": "canonical model name in config/policy/identity; integration and actual factory dispatch regression; descriptive registry lookup error",
+  "new_run_policy": "new exact-SHA output; keep failed zero-step run and all D3 finals; no checkpoint migration"
+}

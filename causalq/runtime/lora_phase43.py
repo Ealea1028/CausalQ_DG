@@ -7,7 +7,7 @@ from causalq.runtime.identity import file_sha
 from causalq.runtime.lora_l1_formal import DIRECTORY, ROOT, VARIANTS
 
 PHASE = 43
-NAME = 'dinov2_vitl14'
+NAME = 'dinov2_vitl14_hpi_p16'
 CONFIG = 'configs/lora_causalq_1114/phase43_core_d2_l1.json'
 FREEZE = DIRECTORY/'phase43_freeze.json'
 POLICY = DIRECTORY/'phase43_parallel_policy.json'
@@ -32,6 +32,10 @@ def load_contract():
         if hashlib.sha256((ROOT/name).read_bytes().replace(b'\r\n', b'\n')).hexdigest() != digest:
             raise ValueError('Phase43 frozen source changed: '+name)
     config = json.loads((ROOT/CONFIG).read_text())
+    from causalq.protocols.lora_causalq_1114 import BACKBONES
+    integrated = json.loads((DIRECTORY/'phase39_report.json').read_text())['models']
+    if NAME not in BACKBONES or sum(m['model'] == NAME for m in integrated) != 1:
+        raise ValueError('Phase43 backbone missing from accepted integration/protocol')
     reference = json.loads((ROOT/'configs/lora_causalq_1114/phase42_vgpu48.json').read_text())
     allowed_changes = {'phase', 'backbones', 'initialization', 'execution', 'performance_policy'}
     if (config['phase'] != PHASE or config['backbones'] != [NAME]

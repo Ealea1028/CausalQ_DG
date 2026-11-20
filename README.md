@@ -4,6 +4,13 @@ Experiment plans, project/agent instructions and AutoDL operating handoffs are k
 
 ## Active — Phase43 fresh DINOv2 core LoRA training
 
+The0177006 launch fails before weight loading or any formal update: Phase43
+used the shorthand dinov2_vitl14 instead of the accepted/factory identifier
+dinov2_vitl14_hpi_p16. The corrected release uses that canonical name and
+checks integration-registry membership plus the actual D2 factory route
+in a synthetic regression. Preserve the failed zero-step run and D3 finals.
+20 focused tests pass (27.22s); real-weight/GPU verification remains AutoDL.
+
 Phase42 is accepted from archive
 ad9e3cbcbb94eff994eac9a908c35359e631c4af086c3f9aaccf5b3320212bb7:
 four D3 finals40000 each,total160000;156762 new updates plus3238 original.

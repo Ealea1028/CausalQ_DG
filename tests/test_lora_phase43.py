@@ -20,12 +20,35 @@ from tools.train_lora_phase43_parallel import execution_plan, validate_execution
 
 def test_phase43_only_changes_backbone_and_keeps_hpi_causalq_and_fresh_lora_scope():
     config, freeze = load_contract()
-    assert config['phase'] == 43 and config['backbones'] == ['dinov2_vitl14']
+    assert config['phase'] == 43 and config['backbones'] == ['dinov2_vitl14_hpi_p16']
     assert config['variants'] == list(VARIANTS) and config['formal_steps']*len(VARIANTS) == 160000
     assert config['lora']['rank'] == 4 and config['lora']['parameters'] == 98304
     assert config['physical_source_batch'] == 4 and config['effective_source_batch'] == 8
     assert config['target_access_authorized'] is False and freeze['fresh_initialization'] is True
     assert completion()['accepted'] and completion()['formal_optimizer_updates_total'] == 160000
+
+
+def test_actual_phase43_loading_path_selects_the_accepted_d2_factory_without_real_weights(tmp_path, monkeypatch):
+    from causalq.runtime import lora_formal
+    from causalq.models import backbone_factory
+    from causalq.models.dinov2_wrapper import DINOv2Backbone
+    accepted = json.loads((DIRECTORY/'phase39_report.json').read_text())
+    row = next(m for m in accepted['models'] if m['model'] == NAME)
+    expected = next(iter(row['weight_files'].values()))
+    calls = []
+    sentinel = SimpleNamespace(cuda=lambda: 'synthetic-d2-cuda-boundary')
+    def load(weights, **kw):
+        calls.append((weights, kw))
+        return sentinel
+    monkeypatch.setattr(lora_formal, 'file_sha', lambda path: expected)
+    monkeypatch.setattr(DINOv2Backbone, 'from_pretrained', load)
+    monkeypatch.setattr(backbone_factory.DINOv3Backbone, 'from_pretrained',
+                        lambda *a, **kw: pytest.fail('D2 incorrectly routed to D3'))
+    assert lora_formal.build_backbone(NAME, tmp_path) == 'synthetic-d2-cuda-boundary'
+    assert len(calls) == 1 and calls[0][0] == tmp_path/'dinov2_vitl14/dinov2_vitl14_hpi_p16.pth'
+    with pytest.raises(ValueError, match='Phase39 accepted models'):
+        lora_formal.build_backbone('dinov2_vitl14', tmp_path)
+    assert len(calls) == 1
 
 
 def test_runtime_uses_completed_phase42_environment_without_relaxing_software():

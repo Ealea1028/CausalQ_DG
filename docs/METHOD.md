@@ -2,6 +2,13 @@
 
 ## Active — Phase43 DINOv2 core LoRA on accepted48GB GPU
 
+The0177006 launch fails before weight loading or any formal update: Phase43
+used the shorthand dinov2_vitl14 instead of the accepted/factory identifier
+dinov2_vitl14_hpi_p16. The corrected release uses that canonical name and
+checks integration-registry membership plus the actual D2 factory route
+in a synthetic regression. Preserve the failed zero-step run and D3 finals.
+20 focused tests pass (27.22s); real-weight/GPU verification remains AutoDL.
+
 Phase42 completion is accepted by outer/member/201 included-metadata hashes,
 six nonoverlapping attempt cursor intervals,final40000 markers/reports and their
 original-donor lineage. Producer isf2ecf467f6b2f61a668e3eac4039b10753532a99;
@@ -43,8 +50,8 @@ with private MPS. Never use the D3 speed as D2's performance floor. Same targets
 whole-GPU memory<=85%. Save complete states before4->2->1 fallback on OOM or
 performance failure; stop on other errors. No throwaway pilot or L0 training.
 
-Local verification passes24 focused CPU synthetic namespace/checkpoint/reference/
-scheduling checks in11.95s; the old full suite is not repeated. Next verification is AutoDL real D2 LoRA forward/backward,training
+The initial release passed24 synthetic checks but missed the production factory
+name mismatch. The corrected release passes20 focused checks including that route; the old full suite is not repeated. Next verification is AutoDL real D2 LoRA forward/backward,training
 and performance inside the formal run. No local CUDA/real-weight/data work.
 Phase44 B-series,45 source mIoU/variance/responsibility/joint PCA and46 target
 metrics remain later phases and cannot be automatically chained by this launcher.

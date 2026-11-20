@@ -45,7 +45,11 @@ def core_head(backbone,variant,*,decoder_channels=256,num_classes=19,dropout=.1)
 def build_backbone(name,root):
     from causalq.models.backbone_factory import build_backbone as factory
     accepted=json.loads((DIRECTORY/'phase39_report.json').read_text())
-    row=next(m for m in accepted['models'] if m['model']==name)
+    rows=[m for m in accepted['models'] if m['model']==name]
+    if len(rows)!=1:
+        raise ValueError(f'Backbone {name!r} is not uniquely present in Phase39 accepted models: '
+                         f'{[m["model"] for m in accepted["models"]]}')
+    row=rows[0]
     weights=root/'dinov3_vitl16' if name=='dinov3_vitl16' else root/'dinov2_vitl14/dinov2_vitl14_hpi_p16.pth'
     for filename,digest in row['weight_files'].items():
         path=weights/filename if weights.is_dir() else weights

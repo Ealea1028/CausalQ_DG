@@ -2,7 +2,7 @@
   "study": "lora_causalq_1114",
   "phase": 43,
   "backbones": [
-    "dinov2_vitl14"
+    "dinov2_vitl14_hpi_p16"
   ],
   "variants": [
     "U0",

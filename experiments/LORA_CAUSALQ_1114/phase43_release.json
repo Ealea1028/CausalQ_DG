@@ -1,6 +1,6 @@
 {
   "phase": 43,
-  "backbone": "dinov2_vitl14",
+  "backbone": "dinov2_vitl14_hpi_p16",
   "entrypoint": "python -m tools.train_lora_phase43_parallel",
   "launcher": "scripts/train_lora_phase43_parallel.sh",
   "prerequisite": "phase42_completion_acceptance.json",
@@ -34,14 +34,15 @@
   "target_evaluation_phase": 46,
   "real_d2_training_on_new_gpu_verified": false,
   "local_verification": {
-    "focused_tests_passed": 24,
-    "seconds": 11.95,
+    "focused_tests_passed": 20,
+    "seconds": 27.22,
     "full_suite_repeated": false,
     "python": "3.10.20",
     "torch": "2.10.0+cu128",
     "pytest": "8.4.2",
     "CUDA_VISIBLE_DEVICES": "",
-    "coverage": "D2 native synthetic checkpoint/cursor, identity namespace, read-only D3 pins, runtime, D2-only baseline, loader budgets and concurrent dispatch"
+    "coverage": "actual production Phase39 lookup and D2 factory dispatch without real weights; old shorthand rejected; Phase43 checkpoint/namespace/reference checks and parallel scheduling"
   },
-  "next": "AutoDL exact-SHA tmux formal D2 training and whole-GPU measurements; return lightweight evidence"
+  "next": "AutoDL exact-SHA tmux formal D2 training and whole-GPU measurements; return lightweight evidence",
+  "supersedes_zero_step_failure": "017700656e8160aa5ffa57278f9afe2ca12a9967"
 }
