@@ -1,6 +1,33 @@
 # Method contract
 
-## Active — Phase43 DINOv2 core LoRA on accepted48GB GPU
+## Active — Phase44 B1 on both backbones
+
+Phase43 is accepted: four D2 finals40000 each,160000 updates. All205 archive
+members and197 included evidence hashes match. W0 unchanged,adapters changed,
+Patch/CLS present,D3 finals preserved.403/404 parallel windows pass;median26.3044
+source images/s,GPU median100%,memory max25.53%. The late failed window saves
+CA39932; its final68 updates finish after fallback. Do not rerun the core models.
+
+Only B1 is released now,following the prescribed B1->B2->B3 module order within
+Phase44. Two independent fresh seed0 LoRA models,one per canonical backbone,
+40000 each,total80000. Use the existing static two-slot readout with frozen-zero
+query residuals; exclude that residual from AdamW. Reuse U0's two-view CE update
+without CQE,router or localization. All LoRA/HPI settings and Patch/CLS contract
+remain unchanged. Every native checkpoint retains the complete head,LoRA,AdamW,
+RNG and absolute source cursor; verify residual-zero before updates/commits/restores.
+
+Prefer two concurrent jobs with private MPS and actual CPU/RAM loader budgets;
+save then one on OOM/performance failure. Whole-GPU targets stay median70/p1060,
+wait<10%,memory<=85%,100 samples per120s window. Throughput floor is95% of the
+maximum already accepted core single-UA rate23.09524 source images/s; this is a
+reference floor,not a new B1 acceleration measurement. No disposable calibration.
+Hash-pin all eight core finals before/after and hold their run locks; never use
+trained core/L0 heads as initializers. Preserve the original L1 states and U0 L0.
+16 unique focused CPU checks passed; no local real weights or CUDA. The next
+boundary is AutoDL B1 formal training. Stop after B1 and return evidence before
+implementing B2/B3. Source diagnostics/PCA remain45,target evaluation46.
+
+## Completed — Phase43 DINOv2 core LoRA on accepted48GB GPU
 
 The0177006 launch fails before weight loading or any formal update: Phase43
 used the shorthand dinov2_vitl14 instead of the accepted/factory identifier

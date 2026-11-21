@@ -97,8 +97,8 @@
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_acceptance.json": "ef3091fe21e66fc5ba9b60827ad0eb163577abb0e6fbc0d658bbfc20fb271acf",
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_freeze.json": "a4239e2f7956fd35cd44d549e8fd8fc75b86555d8c7bb45c80212db3109ea435",
     "experiments/LORA_CAUSALQ_1114/phase41_stop_acceptance.json": "a74964c4d4bf6475f6ad8c0d039c888f7fef60b967980576742a81198934f3a0",
-    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "fc3928b22e772f0a1ddfb97395daf94aef413e3b58f2f8f55a1f8b72a7d3fc75",
-    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "82f52f682f7541844698211c353fb26d0cb53acb1913ad445995610cd0c5d142",
+    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "43193e93f2b4e62894e63a3ebbe6dc53763cd960355328556fb55138db7c3952",
+    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "b512b1aef09a5a58412c7d68bdd0bfdc3b773c8303e7ab2d72fcb6391f6857f4",
     "experiments/LORA_CAUSALQ_1114/phase42_parallel_policy.json": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_audit_acceptance.json": "2ba1d62fca0d7442c81b33fb6dad9856f8e0751a40a519e0beb45e65eabcd467",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_policy.json": "2c9db1f016a6128d2dc7ffeed1f3b0aacbeae6577414c244e81de13bfcca6b6a",
@@ -114,8 +114,8 @@
     "tools/check_lora_vgpu48_resume.py": "c3f0f128eb2b2f85957f1cb12d434bb292fd04c45f9ed9d39abd3b483760fcb9",
     "tools/resume_lora_phase42_vgpu48.py": "3a0de03459717b0bfc09a80a6174d48088172c00fe96cccd1509fb672fa6d2b9",
     "tools/retire_lora_l0.py": "d8299ce2c319a548cca55524d47c17c25e5013df0042f73eb0336388c584cdb1",
-    "tools/train_lora_core_d3_l1.py": "9d5fc6d6e90085fcb81d813c8c8422f20a7824497383e12794daf8d2ac55de37",
+    "tools/train_lora_core_d3_l1.py": "0f9b0ded2b098e64c0dec90a81b47482a877e04ae0a31e04e50142fff09827f0",
     "tools/train_lora_core_l0.py": "4b9c6157b46f482e7c6b619397c0232e88c33e8455e0fa2bc7cfb052046a992d",
-    "tools/train_lora_phase42_parallel.py": "73c1a7f1b88e376b7fe7b79bf1df0e3b4321270c45962f3bb969fa55dd7c3101"
+    "tools/train_lora_phase42_parallel.py": "eb50b6bb7dcf7cd02e2d75e6e98f1818f9198d21b1d5bd280bde4afaaaa03fd4"
   }
 }

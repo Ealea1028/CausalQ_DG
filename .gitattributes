@@ -122,3 +122,9 @@ tools/train_lora_phase43_parallel.py text eol=lf
 scripts/train_lora_phase43_parallel.sh text eol=lf
 tests/test_lora_phase43.py text eol=lf
 experiments/LORA_CAUSALQ_1114/phase43*.json text eol=lf
+
+causalq/runtime/lora_phase44_b1.py text eol=lf
+tools/train_lora_phase44_b1.py text eol=lf
+scripts/train_lora_phase44_b1.sh text eol=lf
+tests/test_lora_phase44_b1.py text eol=lf
+experiments/LORA_CAUSALQ_1114/phase44*.json text eol=lf

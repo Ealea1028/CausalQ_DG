@@ -1,0 +1,31 @@
+{
+  "phase": 44,
+  "module": "B1",
+  "variants": [
+    "B1"
+  ],
+  "backbones": [
+    "dinov3_vitl16",
+    "dinov2_vitl14_hpi_p16"
+  ],
+  "formal_updates": 80000,
+  "next_modules": [
+    "B2",
+    "B3"
+  ],
+  "next_automatic": false,
+  "local_unique_tests_passed": 16,
+  "test_runs": [
+    {
+      "passed": 15,
+      "seconds": 10.72
+    },
+    {
+      "passed": 4,
+      "seconds": 6.3
+    }
+  ],
+  "real_weights_loaded_locally": false,
+  "real_GPU_verified": false,
+  "performance_reference": "maximum accepted core single-UA throughput, not a B1 speedup claim"
+}

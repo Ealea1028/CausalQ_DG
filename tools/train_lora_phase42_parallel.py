@@ -39,9 +39,10 @@ def verified_final(output, variant, args):
     if report.get('recovery_blocked'): raise ValueError('Failed base invariant; local review required')
     if not report.get('ok'): return None
     identity = report['identity']
-    if (identity.get('training_producer_git_sha') != args.expected_sha or identity.get('variant') != variant
+    spec = getattr(args, 'job_specs', {}).get(variant, {})
+    if (identity.get('training_producer_git_sha') != args.expected_sha or identity.get('variant') != spec.get('variant', variant)
             or identity.get('phase') != getattr(args, 'phase', 42)
-            or identity.get('backbone') != getattr(args, 'backbone_name', NAME)
+            or identity.get('backbone') != spec.get('backbone', getattr(args, 'backbone_name', NAME))
             or identity.get('parallel_policy_sha256') != file_sha(getattr(args, 'policy_path', POLICY))
             or identity.get('data_root') != str(args.data_root.resolve())
             or identity.get('pretrained_root') != str(args.pretrained_root.resolve())
@@ -63,6 +64,7 @@ def read_progress(folder, pid):
 
 
 def committed_progress(args):
+    if hasattr(args, 'progress_reader'): return args.progress_reader(args)
     if getattr(args, 'phase', 42) == 42 and getattr(args, 'backbone_name', NAME) == NAME:
         return hints(args.output, args.expected_sha)
     return hints(args.output, args.expected_sha, phase=args.phase, backbone=args.backbone_name)

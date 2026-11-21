@@ -42,7 +42,11 @@ def git_sha():
 def identity_for(trainer, args, environment, *, phase=42, backbone_name=NAME):
     freeze = DIRECTORY/'phase42_freeze.json'
     config = ROOT/'configs/lora_causalq_1114/phase42_core_d3_l1.json'
-    if phase == 43:
+    if phase == 44:
+        from causalq.runtime.lora_phase44_b1 import FREEZE, CONFIG, BACKBONES
+        if backbone_name not in BACKBONES: raise ValueError('Unknown B1 backbone')
+        freeze, config = FREEZE, ROOT/CONFIG
+    elif phase == 43:
         from causalq.runtime.lora_phase43 import FREEZE, CONFIG, NAME as D2_NAME
         if backbone_name != D2_NAME: raise ValueError('Phase43 identity requires DINOv2')
         freeze, config = FREEZE, ROOT/CONFIG
@@ -92,7 +96,10 @@ def worker(args, *, execution=None):
     parallel = execution is not None
     phase = execution.get('phase', 42) if parallel else 42
     backbone_name = execution.get('backbone', NAME) if parallel else NAME
-    if phase == 43:
+    if phase == 44:
+        from causalq.runtime.lora_phase44_b1 import load_contract as b1_contract
+        config, _ = b1_contract()
+    elif phase == 43:
         from causalq.runtime.lora_phase43 import load_contract as d2_contract, NAME as D2_NAME
         if backbone_name != D2_NAME or execution.get('original_donor_migration'):
             raise ValueError('Phase43 requires fresh DINOv2 models')
@@ -102,7 +109,7 @@ def worker(args, *, execution=None):
         config, _ = load_contract()
     if parallel: config = json.loads((ROOT/execution['config_path']).read_text())
     profile = execution['profile'] if parallel else json.loads((DIRECTORY/'execution_profile.json').read_text())
-    folder = args.output/args.variant
+    folder = args.output/(execution.get('job_key', args.variant) if parallel else args.variant)
     folder.mkdir(parents=True, exist_ok=True)
     attempt = folder/'attempts'/uuid.uuid4().hex
     attempt.mkdir(parents=True)
@@ -123,7 +130,7 @@ def worker(args, *, execution=None):
         if parallel: torch.set_num_threads(1)
         environment = runtime()
         migration = parallel and execution.get('original_donor_migration', False)
-        if phase == 43:
+        if phase in (43, 44):
             from causalq.runtime.lora_phase43 import check_runtime
             check_runtime(environment)
         elif migration:
@@ -139,10 +146,14 @@ def worker(args, *, execution=None):
         report['runtime'] = environment
         train, _ = build_source_datasets(args.data_root/'gta5', TrainTransform((512, 512)), SourceEvalTransform())
         backbone = build_backbone(backbone_name, args.pretrained_root)
-        model = core_l1_head(backbone, args.variant)
+        if phase == 44:
+            from causalq.runtime.lora_phase44_b1 import b1_head, B1Trainer
+            model = b1_head(backbone)
+        else:
+            model = core_l1_head(backbone, args.variant)
         if backbone.lora_manifest['trainable_parameters'] != 98304:
             raise ValueError('Expected exactly98304 LoRA parameters')
-        trainer = L1Trainer(model, args.variant)
+        trainer = B1Trainer(model) if phase == 44 else L1Trainer(model, args.variant)
         identity = identity_for(trainer, args, environment, phase=phase, backbone_name=backbone_name)
         report['identity'] = identity
         if parallel:
@@ -159,6 +170,9 @@ def worker(args, *, execution=None):
             identity['initialization'] = 'fresh_common_seed0_head_and_zero_delta_lora'
             identity['phase42_acceptance_sha256'] = file_sha(DIRECTORY/'phase42_completion_acceptance.json')
             identity['trained_l0_or_d3_initialization'] = False
+        if phase == 44:
+            identity['residual_status'] = 'structurally_absent'
+            identity['initialization'] = 'fresh_seed0_B1_zero_residual_and_zero_delta_lora'
         previous = folder/'training_report.json'
         if previous.exists():
             old = json.loads(previous.read_text())
