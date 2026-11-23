@@ -77,7 +77,7 @@
     "causalq/runtime/identity.py": "3c5786fb99152e11b9bb98c96f50f9f241bd56888273a5402632fbb97c1725f5",
     "causalq/runtime/input_stream.py": "38ad99a3df8dd5895ebe994d8c9d546d911711e6e0ecc8b8d5cb2cff7a1b8404",
     "causalq/runtime/lora_formal.py": "254cd86eeca6416830922529101a434317ba37bcfe17372ca2d53492d13f8d39",
-    "causalq/runtime/lora_l1_formal.py": "5c463f7aa5d436b0e483055ee52c6812a51dd5184dc758567b2669c11f8aef75",
+    "causalq/runtime/lora_l1_formal.py": "0dca14a11ff5810d154a8feeff5021cb0c7d4b753f302d1e9abfc49a0d1e5811",
     "causalq/runtime/lora_migration.py": "5ff44e05f15eb77c7be9097797c39e71a9088f51735d9b4f050ac45c53c43e7f",
     "causalq/runtime/lora_parallel.py": "4147b332b57a91928e81bbe119c77bc57558bfc11d03e42f8451523ac58a4a78",
     "causalq/runtime/lora_performance.py": "fce3d7b5919f6b8fc2ee1f364db753695718bf9b13238c05257072d5257e2ca5",
@@ -97,8 +97,8 @@
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_acceptance.json": "ef3091fe21e66fc5ba9b60827ad0eb163577abb0e6fbc0d658bbfc20fb271acf",
     "experiments/LORA_CAUSALQ_1114/phase41_retirement_apply_freeze.json": "a4239e2f7956fd35cd44d549e8fd8fc75b86555d8c7bb45c80212db3109ea435",
     "experiments/LORA_CAUSALQ_1114/phase41_stop_acceptance.json": "a74964c4d4bf6475f6ad8c0d039c888f7fef60b967980576742a81198934f3a0",
-    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "43193e93f2b4e62894e63a3ebbe6dc53763cd960355328556fb55138db7c3952",
-    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "b512b1aef09a5a58412c7d68bdd0bfdc3b773c8303e7ab2d72fcb6391f6857f4",
+    "experiments/LORA_CAUSALQ_1114/phase42_freeze.json": "4f32661a8c06ae5899c33da6cdc3a498c0ee578747844f85b9ad3c607ae7cc94",
+    "experiments/LORA_CAUSALQ_1114/phase42_parallel_freeze.json": "3921dfd10ef61769344c9386774bd0d117705d0750cf3b8a28fa390bc884c65c",
     "experiments/LORA_CAUSALQ_1114/phase42_parallel_policy.json": "9aa79c68287153e06b233c7a3101e750c427f017dab6404390f02bd102f30df8",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_audit_acceptance.json": "2ba1d62fca0d7442c81b33fb6dad9856f8e0751a40a519e0beb45e65eabcd467",
     "experiments/LORA_CAUSALQ_1114/phase42_vgpu48_policy.json": "2c9db1f016a6128d2dc7ffeed1f3b0aacbeae6577414c244e81de13bfcca6b6a",
@@ -114,7 +114,7 @@
     "tools/check_lora_vgpu48_resume.py": "c3f0f128eb2b2f85957f1cb12d434bb292fd04c45f9ed9d39abd3b483760fcb9",
     "tools/resume_lora_phase42_vgpu48.py": "3a0de03459717b0bfc09a80a6174d48088172c00fe96cccd1509fb672fa6d2b9",
     "tools/retire_lora_l0.py": "d8299ce2c319a548cca55524d47c17c25e5013df0042f73eb0336388c584cdb1",
-    "tools/train_lora_core_d3_l1.py": "0f9b0ded2b098e64c0dec90a81b47482a877e04ae0a31e04e50142fff09827f0",
+    "tools/train_lora_core_d3_l1.py": "34d5f778344b7db67732eb705f23227672a9c459949803b899aaf2a278bb11e3",
     "tools/train_lora_core_l0.py": "4b9c6157b46f482e7c6b619397c0232e88c33e8455e0fa2bc7cfb052046a992d",
     "tools/train_lora_phase42_parallel.py": "eb50b6bb7dcf7cd02e2d75e6e98f1818f9198d21b1d5bd280bde4afaaaa03fd4"
   }

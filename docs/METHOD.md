@@ -1,6 +1,29 @@
 # Method contract
 
-## Active — Phase44 B1 on both backbones
+## Active — Phase44 B2 on both backbones
+
+B1 is accepted: two40000-step finals,total80000;104 archive members and98
+included evidence hashes verified.194/194 windows pass,median27.7008 source
+images/s,GPU median100%,memory max12.17%. Eight core finals remain unchanged.
+Ten of fourteen LoRA models are complete. Keep all core/B1 states and evidence.
+
+Release B2 only: two independent fresh seed0 models,40000 each,with frozen-zero
+residual plus the existing LoRARoutedQuerySegmentor/QueryFeatureRouter. Router
+seed20261031,heads8,width256,gate32,initial gamma0.1. Add routing only: U0 two-view
+CE remains the objective; no CQE or localization loss. B3 waits for B2 acceptance.
+Reuse the accepted native router math and preserve Patch/CLS/register features.
+Check real LoRA and router gradients at formal updates1/20,W0 unchanged and
+zero residual on every update/commit/restore. Save the full router/optimizer/RNG.
+Retain physical4/effective8,HPI and98304 LoRA backbone parameters. Router adds
+head parameters,not backbone adapters. Use80MiB per segment plus3GiB staging
+for conservative full-history disk budgeting; do not delete old payloads.
+
+Prefer two jobs,private MPS,cgroup-aware loaders;save then one on window failure
+or OOM. Same accepted core-UA reference floor and GPU/wait/memory targets as B1;
+no B2 acceleration claim before AutoDL. Verify and lock all ten previous finals.
+Next boundary is AutoDL real B2 training. Source/PCA remain45,target metrics46.
+
+## Completed — Phase44 B1 on both backbones
 
 Phase43 is accepted: four D2 finals40000 each,160000 updates. All205 archive
 members and197 included evidence hashes match. W0 unchanged,adapters changed,

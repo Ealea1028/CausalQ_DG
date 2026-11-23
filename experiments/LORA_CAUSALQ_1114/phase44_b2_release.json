@@ -1,0 +1,13 @@
+{
+  "phase": 44,
+  "module": "B2",
+  "formal_updates": 80000,
+  "router_seed": 20261031,
+  "localization_weight": 0,
+  "local_tests_passed": 19,
+  "real_GPU_verified": false,
+  "preserved_models": 10,
+  "next_module": "B3",
+  "auto_next": false,
+  "checkpoint_segment_budget_mib": 80
+}

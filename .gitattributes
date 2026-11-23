@@ -128,3 +128,11 @@ tools/train_lora_phase44_b1.py text eol=lf
 scripts/train_lora_phase44_b1.sh text eol=lf
 tests/test_lora_phase44_b1.py text eol=lf
 experiments/LORA_CAUSALQ_1114/phase44*.json text eol=lf
+
+causalq/runtime/lora_phase44_b2.py text eol=lf
+
+tools/train_lora_phase44_b2.py text eol=lf
+
+scripts/train_lora_phase44_b2.sh text eol=lf
+
+tests/test_lora_phase44_b2.py text eol=lf

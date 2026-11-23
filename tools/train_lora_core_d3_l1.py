@@ -43,7 +43,11 @@ def identity_for(trainer, args, environment, *, phase=42, backbone_name=NAME):
     freeze = DIRECTORY/'phase42_freeze.json'
     config = ROOT/'configs/lora_causalq_1114/phase42_core_d3_l1.json'
     if phase == 44:
-        from causalq.runtime.lora_phase44_b1 import FREEZE, CONFIG, BACKBONES
+        if args.variant not in ('B1', 'B2'): raise ValueError('Unreleased Phase44 module')
+        if args.variant == 'B2':
+            from causalq.runtime.lora_phase44_b2 import FREEZE, CONFIG, BACKBONES
+        else:
+            from causalq.runtime.lora_phase44_b1 import FREEZE, CONFIG, BACKBONES
         if backbone_name not in BACKBONES: raise ValueError('Unknown B1 backbone')
         freeze, config = FREEZE, ROOT/CONFIG
     elif phase == 43:
@@ -97,7 +101,10 @@ def worker(args, *, execution=None):
     phase = execution.get('phase', 42) if parallel else 42
     backbone_name = execution.get('backbone', NAME) if parallel else NAME
     if phase == 44:
-        from causalq.runtime.lora_phase44_b1 import load_contract as b1_contract
+        if args.variant == 'B2':
+            from causalq.runtime.lora_phase44_b2 import load_contract as b1_contract
+        else:
+            from causalq.runtime.lora_phase44_b1 import load_contract as b1_contract
         config, _ = b1_contract()
     elif phase == 43:
         from causalq.runtime.lora_phase43 import load_contract as d2_contract, NAME as D2_NAME
@@ -147,7 +154,10 @@ def worker(args, *, execution=None):
         train, _ = build_source_datasets(args.data_root/'gta5', TrainTransform((512, 512)), SourceEvalTransform())
         backbone = build_backbone(backbone_name, args.pretrained_root)
         if phase == 44:
-            from causalq.runtime.lora_phase44_b1 import b1_head, B1Trainer
+            if args.variant == 'B2':
+                from causalq.runtime.lora_phase44_b2 import b2_head as b1_head, B2Trainer as B1Trainer
+            else:
+                from causalq.runtime.lora_phase44_b1 import b1_head, B1Trainer
             model = b1_head(backbone)
         else:
             model = core_l1_head(backbone, args.variant)
@@ -172,7 +182,7 @@ def worker(args, *, execution=None):
             identity['trained_l0_or_d3_initialization'] = False
         if phase == 44:
             identity['residual_status'] = 'structurally_absent'
-            identity['initialization'] = 'fresh_seed0_B1_zero_residual_and_zero_delta_lora'
+            identity['initialization'] = f'fresh_seed0_{args.variant}_zero_residual_and_zero_delta_lora'
         previous = folder/'training_report.json'
         if previous.exists():
             old = json.loads(previous.read_text())
@@ -223,6 +233,14 @@ def worker(args, *, execution=None):
                             'checkpoint_seconds': checkpoint_seconds, 'attempt_directory': str(attempt)})
                     if ticks in (1, 20):
                         grads = adapter_gradients(model)
+                        if phase == 44 and args.variant == 'B2':
+                            router = dict(model.query_router.named_parameters())
+                            if any(p.grad is None for p in router.values()):
+                                raise ValueError('Disconnected B2 router gradient')
+                            norms = {n: float(p.grad.detach().float().norm()) for n,p in router.items()}
+                            if not all(__import__('math').isfinite(v) for v in norms.values()) or not any(v>0 for v in norms.values()):
+                                raise ValueError('B2 router has no finite learning signal')
+                            report[f'router_gradient_probe_tick_{ticks}'] = norms
                         report[f'gradient_probe_tick_{ticks}'] = grads
                         if not any(v > 0 for n, v in grads.items() if n.endswith('.B')):
                             raise ValueError('LoRA B has no learning signal')

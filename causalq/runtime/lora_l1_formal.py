@@ -35,14 +35,14 @@ def load_contract():
     return config, freeze
 
 
-def core_l1_head(backbone, variant, *, decoder_channels=256, num_classes=19, dropout=.1, blocks=None):
+def core_l1_head(backbone, variant, *, decoder_channels=256, num_classes=19, dropout=.1, blocks=None, head_type=QuerySegmentor):
     if variant not in VARIANTS:
         raise ValueError('Only core U0/UA/C0/CA L1 models are released')
     if getattr(backbone, 'lora_enabled', False) or any(p.requires_grad for p in backbone.parameters()):
         raise ValueError('Build each L1 model from an independent original frozen backbone')
     with torch.random.fork_rng(devices=[]):
         torch.random.default_generator.manual_seed(0)
-        model = QuerySegmentor(backbone, decoder_channels=decoder_channels, num_classes=num_classes,
+        model = head_type(backbone, decoder_channels=decoder_channels, num_classes=num_classes,
                                dropout=dropout, queries_per_class=2, interaction='static',
                                cross_attention_layers=0, centered_residuals=variant in ('C0', 'CA'),
                                temperature=.07, alpha_init=0.)

@@ -1,0 +1,14 @@
+{
+  "phase": 44,
+  "module": "B2",
+  "single_ua_source_images_per_second": 23.095241730043238,
+  "minimum_baseline_fraction": 0.95,
+  "visible_memory_bytes": 50866487296,
+  "speed_reference": "accepted core UA maximum; reference floor, not a B1 acceleration claim",
+  "jobs": [
+    2,
+    1
+  ],
+  "formal_updates": 80000,
+  "target_access": false
+}
