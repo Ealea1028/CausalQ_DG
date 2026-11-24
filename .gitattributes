@@ -136,3 +136,11 @@ tools/train_lora_phase44_b2.py text eol=lf
 scripts/train_lora_phase44_b2.sh text eol=lf
 
 tests/test_lora_phase44_b2.py text eol=lf
+
+causalq/runtime/lora_phase44_b3.py text eol=lf
+
+tools/train_lora_phase44_b3.py text eol=lf
+
+scripts/train_lora_phase44_b3.sh text eol=lf
+
+tests/test_lora_phase44_b3.py text eol=lf

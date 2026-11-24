@@ -1,6 +1,35 @@
 # Method contract
 
-## Active — Phase44 B2 on both backbones
+## Active — Phase44 B3 localization on both backbones
+
+B2 is accepted: two40000-step finals,total80000. Its last invocation skipped
+both completed models (0 new updates); two original attempts contain80000,
+194/194 original performance windows pass,median27.6864 source images/s,
+GPU median100%,memory max12.36%.110 archive members and102 included metadata
+hashes match; all earlier finals remain unchanged. Twelve of14 LoRA models done.
+
+Release the final B3 pair only,each fresh seed0/40000. Reuse the identical B2
+head/router/zero-residual/LoRA initialization and HPI schedule. Add only the
+existing weak source patch localization loss. Soft class-area targets are
+normalized by valid area,255/padding ignored,class competition log-softmax.
+Objective per source image is CE_original+CE_photo+0.1*mean(Lloc_original,Lloc_photo).
+Existing update's0.05 per view,when summed and divided by8 source images,
+implements that exact mean-view weight. A production-update regression isolates
+the localization contribution and verifies0.1*mean over16 views,including an
+all-ignore image. No new routing/backbone math,no CQE and no target supervision.
+
+The B3 trainer reuses native compact model/router/AdamW/RNG/cursor validation;
+frozen W0 and zero residual stay invariant. Formal steps1/20 check both LoRA
+and router gradients;first forward checks Patch/CLS. Keep physical4/effective8,
+rank4/alpha4/QV18-23 and80MiB/segment+3GiB conservative disk budget. Prefer2
+independent workers/private MPS,save then1 on real window/OOM failure. Keep the
+same accepted core-UA reference floor,not a claim of B3 speedup. Hash-pin and
+lock all12 previous finals;never initialize from a trained B2/core checkpoint.
+24 focused CPU checks pass in14.55s; no real local weights/data/CUDA. Next is
+AutoDL formal B3 training. Return before Phase45 diagnostics/joint PCA; target
+mIoU remains46. No automatic chaining and no deletion of existing states.
+
+## Completed — Phase44 B2 on both backbones
 
 B1 is accepted: two40000-step finals,total80000;104 archive members and98
 included evidence hashes verified.194/194 windows pass,median27.7008 source

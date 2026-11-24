@@ -1,0 +1,21 @@
+{
+  "phase": 44,
+  "module": "B3",
+  "formal_updates": 80000,
+  "router_seed": 20261031,
+  "localization_weight": 0.1,
+  "per_view_implementation_weight": 0.05,
+  "objective": "CE_original+CE_photo+0.1*mean(localization_original,localization_photo), averaged over8 source images",
+  "local_tests_passed": 24,
+  "seconds": 14.55,
+  "local_environment": {
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "real_GPU_verified": false,
+  "preserved_models": 12,
+  "next_phase": 45,
+  "auto_next": false,
+  "checkpoint_segment_budget_mib": 80
+}
