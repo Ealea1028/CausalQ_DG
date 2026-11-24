@@ -151,3 +151,7 @@ tools/run_lora_phase45_source.py text eol=lf
 scripts/run_lora_phase45_source.sh text eol=lf
 tests/test_lora_phase45.py text eol=lf
 experiments/LORA_CAUSALQ_1114/phase45* text eol=lf
+
+causalq/analysis/lora_effect_moments.py text eol=lf
+causalq/runtime/lora_phase45_resume.py text eol=lf
+tests/test_lora_phase45_resume.py text eol=lf

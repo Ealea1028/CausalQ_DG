@@ -2,6 +2,22 @@
 
 ## Active — Phase45 source diagnostics and joint PCA
 
+The first Phase45 run returned exit 130 after a stop signal. Its bundle matches
+the external checksum and all five extracted members. D3 UA was still in
+per-image statistics, and no model summary had completed. Observed GPU
+utilization was 0% median and 2.80% mean over 3,648 samples. The last logged
+progress was batch 251. Exact committed-image counts come from the AutoDL
+record directory because the return bundle contains summaries and telemetry.
+
+The continuation computes dense effect moments on the device in FP64 from
+the original FP32 maps. Tiled Gram matrices reuse spatial moments for
+correlations. Each model compares a real sample with the original CPU method
+on the same forward. The tolerances are 1e-10 absolute and 1e-7 relative, with
+exact null agreement. Valid committed D3 UA records and matching PCA caches
+copy into the new run with their producer identity preserved. The run reports
+image counts by producer. Twelve focused CPU tests pass. GPU numerical and
+utilization measurements will be collected on AutoDL.
+
 Phase44 B3 passes checkpoint and evidence verification for both 40,000-step
 models. The archive matches its checksum, all 104 members match their extracted
 files, and all 98 included file hashes agree. The 199 performance windows pass.
@@ -29,7 +45,7 @@ AutoDL stores per-image resumable records and feature caches under the pinned
 release. The return bundle contains summary JSON/CSV, shared PCA bases and
 figures, runtime, telemetry and checksums. The frozen validation command uses
 the pinned commit and verifies each final payload before and after inference.
-Nine focused CPU tests pass. AutoDL performs the real-weight and data run.
+AutoDL performs the real-weight and data run.
 Phase46 target evaluation follows source acceptance.
 
 ## Completed — Phase44 B3 localization on both backbones

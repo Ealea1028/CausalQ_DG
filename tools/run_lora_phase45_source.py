@@ -18,6 +18,7 @@ import numpy as np
 import torch
 
 from causalq.analysis import lora_joint_pca as pca
+from causalq.analysis.lora_effect_moments import validate_reference
 from causalq.datasets.segmentation import IMAGENET_MEAN, IMAGENET_STD
 from causalq.datasets.strict_source import SourceEvalTransform, build_source_datasets
 from causalq.interventions.style import StyleInterventionBank
@@ -33,6 +34,7 @@ from causalq.runtime.lora_source_diagnostics import (
     load_final, read_record, write_record, summarize, readout,
 )
 from causalq.runtime.lora_training import rng_digest
+from causalq.runtime.lora_phase45_resume import check_record, compatible_key, migrate_sample, old_source
 from tools.retire_lora_l0 import safe
 from tools.train_lora_core_d3_l1 import BASE, git_sha, runtime
 
@@ -100,24 +102,39 @@ def state_stamp(model):
     return tree_digest(model.state_dict()), rng_digest(capture_rng())
 
 
-def run_model(args, name, pin, dataset, ids, selected, dense, base_key, machine, threads):
+def run_model(args, name, pin, dataset, ids, selected, dense, base_key, machine, threads, legacy):
     folder = model_dir(args.output, name)
     key = dict(base_key, model=name, checkpoint_sha256=pin['sha256'])
+    legacy_root, legacy_key = legacy
+    previous = dict(legacy_key, model=name, checkpoint_sha256=pin['sha256']) if name == 'D3_UA_L1' else None
     todo = []
+    observed_producers = {}
     for j, sample_id in enumerate(ids):
         path = folder/'records'/f'{sample_id}.json.gz'
         if not path.is_file():
-            todo.append(j)
-            continue
+            if previous is None or not migrate_sample(model_dir(legacy_root,name),folder,sample_id,
+                                                       previous,key,selected,verified_cache):
+                todo.append(j)
+                continue
         record = read_record(path)
-        if record['key'] != key or record['id'] != sample_id:
-            raise ValueError(f'Cannot mix diagnostic records from different producers: {name}/{sample_id}')
+        check_record(record,sample_id,key,previous)
         verified_cache(folder, sample_id, record, selected)
+        producer = record['key']['git_sha']
+        observed_producers[producer] = observed_producers.get(producer,0)+1
+    print(name, 'records reused', len(ids)-len(todo), 'pending images', len(todo), flush=True)
     model = None
     started = time.monotonic()
     routed = pin['variant'] in ('B2', 'B3')
     interventions = selected if routed else ()
     pca_hashes = {}
+    reference = folder/'effect_reference_check.json'
+    if reference.exists() and json.loads(reference.read_bytes())['key'] != key:
+        raise ValueError(f'FP64 equivalence receipt differs: {name}')
+
+    def reference_check(sample_id, full, anchor, label, rows):
+        difference = validate_reference(full,anchor,label,rows)
+        write_json(reference, {'key':key,'same_forward_sample_id':sample_id,'max_abs_difference':difference,
+                              'rtol':1e-7,'atol':1e-10,'nulls_match':True})
 
     def observer(features, prediction, batch):
         for j, (sample_id, views, label) in enumerate(batch):
@@ -133,7 +150,8 @@ def run_model(args, name, pin, dataset, ids, selected, dense, base_key, machine,
         samples_iter = prepared(dataset, todo, machine, threads)
         with Telemetry(folder/f'telemetry_{uuid.uuid4().hex[:12]}.csv', 1):
             for i, batch in enumerate(source_batches(samples_iter, max_images=args.image_batch)):
-                output = readout(model,batch,intervention_ids=interventions,observer=observer)
+                output = readout(model,batch,intervention_ids=interventions,observer=observer,
+                                 reference_check=None if reference.exists() else reference_check)
                 for sample_id, record in output.items():
                     write_record(folder/'records'/f'{sample_id}.json.gz',
                                  {'key':key, 'id':sample_id, 'record':record,
@@ -159,7 +177,11 @@ def run_model(args, name, pin, dataset, ids, selected, dense, base_key, machine,
     del model
     gc.collect()
     torch.cuda.empty_cache()
-    return summarize(folder, ids, interventions, pin['variant'].startswith('B'))
+    if not reference.exists(): raise ValueError(f'Missing phase45 effect reference receipt: {name}')
+    if todo:
+        observed_producers[args.expected_sha]=observed_producers.get(args.expected_sha,0)+len(todo)
+    write_json(folder/'record_provenance.json',{'records_by_git_sha':observed_producers,'sample_count':len(ids)})
+    return summarize(folder, ids, interventions, pin['variant'].startswith('B')), observed_producers
 
 
 @torch.inference_mode()
@@ -274,6 +296,9 @@ def run(args):
                'source_root':str(args.source_root),'pretrained_root':str(args.pretrained_root),
                'sample_sha256':file_sha(SAMPLE),'long_edge':1024,'pad_multiple':16,'views':5,'image_batch':args.image_batch,
                'weight_manifest_sha256':file_sha(CONTRACT.parent/'phase39_report.json'), 'runtime':actual}
+    legacy = old_source(BASE)
+    if not compatible_key(legacy[1],base_key):
+        raise ValueError('Phase45 resume inputs or runtime differ from the interrupted run')
     started = time.monotonic()
     report = {'phase':45,'git_sha':args.expected_sha,'status':'running','ok':False,'runtime':actual,'hardware':machine,
               'optimizer_updates':0,'target_data_accessed':False,'models':{},'source_protocol':base_key}
@@ -281,9 +306,9 @@ def run(args):
     for pin in pins.values(): verify_final(pin, BASE)
     for name, pin in pins.items():
         print('Diagnosing', name, flush=True)
-        summary = run_model(args,name,pin,dataset,ids,set(selected),set(dense),base_key,machine,threads)
+        summary, producers = run_model(args,name,pin,dataset,ids,set(selected),set(dense),base_key,machine,threads,legacy)
         report['models'][name] = {'samples':summary['sample_count'],'source_miou':summary['miou'],
-                                 'checkpoint_sha256':pin['sha256'],'target_miou':None}
+                                 'checkpoint_sha256':pin['sha256'],'target_miou':None,'records_by_git_sha':producers}
         write_json(args.output/'report.json',report)
     with (args.output/'source_miou.csv').open('w',newline='',encoding='utf-8') as stream:
         import csv
@@ -357,6 +382,8 @@ def main():
         if args.archive is None:
             paths = [BASE/'gpu0.lock', *paths, *sorted({BASE/Path(pin['path']).relative_to(BASE).parts[0]/'run.lock'
                                                       for pin in inventory().values()})]
+            previous, _ = old_source(BASE)
+            if previous.is_dir(): paths.append(previous/'run.lock')
         for path in paths:
             handle = stack.enter_context(safe(BASE,path).open('a+'))
             fcntl.flock(handle,fcntl.LOCK_EX|fcntl.LOCK_NB)

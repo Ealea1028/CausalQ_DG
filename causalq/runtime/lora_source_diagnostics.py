@@ -12,9 +12,8 @@ from statistics import fmean
 import torch
 
 from causalq.analysis.diagnostic_summary import DiagnosticSummary
-from causalq.analysis.selective_stability import (
-    effect_and_correlation_rows, structural_effect_and_correlation_rows, multiview_responsibility_rows,
-)
+from causalq.analysis.lora_effect_moments import effect_rows
+from causalq.analysis.selective_stability import multiview_responsibility_rows
 from causalq.metrics.miou import MeanIoU
 from causalq.runtime.hpi_source_batch import main_path_rows
 from causalq.runtime.identity import file_sha, write_json
@@ -132,7 +131,7 @@ def responsibility(scores, label):
 
 
 @torch.inference_mode()
-def readout(model, batch, *, device='cuda', amp=True, intervention_ids=(), observer=None):
+def readout(model, batch, *, device='cuda', amp=True, intervention_ids=(), observer=None, reference_check=None):
     """Run every view's DINO once and share the features with source and PCA outputs."""
     from causalq.runtime.hpi_training import class_responsibility
     images = torch.cat([x[1] for x in batch]).to(device, non_blocking=True)
@@ -149,8 +148,8 @@ def readout(model, batch, *, device='cuda', amp=True, intervention_ids=(), obser
     if not torch.isfinite(prediction.logits).all(): raise ValueError('Nonfinite source logits')
     if observer is not None: observer(features,prediction,batch)
     scores = prediction.query_score_maps.float().cpu()
-    full = prediction.scaled_delta_logits.float().cpu()
-    anchor = None if structural else prediction.anchor_scaled_delta_logits.float().cpu()
+    full = prediction.scaled_delta_logits.float()
+    anchor = None if structural else prediction.anchor_scaled_delta_logits.float()
     result = {}
     if route is not None:
         attention = route.patch_attention.float()
@@ -161,11 +160,10 @@ def readout(model, batch, *, device='cuda', amp=True, intervention_ids=(), obser
     for index, (sample_id, _, label) in enumerate(batch):
         offset = index*5
         sl = slice(offset,offset+5)
-        if structural:
-            effects, correlations = structural_effect_and_correlation_rows(full[sl],label)
-        else:
-            maps = [{'full':f[None],'anchor':a[None],'residual':(f-a)[None]} for f,a in zip(full[sl],anchor[sl])]
-            effects, correlations = effect_and_correlation_rows(maps,label)
+        anchor_views = None if structural else anchor[sl]
+        effects, correlations = effect_rows(full[sl],anchor_views,label)
+        if reference_check is not None and index == 0:
+            reference_check(sample_id,full[sl],anchor_views,label,(effects,correlations))
         metric = MeanIoU(model.num_classes)
         metric.update(original_predictions[index:index+1],label)
         r = {'effects':effects,'correlations':correlations,'gradients':[],

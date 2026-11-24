@@ -9,9 +9,9 @@
   "expected_extra_d2_original_image_views": 640,
   "training_updates": 0,
   "target_data_access": false,
-  "local_test_scope": "Phase45 production readout on synthetic tensors, shared PCA, export, and reused effect/routing tests",
-  "local_tests_passed": 9,
-  "local_seconds": 5.11,
+  "local_test_scope": "Phase45 synthetic readout, PCA, export, FP64 equivalence and v1 record/cache import, plus existing effect/routing tests",
+  "local_tests_passed": 12,
+  "local_seconds": 8.99,
   "local_environment": {
     "python": "3.10.20",
     "torch": "2.10.0+cu128",
@@ -19,5 +19,6 @@
   },
   "autodl_validated": false,
   "next_phase": 46,
-  "auto_next": false
+  "auto_next": false,
+  "resume_from": "1d28c61b6f68d45b55893c288c70d1ecba156ddf"
 }
