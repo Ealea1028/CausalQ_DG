@@ -1,0 +1,23 @@
+{
+  "phase": 45,
+  "entrypoint": "scripts/run_lora_phase45_source.sh",
+  "accepted_lora_models": 14,
+  "retained_l0_models": 1,
+  "source_examples_per_model": 2497,
+  "source_views_per_example": 5,
+  "expected_logical_model_image_views": 187275,
+  "expected_extra_d2_original_image_views": 640,
+  "training_updates": 0,
+  "target_data_access": false,
+  "local_test_scope": "Phase45 production readout on synthetic tensors, shared PCA, export, and reused effect/routing tests",
+  "local_tests_passed": 9,
+  "local_seconds": 5.11,
+  "local_environment": {
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128",
+    "CUDA_VISIBLE_DEVICES": ""
+  },
+  "autodl_validated": false,
+  "next_phase": 46,
+  "auto_next": false
+}

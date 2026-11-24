@@ -1,6 +1,38 @@
 # Method contract
 
-## Active — Phase44 B3 localization on both backbones
+## Active — Phase45 source diagnostics and joint PCA
+
+Phase44 B3 passes checkpoint and evidence verification for both 40,000-step
+models. The archive matches its checksum, all 104 members match their extracted
+files, and all 98 included file hashes agree. The 199 performance windows pass.
+Median throughput is 26.84 source images/s, with median GPU utilization at 100%.
+All fourteen L1 models are ready. The retained DINOv3 U0 L0 final completes
+the fifteen-model source evaluation matrix.
+
+Phase45 reads the verified final checkpoints and the 2,497 GTA5 holdout images.
+The original view supplies the 19-class confusion matrix and source mIoU.
+Original plus four deterministic photometric views supply Anchor, Residual and
+Full effect statistics, including RMS-normalized variance, valid counts and
+covariance. Query slot and class responsibility are measured on the native
+grid. B1–B3 report structurally absent residuals. B2/B3 also report class-route
+deletion across the frozen 128-image sample.
+
+Joint PCA uses pre-router output and a separate common basis for each backbone
+and feature layer, including an independent CLS basis. Each fit aligns the
+original backbone with all seven LoRA models using matched Patch coordinates
+and all five views in the 128-image sample. Dense panels show original and
+photo1 for the same twelve fixed images. The panel format uses the retained
+L0 segmentation only for the DINOv3 U0 comparison. The other panels show
+the adapted segmentation, paired DINO features, GT and feature displacement.
+
+AutoDL stores per-image resumable records and feature caches under the pinned
+release. The return bundle contains summary JSON/CSV, shared PCA bases and
+figures, runtime, telemetry and checksums. The frozen validation command uses
+the pinned commit and verifies each final payload before and after inference.
+Nine focused CPU tests pass. AutoDL performs the real-weight and data run.
+Phase46 target evaluation follows source acceptance.
+
+## Completed — Phase44 B3 localization on both backbones
 
 B2 is accepted: two40000-step finals,total80000. Its last invocation skipped
 both completed models (0 new updates); two original attempts contain80000,
