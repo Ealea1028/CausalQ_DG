@@ -1,6 +1,6 @@
 # Method contract
 
-## Active — Phase46 fixed-final Cityscapes evaluation
+## Completed — Phase46 fixed-final Cityscapes evaluation
 
 Phase45 is accepted. The checksums of all 320 archive members agree with the
 returned files. Source mIoU recomputes from 19-class counts for all fifteen
@@ -17,8 +17,10 @@ paired train-ID mask may serve when labelIds is absent. Per-image confusion
 counts and exact image/label hashes support resume and independent audit.
 The runner checks the same image/label identities and valid-pixel coverage
 across all models. It records CUDA memory, utilization and execution time.
-The planned target deliverable is mIoU; the study's PCA uses the accepted source
-bases and figures. Seven CPU tests pass. AutoDL runs the native evaluation.
+Phase46 completed on AutoDL with zero optimizer updates. Independent local
+recomputation matched all 7,500 image records to the frozen membership,
+checkpoint identities and confusion counts. The study uses the accepted source
+PCA bases and figures. See the [final report](../analysis/lora_causalq_1114/REPORT.md).
 
 ## Completed — Phase45 source diagnostics and joint PCA
 

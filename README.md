@@ -1,24 +1,18 @@
 # CausalQ-DG
 
-## Active — Phase46 fixed-final Cityscapes evaluation
+## Completed — LoRA CausalQ study, Phase39–46
 
-Phase45 is accepted. The checksums of all 320 archive members agree with the
-returned files. Source mIoU recomputes from 19-class counts for all fifteen
-models over 2,497 GTA5 holdout images each. All models pass their FP64 effect
-comparison. DINOv3 UA includes 530 records from the original producer. The
-twelve common PCA bases and 172 figures pass the coverage and integrity checks.
-DINOv3 U0, the retained paired LoRA contrast, reaches 77.28% source mIoU
-from 75.97% in L0, a +1.31 pp source difference.
+All fourteen LoRA models and the retained DINOv3 U0 L0 have accepted source
+and target results. The local audit recomputed 7,500 Cityscapes image records
+and validated 7,536 return archive entries. DINOv3 UA L1 reached 66.34%
+Cityscapes mIoU. The paired DINOv3 U0 LoRA result improved by 1.31 pp on the
+GTA5 holdout and 1.43 pp on Cityscapes. See the
+[final report](analysis/lora_causalq_1114/REPORT.md) for all results, effect
+and query diagnostics, fixed-final provenance, and the joint PCA summary.
 
-Phase46 uses all fifteen final checkpoints and the frozen 500 Cityscapes val
-IDs. Use native 1024×2048 frames, batch one, BF16 autocast and one full-frame
-argmax per image. Target labelIds map to the nineteen train IDs; an existing
-paired train-ID mask may serve when labelIds is absent. Per-image confusion
-counts and exact image/label hashes support resume and independent audit.
-The runner checks the same image/label identities and valid-pixel coverage
-across all models. It records CUDA memory, utilization and execution time.
-The planned target deliverable is mIoU; the study's PCA uses the accepted source
-bases and figures. Seven CPU tests pass. AutoDL runs the native evaluation.
+Post-study storage work begins with a read-only AutoDL check of the reviewed
+Phase42–44 payload list. The check verifies 532 candidates, 36 protected L1
+states, and the retained L0 final against their hashes and checkpoint metadata.
 
 ## Completed — Phase45 source diagnostics and joint PCA
 
