@@ -9,3 +9,5 @@
 /README.md
 /docs/METHOD.md
 /pyproject.toml
+/manifests/cityscapes_val500.txt
+/manifests/cityscapes_val500.json

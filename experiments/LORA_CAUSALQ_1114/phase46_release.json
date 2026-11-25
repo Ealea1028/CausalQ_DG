@@ -1,0 +1,19 @@
+{
+  "phase": 46,
+  "entrypoint": "scripts/run_lora_phase46_target.sh",
+  "model_count": 15,
+  "images_per_model": 500,
+  "logical_image_forwards": 7500,
+  "source_acceptance_file": "phase45_completion_acceptance.json",
+  "optimizer_updates": 0,
+  "target_pca": false,
+  "local_tests_passed": 7,
+  "local_seconds": 4.4,
+  "local_data": "Synthetic images and masks only",
+  "local_environment": {
+    "python": "3.10.20",
+    "torch": "2.10.0+cu128"
+  },
+  "autodl_validated": false,
+  "next": "Audit Phase46 return and write the final report"
+}

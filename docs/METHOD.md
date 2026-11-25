@@ -1,6 +1,26 @@
 # Method contract
 
-## Active — Phase45 source diagnostics and joint PCA
+## Active — Phase46 fixed-final Cityscapes evaluation
+
+Phase45 is accepted. The checksums of all 320 archive members agree with the
+returned files. Source mIoU recomputes from 19-class counts for all fifteen
+models over 2,497 GTA5 holdout images each. All models pass their FP64 effect
+comparison. DINOv3 UA includes 530 records from the original producer. The
+twelve common PCA bases and 172 figures pass the coverage and integrity checks.
+DINOv3 U0, the retained paired LoRA contrast, reaches 77.28% source mIoU
+from 75.97% in L0, a +1.31 pp source difference.
+
+Phase46 uses all fifteen final checkpoints and the frozen 500 Cityscapes val
+IDs. Use native 1024×2048 frames, batch one, BF16 autocast and one full-frame
+argmax per image. Target labelIds map to the nineteen train IDs; an existing
+paired train-ID mask may serve when labelIds is absent. Per-image confusion
+counts and exact image/label hashes support resume and independent audit.
+The runner checks the same image/label identities and valid-pixel coverage
+across all models. It records CUDA memory, utilization and execution time.
+The planned target deliverable is mIoU; the study's PCA uses the accepted source
+bases and figures. Seven CPU tests pass. AutoDL runs the native evaluation.
+
+## Completed — Phase45 source diagnostics and joint PCA
 
 The first Phase45 run returned exit 130 after a stop signal. Its bundle matches
 the external checksum and all five extracted members. D3 UA was still in
