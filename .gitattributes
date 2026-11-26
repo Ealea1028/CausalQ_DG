@@ -172,3 +172,4 @@ experiments/LORA_CAUSALQ_1114/phase46_cleanup_preview.tsv -text whitespace=cr-at
 scripts/apply_lora_checkpoint_cleanup.sh text eol=lf
 tools/apply_lora_checkpoint_cleanup.py text eol=lf
 tests/test_lora_checkpoint_cleanup.py text eol=lf
+scripts/run_rein_g2c.sh text eol=lf
