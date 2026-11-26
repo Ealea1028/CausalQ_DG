@@ -10,10 +10,12 @@ GTA5 holdout and 1.43 pp on Cityscapes. See the
 [final report](analysis/lora_causalq_1114/REPORT.md) for all results, effect
 and query diagnostics, fixed-final provenance, and the joint PCA summary.
 
-The post-study AutoDL audit verified 532 intermediate checkpoints, 36
-protected LoRA states and the retained L0 final. The reviewed cleanup release
-checks the retained recovery states, durably records the completion markers,
-and retires only the listed intermediate payloads on operator confirmation.
+Post-study checkpoint cleanup is accepted. AutoDL retired all 532 reviewed
+intermediate payloads, increasing available disk space by 25.046 GiB to
+46.595 GiB. The 36 retained LoRA states, including fourteen finals, and
+DINOv3 U0 L0 passed the protected-state checks. Local audit matched all 568
+cataloged completion-marker hashes. See the
+[cleanup acceptance record](experiments/LORA_CAUSALQ_1114/phase46_checkpoint_cleanup_acceptance.json).
 
 ## Completed — Phase45 source diagnostics and joint PCA
 

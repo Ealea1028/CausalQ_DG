@@ -72,3 +72,7 @@
 Phase46 回传压缩包 SHA256 为 `4e60a75e98fca45d7cb9932c489748d8f28a64b188bf799c55c1f233ebc90fe8`。本机核验 7,536 个归档条目并逐模型重算 7,500 张图的整数计数。15 个模型共享同一份输入、标签哈希和有效像素清单。源汇总矩阵与 Phase45 已验收记录一致。Phase46 生产提交为 `d8d45d5bef4b081617bbffc6b03e94cb239574de`，检查点保持固定，优化器更新 0。联合 PCA 和风格诊断使用源域，目标协议只计算分割指标。 [Phase46 验收、运行环境及证据哈希](../../experiments/LORA_CAUSALQ_1114/phase46_completion_acceptance.json) · [Phase45 验收和 PCA 基底哈希](../../experiments/LORA_CAUSALQ_1114/phase45_completion_acceptance.json)
 
 历史 Phase28–32 的 D3 UA/CA 目标分数为 66.0753%/66.3220%，旧 D2 B2/B3 为 62.1193%/62.1149%。历史用过目标反馈，本轮统一了 HPI 训练配方并改变有效 batch。D2 使用 HPI 的 patch16 转换权重。D3 与 D2 的差值因此涉及完整骨干及适配实现。所有结果为单训练种子点估计，UA/CA 的 LoRA 开关效应仍缺配对基线。
+
+## 检查点归档与数据盘清理
+
+2026-11-26，AutoDL 删除了 532 个已审阅的中间检查点数据文件，剩余候选为 0。实例可用空间由 21.549 GiB 增至 46.595 GiB，实测增加 25.046 GiB。36 个 LoRA 保留状态含 14 个最终模型，每线保留 39,000 步和 40,000 步及清单中的迁移点。DINOv3 U0 L0 最终状态也已保留。AutoDL 在锁内复核 15 个最终哈希及保留状态的恢复清单，本机独立比对回传报告、归档清单和 568 个原始完成标记的 SHA256。 [清理验收和保留步数](../../experiments/LORA_CAUSALQ_1114/phase46_checkpoint_cleanup_acceptance.json)
