@@ -10,9 +10,10 @@ GTA5 holdout and 1.43 pp on Cityscapes. See the
 [final report](analysis/lora_causalq_1114/REPORT.md) for all results, effect
 and query diagnostics, fixed-final provenance, and the joint PCA summary.
 
-Post-study storage work begins with a read-only AutoDL check of the reviewed
-Phase42–44 payload list. The check verifies 532 candidates, 36 protected L1
-states, and the retained L0 final against their hashes and checkpoint metadata.
+The post-study AutoDL audit verified 532 intermediate checkpoints, 36
+protected LoRA states and the retained L0 final. The reviewed cleanup release
+checks the retained recovery states, durably records the completion markers,
+and retires only the listed intermediate payloads on operator confirmation.
 
 ## Completed — Phase45 source diagnostics and joint PCA
 

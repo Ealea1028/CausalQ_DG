@@ -1,0 +1,10 @@
+{
+  "policy": "phase46-closed-l1-intermediates",
+  "preview_sha256": "d44b256ff2c8dc627ad5dc6f582c0833301e46a14733f50fc335f94a55f7c056",
+  "verified_report": "phase46_checkpoint_verify_38958f5_20261125T145315Z_5212.json",
+  "verified_report_sha256": "aad626f08c22ba55bb4705213bcea055814e3418cef7a56777041476932bc519",
+  "verified_tool_git_sha": "38958f53d464a959c858a43af405f23075a5c737",
+  "candidate_count": 532,
+  "candidate_allocated_bytes": 26897846272,
+  "l1_keep_count": 36
+}

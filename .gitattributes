@@ -169,3 +169,6 @@ scripts/verify_lora_checkpoint_preview.sh text eol=lf
 tests/test_lora_phase46_acceptance.py text eol=lf
 analysis/lora_causalq_1114/* text eol=lf
 experiments/LORA_CAUSALQ_1114/phase46_cleanup_preview.tsv -text whitespace=cr-at-eol
+scripts/apply_lora_checkpoint_cleanup.sh text eol=lf
+tools/apply_lora_checkpoint_cleanup.py text eol=lf
+tests/test_lora_checkpoint_cleanup.py text eol=lf
