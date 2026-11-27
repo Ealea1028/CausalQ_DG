@@ -1,0 +1,35 @@
+{
+  "ok": true,
+  "stage": "complete",
+  "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+  "python_path": "/root/autodl-tmp/outputs/scs_p0_setup_2eb18c2_nP68O8/env/bin/python",
+  "rein_root": "/root/autodl-tmp/external/rein-phase16-dc063429",
+  "formal_optimizer_updates": 0,
+  "git_sha": "12122fb3dc085e5f9462a3617702e9c2577dc921",
+  "rein_sha": "dc063429c4dadc0da9c6252b3db22fc55a9882ab",
+  "torch": "2.7.0+cu128",
+  "cuda": "12.8",
+  "transformers": "4.56.1",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_total_bytes": 50866487296,
+  "dinov3_model": "DINOv3ViTModel",
+  "mmcv": "2.1.0",
+  "mmdet": "3.3.0",
+  "mmengine": "0.10.7",
+  "mmseg": "1.2.2",
+  "rein_head_source": "/root/autodl-tmp/external/rein-phase16-dc063429/rein/models/heads/rein_mask2former.py",
+  "class_shape": [
+    1,
+    100,
+    20
+  ],
+  "mask_shape": [
+    1,
+    100,
+    16,
+    16
+  ],
+  "loss_terms": 30,
+  "loss": 142.9833221435547,
+  "peak_allocated_bytes": 226673664
+}
