@@ -9,6 +9,8 @@ import subprocess
 import sys
 import traceback
 
+from causalq.rein_head import load_rein_mask2former_head
+
 
 REIN_SHA = "dc063429c4dadc0da9c6252b3db22fc55a9882ab"
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -30,34 +32,46 @@ def probe(rein_root: Path, report: dict) -> None:
 
     report["dinov3_model"] = DINOv3ViTModel.__name__
     report["stage"] = "rein_import"
-    sys.path.insert(0, str(rein_root))
     import mmcv
     import mmdet
     import mmengine
     import mmseg
-    import rein  # noqa: F401  # register the upstream head
     from mmengine.config import Config
     from mmengine.registry import init_default_scope
-    from mmseg.registry import MODELS
+    from mmengine.structures import PixelData
     from mmseg.structures import SegDataSample
 
     report.update(mmcv=mmcv.__version__, mmdet=mmdet.__version__,
                   mmengine=mmengine.__version__, mmseg=mmseg.__version__)
-    report["stage"] = "rein_head_forward_backward"
+    head_class = load_rein_mask2former_head(rein_root)
+    report["rein_head_source"] = str(rein_root / "rein/models/heads/rein_mask2former.py")
+    report["stage"] = "rein_head_build"
     init_default_scope("mmseg")
     config = Config.fromfile(str(rein_root / "configs/_base_/models/rein_dinov2_mask2former.py"))
+    head_config = config.model.decode_head.copy()
+    if head_config.pop("type") != head_class.__name__:
+        raise RuntimeError("Unexpected head type in the pinned REIN config")
     torch.manual_seed(0)
-    head = MODELS.build(config.model.decode_head).cuda().train()
+    head = head_class(**head_config).cuda().train()
     head.init_weights()
     features = [torch.randn(1, 1024, size, size, device="cuda", requires_grad=True)
                 for size in (16, 8, 4, 2)]
     queries = torch.randn(100, 256, device="cuda", requires_grad=True)
     sample = SegDataSample(metainfo={"img_shape": (64, 64), "pad_shape": (64, 64)})
+    label = (torch.arange(64, device="cuda") * 19 // 64).view(1, 1, 64).repeat(1, 64, 1)
+    label[:, :2, :] = 255
+    sample.gt_sem_seg = PixelData(data=label)
+    report["stage"] = "rein_head_forward_backward"
     torch.cuda.reset_peak_memory_stats()
     classes, masks = head((features, queries), [sample])
     if classes[-1].shape != (1, 100, 20) or masks[-1].shape != (1, 100, 16, 16):
         raise RuntimeError("Unexpected Mask2Former output shape")
-    loss = classes[-1].square().mean() + masks[-1].square().mean()
+    instances, metas = head._seg_data_to_instance_data([sample])
+    losses = head.loss_by_feat(classes, masks, instances, metas)
+    expected = {f"loss_{name}" for name in ("cls", "mask", "dice")}
+    if not expected.issubset(losses) or any(not torch.isfinite(item).item() for item in losses.values()):
+        raise RuntimeError("Missing or non-finite Mask2Former losses")
+    loss = sum(losses.values())
     loss.backward()
     if not torch.isfinite(loss).item():
         raise RuntimeError("Non-finite head outputs")
@@ -66,6 +80,7 @@ def probe(rein_root: Path, report: dict) -> None:
                 or not torch.count_nonzero(tensor.grad).item()):
             raise RuntimeError("Missing, zero, or non-finite gradient into a head input")
     report.update(class_shape=list(classes[-1].shape), mask_shape=list(masks[-1].shape),
+                  loss_terms=len(losses), loss=float(loss.detach()),
                   peak_allocated_bytes=torch.cuda.max_memory_allocated())
 
 
