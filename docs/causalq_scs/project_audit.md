@@ -13,4 +13,6 @@
 
 此前 DINOv3 在 causalq-lora1114 环境运行，原版 REIN 在单独的 OpenMMLab 环境运行。SCS 接入需要 REIN head 的 GPU backward 在同一进程内将梯度传回 SCS。
 
-用 tools/probe_scs_rein_runtime.py 在现有 DINOv3 环境导入原生模型类与固定提交的 REIN。向真实 head 输入四层合成特征和 100 个解码查询，验收 CUDA 前后向与输入梯度。环境不兼容时保留失败阶段和首个异常，用于确定独立 SCS 环境的构建方式。真实权重和数据验证在 P3 执行。
+首次探测在 CausalQ 提交 `47cab11ab713a8acc52897befbe6aae84ed30ee9` 和 REIN 提交 `dc063429c4dadc0da9c6252b3db22fc55a9882ab` 执行。AutoDL 回传 Python 3.12.16、Torch 2.7.0+cu128、Transformers 4.56.1、RTX 4090（50,866,487,296 bytes）。DINOv3ViTModel 导入成功。随后在 `rein_import` 报 `ModuleNotFoundError: No module named 'mmcv'`，退出码 1，优化更新数为 0。
+
+用 `scripts/setup_scs_rein_autodl.sh` 克隆该 DINOv3 环境，在克隆环境里按原 REIN 版本固定 MMCV 2.1.0、MMEngine 0.10.7、MMSeg 1.2.2 和 MMDet 3.3.0。MMCV 从 PyPI 发布源码和固定 SHA256 生成 CUDA 12.8、SM 8.9 wheel。优先使用实例已有 CUDA 12.8 编译工具链，缺失时使用 NVIDIA Conda 的 12.8.1 开发工具包。脚本随后向固定的 REIN head 输入四层合成特征与 100 个解码查询，验收 CUDA 前后向及输入梯度。真实权重和数据验证在 P3 执行。[MMCV 官方构建说明](https://mmcv.readthedocs.io/en/latest/get_started/build.html) · [MMCV 2.1.0 发布包](https://pypi.org/project/mmcv/2.1.0/) · [NVIDIA Conda CUDA 说明](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-installation-guide-linux/index.html#conda-installation)
