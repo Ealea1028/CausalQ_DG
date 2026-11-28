@@ -1,0 +1,431 @@
+{
+  "ok": true,
+  "formal_optimizer_updates": 0,
+  "python": "3.12.16 | packaged by Anaconda, Inc. | (main, Oct 26 2026, 20:21:38) [GCC 14.3.0]",
+  "python_path": "/root/autodl-tmp/outputs/scs_p0_setup_2eb18c2_nP68O8/env/bin/python",
+  "torch": "2.7.0+cu128",
+  "cuda": "12.8",
+  "target_data_accessed": false,
+  "models": [
+    {
+      "backbone": "dinov2_vitl14_hpi_p16",
+      "ok": true,
+      "weight_resolution": {
+        "candidates": [
+          {
+            "path": "/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth",
+            "sha256": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+          }
+        ],
+        "method": "hpi_rein_equivalent_p16",
+        "source_sha256": "d5383ea8f4877b2472eb973e0fd72d557c7da5d3611bd527ceeb1d7162cbf428",
+        "path": "/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth",
+        "sha256": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+      },
+      "weight_files": {
+        "/root/autodl-tmp/pretrained/dinov2_vitl14/dinov2_vitl14_hpi_p16.pth": "054d08a7c672f07ee290f5202290d9807b3ae026e201263edbab284aad96d6af"
+      },
+      "native_features": [
+        {
+          "image": [
+            512,
+            512
+          ],
+          "patch": [
+            1,
+            1024,
+            1024
+          ],
+          "cls": [
+            1,
+            1024
+          ],
+          "register": [
+            1,
+            0,
+            1024
+          ],
+          "dtype": "torch.float32",
+          "device": "cuda:0",
+          "decoder": [
+            [
+              1,
+              1024,
+              128,
+              128
+            ],
+            [
+              1,
+              1024,
+              64,
+              64
+            ],
+            [
+              1,
+              1024,
+              32,
+              32
+            ],
+            [
+              1,
+              1024,
+              16,
+              16
+            ]
+          ],
+          "aux": [
+            1,
+            19,
+            32,
+            32
+          ]
+        },
+        {
+          "image": [
+            512,
+            640
+          ],
+          "patch": [
+            1,
+            1280,
+            1024
+          ],
+          "cls": [
+            1,
+            1024
+          ],
+          "register": [
+            1,
+            0,
+            1024
+          ],
+          "dtype": "torch.float32",
+          "device": "cuda:0",
+          "decoder": [
+            [
+              1,
+              1024,
+              128,
+              160
+            ],
+            [
+              1,
+              1024,
+              64,
+              80
+            ],
+            [
+              1,
+              1024,
+              32,
+              40
+            ],
+            [
+              1,
+              1024,
+              16,
+              20
+            ]
+          ],
+          "aux": [
+            1,
+            19,
+            32,
+            40
+          ]
+        }
+      ],
+      "scs_parameters": 1194240,
+      "trainable_parameters": 21799636,
+      "updates": [
+        {
+          "step": 1,
+          "source_id": "00002",
+          "loss": 135.51034545898438,
+          "gradients": {
+            "up_12": 291.5648193359375,
+            "up_16": 75.99103546142578,
+            "up_20": 9.384764671325684,
+            "up_24": 7.07588529586792,
+            "query": 0.153615340590477
+          },
+          "style": {
+            "brightness": [
+              0.9394278526306152
+            ],
+            "contrast": [
+              1.2833447456359863
+            ],
+            "saturation": [
+              0.7116696238517761
+            ],
+            "gamma": [
+              1.1149471998214722
+            ],
+            "temperature": [
+              1.0869072675704956
+            ],
+            "grayscale": [
+              false
+            ]
+          },
+          "lr": 9.999774999718747e-05
+        },
+        {
+          "step": 2,
+          "source_id": "00003",
+          "loss": 119.24111938476562,
+          "gradients": {
+            "up_12": 108.63121032714844,
+            "up_16": 31.20353126525879,
+            "up_20": 3.541234016418457,
+            "up_24": 2.7242915630340576,
+            "query": 0.3084208369255066,
+            "early_down": 11.396056175231934,
+            "read": 3.155059814453125,
+            "write": 2.193603754043579
+          },
+          "style": {
+            "brightness": [
+              1.1281673908233643
+            ],
+            "contrast": [
+              1.0953898429870605
+            ],
+            "saturation": [
+              0.8494750261306763
+            ],
+            "gamma": [
+              1.0357972383499146
+            ],
+            "temperature": [
+              1.0683343410491943
+            ],
+            "grayscale": [
+              false
+            ]
+          },
+          "lr": 9.999549998874979e-05
+        }
+      ],
+      "checkpoint_roundtrip": true,
+      "frozen_dino": true,
+      "peak_allocated_bytes": 3149369344,
+      "peak_reserved_bytes": 3286237184
+    },
+    {
+      "backbone": "dinov3_vitl16",
+      "ok": true,
+      "weight_files": {
+        "/root/autodl-tmp/pretrained/dinov3_vitl16/config.json": "135ecd23e34a70b6fbed8b083fdecb319b7e3a54e3d849258bbe4ddcf1783bb5",
+        "/root/autodl-tmp/pretrained/dinov3_vitl16/model.safetensors": "dcb2e45127cccbf1601e5f42fef165eea275c8e5213197e8dcf3f48822718179"
+      },
+      "native_features": [
+        {
+          "image": [
+            512,
+            512
+          ],
+          "patch": [
+            1,
+            1024,
+            1024
+          ],
+          "cls": [
+            1,
+            1024
+          ],
+          "register": [
+            1,
+            4,
+            1024
+          ],
+          "dtype": "torch.float32",
+          "device": "cuda:0",
+          "decoder": [
+            [
+              1,
+              1024,
+              128,
+              128
+            ],
+            [
+              1,
+              1024,
+              64,
+              64
+            ],
+            [
+              1,
+              1024,
+              32,
+              32
+            ],
+            [
+              1,
+              1024,
+              16,
+              16
+            ]
+          ],
+          "aux": [
+            1,
+            19,
+            32,
+            32
+          ]
+        },
+        {
+          "image": [
+            512,
+            640
+          ],
+          "patch": [
+            1,
+            1280,
+            1024
+          ],
+          "cls": [
+            1,
+            1024
+          ],
+          "register": [
+            1,
+            4,
+            1024
+          ],
+          "dtype": "torch.float32",
+          "device": "cuda:0",
+          "decoder": [
+            [
+              1,
+              1024,
+              128,
+              160
+            ],
+            [
+              1,
+              1024,
+              64,
+              80
+            ],
+            [
+              1,
+              1024,
+              32,
+              40
+            ],
+            [
+              1,
+              1024,
+              16,
+              20
+            ]
+          ],
+          "aux": [
+            1,
+            19,
+            32,
+            40
+          ]
+        }
+      ],
+      "scs_parameters": 1194240,
+      "trainable_parameters": 21799636,
+      "updates": [
+        {
+          "step": 1,
+          "source_id": "00002",
+          "loss": 128.2064208984375,
+          "gradients": {
+            "up_12": 7.331624984741211,
+            "up_16": 2.4695987701416016,
+            "up_20": 0.3646385371685028,
+            "up_24": 0.08933527022600174,
+            "query": 0.10948755592107773
+          },
+          "style": {
+            "brightness": [
+              0.9394278526306152
+            ],
+            "contrast": [
+              1.2833447456359863
+            ],
+            "saturation": [
+              0.7116696238517761
+            ],
+            "gamma": [
+              1.1149471998214722
+            ],
+            "temperature": [
+              1.0869072675704956
+            ],
+            "grayscale": [
+              false
+            ]
+          },
+          "lr": 9.999774999718747e-05
+        },
+        {
+          "step": 2,
+          "source_id": "00003",
+          "loss": 127.97418212890625,
+          "gradients": {
+            "up_12": 5.643172740936279,
+            "up_16": 2.1292591094970703,
+            "up_20": 0.21912509202957153,
+            "up_24": 0.07084330916404724,
+            "query": 0.004910301882773638,
+            "early_down": 0.2256021499633789,
+            "read": 0.06653004139661789,
+            "write": 0.07219378650188446
+          },
+          "style": {
+            "brightness": [
+              1.1281673908233643
+            ],
+            "contrast": [
+              1.0953898429870605
+            ],
+            "saturation": [
+              0.8494750261306763
+            ],
+            "gamma": [
+              1.0357972383499146
+            ],
+            "temperature": [
+              1.0683343410491943
+            ],
+            "grayscale": [
+              false
+            ]
+          },
+          "lr": 9.999549998874979e-05
+        }
+      ],
+      "checkpoint_roundtrip": true,
+      "frozen_dino": true,
+      "peak_allocated_bytes": 3145441792,
+      "peak_reserved_bytes": 3284140032
+    }
+  ],
+  "git_sha": "19ced6d05cf0a077e60373fa68a995d9f8231493",
+  "rein_sha": "dc063429c4dadc0da9c6252b3db22fc55a9882ab",
+  "transformers": "4.56.1",
+  "mmcv": "2.1.0",
+  "mmdet": "3.3.0",
+  "mmengine": "0.10.7",
+  "mmseg": "1.2.2",
+  "gpu": "NVIDIA GeForce RTX 4090",
+  "gpu_total_bytes": 50866487296,
+  "source": {
+    "manifest_sha256": {
+      "gta5_source_train.txt": "c33c1316eb1e547199aa0be79f749d6af9a7c8a39d6ab40313e410b1fe021ac9",
+      "gta5_source_val.txt": "57dec87d8081f50162e29738a7052cd014404d23bf6cd2268c77b23bc0f011cb"
+    },
+    "train_count": 22469,
+    "val_count": 2497,
+    "source_validation": "gta5_holdout",
+    "target_data_accessed": false
+  }
+}

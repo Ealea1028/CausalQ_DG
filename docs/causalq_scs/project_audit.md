@@ -24,3 +24,11 @@ AutoDL 在提交 `2eb18c2b1eaee0ab7cf537c8a8d50b8c681d0337` 成功安装 MMCV 2.
 AutoDL 在 `99f368c5b32f623b8cee4eb04e2b274225b5c00c` 读取了锁定的 GTA5 样本，随后因首个 DINOv2 转换文件字节 SHA256 与 Phase16 归档值不同而停止。回传未包含候选文件的实际 SHA256，两线均未执行工程更新。
 
 P3 依次尝试已固定 SHA256 的 Phase16 REIN p16 转换产物和 HPI p16 转换产物。两者使用同一官方 DINOv2 ViT-L/14 源权重和 FP32 bicubic、`align_corners=False` 的 14→16 patch kernel、37→32 位置网格转换。仓库测试比较两套转换实现的张量输出。若候选均不匹配，从校验通过的官方源权重重做 REIN 转换，在本次输出目录记录实际新 SHA256。报告记录每个已检查文件的实际哈希，DINOv3 独立报告供回传。
+
+P3 在提交 `19ced6d05cf0a077e60373fa68a995d9f8231493` 通过。双线原生特征对照、两次源域工程更新、冻结与 checkpoint 重载均通过。正式训练沿用回传中的 HPI p16 和 DINOv3 权重身份。[P3 回传](p3_acceptance.json)
+
+## P4 首批正式训练
+
+每条骨干各运行 A0 和 A4，seed 0，每个正式作业 40,000 更新、每步四张源图。选用物理 batch 4，并按 CPU 配额、RAM 与共享内存配置最多八个 DataLoader worker，固定 batch 的 loss 归约和 Hungarian 采样顺序。首批串行运行，以相同训练负载记录利用率、数据等待和显存。并行调度待这一批真实吞吐回传后决定。
+
+两组各自在同一个 REIN 几何变换后生成原图与 PhotoMetricDistortion 两个视图，每步等权。A4 增加 0.1 权重的末层辅助损失。所有作业使用相同的解码器初始化、源样本序列、随机种子及 AdamW/PolyLR。每千步原子保存训练状态，保留第 10k、20k、30k、40k 步的候选模型。后续先在固定 GTA5 holdout 以源域 mIoU 选 checkpoint，同分取较早步数，再锁定目标评估。P4 只运行源域训练。A2/A5 配置留待下一批，A1 作为历史参照，A3 及共享和位置控制按独立改动推进。
