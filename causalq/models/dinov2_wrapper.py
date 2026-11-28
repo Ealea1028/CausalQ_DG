@@ -99,15 +99,11 @@ class DinoVisionTransformer(nn.Module):
             raise ValueError('Position interpolation shape mismatch')
         return torch.cat((self.pos_embed[:, :1].float(), spatial.flatten(2).transpose(1, 2)), 1).to(dtype)
 
-    def embed_images(self, images):
+    def forward(self, images, indices):
         h, w = images.shape[-2:]
         x = self.patch_embed(images)
         x = torch.cat((self.cls_token.to(x.dtype).expand(x.shape[0], -1, -1), x), 1)
-        return x + self.position(h, w, x.dtype)
-
-    def forward(self, images, indices):
-        h, w = images.shape[-2:]
-        x = self.embed_images(images)
+        x = x + self.position(h, w, x.dtype)
         maps = []
         for i, block in enumerate(self.blocks):
             x = block(x)

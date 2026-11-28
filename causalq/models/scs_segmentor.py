@@ -56,7 +56,9 @@ class SCSBackbone(nn.Module):
         model = self.backbone.model
         if self.is_dino2:
             layers = model.blocks
-            tokens = model.embed_images(images)
+            patches = model.patch_embed(images)
+            cls = model.cls_token.to(patches.dtype).expand(images.shape[0], -1, -1)
+            tokens = torch.cat((cls, patches), dim=1) + model.position(h, w, patches.dtype)
             layer_kwargs = {}
         else:
             layers = model.layer
