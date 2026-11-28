@@ -21,12 +21,38 @@ from causalq.runtime.scs_training import (
     build_scs_optimizer, load_scs_trainable_state, paired_scs_backward, scs_trainable_state,
 )
 from tools.check_rein_backbone import WEIGHT_SHA
+from tools.convert_dinov2_for_rein import convert_state_dict
 from tools.probe_scs_rein_runtime import PROJECT_ROOT, REIN_SHA, git
 
 
 def file_sha(path: Path) -> str:
     with path.open("rb") as stream:
         return hashlib.file_digest(stream, "sha256").hexdigest()
+
+
+def resolve_d2_weights(converted, raw, destination: Path, identity: dict, evidence: dict) -> Path:
+    """Use an accepted conversion or replay REIN from the exact official source."""
+    accepted = {WEIGHT_SHA: "phase16_rein_p16", identity["converted_file_sha256"]: "hpi_rein_equivalent_p16"}
+    evidence["candidates"] = []
+    for paths, digests, needs_conversion in (
+        (converted, accepted, False), (raw, {identity["source_sha256"]: "official_vitl14"}, True)
+    ):
+        for path in paths:
+            actual = file_sha(path) if path.is_file() else None
+            evidence["candidates"].append({"path": str(path), "sha256": actual})
+            if actual not in digests:
+                continue
+            if needs_conversion:
+                original = torch.load(path, map_location="cpu", weights_only=True)
+                with destination.open("xb") as stream:
+                    torch.save(convert_state_dict(original), stream)
+                evidence.update(method="regenerated_rein_p16", source=str(path), source_sha256=actual,
+                                path=str(destination), sha256=file_sha(destination))
+                return destination
+            evidence.update(method=digests[actual], source_sha256=identity["source_sha256"],
+                            path=str(path), sha256=actual)
+            return path
+    raise RuntimeError("No accepted DINOv2 p16 artifact or hash-matching official ViT-L/14 source; see candidates")
 
 
 def read_source_samples(root: Path):
@@ -157,7 +183,10 @@ def main() -> int:
     parser.add_argument("--report", type=Path, required=True)
     parser.add_argument("--rein-root", type=Path, required=True)
     parser.add_argument("--gta-root", type=Path, required=True)
-    parser.add_argument("--d2", type=Path, required=True)
+    parser.add_argument("--d2", type=Path, action="append", required=True,
+                        help="Candidate DINOv2 p16 files, in order of preference (repeatable)")
+    parser.add_argument("--d2-raw", type=Path, action="append", default=[],
+                        help="Fallback candidates for the official DINOv2 ViT-L/14 file")
     parser.add_argument("--d3", type=Path, required=True)
     args = parser.parse_args()
     report = {"ok": False, "formal_optimizer_updates": 0, "python": sys.version,
@@ -187,21 +216,35 @@ def main() -> int:
         samples = read_source_samples(args.gta_root)
         historical = json.loads((PROJECT_ROOT / "experiments/LORA_CAUSALQ_1114/phase39_report.json")
                                 .read_text(encoding="utf-8"))
+        d2_identity = json.loads((PROJECT_ROOT / "experiments/HPI_DINOV2_20261031/weight_identity.json")
+                                 .read_text(encoding="utf-8"))
         d3_hashes = next(model["weight_files"] for model in historical["models"]
                          if model["model"] == "dinov3_vitl16")
-        for name, path, files in (
-            ("dinov2_vitl14_hpi_p16", args.d2, {args.d2: WEIGHT_SHA}),
-            ("dinov3_vitl16", args.d3, {args.d3 / file: digest for file, digest in d3_hashes.items()}),
-        ):
+
+        for name in ("dinov2_vitl14_hpi_p16", "dinov3_vitl16"):
             print(f"Checking {name}", flush=True)
-            hashes = {str(file): file_sha(file) for file in files}
-            if hashes != {str(file): digest for file, digest in files.items()}:
-                raise RuntimeError(f"Pretrained weight identity mismatch: {name}")
-            result = {"backbone": name, "weight_files": hashes}
+            result = {"backbone": name, "ok": False}
             report["models"].append(result)
-            check_model(name, path, args.rein_root, samples, result)
+            try:
+                if name == "dinov2_vitl14_hpi_p16":
+                    evidence = result["weight_resolution"] = {}
+                    path = resolve_d2_weights(args.d2, args.d2_raw,
+                                              args.report.parent / "dinov2_rein_p16.pth",
+                                              d2_identity, evidence)
+                    result["weight_files"] = {str(path): evidence["sha256"]}
+                else:
+                    path = args.d3
+                    expected = {str(path / file): d3_hashes[file] for file in ("config.json", "model.safetensors")}
+                    result["weight_files"] = {file: file_sha(Path(file)) for file in expected}
+                    if result["weight_files"] != expected:
+                        result["expected_weight_files"] = expected
+                        raise RuntimeError("Pretrained weight/config identity mismatch: DINOv3")
+                check_model(name, path, args.rein_root, samples, result)
+                result["ok"] = True
+            except Exception:
+                result["error"] = traceback.format_exc()
             torch.cuda.empty_cache()
-        report["ok"] = True
+        report["ok"] = all(model["ok"] for model in report["models"])
     except Exception:
         report["error"] = traceback.format_exc()
     with args.report.open("x", encoding="utf-8") as stream:

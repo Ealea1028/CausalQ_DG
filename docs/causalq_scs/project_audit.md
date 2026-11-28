@@ -18,3 +18,9 @@
 用 `scripts/setup_scs_rein_autodl.sh` 克隆该 DINOv3 环境，在克隆环境里按原 REIN 版本固定 MMCV 2.1.0、MMEngine 0.10.7、MMSeg 1.2.2 和 MMDet 3.3.0。MMCV 从 PyPI 发布源码和固定 SHA256 生成 CUDA 12.8、SM 8.9 wheel。优先使用实例已有 CUDA 12.8 编译工具链，缺失时使用 NVIDIA Conda 的 12.8.1 开发工具包。脚本随后向固定的 REIN head 输入四层合成特征与 100 个解码查询，验收 CUDA 前后向及输入梯度。真实权重和数据验证在 P3 执行。[MMCV 官方构建说明](https://mmcv.readthedocs.io/en/latest/get_started/build.html) · [MMCV 2.1.0 发布包](https://pypi.org/project/mmcv/2.1.0/) · [NVIDIA Conda CUDA 说明](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-installation-guide-linux/index.html#conda-installation)
 
 AutoDL 在提交 `2eb18c2b1eaee0ab7cf537c8a8d50b8c681d0337` 成功安装 MMCV 2.1.0。探测进入 REIN 包初始化后，由 EVA 骨干导入未安装的 `xformers` 而退出，优化更新数仍为 0。复用 `/root/autodl-tmp/outputs/scs_p0_setup_2eb18c2_nP68O8/env/bin/python`。SCS 直接从固定外部源码加载独立的 `ReinMask2FormerHead`，其顶层依赖只来自 PyTorch、MMSeg 及标准库。用同一配置验证 100 个查询、四层特征、真实分类/掩膜/Dice 损失与梯度。REIN 官方复现命令继续使用原有入口。[固定提交的 head](https://github.com/w1oves/Rein/blob/dc063429c4dadc0da9c6252b3db22fc55a9882ab/rein/models/heads/rein_mask2former.py)
+
+## P3 预训练权重恢复
+
+AutoDL 在 `99f368c5b32f623b8cee4eb04e2b274225b5c00c` 读取了锁定的 GTA5 样本，随后因首个 DINOv2 转换文件字节 SHA256 与 Phase16 归档值不同而停止。回传未包含候选文件的实际 SHA256，两线均未执行工程更新。
+
+P3 依次尝试已固定 SHA256 的 Phase16 REIN p16 转换产物和 HPI p16 转换产物。两者使用同一官方 DINOv2 ViT-L/14 源权重和 FP32 bicubic、`align_corners=False` 的 14→16 patch kernel、37→32 位置网格转换。仓库测试比较两套转换实现的张量输出。若候选均不匹配，从校验通过的官方源权重重做 REIN 转换，在本次输出目录记录实际新 SHA256。报告记录每个已检查文件的实际哈希，DINOv3 独立报告供回传。
